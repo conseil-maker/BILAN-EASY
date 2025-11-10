@@ -31,13 +31,18 @@ Une application interactive pour réaliser votre bilan de compétences avec l'ai
 
 **Version AI Studio**: [Voir dans AI Studio](https://ai.studio/apps/drive/1xKIXDV1a-WYTmcI6iSQtpDZmqzFlPdmG)
 
-### Problèmes résolus (Dernier commit: ec00f8f)
+### 🎉 Dernières améliorations (Dernière mise à jour: Décembre 2024)
 
-✅ Extraction du code source depuis l'archive ZIP
-✅ Installation de 133 packages npm sans vulnérabilités
-✅ **Correction critique**: Erreur de syntaxe JSX dans `SummaryDashboard.tsx:293` (apostrophes)
-✅ Build réussi (469.79 kB)
-✅ Serveur de développement fonctionnel
+✅ **Backend complet intégré**: API REST avec Hono.js, PostgreSQL, Drizzle ORM
+✅ **Authentification**: Système de session personnalisé (remplacement de Clerk)
+✅ **Docker**: Configuration complète avec Docker Compose (Frontend, Backend, PostgreSQL)
+✅ **Tests**: Vitest configuré pour frontend et backend
+✅ **Error Handling**: Error Boundary, Toast notifications, retry mechanism
+✅ **Performance**: Debouncing, pagination, code splitting, connection pooling
+✅ **PDF Export**: Génération PDF avec jsPDF et html2canvas
+✅ **API Retry**: Mécanisme de retry automatique pour erreurs Gemini API (503, 429)
+✅ **State Management**: Synchronisation d'état améliorée, prévention des boucles infinies
+✅ **Questionnaire Flow**: Correction du flux multi-étapes, satisfaction modal unique par phase
 
 ## ✨ Fonctionnalités
 
@@ -102,21 +107,44 @@ BILAN-EASY/
 │   ├── SkillsRadar.tsx         # Graphique radar
 │   ├── WordCloud.tsx           # Nuage de mots
 │   ├── SpeechSettings.tsx      # Paramètres vocaux
-│   ├── CoachChat.tsx           # Chat avec coach
-│   └── LiveCoach.tsx           # Coach en direct
+│   ├── ErrorBoundary.tsx       # Gestion d'erreurs globales
+│   ├── Toast.tsx               # Notifications toast
+│   └── SkeletonLoader.tsx     # Loaders de chargement
 │
 ├── 📁 services/             # Logique métier
 │   ├── geminiService.ts        # API Gemini 2.5 (génération) ⭐
+│   ├── apiClient.ts            # Client API backend ⭐
 │   ├── historyService.ts       # Gestion localStorage
 │   ├── ttsService.ts           # Text-to-speech
 │   └── liveService.ts          # Services live
 │
 ├── 📁 hooks/                # Hooks React personnalisés
 │   ├── useSpeechRecognition.ts # Speech-to-text
-│   └── useSpeechSynthesis.ts   # Text-to-speech
+│   ├── useSpeechSynthesis.ts    # Text-to-speech
+│   ├── useDebounce.ts          # Debouncing
+│   └── useOfflineDetection.ts  # Détection hors ligne
 │
-├── 📁 utils/                # Utilitaires
-│   └── audio.ts                # Gestion audio
+├── 📁 backend/              # Backend API (Hono.js + PostgreSQL)
+│   ├── src/
+│   │   ├── app.ts              # Application Hono
+│   │   ├── db/
+│   │   │   ├── schema.ts       # Schéma Drizzle ORM
+│   │   │   └── client.ts       # Client PostgreSQL
+│   │   ├── routes/             # Routes API
+│   │   │   ├── assessments.ts
+│   │   │   ├── answers.ts
+│   │   │   └── summaries.ts
+│   │   ├── middleware/
+│   │   │   ├── auth.ts         # Authentification
+│   │   │   └── error.ts        # Gestion d'erreurs
+│   │   └── test/               # Tests Vitest
+│   ├── Dockerfile
+│   └── package.json
+│
+├── 📁 src/test/             # Tests frontend (Vitest)
+│   ├── components/
+│   ├── hooks/
+│   └── services/
 │
 ├── 📄 App.tsx               # Composant racine (routing)
 ├── 📄 types.ts              # Définitions TypeScript
@@ -125,7 +153,10 @@ BILAN-EASY/
 ├── 📄 vite.config.ts        # Configuration Vite
 ├── 📄 tsconfig.json         # Configuration TypeScript
 ├── 📄 package.json          # Dépendances npm
-└── 📄 .env.local            # Variables d'environnement ⚠️
+├── 📄 Dockerfile             # Docker frontend
+├── 📄 docker-compose.yml     # Orchestration Docker
+├── 📄 nginx.conf             # Configuration Nginx
+└── 📄 .env.local             # Variables d'environnement ⚠️
 
 ⭐ Fichiers critiques
 ⚠️ Nécessite configuration
@@ -136,37 +167,80 @@ BILAN-EASY/
 ### Prérequis
 - **Node.js** (v18+)
 - **npm** ou **yarn**
+- **PostgreSQL** (v14+) - Pour le backend
+- **Docker & Docker Compose** (optionnel, pour déploiement)
 - **Clé API Gemini** ([Obtenir ici](https://aistudio.google.com/app/apikey))
 
-### Étapes
+### Installation locale
 
 ```bash
 # 1. Cloner le dépôt
 git clone https://github.com/lekesiz/BILAN-EASY.git
 cd BILAN-EASY
 
-# 2. Installer les dépendances
+# 2. Installer les dépendances frontend
 npm install
 
-# 3. Configurer l'API Gemini (voir section suivante)
-# Éditer .env.local avec votre clé API
+# 3. Installer les dépendances backend
+cd backend
+npm install
+cd ..
 
-# 4. Lancer en développement
+# 4. Configurer les variables d'environnement
+# Frontend: .env.local
+echo "GEMINI_API_KEY=votre_clé_ici" > .env.local
+
+# Backend: backend/.env
+echo "DATABASE_URL=postgresql://user:password@localhost:5432/bilan_easy" > backend/.env
+echo "PORT=3001" >> backend/.env
+echo "FRONTEND_URL=http://localhost:3000" >> backend/.env
+echo "TEST_MODE=true" >> backend/.env
+
+# 5. Créer la base de données
+cd backend
+npm run db:push
+cd ..
+
+# 6. Lancer en développement
+# Terminal 1: Backend
+cd backend && npm run dev
+
+# Terminal 2: Frontend
 npm run dev
-
-# 5. Build pour production
-npm run build
 ```
+
+### Installation avec Docker
+
+```bash
+# 1. Cloner le dépôt
+git clone https://github.com/lekesiz/BILAN-EASY.git
+cd BILAN-EASY
+
+# 2. Configurer les variables d'environnement
+# Créer .env.local avec GEMINI_API_KEY
+echo "GEMINI_API_KEY=votre_clé_ici" > .env.local
+
+# 3. Lancer avec Docker Compose
+docker-compose up -d
+
+# 4. Accéder à l'application
+# Frontend: http://localhost:3000
+# Backend: http://localhost:3001/api
+```
+
+Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour plus de détails.
 
 ## ⚙️ Configuration
 
 ### Clé API Gemini (OBLIGATOIRE)
 
-**Fichier**: `.env.local`
+**Fichier**: `.env.local` (frontend)
 
 ```bash
-# Remplacer PLACEHOLDER_API_KEY par votre vraie clé
+# Remplacer par votre vraie clé
 GEMINI_API_KEY=votre_clé_api_gemini_ici
+# ou
+VITE_GEMINI_API_KEY=votre_clé_api_gemini_ici
 ```
 
 **Comment obtenir la clé**:
@@ -174,13 +248,27 @@ GEMINI_API_KEY=votre_clé_api_gemini_ici
 2. Créer ou copier votre clé API
 3. Remplacer dans `.env.local`
 
+**Pour Docker**: Voir [GEMINI_API_KEY_SETUP.md](GEMINI_API_KEY_SETUP.md)
+
 ### Variables d'environnement
+
+#### Frontend (`.env.local`)
 
 | Variable | Description | Requis |
 |----------|-------------|--------|
-| `GEMINI_API_KEY` | Clé API Gemini 2.5 | ✅ Oui |
+| `GEMINI_API_KEY` ou `VITE_GEMINI_API_KEY` | Clé API Gemini 2.5 | ✅ Oui |
+| `VITE_API_URL` | URL du backend (défaut: `http://localhost:3001/api`) | ⚠️ Optionnel |
 
-**Note**: Vite expose les variables via `process.env.API_KEY` (voir `vite.config.ts:14`)
+#### Backend (`backend/.env`)
+
+| Variable | Description | Requis |
+|----------|-------------|--------|
+| `DATABASE_URL` | URL PostgreSQL | ✅ Oui |
+| `PORT` | Port du serveur (défaut: `3001`) | ⚠️ Optionnel |
+| `FRONTEND_URL` | URL du frontend (pour CORS) | ⚠️ Optionnel |
+| `TEST_MODE` | Mode test (défaut: `false`) | ⚠️ Optionnel |
+
+**Note**: Vite expose les variables via `process.env.API_KEY` (voir `vite.config.ts`)
 
 ## 📖 Utilisation
 
@@ -313,11 +401,43 @@ echo "GEMINI_API_KEY=votre_clé_ici" > .env.local
 npm run dev
 ```
 
-### Erreur de build: "Transform failed"
+### Erreur: "Failed to fetch" (Backend)
 
-**Cause**: Problème de syntaxe JSX (apostrophes)
+**Cause**: Backend non démarré ou CORS mal configuré
 
-**Solution**: Déjà corrigée dans commit `ec00f8f`. Utiliser des guillemets doubles pour les chaînes avec apostrophes.
+**Solution**:
+1. Vérifier que le backend est démarré: `cd backend && npm run dev`
+2. Vérifier `FRONTEND_URL` dans `backend/.env`
+3. Vérifier les logs backend pour les erreurs
+
+### Erreur: "relation 'assessments' does not exist"
+
+**Cause**: Schéma de base de données non créé
+
+**Solution**:
+```bash
+cd backend
+npm run db:push
+```
+
+### Erreur Docker: "Port already in use"
+
+**Cause**: Port 3000, 3001 ou 5432 déjà utilisé
+
+**Solution**:
+1. Trouver le processus: `lsof -i :3000` (ou 3001, 5432)
+2. Arrêter le processus ou changer les ports dans `docker-compose.yml`
+
+Voir [DOCKER_TROUBLESHOOTING.md](DOCKER_TROUBLESHOOTING.md) pour plus de détails.
+
+### Erreur: "503 The model is overloaded" ou "429 Quota exceeded"
+
+**Cause**: Limite de quota Gemini API atteinte
+
+**Solution**: 
+- L'application retry automatiquement (max 3 tentatives)
+- Attendre le délai indiqué par l'API
+- Vérifier votre quota sur [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 ### Sauvegarde ne fonctionne pas
 
@@ -338,10 +458,34 @@ npm run dev
 
 ## 🔧 Scripts npm
 
+### Frontend
+
 ```bash
 npm run dev      # Serveur dev (http://localhost:3000)
 npm run build    # Build production (dist/)
 npm run preview  # Prévisualiser le build
+npm test         # Lancer les tests (Vitest)
+npm run test:ui  # Interface UI pour les tests
+npm run test:coverage  # Tests avec couverture
+```
+
+### Backend
+
+```bash
+cd backend
+npm run dev      # Serveur dev (http://localhost:3001)
+npm run build    # Build production
+npm run db:push  # Créer/mettre à jour le schéma DB
+npm test         # Lancer les tests (Vitest)
+```
+
+### Docker
+
+```bash
+docker-compose up -d        # Démarrer tous les services
+docker-compose down         # Arrêter tous les services
+docker-compose logs -f      # Voir les logs
+docker-compose build        # Reconstruire les images
 ```
 
 ## 📝 Fichiers de configuration
@@ -388,6 +532,15 @@ git push -u origin feature/ma-fonctionnalite
 - **React 19**: Hooks modernes (pas de class components)
 - **Tailwind CSS**: Classes utilitaires pour le style
 - **Schémas JSON**: Toutes les réponses IA doivent avoir un schéma
+
+## 📚 Documentation supplémentaire
+
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Guide de déploiement complet
+- [DOCKER_TROUBLESHOOTING.md](DOCKER_TROUBLESHOOTING.md) - Résolution de problèmes Docker
+- [TESTING.md](TESTING.md) - Guide des tests
+- [ENV_VARIABLES.md](ENV_VARIABLES.md) - Variables d'environnement détaillées
+- [GEMINI_API_KEY_SETUP.md](GEMINI_API_KEY_SETUP.md) - Configuration de la clé API pour Docker
+- [FINAL_TEST_GUIDE.md](FINAL_TEST_GUIDE.md) - Guide de test final
 
 ## 📞 Support
 

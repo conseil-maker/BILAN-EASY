@@ -4,13 +4,14 @@ import { requireAuth } from '../middleware/auth.js';
 import { eq, and } from 'drizzle-orm';
 import { createAnswerSchema } from '../utils/validate.js';
 import { success, error } from '../utils/response.js';
+import type { Env } from '../types/env.js';
 
-const app = new Hono();
+const app = new Hono<Env>();
 
 // POST /api/assessments/:assessmentId/answers - Ajouter une réponse
 app.post('/:assessmentId/answers', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const assessmentId = c.req.param('assessmentId');
     const body = await c.req.json();
 
@@ -59,7 +60,7 @@ app.post('/:assessmentId/answers', requireAuth, async (c) => {
 // GET /api/assessments/:assessmentId/answers - Récupérer toutes les réponses d'un bilan
 app.get('/:assessmentId/answers', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const assessmentId = c.req.param('assessmentId');
 
     // Vérifier que l'assessment appartient à l'utilisateur

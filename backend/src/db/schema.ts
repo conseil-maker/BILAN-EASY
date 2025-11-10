@@ -31,6 +31,10 @@ export const assessments = pgTable('assessments', {
   clerkUserIdIdx: index('idx_clerk_user_id').on(table.clerkUserId),
   statusIdx: index('idx_status').on(table.status),
   startedAtIdx: index('idx_started_at').on(table.startedAt),
+  lastActivityAtIdx: index('idx_last_activity_at').on(table.lastActivityAt),
+  completedAtIdx: index('idx_completed_at').on(table.completedAt),
+  // Composite index for common query: userId + status
+  userIdStatusIdx: index('idx_user_id_status').on(table.clerkUserId, table.status),
 }));
 
 // Table: answers (réponses aux questions)

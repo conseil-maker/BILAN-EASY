@@ -4,13 +4,14 @@ import { requireAuth } from '../middleware/auth.js';
 import { eq, and, desc, count } from 'drizzle-orm';
 import { createAssessmentSchema, updateAssessmentSchema } from '../utils/validate.js';
 import { success, error, paginated } from '../utils/response.js';
+import type { Env } from '../types/env.js';
 
-const app = new Hono();
+const app = new Hono<Env>();
 
 // POST /api/assessments - Créer un nouveau bilan
 app.post('/', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const body = await c.req.json();
 
     // Validation
@@ -42,7 +43,7 @@ app.post('/', requireAuth, async (c) => {
 // GET /api/assessments - Lister tous les bilans de l'utilisateur
 app.get('/', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const statusFilter = c.req.query('status');
     const limit = parseInt(c.req.query('limit') || '20');
     const offset = parseInt(c.req.query('offset') || '0');
@@ -82,7 +83,7 @@ app.get('/', requireAuth, async (c) => {
 // GET /api/assessments/:id - Récupérer un bilan spécifique avec ses réponses
 app.get('/:id', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const id = c.req.param('id');
 
     // Récupérer l'assessment
@@ -118,7 +119,7 @@ app.get('/:id', requireAuth, async (c) => {
 // PATCH /api/assessments/:id - Mettre à jour un bilan (sauvegarder progression)
 app.patch('/:id', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const id = c.req.param('id');
     const body = await c.req.json();
 
@@ -155,7 +156,7 @@ app.patch('/:id', requireAuth, async (c) => {
 // DELETE /api/assessments/:id - Supprimer un bilan (RGPD)
 app.delete('/:id', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const id = c.req.param('id');
 
     // Vérifier que l'assessment existe et appartient à l'utilisateur

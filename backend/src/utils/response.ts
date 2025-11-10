@@ -1,21 +1,22 @@
 import { Context } from 'hono';
+import type { Env } from '../types/env.js';
 
 // Helper pour réponses success
-export const success = <T>(c: Context, data: T, status = 200) => {
-  return c.json(data, status);
+export const success = <T>(c: Context<Env>, data: T, status: number = 200) => {
+  return c.json(data, status as any);
 };
 
 // Helper pour réponses error
-export const error = (c: Context, message: string, status = 400, details?: any) => {
+export const error = (c: Context<Env>, message: string, status: number = 400, details?: any) => {
   return c.json({
     error: message,
     ...(details && { details }),
-  }, status);
+  }, status as any);
 };
 
 // Helper pour réponses paginées
 export const paginated = <T>(
-  c: Context,
+  c: Context<Env>,
   data: T[],
   total: number,
   limit: number,

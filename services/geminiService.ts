@@ -2,7 +2,24 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Answer, Package, Question, QuestionType, Summary, UserProfile, DashboardData, ActionPlanItem, CoachingStyle } from '../types';
 import { QUESTION_CATEGORIES } from "../constants";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// Vite'da environment variables için process.env.API_KEY kullanılıyor (vite.config.ts'de define edilmiş)
+// Eğer undefined ise, import.meta.env'den de deneyelim
+const apiKey = (process.env.API_KEY || process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY) as string;
+
+if (!apiKey || apiKey === 'undefined' || apiKey === '') {
+  console.error('❌ GEMINI_API_KEY bulunamadı!');
+  console.error('📝 .env.local dosyasında şu şekilde tanımlayın:');
+  console.error('   GEMINI_API_KEY=your_api_key_here');
+  console.error('   VEYA');
+  console.error('   VITE_GEMINI_API_KEY=your_api_key_here');
+  
+  // Kullanıcıya görünür hata mesajı göster
+  if (typeof window !== 'undefined') {
+    alert('⚠️ Erreur de configuration: Clé API Gemini manquante.\n\nVérifiez votre fichier .env.local et redémarrez le serveur de développement.');
+  }
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 // --- SCHEMAS ---
 
@@ -180,6 +197,11 @@ export const generateQuestion = async (
   userProfile: UserProfile | null = null,
   options: { useJoker?: boolean, useGoogleSearch?: boolean, searchTopic?: string, isModuleQuestion?: { moduleId: string, questionNum: number } } = {}
 ): Promise<Question> => {
+    // API key kontrolü
+    if (!apiKey || apiKey === '') {
+        throw new Error('GEMINI_API_KEY bulunamadı! Lütfen .env.local dosyasında GEMINI_API_KEY tanımlı olduğundan emin olun ve sunucuyu yeniden başlatın.');
+    }
+
     const systemInstruction = getSystemInstruction(coachingStyle);
     const history = previousAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
 
@@ -247,19 +269,78 @@ export const generateSynthesis = async (lastAnswers: Answer[], userName: string,
 };
 
 export const generateSummary = async (answers: Answer[], pkg: Package, userName: string, coachingStyle: CoachingStyle): Promise<Summary> => {
+    console.log(`📝 Summary oluşturuluyor: ${answers.length} cevap, ${pkg.name}`);
     const systemInstruction = getSystemInstruction(coachingStyle);
     const fullTranscript = answers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
-    const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}, Transcript: ${fullTranscript}. Task: Analyze the transcript and generate a comprehensive summary in French. The response MUST be a valid JSON object conforming to the schema. For 'keyStrengths' and 'areasForDevelopment', each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. For 'actionPlan', each item must have a unique 'id' and 'text'.`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } });
-    const summaryData = parseJsonResponse<any>(response.text, 'generateSummary');
-    const processActionPlan = (items: any[]): ActionPlanItem[] => items.map(item => ({...item, completed: false}));
     
-    // Ensure actionPlan exists and has the correct structure before processing
-    if (summaryData.actionPlan && summaryData.actionPlan.shortTerm && summaryData.actionPlan.mediumTerm) {
-         return { ...summaryData, actionPlan: { shortTerm: processActionPlan(summaryData.actionPlan.shortTerm), mediumTerm: processActionPlan(summaryData.actionPlan.mediumTerm) } };
+    // Transcript çok uzunsa kısalt (max 10000 karakter)
+    const maxTranscriptLength = 10000;
+    const truncatedTranscript = fullTranscript.length > maxTranscriptLength 
+        ? fullTranscript.substring(0, maxTranscriptLength) + '\n\n[... transcript tronqué pour optimiser la génération ...]'
+        : fullTranscript;
+    
+    const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}, Transcript: ${truncatedTranscript}. Task: Analyze the transcript and generate a comprehensive summary in French. The response MUST be a valid JSON object conforming to the schema. For 'keyStrengths' and 'areasForDevelopment', each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. For 'actionPlan', each item must have a unique 'id' and 'text'.`;
+    
+    try {
+        console.log('🤖 Gemini API çağrılıyor (gemini-2.5-pro)...');
+        
+        // Retry mekanizması: 503 (overload) ve 429 (quota) hatalarında retry
+        let lastError: any = null;
+        let retries = 3;
+        let response: any = null;
+        
+        while (retries > 0) {
+            try {
+                response = await ai.models.generateContent({ 
+                    model: 'gemini-2.5-pro', 
+                    contents: prompt, 
+                    config: { 
+                        systemInstruction, 
+                        responseMimeType: "application/json", 
+                        responseSchema: summarySchema 
+                    } 
+                });
+                break; // Başarılı, döngüden çık
+            } catch (error: any) {
+                lastError = error;
+                const errorCode = error?.error?.code || error?.code;
+                const errorStatus = error?.error?.status || error?.status;
+                
+                // 503 (overload) veya 429 (quota) hatası ise retry
+                if ((errorCode === 503 || errorStatus === 'UNAVAILABLE' || errorCode === 429 || errorStatus === 'RESOURCE_EXHAUSTED') && retries > 1) {
+                    const retryDelay = error?.error?.details?.find((d: any) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo')?.retryDelay || '30s';
+                    const delayMs = parseInt(retryDelay.replace('s', '')) * 1000 || 30000;
+                    
+                    console.log(`⚠️ Gemini API hatası (${errorCode}), ${retries - 1} retry kaldı. ${delayMs}ms bekleniyor...`);
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                    retries--;
+                } else {
+                    // Retry edilemeyecek hata veya retry bitti
+                    throw error;
+                }
+            }
+        }
+        
+        if (!response) {
+            throw lastError || new Error('Gemini API yanıt alamadı');
+        }
+        
+        console.log('✅ Gemini API yanıt aldı, parsing...');
+        const summaryData = parseJsonResponse<any>(response.text, 'generateSummary');
+        const processActionPlan = (items: any[]): ActionPlanItem[] => items.map(item => ({...item, completed: false}));
+        
+        // Ensure actionPlan exists and has the correct structure before processing
+        if (summaryData.actionPlan && summaryData.actionPlan.shortTerm && summaryData.actionPlan.mediumTerm) {
+            console.log('✅ Summary başarıyla oluşturuldu');
+            return { ...summaryData, actionPlan: { shortTerm: processActionPlan(summaryData.actionPlan.shortTerm), mediumTerm: processActionPlan(summaryData.actionPlan.mediumTerm) } };
+        }
+        // Fallback if the AI fails to generate the action plan correctly
+        console.warn('⚠️ Action plan eksik, fallback kullanılıyor');
+        return { ...summaryData, actionPlan: { shortTerm: [], mediumTerm: [] } };
+    } catch (error) {
+        console.error('❌ generateSummary hatası:', error);
+        throw error;
     }
-    // Fallback if the AI fails to generate the action plan correctly
-    return { ...summaryData, actionPlan: { shortTerm: [], mediumTerm: [] } };
 };
 
 export const findResourceLeads = async (actionItemText: string): Promise<{ searchKeywords: string[], resourceTypes: string[], platformExamples: string[] }> => {

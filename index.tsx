@@ -1,25 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ClerkProvider } from '@clerk/clerk-react';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
+import { ToastProvider } from './components/Toast';
 
-// Récupérer la clé publique Clerk depuis les variables d'environnement
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!clerkPubKey) {
-  throw new Error('Missing Clerk Publishable Key. Set VITE_CLERK_PUBLISHABLE_KEY in .env.local');
-}
-
+// Clerk kaldırıldı - Basit session-based authentication kullanılıyor
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error('Could not find root element to mount to');
 }
 
 const root = ReactDOM.createRoot(rootElement);
+
 root.render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={clerkPubKey}>
-      <App />
-    </ClerkProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

@@ -4,13 +4,14 @@ import { requireAuth } from '../middleware/auth.js';
 import { eq, and } from 'drizzle-orm';
 import { createSummarySchema } from '../utils/validate.js';
 import { success, error } from '../utils/response.js';
+import type { Env } from '../types/env.js';
 
-const app = new Hono();
+const app = new Hono<Env>();
 
 // POST /api/assessments/:assessmentId/summary - Créer/Sauvegarder la synthèse
 app.post('/:assessmentId/summary', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const assessmentId = c.req.param('assessmentId');
     const body = await c.req.json();
 
@@ -85,7 +86,7 @@ app.post('/:assessmentId/summary', requireAuth, async (c) => {
 // GET /api/assessments/:assessmentId/summary - Récupérer la synthèse
 app.get('/:assessmentId/summary', requireAuth, async (c) => {
   try {
-    const userId = c.get('userId') as string;
+    const userId = c.get('userId');
     const assessmentId = c.req.param('assessmentId');
 
     // Vérifier que l'assessment appartient à l'utilisateur

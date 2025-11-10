@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bilan-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bilan_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bilan_password}
+      POSTGRES_DB: ${POSTGRES_DB:-bilan_easy}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bilan_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bilan-backend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-bilan_user}:${POSTGRES_PASSWORD:-bilan_password}@postgres:5432/${POSTGRES_DB:-bilan_easy}
+      PORT: 3001
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:3000
+      TEST_MODE: ${TEST_MODE:-false}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:-}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY:-${GEMINI_API_KEY:-}}
+        GEMINI_API_KEY: ${GEMINI_API_KEY:-${VITE_GEMINI_API_KEY:-}}
+    container_name: bilan-frontend
+    environment:
+      VITE_API_URL: http://localhost:3001/api
+      VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY:-}
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+

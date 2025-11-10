@@ -16,7 +16,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 if (!process.env.CLERK_SECRET_KEY) {
-  console.error('⚠️  WARNING: CLERK_SECRET_KEY is not set - Authentication will fail');
+  console.warn('⚠️  WARNING: CLERK_SECRET_KEY is not set - Running in TEST MODE (auth bypassed)');
 }
 
 console.log(`\n✅ Server is running on http://localhost:${port}`);

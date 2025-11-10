@@ -4,6 +4,11 @@ import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndS
 import { QUESTION_CATEGORIES } from '../constants';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import { useApi } from '../services/apiClient';
+import { useToast } from './Toast';
+import { useOfflineDetection } from '../hooks/useOfflineDetection';
+import { useDebouncedCallback } from '../hooks/useDebounce';
+import { MessageSkeleton } from './SkeletonLoader';
 import SpeechSettings from './SpeechSettings';
 import Dashboard from './Dashboard';
 import JourneyProgress from './JourneyProgress';
@@ -66,21 +71,26 @@ interface QuestionnaireProps {
   userName: string;
   userProfile: UserProfile | null;
   coachingStyle: CoachingStyle;
+  assessmentId: string | null;
   onComplete: (answers: Answer[], summary: Summary) => void;
 }
 
-const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete }) => {
+const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, assessmentId, onComplete }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSummarizing, setIsSummarizing] = useState(false);
+    const api = useApi();
+    const { showToast } = useToast();
+    const isOnline = useOfflineDetection();
     const [currentPhaseInfo, setCurrentPhaseInfo] = useState<CurrentPhaseInfo | null>(null);
     const [textInput, setTextInput] = useState('');
     const [showSettings, setShowSettings] = useState(false);
     const [showSaveNotification, setShowSaveNotification] = useState(false);
     const [showSatisfactionModal, setShowSatisfactionModal] = useState(false);
     const [satisfactionPhaseInfo, setSatisfactionPhaseInfo] = useState<CurrentPhaseInfo | null>(null);
+    const [satisfactionSubmittedForPhase, setSatisfactionSubmittedForPhase] = useState<number | null>(null);
     const [isAwaitingSynthesisConfirmation, setIsAwaitingSynthesisConfirmation] = useState(false);
     const [synthesisConfirmed, setSynthesisConfirmed] = useState<boolean | null>(null);
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -110,7 +120,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     }, [pkg]);
     
     const updateDashboard = useCallback(async (currentAnswers: Answer[]) => {
-        if (currentAnswers.length < 2) return;
+        // Dashboard için en az 1 cevap yeterli
+        if (currentAnswers.length < 1) return;
         setIsDashboardLoading(true);
         try {
             const data = await analyzeThemesAndSkills(currentAnswers);
@@ -118,35 +129,51 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         } catch (error) { console.error("Error updating dashboard:", error); } 
         finally { setIsDashboardLoading(false); }
     }, []);
+    
+    // Debounced dashboard update (500ms delay)
+    const debouncedUpdateDashboard = useDebouncedCallback(updateDashboard, 500);
 
-    const fetchNextQuestion = useCallback(async (options: { useJoker?: boolean } = {}) => {
+    const fetchNextQuestion = useCallback(async (options: { useJoker?: boolean, currentAnswers?: Answer[] } = {}) => {
+        // ÖNEMLİ: currentAnswers parametresi varsa onu kullan, yoksa answers state'ini kullan
+        // Bu, state güncellemesi gecikmelerini önler
+        const answersToUse = options.currentAnswers || answers;
+        console.log('🔍 fetchNextQuestion çağrıldı, answersToUse.length:', answersToUse.length, ', answers.length:', answers.length);
         setIsLoading(true);
         setCurrentQuestion(null);
         try {
             let question;
             if (activeModule) {
-                question = await generateQuestion('phase2', 0, answers, userName, coachingStyle, null, { isModuleQuestion: { moduleId: activeModule, questionNum: moduleQuestionCount + 1 } });
+                console.log('📦 Module sorusu oluşturuluyor:', activeModule);
+                question = await generateQuestion('phase2', 0, answersToUse, userName, coachingStyle, null, { isModuleQuestion: { moduleId: activeModule, questionNum: moduleQuestionCount + 1 } });
             } else {
-                const info = getPhaseInfo(answers.length);
+                const info = getPhaseInfo(answersToUse.length);
+                console.log('📊 Phase bilgisi:', info, 'answersToUse.length:', answersToUse.length);
                 setCurrentPhaseInfo(info);
                 const phaseKey = `phase${info.phase}` as 'phase1' | 'phase2' | 'phase3';
                 const phaseCategories = QUESTION_CATEGORIES[phaseKey].categories;
                 const categoryIndex = (info.positionInPhase - 1) % phaseCategories.length;
                 
+                console.log(`🎯 Soru oluşturuluyor: Phase ${info.phase}, Category: ${phaseCategories[categoryIndex]}, Index: ${categoryIndex}`);
+                
                 let genOptions: any = { useJoker: options.useJoker };
-                if (info.phase === 2 && info.positionInPhase === 2 && answers.length > 0 && answers[answers.length - 1].value.length > 3) {
-                    genOptions.useGoogleSearch = true; genOptions.searchTopic = answers[answers.length - 1].value;
+                if (info.phase === 2 && info.positionInPhase === 2 && answersToUse.length > 0 && answersToUse[answersToUse.length - 1].value.length > 3) {
+                    genOptions.useGoogleSearch = true; genOptions.searchTopic = answersToUse[answersToUse.length - 1].value;
                 }
-                question = await generateQuestion(phaseKey, categoryIndex, answers, userName, coachingStyle, answers.length === 0 ? userProfile : null, genOptions);
+                question = await generateQuestion(phaseKey, categoryIndex, answersToUse, userName, coachingStyle, answersToUse.length === 0 ? userProfile : null, genOptions);
             }
+            console.log('✅ Soru oluşturuldu:', question.title);
             setCurrentQuestion(question);
             const aiMessage: Message = { sender: 'ai', text: `${question.title}${question.description ? `\n\n${question.description}` : ''}`, question };
             setMessages(prev => [...prev, aiMessage]);
             if (speechSynthSupported && settings.voice) speak(aiMessage.text as string);
         } catch (error) {
-            console.error("Error generating question:", error);
-            setMessages(prev => [...prev, { sender: 'ai', text: "Désolé, une erreur est survenue. Laissez-moi un instant..." }]);
-            setTimeout(() => fetchNextQuestion(), 3000);
+            console.error("❌ Error generating question:", error);
+            const errorMessage = error instanceof Error ? error.message : "Une erreur inconnue s'est produite";
+            const userFriendlyMessage = errorMessage.includes('GEMINI_API_KEY') 
+                ? "⚠️ Erreur de configuration: Clé API Gemini manquante. Vérifiez votre fichier .env.local"
+                : "Désolé, une erreur est survenue. Laissez-moi un instant...";
+            setMessages(prev => [...prev, { sender: 'ai', text: userFriendlyMessage }]);
+            setTimeout(() => fetchNextQuestion(options), 3000);
         } finally {
             setIsLoading(false);
         }
@@ -161,59 +188,213 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             setIsAwaitingSynthesisConfirmation(true);
         } catch (error) {
             console.error("Error generating synthesis:", error);
-            await fetchNextQuestion();
+            // Synthesis hatası durumunda, mevcut answers ile devam et
+            await fetchNextQuestion({ currentAnswers });
         } finally {
             setIsLoading(false);
         }
     }, [userName, coachingStyle, fetchNextQuestion]);
 
-    const runNextStep = useCallback(async (currentAnswers: Answer[]) => {
-        if (currentAnswers.length >= pkg.totalQuestionnaires) {
-            setIsSummarizing(true);
-            const finalSummary = await generateSummary(currentAnswers, pkg, userName, coachingStyle);
-            localStorage.removeItem(SESSION_STORAGE_KEY);
-            onComplete(currentAnswers, finalSummary);
+    const runNextStep = useCallback(async (currentAnswers: Answer[], skipSynthesis: boolean = false) => {
+        // Synthesis beklenirken veya zaten oluşturulmuşsa, synthesis kontrolünü atla
+        if (isAwaitingSynthesisConfirmation && !skipSynthesis) {
+            console.log('⏸️ Synthesis bekleniyor, runNextStep atlanıyor');
             return;
         }
 
+        console.log(`🔄 runNextStep çağrıldı: ${currentAnswers.length}/${pkg.totalQuestionnaires} cevap, skipSynthesis: ${skipSynthesis}`);
+        console.log(`📦 Package bilgisi: ${pkg.name}, totalQuestionnaires: ${pkg.totalQuestionnaires}`);
+
+        // Tüm sorular tamamlandı mı?
+        // ÖNEMLİ: Sadece gerçekten tüm sorular tamamlandıysa summary oluştur
+        if (currentAnswers.length >= pkg.totalQuestionnaires) {
+            console.log('✅ Tüm sorular tamamlandı, final summary oluşturuluyor...');
+            console.log(`📊 Cevap sayısı kontrolü: ${currentAnswers.length} >= ${pkg.totalQuestionnaires} = ${currentAnswers.length >= pkg.totalQuestionnaires}`);
+            setIsSummarizing(true);
+            
+            try {
+                // Timeout ile summary oluştur (max 60 saniye)
+                const summaryPromise = generateSummary(currentAnswers, pkg, userName, coachingStyle);
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Summary generation timeout (60s)')), 60000)
+                );
+                
+                const finalSummary = await Promise.race([summaryPromise, timeoutPromise]) as Summary;
+                
+                console.log('✅ Summary oluşturuldu:', finalSummary.profileType);
+                
+                // Backend'e summary kaydet
+                if (assessmentId) {
+                    try {
+                        await api.createSummary(assessmentId, {
+                            profileType: finalSummary.profileType,
+                            priorityThemes: finalSummary.priorityThemes,
+                            maturityLevel: finalSummary.maturityLevel,
+                            keyStrengths: finalSummary.keyStrengths,
+                            areasForDevelopment: finalSummary.areasForDevelopment,
+                            recommendations: finalSummary.recommendations,
+                            actionPlan: {
+                                shortTerm: finalSummary.actionPlan.shortTerm.map(item => ({
+                                    id: item.id,
+                                    text: item.text,
+                                    completed: item.completed || false,
+                                })),
+                                mediumTerm: finalSummary.actionPlan.mediumTerm.map(item => ({
+                                    id: item.id,
+                                    text: item.text,
+                                    completed: item.completed || false,
+                                })),
+                            },
+                        });
+                        
+                        // Assessment'ı completed olarak işaretle
+                        await api.updateAssessment(assessmentId, {
+                            status: 'completed',
+                            completedAt: new Date().toISOString(),
+                        });
+                        showToast('Synthèse sauvegardée avec succès', 'success', 3000);
+                    } catch (error) {
+                        console.error('Failed to save summary to backend:', error);
+                        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+                        showToast(
+                            `Synthèse générée mais erreur de sauvegarde: ${errorMessage}`,
+                            'error',
+                            5000
+                        );
+                        // Hata durumunda da devam et
+                    }
+                }
+                
+                localStorage.removeItem(SESSION_STORAGE_KEY);
+                setIsSummarizing(false);
+                onComplete(currentAnswers, finalSummary);
+                return;
+            } catch (error) {
+                console.error('❌ Summary oluşturma hatası:', error);
+                setIsSummarizing(false);
+                const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+                showToast(
+                    `Erreur lors de la génération de la synthèse: ${errorMessage}. Veuillez réessayer.`,
+                    'error',
+                    5000
+                );
+                // Hata durumunda kullanıcıya seçenek sun
+                if (window.confirm('La génération de la synthèse a échoué. Voulez-vous réessayer ?')) {
+                    // Tekrar dene
+                    runNextStep(currentAnswers, false);
+                }
+                return;
+            }
+        }
+
+        // Her 5 cevapta bir kaydet ve dashboard güncelle
         if (currentAnswers.length > 0 && currentAnswers.length % 5 === 0) {
             localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentAnswers));
             setShowSaveNotification(true); setTimeout(() => setShowSaveNotification(false), 3000);
-            updateDashboard(currentAnswers);
+            // Debounced dashboard update
+            debouncedUpdateDashboard(currentAnswers);
+            
+            // Dashboard data'yı backend'e kaydet (debounced, sadece son güncelleme)
+            if (assessmentId) {
+                // Backend update'i de debounce et (1 saniye)
+                setTimeout(async () => {
+                    try {
+                        const dashboardData = await analyzeThemesAndSkills(currentAnswers);
+                        await api.updateAssessment(assessmentId, {
+                            dashboardData: dashboardData,
+                        });
+                    } catch (error) {
+                        console.error('Failed to save dashboard data to backend:', error);
+                        // Dashboard hatası kritik değil, sessizce devam et
+                    }
+                }, 1000);
+            }
+        } else if (currentAnswers.length > 0) {
+            // Her answer'da debounced update (ama sadece 5'te bir backend'e kaydet)
+            debouncedUpdateDashboard(currentAnswers);
         }
 
+        // Phase geçişi kontrolü
         if (currentAnswers.length > 0) {
             const info = getPhaseInfo(currentAnswers.length);
             const prevInfo = getPhaseInfo(currentAnswers.length - 1);
             if (info.phase !== prevInfo.phase) {
+                console.log(`📊 Phase geçişi: Phase ${prevInfo.phase} → Phase ${info.phase}`);
                 setUnlockedBadge(`Phase ${prevInfo.phase} : ${prevInfo.name}`);
                 const moduleSuggestion = await suggestOptionalModule(currentAnswers);
                 if (moduleSuggestion.isNeeded && moduleSuggestion.moduleId && moduleSuggestion.reason) {
+                    console.log('🔍 Module önerisi:', moduleSuggestion.moduleId);
                     setSuggestedModule({ id: moduleSuggestion.moduleId, reason: moduleSuggestion.reason });
                     return;
                 }
-                if (prevInfo.satisfactionActive) {
+                // ÖNEMLİ: Eğer bu phase için satisfaction zaten gönderildiyse, tekrar gösterme
+                if (prevInfo.satisfactionActive && satisfactionSubmittedForPhase !== prevInfo.phase) {
+                    console.log('⭐ Satisfaction modal gösteriliyor (Phase', prevInfo.phase, ')');
                     setSatisfactionPhaseInfo(prevInfo);
                     setShowSatisfactionModal(true);
                     return;
+                } else if (prevInfo.satisfactionActive && satisfactionSubmittedForPhase === prevInfo.phase) {
+                    console.log('⏭️ Satisfaction zaten gönderildi (Phase', prevInfo.phase, '), atlanıyor');
                 }
             }
         }
 
-        if (currentAnswers.length > 0 && currentAnswers.length % 3 === 0 && currentAnswers.length % 5 !== 0) {
+        // Synthesis kontrolü: Her 3 cevapta bir (ama 5'in katı değilse) VE synthesis beklenmiyorsa
+        // İLK CEVAPTA SYNTHESIS OLUŞTURMA! (currentAnswers.length > 1 kontrolü eklendi)
+        if (!skipSynthesis && currentAnswers.length > 1 && currentAnswers.length % 3 === 0 && currentAnswers.length % 5 !== 0) {
+            console.log('📝 Synthesis oluşturuluyor (3. cevap)');
             await handleGenerateSynthesis(currentAnswers);
             return;
         }
         
-        await fetchNextQuestion();
-    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis]);
+        // Sonraki soruyu getir
+        console.log('❓ Sonraki soru getiriliyor... (cevap sayısı:', currentAnswers.length, ', toplam:', pkg.totalQuestionnaires, ')');
+        
+        // Eğer tüm sorular tamamlandıysa, buraya gelmemeli (yukarıdaki kontrol zaten yapıldı)
+        if (currentAnswers.length >= pkg.totalQuestionnaires) {
+            console.error('⚠️ HATA: Tüm sorular tamamlandı ama runNextStep devam ediyor!');
+            return;
+        }
+        
+        // ÖNEMLİ: fetchNextQuestion'a currentAnswers parametresini geçir
+        // Bu, state güncellemesi gecikmelerini önler
+        await fetchNextQuestion({ currentAnswers });
+    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, assessmentId, api, isAwaitingSynthesisConfirmation, satisfactionSubmittedForPhase]);
 
     useEffect(() => {
         const loadSession = async () => {
+            // Önce backend'den in_progress assessment'ı kontrol et
+            if (assessmentId) {
+                try {
+                    const assessment = await api.getAssessment(assessmentId);
+                    if (assessment.status === 'in_progress' && assessment.currentQuestionIndex > 0) {
+                        // Answers'ları çek
+                        const answersResponse = await api.getAnswers(assessmentId);
+                        const savedAnswers: Answer[] = (answersResponse.answers || []).map((a: any) => ({
+                            questionId: a.questionId,
+                            value: a.value,
+                        }));
+                        
+                        if (savedAnswers.length > 0) {
+                            if (window.confirm(`Une session inachevée a été trouvée (${savedAnswers.length} réponses). Voulez-vous la reprendre ?`)) {
+                                setAnswers(savedAnswers);
+                                setMessages([{ sender: 'ai', text: `Bonjour ${userName}, reprenons où nous nous étions arrêtés.` }]);
+                                await runNextStep(savedAnswers);
+                                return;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to load session from backend:', error);
+                    // Fallback: localStorage'a bak
+                }
+            }
+            
+            // Fallback: localStorage'dan yükle
             const savedAnswersJSON = localStorage.getItem(SESSION_STORAGE_KEY);
             if (savedAnswersJSON) {
                 const savedAnswers: Answer[] = JSON.parse(savedAnswersJSON);
-                if (window.confirm("Une session inachevée a été trouvée. Voulez-vous la reprendre ?")) {
+                if (window.confirm("Une session inachevée a été trouvée (localStorage). Voulez-vous la reprendre ?")) {
                     setAnswers(savedAnswers);
                     setMessages([{ sender: 'ai', text: `Bonjour ${userName}, reprenons où nous nous étions arrêtés.` }]);
                     await runNextStep(savedAnswers);
@@ -229,51 +410,138 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
 
     useEffect(() => {
         if (synthesisConfirmed !== null) {
-            runNextStep(answers);
+            console.log('✅ Synthesis confirmation alındı:', synthesisConfirmed);
+            // Synthesis confirmation sonrası, synthesis kontrolünü atlayarak devam et
+            runNextStep(answers, true); // skipSynthesis = true
             setSynthesisConfirmed(null);
         }
     }, [synthesisConfirmed, answers, runNextStep]);
 
-    const handleAnswerSubmit = (value: string) => {
+    const handleAnswerSubmit = async (value: string) => {
         if (isLoading || !currentQuestion || isAwaitingSynthesisConfirmation) return;
         cancel();
         const newAnswer: Answer = { questionId: currentQuestion.id, value };
+        
+        // OPTIMISTIC UPDATE: Önce UI'ı güncelle
         const newAnswers = [...answers, newAnswer];
         setMessages(prev => [...prev, { sender: 'user', text: value }]);
         setAnswers(newAnswers);
         setTextInput('');
+        
+        // Mevcut question'ı temizle (optimistic)
+        const previousQuestion = currentQuestion;
+        setCurrentQuestion(null);
 
-        if (activeModule) {
-            if (moduleQuestionCount + 1 >= 3) {
-                setActiveModule(null); setModuleQuestionCount(0);
-                runNextStep(newAnswers);
-            } else {
-                setModuleQuestionCount(prev => prev + 1);
-                fetchNextQuestion();
+        // Backend'e answer kaydet (async, hata durumunda rollback)
+        // ÖNEMLİ: runNextStep her durumda çağrılmalı, backend kaydı başarısız olsa bile
+        let shouldContinue = true;
+        
+        if (assessmentId && previousQuestion && isOnline) {
+            try {
+                console.log('💾 Backend\'e answer kaydediliyor...', newAnswers.length);
+                await api.addAnswer(assessmentId, {
+                    questionId: previousQuestion.id,
+                    questionTitle: previousQuestion.title,
+                    questionType: previousQuestion.type === QuestionType.MULTIPLE_CHOICE ? 'MULTIPLE_CHOICE' : 'PARAGRAPH',
+                    questionTheme: previousQuestion.theme,
+                    value: value,
+                });
+                
+                // Assessment'ı güncelle (currentQuestionIndex)
+                await api.updateAssessment(assessmentId, {
+                    currentQuestionIndex: newAnswers.length,
+                    lastActivityAt: new Date().toISOString(),
+                });
+                
+                console.log('✅ Answer backend\'e kaydedildi:', newAnswers.length);
+            } catch (error) {
+                console.error('❌ Failed to save answer to backend:', error);
+                
+                const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+                if (errorMessage.includes('Failed to fetch') || !isOnline) {
+                    showToast('Mode hors ligne: réponse sauvegardée localement', 'warning', 4000);
+                    // Offline durumunda optimistic update'i koru ve devam et
+                } else {
+                    showToast(
+                        `Erreur lors de la sauvegarde. Réessayez. (${errorMessage})`,
+                        'error',
+                        5000
+                    );
+                    // Hata durumunda da devam et (optimistic update korunuyor)
+                }
             }
-        } else {
-            runNextStep(newAnswers);
+        } else if (!isOnline) {
+            showToast('Mode hors ligne: réponse sauvegardée localement', 'info', 3000);
+        }
+
+        // Her durumda sonraki adıma geç (backend kaydı başarısız olsa bile)
+        if (shouldContinue) {
+            console.log(`➡️ Sonraki adıma geçiliyor: newAnswers.length=${newAnswers.length}, pkg.totalQuestionnaires=${pkg.totalQuestionnaires}`);
+            
+            // ÖNEMLİ: Eğer tüm sorular tamamlandıysa runNextStep çağrılmalı (summary için)
+            // Ama eğer henüz sorular varsa, runNextStep çağrılmalı (sonraki soru için)
+            if (activeModule) {
+                if (moduleQuestionCount + 1 >= 3) {
+                    console.log('✅ Module tamamlandı, normal akışa dönülüyor');
+                    setActiveModule(null); 
+                    setModuleQuestionCount(0);
+                    runNextStep(newAnswers);
+                } else {
+                    console.log('📝 Module sorusu devam ediyor:', moduleQuestionCount + 1);
+                    setModuleQuestionCount(prev => prev + 1);
+                    fetchNextQuestion();
+                }
+            } else {
+                console.log('➡️ Normal akış: runNextStep çağrılıyor (newAnswers.length:', newAnswers.length, ')');
+                // ÖNEMLİ: runNextStep içinde totalQuestionnaires kontrolü var
+                // Eğer newAnswers.length < pkg.totalQuestionnaires ise, fetchNextQuestion çağrılacak
+                // Eğer newAnswers.length >= pkg.totalQuestionnaires ise, summary oluşturulacak
+                runNextStep(newAnswers);
+            }
         }
     };
     
     const handleSynthesisConfirmation = (confirmed: boolean) => {
+        console.log('🔄 Synthesis confirmation:', confirmed);
         setIsAwaitingSynthesisConfirmation(false);
         setMessages(prev => [...prev, { sender: 'user', text: confirmed ? "Oui, c'est exact." : "Non, pas tout à fait." }]);
+        // Synthesis confirmation sonrası bir sonraki soruya geç
+        // useEffect ile runNextStep çağrılacak (skipSynthesis = true ile)
         setSynthesisConfirmed(confirmed);
     };
     
     const handleSatisfactionSubmit = (rating: number, comment: string) => {
-        console.log({ phase: satisfactionPhaseInfo?.name, rating, comment });
+        console.log('⭐ Satisfaction gönderildi:', { phase: satisfactionPhaseInfo?.name, rating, comment });
+        const currentPhase = satisfactionPhaseInfo?.phase;
+        if (currentPhase !== undefined) {
+            // Bu phase için satisfaction gönderildiğini işaretle
+            setSatisfactionSubmittedForPhase(currentPhase);
+            console.log('✅ Satisfaction Phase', currentPhase, 'için işaretlendi');
+        }
         setShowSatisfactionModal(false);
         setSatisfactionPhaseInfo(null);
-        runNextStep(answers);
+        // Satisfaction sonrası normal akışa devam et
+        runNextStep(answers, false);
     };
 
-    const handleModuleAccept = () => { setActiveModule(suggestedModule!.id); setSuggestedModule(null); fetchNextQuestion(); };
-    const handleModuleDecline = () => { setSuggestedModule(null); runNextStep(answers); };
+    const handleModuleAccept = () => { 
+        console.log('✅ Module kabul edildi:', suggestedModule!.id);
+        setActiveModule(suggestedModule!.id); 
+        setSuggestedModule(null); 
+        fetchNextQuestion(); 
+    };
+    const handleModuleDecline = () => { 
+        console.log('❌ Module reddedildi');
+        setSuggestedModule(null); 
+        runNextStep(answers, false); 
+    };
     const handleJoker = () => { if (!isLoading) { fetchNextQuestion({ useJoker: true }); } };
 
-    if (isSummarizing) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="text-2xl font-bold">Génération de votre synthèse...</div><p>Veuillez patienter.</p></div></div>;
+    // isSummarizing sadece gerçekten summary oluşturulurken true olmalı
+    // Eğer currentQuestion varsa, summary oluşturulmuyor demektir
+    if (isSummarizing && !currentQuestion) {
+        return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="text-2xl font-bold">Génération de votre synthèse...</div><p>Veuillez patienter.</p></div></div>;
+    }
 
     return (
         <>
@@ -281,6 +549,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             {showSatisfactionModal && satisfactionPhaseInfo && <SatisfactionModal phaseName={satisfactionPhaseInfo.name} onSubmit={handleSatisfactionSubmit} />}
             {suggestedModule && <ModuleModal reason={suggestedModule.reason} onAccept={handleModuleAccept} onDecline={handleModuleDecline} />}
             {showSaveNotification && <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-sm shadow-lg z-50">Progrès sauvegardé !</div>}
+            {!isOnline && (
+                <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-yellow-500 text-white px-4 py-2 rounded-full text-sm shadow-lg z-50 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>Mode hors ligne - Les données sont sauvegardées localement</span>
+                </div>
+            )}
             
             <div className="h-screen w-screen flex flex-col bg-slate-100">
                 <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 p-4 flex justify-between items-center shadow-sm">
@@ -323,7 +597,20 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     </div>
                                 </div>
                             ))}
-                            {isLoading && <div className="flex justify-start"><div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center flex-shrink-0">IA</div><div className="ml-3 p-4 bg-slate-200 rounded-2xl rounded-bl-none">...</div></div>}
+                            {isLoading && <MessageSkeleton />}
+                            {isSummarizing && (
+                                <div className="flex justify-start">
+                                    <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center flex-shrink-0">IA</div>
+                                    <div className="ml-3 p-4 bg-slate-200 rounded-2xl rounded-bl-none">
+                                        <p className="text-slate-600">Génération de votre synthèse finale...</p>
+                                        <div className="mt-2 flex gap-1">
+                                            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             <div ref={chatEndRef} />
                         </div>
 

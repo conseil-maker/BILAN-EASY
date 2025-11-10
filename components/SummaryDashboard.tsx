@@ -3,9 +3,6 @@ import { Summary, SummaryPoint, ActionPlanItem, Answer, DashboardData } from '..
 import { findResourceLeads, analyzeThemesAndSkills } from '../services/geminiService';
 import SkillsRadar from './SkillsRadar';
 
-declare const jspdf: any;
-declare const html2canvas: any;
-
 interface SummaryDashboardProps {
   summary: Summary;
   answers: Answer[];
@@ -159,36 +156,72 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
     }, [actionPlan, isHistoryView, ACTION_PLAN_STORAGE_KEY]);
     
     const summaryRef = useRef<HTMLDivElement>(null);
-    const { PDF } = jspdf;
+    const [isPdfGenerating, setIsPdfGenerating] = useState(false);
 
     const handleDownloadPdf = async () => {
         const content = summaryRef.current;
-        if (!content) return;
+        if (!content) {
+            console.error('❌ PDF: Content not found');
+            alert('Erreur: Contenu non trouvé pour le PDF');
+            return;
+        }
 
-        const canvas = await html2canvas(content, { scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
-        
-        const pdf = new PDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / pdfWidth;
-        const imgHeight = canvasHeight / ratio;
+        // jspdf ve html2canvas kontrolü
+        if (typeof window === 'undefined' || !(window as any).jspdf || !(window as any).html2canvas) {
+            console.error('❌ PDF: jspdf veya html2canvas yüklenmemiş');
+            alert('Erreur: Les bibliothèques PDF ne sont pas chargées. Veuillez rafraîchir la page.');
+            return;
+        }
 
-        let heightLeft = imgHeight;
-        let position = 0;
+        setIsPdfGenerating(true);
+        try {
+            console.log('📄 PDF oluşturuluyor...');
+            
+            // html2canvas ile screenshot al
+            const canvas = await (window as any).html2canvas(content, { 
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#f1f5f9'
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            console.log('✅ Canvas oluşturuldu, PDF oluşturuluyor...');
+            
+            // jsPDF ile PDF oluştur
+            const { jsPDF } = (window as any).jspdf;
+            const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasWidth / pdfWidth;
+            const imgHeight = canvasHeight / ratio;
 
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
+            let heightLeft = imgHeight;
+            let position = 0;
 
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
+            // İlk sayfa
             pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
             heightLeft -= pdfHeight;
+
+            // Ek sayfalar gerekirse
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdfHeight;
+            }
+            
+            const fileName = `Bilan_${userName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            pdf.save(fileName);
+            console.log('✅ PDF indirildi:', fileName);
+        } catch (error) {
+            console.error('❌ PDF oluşturma hatası:', error);
+            alert(`Erreur lors de la génération du PDF: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+        } finally {
+            setIsPdfGenerating(false);
         }
-        pdf.save(`Bilan_${userName.replace(' ', '_')}.pdf`);
     };
 
     const handleExportJson = () => {
@@ -291,7 +324,13 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
                 <div className="max-w-4xl mx-auto mt-8 flex flex-wrap justify-center items-center gap-4">
                      {!isHistoryView && <button onClick={onRestart} className="bg-primary-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-primary-700">Refaire un bilan</button>}
                      <button onClick={onViewHistory} className="bg-slate-200 text-slate-700 font-bold py-3 px-8 rounded-lg hover:bg-slate-300">{isHistoryView ? "Retour à l'historique" : "Voir mon historique"}</button>
-                     <button onClick={handleDownloadPdf} className="bg-secondary text-white font-bold py-3 px-8 rounded-lg hover:bg-secondary-600">Télécharger en PDF</button>
+                     <button 
+                        onClick={handleDownloadPdf} 
+                        disabled={isPdfGenerating}
+                        className="bg-secondary text-white font-bold py-3 px-8 rounded-lg hover:bg-secondary-600 disabled:bg-slate-400 disabled:cursor-not-allowed"
+                     >
+                        {isPdfGenerating ? 'Génération du PDF...' : 'Télécharger en PDF'}
+                     </button>
                      <button onClick={() => setIsExportModalOpen(true)} className="text-sm text-slate-500 hover:text-primary-600">Exporter mes données</button>
                      <button onClick={() => setIsCoachModalOpen(true)} className="text-sm text-slate-500 hover:text-primary-600">Discuter avec un coach</button>
                 </div>

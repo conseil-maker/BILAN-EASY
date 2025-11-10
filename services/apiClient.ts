@@ -1,6 +1,25 @@
-import { useAuth } from '@clerk/clerk-react';
-
+// Clerk kaldırıldı - Basit session-based authentication kullanılıyor
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+// Session ID oluştur (localStorage'da sakla)
+const getSessionId = (): string => {
+  let sessionId = localStorage.getItem('bilan_session_id');
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('bilan_session_id', sessionId);
+  }
+  return sessionId;
+};
+
+// User ID oluştur (localStorage'da sakla)
+const getUserId = (): string => {
+  let userId = localStorage.getItem('bilan_user_id');
+  if (!userId) {
+    userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('bilan_user_id', userId);
+  }
+  return userId;
+};
 
 // Types
 export interface Assessment {
@@ -69,138 +88,183 @@ export interface CreateSummaryData {
 // API Client class
 class ApiClient {
   private async getHeaders(token: string | null): Promise<HeadersInit> {
+    // Clerk kaldırıldı - Session-based authentication kullanılıyor
+    const sessionId = getSessionId();
+    const userId = getUserId();
+    
     return {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      'X-Test-User-Id': userId,
+      'X-Session-Id': sessionId,
     };
   }
 
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    token: string | null
+    token: string | null,
+    retries: number = 3,
+    retryDelay: number = 1000
   ): Promise<T> {
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers: await this.getHeaders(token),
-    });
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        // Timeout ekle (10 saniye)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const response = await fetch(`${API_URL}${endpoint}`, {
+          ...options,
+          headers: await this.getHeaders(token),
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(error.error || `HTTP ${response.status}`);
+        if (!response.ok) {
+          // 4xx hataları retry etme (client error)
+          if (response.status >= 400 && response.status < 500) {
+            const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(error.error || `HTTP ${response.status}`);
+          }
+          
+          // 5xx hataları retry et (server error)
+          if (response.status >= 500) {
+            const error = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+            throw new Error(error.error || `HTTP ${response.status}`);
+          }
+        }
+
+        return response.json();
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        
+        // Son deneme değilse ve retry edilebilir bir hata ise
+        if (attempt < retries && this.isRetryableError(lastError)) {
+          // Exponential backoff
+          const delay = retryDelay * Math.pow(2, attempt);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        
+        // Son deneme veya retry edilemez hata
+        throw lastError;
+      }
     }
-
-    return response.json();
+    
+    throw lastError || new Error('Request failed after retries');
+  }
+  
+  private isRetryableError(error: Error): boolean {
+    // Network errors, timeout, 5xx errors retry edilebilir
+    const retryableMessages = ['NetworkError', 'Failed to fetch', 'timeout', 'aborted'];
+    const message = error.message.toLowerCase();
+    return retryableMessages.some(msg => message.includes(msg.toLowerCase())) || 
+           message.includes('500') || 
+           message.includes('502') || 
+           message.includes('503') ||
+           message.includes('504');
   }
 
   // Assessments
-  async createAssessment(data: CreateAssessmentData, token: string) {
+  async createAssessment(data: CreateAssessmentData, token: string | null = null) {
     return this.request<Assessment>('/assessments', {
       method: 'POST',
       body: JSON.stringify(data),
     }, token);
   }
 
-  async getAssessments(token: string, params?: { status?: string; limit?: number; offset?: number }) {
+  async getAssessments(token: string | null = null, params?: { status?: string; limit?: number; offset?: number }) {
     const query = params ? `?${new URLSearchParams(params as any).toString()}` : '';
     return this.request<{ data: Assessment[]; pagination: any }>(`/assessments${query}`, {}, token);
   }
 
-  async getAssessment(id: string, token: string) {
+  async getAssessment(id: string, token: string | null = null) {
     return this.request<Assessment>(`/assessments/${id}`, {}, token);
   }
 
-  async updateAssessment(id: string, data: UpdateAssessmentData, token: string) {
+  async updateAssessment(id: string, data: UpdateAssessmentData, token: string | null = null) {
     return this.request<Assessment>(`/assessments/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     }, token);
   }
 
-  async deleteAssessment(id: string, token: string) {
+  async deleteAssessment(id: string, token: string | null = null) {
     return this.request<{ deleted: boolean; id: string }>(`/assessments/${id}`, {
       method: 'DELETE',
     }, token);
   }
 
   // Answers
-  async addAnswer(assessmentId: string, data: CreateAnswerData, token: string) {
+  async addAnswer(assessmentId: string, data: CreateAnswerData, token: string | null = null) {
     return this.request(`/assessments/${assessmentId}/answers`, {
       method: 'POST',
       body: JSON.stringify(data),
     }, token);
   }
 
-  async getAnswers(assessmentId: string, token: string) {
+  async getAnswers(assessmentId: string, token: string | null = null) {
     return this.request<{ answers: any[]; total: number }>(`/assessments/${assessmentId}/answers`, {}, token);
   }
 
   // Summaries
-  async createSummary(assessmentId: string, data: CreateSummaryData, token: string) {
+  async createSummary(assessmentId: string, data: CreateSummaryData, token: string | null = null) {
     return this.request(`/assessments/${assessmentId}/summary`, {
       method: 'POST',
       body: JSON.stringify(data),
     }, token);
   }
 
-  async getSummary(assessmentId: string, token: string) {
+  async getSummary(assessmentId: string, token: string | null = null) {
     return this.request(`/assessments/${assessmentId}/summary`, {}, token);
   }
 }
 
 export const apiClient = new ApiClient();
 
-// React Hook pour utiliser l'API avec auth automatique
+// Clerk kaldırıldı - useApi hook'u basitleştirildi
+// Artık token gerekmiyor, session-based authentication kullanılıyor
 export const useApi = () => {
-  const { getToken } = useAuth();
-
   return {
     // Assessments
     createAssessment: async (data: CreateAssessmentData) => {
-      const token = await getToken();
-      return apiClient.createAssessment(data, token);
+      return apiClient.createAssessment(data, null);
     },
 
     getAssessments: async (params?: { status?: string; limit?: number; offset?: number }) => {
-      const token = await getToken();
-      return apiClient.getAssessments(token, params);
+      return apiClient.getAssessments(null, params);
     },
 
     getAssessment: async (id: string) => {
-      const token = await getToken();
-      return apiClient.getAssessment(id, token);
+      return apiClient.getAssessment(id, null);
     },
 
     updateAssessment: async (id: string, data: UpdateAssessmentData) => {
-      const token = await getToken();
-      return apiClient.updateAssessment(id, data, token);
+      return apiClient.updateAssessment(id, data, null);
     },
 
     deleteAssessment: async (id: string) => {
-      const token = await getToken();
-      return apiClient.deleteAssessment(id, token);
+      return apiClient.deleteAssessment(id, null);
     },
 
     // Answers
     addAnswer: async (assessmentId: string, data: CreateAnswerData) => {
-      const token = await getToken();
-      return apiClient.addAnswer(assessmentId, data, token);
+      return apiClient.addAnswer(assessmentId, data, null);
     },
 
     getAnswers: async (assessmentId: string) => {
-      const token = await getToken();
-      return apiClient.getAnswers(assessmentId, token);
+      return apiClient.getAnswers(assessmentId, null);
     },
 
     // Summaries
     createSummary: async (assessmentId: string, data: CreateSummaryData) => {
-      const token = await getToken();
-      return apiClient.createSummary(assessmentId, data, token);
+      return apiClient.createSummary(assessmentId, data, null);
     },
 
     getSummary: async (assessmentId: string) => {
-      const token = await getToken();
-      return apiClient.getSummary(assessmentId, token);
+      return apiClient.getSummary(assessmentId, null);
     },
   };
 };

@@ -1,8 +1,9 @@
 import { Context } from 'hono';
 import { ZodError } from 'zod';
+import type { Env } from '../types/env.js';
 
 // Global error handler
-export const errorHandler = (err: Error, c: Context) => {
+export const errorHandler = (err: Error, c: Context<Env>) => {
   console.error('Error:', err);
 
   // Zod validation errors
@@ -13,25 +14,25 @@ export const errorHandler = (err: Error, c: Context) => {
         path: e.path.join('.'),
         message: e.message,
       })),
-    }, 400);
+    }, 400 as any);
   }
 
   // PostgreSQL errors
   if (err.message.includes('duplicate key')) {
     return c.json({
       error: 'Resource already exists',
-    }, 409);
+    }, 409 as any);
   }
 
   if (err.message.includes('foreign key')) {
     return c.json({
       error: 'Referenced resource not found',
-    }, 404);
+    }, 404 as any);
   }
 
   // Default error
   return c.json({
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined,
-  }, 500);
+  }, 500 as any);
 };

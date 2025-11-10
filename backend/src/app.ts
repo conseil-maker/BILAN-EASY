@@ -5,8 +5,9 @@ import { errorHandler } from './middleware/error.js';
 import assessmentsRoutes from './routes/assessments.js';
 import answersRoutes from './routes/answers.js';
 import summariesRoutes from './routes/summaries.js';
+import type { Env } from './types/env.js';
 
-const app = new Hono();
+const app = new Hono<Env>();
 
 // Global middleware
 app.use('*', logger());
@@ -16,7 +17,7 @@ app.use('*', cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
   allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Test-User-Id', 'X-Session-Id'],
 }));
 
 // Health check endpoint
