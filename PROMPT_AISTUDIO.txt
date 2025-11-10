@@ -1,0 +1,224 @@
+════════════════════════════════════════════════════════════════
+    PROMPT POUR GOOGLE AI STUDIO - PROJET BILAN-EASY
+════════════════════════════════════════════════════════════════
+
+📋 INSTRUCTIONS:
+1. Allez sur: https://aistudio.google.com/
+2. Créez un nouveau prompt
+3. Copiez-collez TOUT le texte ci-dessous
+4. Ajoutez votre demande spécifique à la fin (section "MA DEMANDE")
+5. Lancez la génération
+
+════════════════════════════════════════════════════════════════
+
+Tu es un expert React/TypeScript et Gemini API. J'ai besoin d'aide avec le projet BILAN-EASY, une application de bilan de compétences.
+
+CONTEXTE DU PROJET:
+- Architecture: React 19.2 + TypeScript 5.8 + Vite 6.2
+- IA: Gemini 2.5 (flash pour questions, pro pour synthèse finale)
+- Repo GitHub: https://github.com/lekesiz/BILAN-EASY
+- Branche actuelle: claude/debug-google-aistudio-blocker-011CUzGKYm8HkLGrCEFeeGxo
+
+STRUCTURE DES FICHIERS CRITIQUES:
+
+1. services/geminiService.ts
+   - Contient toutes les fonctions d'appel API Gemini
+   - Utilise des schémas JSON stricts (questionSchema, summarySchema, etc.)
+   - 8 fonctions principales: generateQuestion, generateSummary, analyzeThemesAndSkills, etc.
+   - Modèles: gemini-2.5-flash (rapide) et gemini-2.5-pro (synthèse finale)
+
+2. components/Questionnaire.tsx (350 lignes)
+   - Interface chat principale avec l'IA
+   - Gère le flow: questions → réponses → synthèses → modules optionnels
+   - Sauvegarde auto toutes les 5 questions dans localStorage
+   - Support voix (speech-to-text et text-to-speech)
+   - Système de "Joker" pour reformuler une question
+
+3. components/SummaryDashboard.tsx (300 lignes)
+   - Affiche la synthèse finale du bilan
+   - Export PDF et JSON/CSV des données
+   - Visualisations: radar de compétences, nuage de mots
+   - Modales pour sources, ressources, coach
+
+4. App.tsx (127 lignes)
+   - Routing entre 7 écrans (welcome, package-selection, questionnaire, summary, etc.)
+   - Gestion de l'état global (userName, selectedPackage, answers, etc.)
+
+5. constants.ts
+   - Définit 3 PACKAGES (Découverte: 3Q, Approfondi: 6Q, Stratégique: 9Q)
+   - Définit QUESTION_CATEGORIES (3 phases avec objectifs et catégories)
+
+6. types.ts (114 lignes)
+   - Tous les types TypeScript du projet
+   - Types clés: Question, Answer, Summary, Package, UserProfile, DashboardData
+
+FONCTIONNALITÉS PRINCIPALES:
+
+1. GÉNÉRATION DE QUESTIONS DYNAMIQUES
+   - L'IA génère des questions contextuelles basées sur:
+     * La phase actuelle (1/2/3)
+     * La catégorie (Motivations, Compétences, etc.)
+     * Les réponses précédentes
+     * Le profil utilisateur (si CV uploadé)
+     * Le style de coaching choisi (collaboratif/analytique/créatif)
+
+2. SYNTHÈSES INTERMÉDIAIRES
+   - Toutes les 3 réponses, l'IA résume et demande confirmation
+   - Si non confirmé, continue sans ajustement (pas de re-génération)
+
+3. MODULES OPTIONNELS ADAPTATIFS
+   - L'IA analyse les réponses et suggère des modules si besoin détecté:
+     * "transition-management" (peur du changement)
+     * "self-confidence" (syndrome de l'imposteur)
+     * "work-life-balance" (burnout, stress)
+   - 3 questions supplémentaires par module
+
+4. DASHBOARD TEMPS RÉEL
+   - Mis à jour toutes les 5 questions
+   - Analyse thématique (nuage de mots avec poids)
+   - Évaluation de 5 compétences: Communication, Leadership, Analyse, Adaptabilité, Collaboration
+
+5. SAUVEGARDE ET REPRISE
+   - localStorage avec clé: autosave-{userName}-{packageId}
+   - Proposition de reprise au chargement
+   - Suppression après synthèse finale
+
+6. SYNTHÈSE FINALE (CRITIQUE)
+   - Utilise gemini-2.5-pro (plus puissant)
+   - Génère:
+     * Type de profil professionnel (ex: "Le Spécialiste en Transition")
+     * 3-5 thèmes prioritaires
+     * Niveau de maturité du projet
+     * Forces clés (avec citations justificatives des réponses)
+     * Axes de développement (avec citations)
+     * 3-4 recommandations
+     * Plan d'action court terme (1-3 mois) et moyen terme (3-6 mois)
+
+PROBLÈMES RÉSOLUS RÉCEMMENT:
+
+1. Erreur JSX dans SummaryDashboard.tsx:293
+   - AVANT: {isHistoryView ? 'Retour à l'historique' : 'Voir mon historique'}
+   - APRÈS: {isHistoryView ? "Retour à l'historique" : "Voir mon historique"}
+   - CAUSE: Apostrophe dans "l'historique" ferme prématurément la chaîne
+   - SOLUTION: Utiliser des guillemets doubles pour les chaînes avec apostrophes
+
+2. Code source non extrait
+   - Extrait depuis bilan-de-compétences-ia.zip
+   - 36 fichiers décompressés et committés
+
+3. Dépendances manquantes
+   - npm install réussi (133 packages)
+   - Aucune vulnérabilité
+
+CONFIGURATION REQUISE:
+
+1. Clé API Gemini (OBLIGATOIRE)
+   - Fichier: .env.local
+   - Variable: GEMINI_API_KEY=votre_clé_ici
+   - Obtenir sur: https://aistudio.google.com/app/apikey
+   - Vite expose via: process.env.API_KEY (voir vite.config.ts:14)
+
+2. Node.js v18+
+   - npm ou yarn
+
+WORKFLOW DE DÉVELOPPEMENT:
+
+1. Cloner le repo
+2. npm install
+3. Configurer .env.local avec clé API
+4. npm run dev (démarre sur http://localhost:3000)
+5. npm run build (génère dist/)
+
+BONNES PRATIQUES:
+
+1. TOUJOURS utiliser des schémas JSON pour les réponses Gemini
+2. TOUJOURS typer strictement (TypeScript strict mode activé)
+3. TOUJOURS utiliser des guillemets doubles pour les chaînes avec apostrophes en JSX
+4. ÉVITER de modifier les types dans types.ts sans mettre à jour tous les usages
+5. TESTER le build avant de commit (npm run build)
+
+SCHEMAS JSON GEMINI:
+Tous les schémas sont définis dans geminiService.ts (lignes 9-129):
+- questionSchema: Structure d'une question
+- synthesisSchema: Synthèse intermédiaire
+- summarySchema: Synthèse finale (complexe)
+- userProfileSchema: Analyse de CV
+- dashboardDataSchema: Données du dashboard
+- resourceLeadsSchema: Pistes de ressources
+- optionalModuleSchema: Suggestion de module
+
+EXEMPLE D'APPEL GEMINI:
+```typescript
+const response = await ai.models.generateContent({
+  model: 'gemini-2.5-flash',
+  contents: prompt,
+  config: {
+    systemInstruction: getSystemInstruction(coachingStyle),
+    responseMimeType: "application/json",
+    responseSchema: questionSchema,
+    tools: [{ googleSearch: {} }] // Optionnel
+  }
+});
+```
+
+POINTS D'ATTENTION:
+
+1. Gestion des erreurs
+   - Toutes les fonctions async ont des try/catch
+   - En cas d'erreur de génération de question, retry après 3s
+   - Logging avec console.error
+
+2. Performance
+   - gemini-2.5-flash pour rapidité (questions, synthèses)
+   - gemini-2.5-pro uniquement pour synthèse finale (plus lent mais meilleur)
+   - Dashboard recalculé toutes les 5Q (pas à chaque réponse)
+
+3. UX
+   - Messages de chargement ("...") pendant génération IA
+   - Notifications (badges débloqués, sauvegarde auto)
+   - Modales pour confirmations (synthèses, modules optionnels)
+   - Boutons désactivés pendant loading
+
+4. Accessibilité
+   - Support voix (Web Speech API)
+   - Paramètres vocaux (vitesse, pitch, volume, voix)
+   - Keyboard navigation (Enter pour envoyer)
+
+DÉPENDANCES CRITIQUES:
+- @google/genai@1.29.0: SDK officiel Gemini
+- react@19.2.0: Framework UI
+- react-dom@19.2.0: Rendu React
+- typescript@5.8.2: Typage statique
+- vite@6.2.0: Build tool
+- @vitejs/plugin-react@5.0.0: Plugin React pour Vite
+- @types/node@22.14.0: Types Node.js
+
+FICHIERS DE CONFIG:
+- vite.config.ts: Définit env variables et alias
+- tsconfig.json: Strict mode, ESNext target
+- package.json: Scripts et dépendances
+- .env.local: Clé API (PAS dans Git)
+- .gitignore: Ignore node_modules, dist, .env.local
+
+TESTING:
+- Pas de tests unitaires actuellement
+- Testing manuel via npm run dev
+- Vérifier build avec npm run build
+
+════════════════════════════════════════════════════════════════
+
+MA DEMANDE:
+[Décrivez ici votre besoin spécifique]
+
+Exemples de demandes:
+- "Comment ajouter une 4ème phase au questionnaire ?"
+- "Je veux changer le modèle Gemini utilisé pour les questions"
+- "L'export PDF ne fonctionne pas, comment débugger ?"
+- "Comment ajouter un nouveau type de question (ex: échelle de 1 à 10) ?"
+- "Je veux personnaliser les prompts envoyés à Gemini"
+- "Comment ajouter une nouvelle visualisation dans le dashboard ?"
+- "L'application ne démarre pas, que faire ?"
+
+════════════════════════════════════════════════════════════════
+    FIN DU PROMPT - N'oubliez pas de remplacer [MA DEMANDE]
+════════════════════════════════════════════════════════════════
