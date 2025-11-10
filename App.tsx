@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { UserButton } from '@clerk/clerk-react';
+import { AuthGuard } from './components/AuthGuard';
 import WelcomeScreen from './components/WelcomeScreen';
 import PackageSelector from './components/PackageSelector';
 import PhasePreliminaire from './components/PhasePreliminaire';
@@ -117,9 +119,16 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="App">
-            {renderContent()}
-        </div>
+        <AuthGuard>
+            <div className="App">
+                {/* Bouton utilisateur Clerk en haut à droite */}
+                <div className="fixed top-4 right-4 z-50">
+                    <UserButton afterSignOutUrl="/" />
+                </div>
+
+                {renderContent()}
+            </div>
+        </AuthGuard>
     );
 };
 
