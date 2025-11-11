@@ -77,7 +77,29 @@ export class ClaudeProvider implements AIProviderInterface {
     options: GenerateQuestionOptions = {}
   ): Promise<Question> {
     const systemInstruction = this.getSystemInstruction(coachingStyle);
-    const history = previousAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
+    
+    // Enhanced history: Include question titles to prevent duplicates
+    const history = previousAnswers.map(a => {
+      const questionTitle = (a as any).questionTitle || a.questionId;
+      return `Question: ${questionTitle}\nAnswer: ${a.value}`;
+    }).join('\n\n');
+    
+    // Extract previous question titles to prevent repetition
+    const previousQuestionTitles = previousAnswers
+      .map(a => (a as any).questionTitle || '')
+      .filter(title => title.length > 0);
+    
+    // Context-aware instruction based on answer length
+    const lastAnswer = previousAnswers[previousAnswers.length - 1];
+    let contextAwareInstruction = "";
+    if (lastAnswer) {
+      const answerLength = lastAnswer.value.length;
+      if (answerLength < 50) {
+        contextAwareInstruction = "IMPORTANT: The user's last answer was very short. Ask a more specific, deeper question to help them elaborate. Use open-ended questions that encourage detailed responses.";
+      } else if (answerLength > 300) {
+        contextAwareInstruction = "IMPORTANT: The user's last answer was very detailed. Acknowledge their thoroughness and ask a follow-up question that builds on their insights or explores a related but different aspect.";
+      }
+    }
 
     let taskDescription = "";
     if (options.isModuleQuestion) {
@@ -97,8 +119,33 @@ export class ClaudeProvider implements AIProviderInterface {
     if (options.useJoker) {
       specialInstruction = "CRITICAL INSTRUCTION: The user is stuck on the previous question. Your task is to reformulate it from a completely different angle or ask a much simpler, related question to help them unlock their thoughts. Acknowledge their request for help subtly.";
     }
+    
+    // Difficulty progression: Earlier questions are easier, later ones are deeper
+    const questionNumber = previousAnswers.length + 1;
+    const difficultyInstruction = questionNumber <= 5 
+      ? "This is an early question. Keep it simple and welcoming to help the user feel comfortable."
+      : questionNumber <= 15
+      ? "This is a mid-assessment question. You can go deeper and explore more specific aspects."
+      : "This is a later question. Ask deeper, more reflective questions that help synthesize insights.";
+    
+    const duplicatePrevention = previousQuestionTitles.length > 0
+      ? `CRITICAL: Do NOT repeat or ask similar questions to these previous questions: ${previousQuestionTitles.slice(-5).join(', ')}. Ensure your question is unique and explores a different angle.`
+      : "";
 
-    const prompt = `Context: User Name: ${userName}. ${profileContext} Previous Q&A: ${history || "None."} ${specialInstruction} Task: ${taskDescription} 
+    const prompt = `Context: User Name: ${userName}. ${profileContext} 
+
+Previous Q&A History:
+${history || "None."}
+
+${duplicatePrevention}
+
+${contextAwareInstruction}
+
+${difficultyInstruction}
+
+${specialInstruction}
+
+Task: ${taskDescription}
 
 Generate a question in French as a JSON object with this exact structure:
 {
@@ -123,16 +170,38 @@ Generate a question in French as a JSON object with this exact structure:
     coachingStyle: CoachingStyle
   ): Promise<{ synthesis: string; confirmationRequest: string }> {
     const systemInstruction = this.getSystemInstruction(coachingStyle);
-    const history = lastAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
-    const prompt = `Context: User Name: ${userName}. Task: Act as an attentive coach. Based on the user's last few answers, create a concise, one-sentence summary and formulate a polite question to confirm if your summary is correct. 
+    
+    // Enhanced history: Include question titles for better context
+    const history = lastAnswers.map(a => {
+      const questionTitle = (a as any).questionTitle || a.questionId;
+      return `Question: ${questionTitle}\nAnswer: ${a.value}`;
+    }).join('\n\n');
+    
+    // Include specific examples from answers in synthesis
+    const answerExamples = lastAnswers
+      .map(a => a.value.length > 20 ? a.value.substring(0, 100) + '...' : a.value)
+      .join(' | ');
+    
+    const prompt = `Context: User Name: ${userName}. 
+
+Task: Act as an attentive coach. Based on the user's last few answers, create a concise, personalized summary that includes specific examples from their responses. Then formulate a polite question to confirm if your summary is correct.
+
+IMPORTANT: 
+- Include at least one specific detail or example from the user's answers in your synthesis
+- Make the synthesis feel personal and relevant to what they actually said
+- Keep it concise (1-2 sentences maximum)
+- The confirmation question should be warm and inviting
+
+Last answers with context:
+${history}
+
+Key points to highlight: ${answerExamples}
 
 Respond as JSON:
 {
-  "synthesis": "One sentence summary in French",
+  "synthesis": "One sentence summary in French with specific examples",
   "confirmationRequest": "Polite confirmation question in French"
-}
-
-Last answers: ${history}`;
+}`;
 
     const response = await this.callClaude(prompt, systemInstruction);
     return this.parseJsonResponse<{ synthesis: string; confirmationRequest: string }>(response, 'generateSynthesis');
@@ -145,16 +214,36 @@ Last answers: ${history}`;
     coachingStyle: CoachingStyle
   ): Promise<Summary> {
     const systemInstruction = this.getSystemInstruction(coachingStyle);
-    const fullTranscript = answers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
+    
+    // Enhanced transcript: Include question titles for better context
+    const fullTranscript = answers.map(a => {
+      const questionTitle = (a as any).questionTitle || a.questionId;
+      return `Question: ${questionTitle}\nAnswer: ${a.value}`;
+    }).join('\n\n');
 
     const maxTranscriptLength = 10000;
     const truncatedTranscript = fullTranscript.length > maxTranscriptLength
       ? fullTranscript.substring(0, maxTranscriptLength) + '\n\n[... transcript tronqué ...]'
       : fullTranscript;
 
-    const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}, Transcript: ${truncatedTranscript}. 
+    const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}. 
 
-Task: Analyze the transcript and generate a comprehensive summary in French as JSON:
+Transcript of the complete assessment:
+${truncatedTranscript}
+
+Task: Analyze the transcript and generate a comprehensive, personalized summary in French as JSON.
+
+CRITICAL REQUIREMENTS:
+1. **Personalization**: Use the user's actual name (${userName}) and reference specific details from their answers
+2. **Key Strengths & Areas for Development**: Each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. Quotes should be verbatim from the transcript.
+3. **Action Plan**: Each item must have a unique 'id' and 'text'. Make the action items specific and actionable, based on what the user actually said.
+4. **Profile Type**: Create a descriptive, personalized title that reflects their unique professional profile
+5. **Priority Themes**: Identify 3-5 themes that truly emerged from their answers, not generic themes
+6. **Recommendations**: Provide 3-4 specific recommendations tailored to their situation, referencing their answers
+
+The summary should feel like it was written specifically for ${userName}, not a generic template.
+
+JSON structure:
 {
   "profileType": "Professional profile title in French",
   "priorityThemes": ["theme1", "theme2", ...],

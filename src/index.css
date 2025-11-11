@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom theme colors */
+:root {
+  --primary: #4f46e5;
+  --secondary: #10b981;
+}
+
+/* Custom fonts */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-display {
+  font-family: 'Lexend', sans-serif;
+}
+

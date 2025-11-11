@@ -189,7 +189,29 @@ export class GeminiProvider implements AIProviderInterface {
     options: GenerateQuestionOptions = {}
   ): Promise<Question> {
     const systemInstruction = this.getSystemInstruction(coachingStyle);
-    const history = previousAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
+    
+    // Enhanced history: Include question titles to prevent duplicates
+    const history = previousAnswers.map(a => {
+      const questionTitle = (a as any).questionTitle || a.questionId;
+      return `Question: ${questionTitle}\nAnswer: ${a.value}`;
+    }).join('\n\n');
+    
+    // Extract previous question titles to prevent repetition
+    const previousQuestionTitles = previousAnswers
+      .map(a => (a as any).questionTitle || '')
+      .filter(title => title.length > 0);
+    
+    // Context-aware instruction based on answer length
+    const lastAnswer = previousAnswers[previousAnswers.length - 1];
+    let contextAwareInstruction = "";
+    if (lastAnswer) {
+      const answerLength = lastAnswer.value.length;
+      if (answerLength < 50) {
+        contextAwareInstruction = "IMPORTANT: The user's last answer was very short. Ask a more specific, deeper question to help them elaborate. Use open-ended questions that encourage detailed responses.";
+      } else if (answerLength > 300) {
+        contextAwareInstruction = "IMPORTANT: The user's last answer was very detailed. Acknowledge their thoroughness and ask a follow-up question that builds on their insights or explores a related but different aspect.";
+      }
+    }
 
     let taskDescription = "";
     if (options.isModuleQuestion) {
@@ -212,7 +234,34 @@ export class GeminiProvider implements AIProviderInterface {
       specialInstruction = `CRITICAL INSTRUCTION: The user mentioned an interest in '${options.searchTopic}'. Use the provided Google Search results to ask an enriched follow-up question that connects their interest to the current reality of the job market.`;
     }
 
-    const prompt = `Context: User Name: ${userName}. ${profileContext} Previous Q&A: ${history || "None."} ${specialInstruction} Task: ${taskDescription} The response MUST be a valid JSON object. Do not repeat questions.`;
+    // Difficulty progression: Earlier questions are easier, later ones are deeper
+    const questionNumber = previousAnswers.length + 1;
+    const difficultyInstruction = questionNumber <= 5 
+      ? "This is an early question. Keep it simple and welcoming to help the user feel comfortable."
+      : questionNumber <= 15
+      ? "This is a mid-assessment question. You can go deeper and explore more specific aspects."
+      : "This is a later question. Ask deeper, more reflective questions that help synthesize insights.";
+    
+    const duplicatePrevention = previousQuestionTitles.length > 0
+      ? `CRITICAL: Do NOT repeat or ask similar questions to these previous questions: ${previousQuestionTitles.slice(-5).join(', ')}. Ensure your question is unique and explores a different angle.`
+      : "";
+    
+    const prompt = `Context: User Name: ${userName}. ${profileContext} 
+
+Previous Q&A History:
+${history || "None."}
+
+${duplicatePrevention}
+
+${contextAwareInstruction}
+
+${difficultyInstruction}
+
+${specialInstruction}
+
+Task: ${taskDescription}
+
+The response MUST be a valid JSON object. Ensure the question is unique, contextually relevant, and appropriate for the user's current stage in the assessment.`;
 
     const config: any = {
       systemInstruction,
@@ -328,14 +377,34 @@ export class GeminiProvider implements AIProviderInterface {
     coachingStyle: CoachingStyle
   ): Promise<Summary> {
     const systemInstruction = this.getSystemInstruction(coachingStyle);
-    const fullTranscript = answers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
+    
+    // Enhanced transcript: Include question titles for better context
+    const fullTranscript = answers.map(a => {
+      const questionTitle = (a as any).questionTitle || a.questionId;
+      return `Question: ${questionTitle}\nAnswer: ${a.value}`;
+    }).join('\n\n');
 
     const maxTranscriptLength = 10000;
     const truncatedTranscript = fullTranscript.length > maxTranscriptLength
       ? fullTranscript.substring(0, maxTranscriptLength) + '\n\n[... transcript tronqué pour optimiser la génération ...]'
       : fullTranscript;
 
-    const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}, Transcript: ${truncatedTranscript}. Task: Analyze the transcript and generate a comprehensive summary in French. The response MUST be a valid JSON object conforming to the schema. For 'keyStrengths' and 'areasForDevelopment', each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. For 'actionPlan', each item must have a unique 'id' and 'text'.`;
+    const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}. 
+
+Transcript of the complete assessment:
+${truncatedTranscript}
+
+Task: Analyze the transcript and generate a comprehensive, personalized summary in French. The response MUST be a valid JSON object conforming to the schema.
+
+CRITICAL REQUIREMENTS:
+1. **Personalization**: Use the user's actual name (${userName}) and reference specific details from their answers
+2. **Key Strengths & Areas for Development**: Each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. Quotes should be verbatim from the transcript.
+3. **Action Plan**: Each item must have a unique 'id' and 'text'. Make the action items specific and actionable, based on what the user actually said.
+4. **Profile Type**: Create a descriptive, personalized title that reflects their unique professional profile
+5. **Priority Themes**: Identify 3-5 themes that truly emerged from their answers, not generic themes
+6. **Recommendations**: Provide 3-4 specific recommendations tailored to their situation, referencing their answers
+
+The summary should feel like it was written specifically for ${userName}, not a generic template.`;
 
     // Use queue and rate limit client
     const response = await this.requestQueue.enqueue(async () => {

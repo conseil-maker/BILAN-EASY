@@ -11,9 +11,12 @@ import { useDebouncedCallback } from '../hooks/useDebounce';
 import { useThrottle } from '../hooks/useThrottle';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { MessageSkeleton } from './SkeletonLoader';
+import TypingIndicator from './TypingIndicator';
+import BreakSuggestionModal from './BreakSuggestionModal';
 import SpeechSettings from './SpeechSettings';
 import Dashboard from './Dashboard';
 import JourneyProgress from './JourneyProgress';
+import EnhancedProgress from './EnhancedProgress';
 
 const SendIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>;
 const MicIcon = ({ active }: { active: boolean }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${active ? 'text-red-500 animate-pulse' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-14 0m7 10v4M5 8v4a7 7 0 0014 0V8M12 15a3 3 0 003-3V5a3 3 0 00-6 0v7a3 3 0 003 3z" /></svg>;
@@ -103,6 +106,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [moduleQuestionCount, setModuleQuestionCount] = useState(0);
     const [isRequestPending, setIsRequestPending] = useState(false);
     const [rateLimitToastShown, setRateLimitToastShown] = useState(false);
+    const [shownMilestones, setShownMilestones] = useState<Set<number>>(new Set());
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -393,6 +397,33 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             debouncedUpdateDashboard(currentAnswers);
         }
 
+        // Milestone notifications
+        const milestones = [
+            { at: 10, message: "10 soru tamamlandı! 🎉" },
+            { at: Math.floor(pkg.totalQuestionnaires / 2), message: "Yarı yoldasınız! 💪" },
+            { at: pkg.totalQuestionnaires - 5, message: "Son 5 soru! 🏁" },
+        ];
+        
+        const currentMilestone = milestones.find(m => currentAnswers.length === m.at);
+        if (currentMilestone && !shownMilestones.has(currentMilestone.at)) {
+            setShownMilestones(prev => new Set([...prev, currentMilestone.at]));
+            showToast(currentMilestone.message, 'success', 4000);
+        }
+        
+        // Break suggestion (her 25 soruda bir, minimum 5 dakika arayla)
+        const BREAK_SUGGESTION_INTERVAL = 25;
+        const MIN_BREAK_INTERVAL_MS = 5 * 60 * 1000; // 5 dakika
+        
+        if (
+            currentAnswers.length > 0 &&
+            currentAnswers.length % BREAK_SUGGESTION_INTERVAL === 0 &&
+            currentAnswers.length !== lastBreakSuggestionAt &&
+            Date.now() - lastBreakSuggestionAt > MIN_BREAK_INTERVAL_MS
+        ) {
+            setLastBreakSuggestionAt(currentAnswers.length);
+            setShowBreakSuggestion(true);
+        }
+
         // Phase geçişi kontrolü
         if (currentAnswers.length > 0) {
             const info = getPhaseInfo(currentAnswers.length);
@@ -438,7 +469,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         // ÖNEMLİ: fetchNextQuestion'a currentAnswers parametresini geçir
         // Bu, state güncellemesi gecikmelerini önler
         await fetchNextQuestion({ currentAnswers });
-    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, assessmentId, api, isAwaitingSynthesisConfirmation, satisfactionSubmittedForPhase]);
+    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, assessmentId, api, isAwaitingSynthesisConfirmation, satisfactionSubmittedForPhase, shownMilestones, showToast]);
 
     useEffect(() => {
         const loadSession = async () => {
@@ -694,13 +725,37 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 </div>
             )}
             
+            {/* Break Suggestion Modal */}
+            <BreakSuggestionModal
+                isOpen={showBreakSuggestion}
+                onContinue={() => {
+                    setShowBreakSuggestion(false);
+                    showToast('Continuez à votre rythme ! 💪', 'info', 3000);
+                }}
+                onTakeBreak={() => {
+                    setShowBreakSuggestion(false);
+                    // Session zaten otomatik kaydediliyor, sadece bilgi ver
+                    showToast('Votre progression est sauvegardée. Revenez quand vous serez prêt ! 💾', 'success', 5000);
+                    // Kullanıcı isterse welcome screen'e dönebilir veya sayfayı kapatabilir
+                }}
+                questionsCompleted={answers.length}
+                totalQuestions={pkg.totalQuestionnaires}
+            />
+            
             <div className="h-screen w-screen flex flex-col bg-slate-100 dark:bg-slate-900 transition-colors">
                 <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center shadow-sm">
                     <div>
                         <h1 className="font-bold text-lg text-primary-800 dark:text-primary-200 font-display">{pkg.name}</h1>
                         <p className="text-sm text-slate-600 dark:text-slate-400">{currentPhaseInfo?.name}</p>
                     </div>
-                    {currentPhaseInfo && <JourneyProgress current={answers.length} total={pkg.totalQuestionnaires} phases={[pkg.phases.phase1.questionnaires, pkg.phases.phase2.questionnaires, pkg.phases.phase3.questionnaires]} />}
+                    {currentPhaseInfo && (
+                        <EnhancedProgress 
+                            current={answers.length} 
+                            total={pkg.totalQuestionnaires} 
+                            pkg={pkg}
+                            currentPhaseInfo={currentPhaseInfo}
+                        />
+                    )}
                     <div className="flex items-center gap-4">
                         {speechSynthSupported && <button onClick={() => isSpeaking ? cancel() : speak(messages[messages.length - 1]?.text as string)} className="text-slate-500 hover:text-primary-600"><SpeakerIcon active={isSpeaking} /></button>}
                         <button onClick={() => setShowSettings(!showSettings)} className="text-slate-500 hover:text-primary-600"><SettingsIcon /></button>
@@ -735,19 +790,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     </div>
                                 </div>
                             ))}
-                            {isLoading && <MessageSkeleton />}
+                            {isLoading && <TypingIndicator message="Génération de la prochaine question..." />}
                             {isSummarizing && (
-                                <div className="flex justify-start">
-                                    <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center flex-shrink-0">IA</div>
-                                    <div className="ml-3 p-4 bg-slate-200 rounded-2xl rounded-bl-none">
-                                        <p className="text-slate-600">Génération de votre synthèse finale...</p>
-                                        <div className="mt-2 flex gap-1">
-                                            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                            <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <TypingIndicator message="Génération de votre synthèse finale..." />
                             )}
                             <div ref={chatEndRef} />
                         </div>
