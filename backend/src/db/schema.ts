@@ -45,8 +45,10 @@ export const answers = pgTable('answers', {
   // Question
   questionId: varchar('question_id', { length: 255 }).notNull(),
   questionTitle: text('question_title').notNull(),
+  questionDescription: text('question_description'), // Soru açıklaması/detayı
   questionType: varchar('question_type', { length: 50 }).notNull(),
   questionTheme: varchar('question_theme', { length: 255 }),
+  questionChoices: jsonb('question_choices'), // Multiple choice seçenekleri (string[])
 
   // Réponse
   value: text('value').notNull(),

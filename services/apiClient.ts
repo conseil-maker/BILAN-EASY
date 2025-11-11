@@ -1,4 +1,6 @@
 // Clerk kaldırıldı - Basit session-based authentication kullanılıyor
+import { useMemo } from 'react';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Session ID oluştur (localStorage'da sakla)
@@ -67,8 +69,10 @@ export interface UpdateAssessmentData {
 export interface CreateAnswerData {
   questionId: string;
   questionTitle: string;
+  questionDescription?: string;
   questionType: 'PARAGRAPH' | 'MULTIPLE_CHOICE';
   questionTheme?: string;
+  questionChoices?: string[];
   value: string;
 }
 
@@ -226,8 +230,9 @@ export const apiClient = new ApiClient();
 
 // Clerk kaldırıldı - useApi hook'u basitleştirildi
 // Artık token gerekmiyor, session-based authentication kullanılıyor
+// useApi hook'u - stable reference için useMemo kullanıyoruz
 export const useApi = () => {
-  return {
+  return useMemo(() => ({
     // Assessments
     createAssessment: async (data: CreateAssessmentData) => {
       return apiClient.createAssessment(data, null);
@@ -266,5 +271,5 @@ export const useApi = () => {
     getSummary: async (assessmentId: string) => {
       return apiClient.getSummary(assessmentId, null);
     },
-  };
+  }), []); // Empty deps - apiClient singleton, methods stable
 };

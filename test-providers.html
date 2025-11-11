@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Providers Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-result {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        .warning { border-left: 4px solid #f59e0b; }
+        pre {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>🧪 AI Providers Test</h1>
+    <button onclick="runTest()">Run Test</button>
+    <div id="results"></div>
+
+    <script type="module">
+        async function runTest() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>⏳ Testing providers...</p>';
+
+            try {
+                // Import the AI service
+                const { getAIService } = await import('./services/aiService.js');
+                
+                const service = getAIService();
+                
+                let html = `
+                    <div class="test-result success">
+                        <h3>✅ AI Service Initialized</h3>
+                        <p><strong>Available Providers:</strong> ${service.getAvailableProviders().join(', ')}</p>
+                        <p><strong>Current Provider:</strong> ${service.getCurrentProvider()}</p>
+                    </div>
+                `;
+
+                // Test each provider
+                const providers = service.getAvailableProviders();
+                for (const provider of providers) {
+                    try {
+                        html += `
+                            <div class="test-result success">
+                                <h3>✅ ${provider.toUpperCase()} Provider</h3>
+                                <p>Provider is configured and ready to use.</p>
+                            </div>
+                        `;
+                    } catch (error) {
+                        html += `
+                            <div class="test-result error">
+                                <h3>❌ ${provider.toUpperCase()} Provider Error</h3>
+                                <p>${error.message}</p>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Check environment variables
+                const envCheck = {
+                    gemini: !!(import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY),
+                    openai: !!import.meta.env.VITE_OPENAI_API_KEY,
+                    claude: !!import.meta.env.VITE_CLAUDE_API_KEY,
+                };
+
+                html += `
+                    <div class="test-result ${Object.values(envCheck).some(v => v) ? 'success' : 'warning'}">
+                        <h3>📋 Environment Variables</h3>
+                        <pre>VITE_GEMINI_API_KEY: ${envCheck.gemini ? '✅ Set' : '❌ Not set'}
+VITE_OPENAI_API_KEY: ${envCheck.openai ? '✅ Set' : '❌ Not set'}
+VITE_CLAUDE_API_KEY: ${envCheck.claude ? '✅ Set' : '❌ Not set'}</pre>
+                    </div>
+                `;
+
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="test-result error">
+                        <h3>❌ Test Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <pre>${error.stack}</pre>
+                        <p><strong>💡 Make sure:</strong></p>
+                        <ul>
+                            <li>At least one API key is set in .env.local</li>
+                            <li>You've restarted the dev server after adding keys</li>
+                            <li>Keys are prefixed with VITE_ for Vite to expose them</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        // Make runTest available globally
+        window.runTest = runTest;
+        
+        // Auto-run on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runTest);
+        } else {
+            runTest();
+        }
+    </script>
+</body>
+</html>
+

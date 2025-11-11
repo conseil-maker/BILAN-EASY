@@ -22,12 +22,17 @@ services:
       dockerfile: Dockerfile
     container_name: bilan-backend
     environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bilan_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bilan_password}
+      POSTGRES_DB: ${POSTGRES_DB:-bilan_easy}
       DATABASE_URL: postgresql://${POSTGRES_USER:-bilan_user}:${POSTGRES_PASSWORD:-bilan_password}@postgres:5432/${POSTGRES_DB:-bilan_easy}
       PORT: 3001
       NODE_ENV: production
       FRONTEND_URL: http://localhost:3000
       TEST_MODE: ${TEST_MODE:-false}
       CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:-}
+      GEMINI_MAX_CONCURRENCY: ${GEMINI_MAX_CONCURRENCY:-2}
+      GEMINI_FALLBACK_MODEL: ${GEMINI_FALLBACK_MODEL:-}
     ports:
       - "3001:3001"
     depends_on:
@@ -40,8 +45,17 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY:-${GEMINI_API_KEY:-}}
+        # Load from .env or .env.local file (docker-compose automatically loads .env files)
+        # Priority: .env > .env.local > default
+        VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY:-}
         GEMINI_API_KEY: ${GEMINI_API_KEY:-${VITE_GEMINI_API_KEY:-}}
+        VITE_OPENAI_API_KEY: ${VITE_OPENAI_API_KEY:-}
+        VITE_CLAUDE_API_KEY: ${VITE_CLAUDE_API_KEY:-}
+        VITE_GEMINI_MAX_CONCURRENCY: ${VITE_GEMINI_MAX_CONCURRENCY:-2}
+        VITE_GEMINI_FALLBACK_MODEL: ${VITE_GEMINI_FALLBACK_MODEL:-}
+    env_file:
+      - .env.local
+      - .env
     container_name: bilan-frontend
     environment:
       VITE_API_URL: http://localhost:3001/api

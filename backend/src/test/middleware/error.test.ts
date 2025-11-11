@@ -10,6 +10,9 @@ describe('Error Middleware', () => {
   beforeEach(() => {
     mockContext = {
       json: vi.fn().mockReturnValue({}),
+      req: {
+        json: vi.fn().mockResolvedValue({}),
+      },
     } as any;
   });
 

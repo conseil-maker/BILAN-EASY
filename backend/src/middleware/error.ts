@@ -1,10 +1,26 @@
 import { Context } from 'hono';
 import { ZodError } from 'zod';
+// Sentry is disabled for now - enable it later by adding SENTRY_DSN to .env
+// import * as Sentry from '@sentry/node';
 import type { Env } from '../types/env.js';
 
 // Global error handler
 export const errorHandler = (err: Error, c: Context<Env>) => {
   console.error('Error:', err);
+  
+  // Sentry is disabled for now - enable it later by adding SENTRY_DSN to .env
+  // if (process.env.SENTRY_DSN) {
+  //   Sentry.captureException(err, {
+  //     tags: {
+  //       path: c.req.path,
+  //       method: c.req.method,
+  //     },
+  //     extra: {
+  //       userId: c.get('userId'),
+  //       headers: Object.fromEntries(c.req.raw.headers.entries()),
+  //     },
+  //   });
+  // }
 
   // Zod validation errors
   if (err instanceof ZodError) {

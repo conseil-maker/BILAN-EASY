@@ -232,21 +232,33 @@ Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour plus de détails.
 
 ## ⚙️ Configuration
 
-### Clé API Gemini (OBLIGATOIRE)
+### Clés API AI (Au moins une OBLIGATOIRE)
 
 **Fichier**: `.env.local` (frontend)
 
+Le système supporte maintenant **multi-provider AI** avec fallback automatique entre Gemini, OpenAI et Claude. Si un provider échoue, le système bascule automatiquement vers un autre.
+
 ```bash
-# Remplacer par votre vraie clé
-GEMINI_API_KEY=votre_clé_api_gemini_ici
-# ou
+# Gemini (Recommandé - Le plus rapide et économique)
 VITE_GEMINI_API_KEY=votre_clé_api_gemini_ici
+# ou
+GEMINI_API_KEY=votre_clé_api_gemini_ici
+
+# OpenAI (Optionnel - Fallback)
+VITE_OPENAI_API_KEY=votre_clé_api_openai_ici
+VITE_OPENAI_MODEL=gpt-4o  # ou gpt-4o-mini, gpt-4-turbo
+
+# Claude (Optionnel - Fallback)
+VITE_CLAUDE_API_KEY=votre_clé_api_claude_ici
+VITE_CLAUDE_MODEL=claude-3-5-sonnet-20241022  # ou claude-3-opus-20240229
 ```
 
-**Comment obtenir la clé**:
-1. Aller sur [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Créer ou copier votre clé API
-3. Remplacer dans `.env.local`
+**Comment obtenir les clés**:
+- **Gemini**: [Google AI Studio](https://aistudio.google.com/app/apikey)
+- **OpenAI**: [OpenAI Platform](https://platform.openai.com/api-keys)
+- **Claude**: [Anthropic Console](https://console.anthropic.com/)
+
+**Configuration minimale**: Au moins une clé API est requise. Pour une meilleure fiabilité, configurez plusieurs providers.
 
 **Pour Docker**: Voir [GEMINI_API_KEY_SETUP.md](GEMINI_API_KEY_SETUP.md)
 
@@ -256,7 +268,11 @@ VITE_GEMINI_API_KEY=votre_clé_api_gemini_ici
 
 | Variable | Description | Requis |
 |----------|-------------|--------|
-| `GEMINI_API_KEY` ou `VITE_GEMINI_API_KEY` | Clé API Gemini 2.5 | ✅ Oui |
+| `GEMINI_API_KEY` ou `VITE_GEMINI_API_KEY` | Clé API Gemini 2.5 | ✅ Au moins un |
+| `VITE_OPENAI_API_KEY` | Clé API OpenAI (fallback) | ⚠️ Optionnel |
+| `VITE_CLAUDE_API_KEY` | Clé API Claude (fallback) | ⚠️ Optionnel |
+| `VITE_OPENAI_MODEL` | Modèle OpenAI (défaut: `gpt-4o`) | ⚠️ Optionnel |
+| `VITE_CLAUDE_MODEL` | Modèle Claude (défaut: `claude-3-5-sonnet-20241022`) | ⚠️ Optionnel |
 | `VITE_API_URL` | URL du backend (défaut: `http://localhost:3001/api`) | ⚠️ Optionnel |
 
 #### Backend (`backend/.env`)
@@ -352,17 +368,22 @@ PACKAGES = [
 ]
 ```
 
-## 🤖 API Gemini
+## 🤖 Multi-Provider AI System
 
-### Modèles utilisés (`geminiService.ts`)
+Le système supporte maintenant **trois providers AI** avec fallback automatique :
+- **Gemini** (Google) - Recommandé, rapide et économique
+- **OpenAI** - Puissant et fiable
+- **Claude** (Anthropic) - Haute qualité de sortie
 
-| Fonction | Modèle | Usage |
-|----------|--------|-------|
-| `generateQuestion` | `gemini-2.5-flash` | Génération de questions |
-| `generateSynthesis` | `gemini-2.5-flash` | Synthèses intermédiaires |
-| `analyzeThemesAndSkills` | `gemini-2.5-flash` | Dashboard temps réel |
-| `generateSummary` | `gemini-2.5-pro` | Synthèse finale ⭐ |
-| `findResourceLeads` | `gemini-2.5-flash` | Recherche de ressources |
+Si un provider échoue, le système bascule automatiquement vers un autre. Voir [ENV_VARIABLES.md](ENV_VARIABLES.md) pour la configuration.
+
+### Modèles utilisés
+
+| Provider | Modèles | Usage |
+|----------|---------|-------|
+| **Gemini** | `gemini-2.5-flash`, `gemini-2.5-pro` | Questions, synthèses, dashboard, résumé final |
+| **OpenAI** | `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo` | Toutes les fonctions (fallback) |
+| **Claude** | `claude-3-5-sonnet-20241022`, `claude-3-opus-20240229` | Toutes les fonctions (fallback) |
 
 ### Schemas JSON structurés
 

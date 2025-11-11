@@ -35,8 +35,10 @@ app.post('/:assessmentId/answers', requireAuth, async (c) => {
       assessmentId,
       questionId: validated.questionId,
       questionTitle: validated.questionTitle,
+      questionDescription: validated.questionDescription,
       questionType: validated.questionType,
       questionTheme: validated.questionTheme,
+      questionChoices: validated.questionChoices,
       value: validated.value,
     }).returning();
 

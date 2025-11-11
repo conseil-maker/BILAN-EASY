@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Package, Answer, Question, QuestionType, Message, CurrentPhaseInfo, Summary, UserProfile, DashboardData, CoachingStyle } from '../types';
-import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule } from '../services/geminiService';
+import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule } from '../services/aiService';
 import { QUESTION_CATEGORIES } from '../constants';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
@@ -8,6 +8,8 @@ import { useApi } from '../services/apiClient';
 import { useToast } from './Toast';
 import { useOfflineDetection } from '../hooks/useOfflineDetection';
 import { useDebouncedCallback } from '../hooks/useDebounce';
+import { useThrottle } from '../hooks/useThrottle';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { MessageSkeleton } from './SkeletonLoader';
 import SpeechSettings from './SpeechSettings';
 import Dashboard from './Dashboard';
@@ -99,6 +101,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [suggestedModule, setSuggestedModule] = useState<{ id: string, reason: string } | null>(null);
     const [activeModule, setActiveModule] = useState<string | null>(null);
     const [moduleQuestionCount, setModuleQuestionCount] = useState(0);
+    const [isRequestPending, setIsRequestPending] = useState(false);
+    const [rateLimitToastShown, setRateLimitToastShown] = useState(false);
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -110,13 +114,31 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     useEffect(scrollToBottom, [messages]);
 
     const getPhaseInfo = useCallback((questionCount: number): CurrentPhaseInfo => {
-        const { phase1, phase2 } = pkg.phases;
-        const qInPhase1 = phase1.questionnaires;
-        const qInPhase2 = phase2.questionnaires;
+        // Her phase'de kaç soru sorulacağını hesapla
+        // questionnaires = kategori döngüsü sayısı
+        // Her phase'de 4 kategori var
+        // Her kategori için soru sayısı: package'a göre değişir
+        const getQuestionsPerCategory = (pkgId: string, phaseNum: number): number => {
+            if (pkgId === 'decouverte') {
+                return phaseNum === 1 ? 2.5 : phaseNum === 2 ? 3.5 : 2.5; // Ortalama 2-3 soru/kategori
+            } else if (pkgId === 'approfondi') {
+                return phaseNum === 1 ? 3 : phaseNum === 2 ? 4 : 4; // Ortalama 3-4 soru/kategori
+            } else { // strategique
+                return phaseNum === 1 ? 3 : phaseNum === 2 ? 4 : 5; // Ortalama 3-5 soru/kategori
+            }
+        };
+        
+        const { phase1, phase2, phase3 } = pkg.phases;
+        const categoriesPerPhase = 4; // Her phase'de 4 kategori var
+        
+        // Her phase için toplam soru sayısı = questionnaires × categoriesPerPhase × questionsPerCategory
+        const qInPhase1 = Math.round(phase1.questionnaires * categoriesPerPhase * getQuestionsPerCategory(pkg.id, 1));
+        const qInPhase2 = Math.round(phase2.questionnaires * categoriesPerPhase * getQuestionsPerCategory(pkg.id, 2));
+        const qInPhase3 = Math.round(phase3.questionnaires * categoriesPerPhase * getQuestionsPerCategory(pkg.id, 3));
 
         if (questionCount < qInPhase1) return { phase: 1, name: QUESTION_CATEGORIES.phase1.name, positionInPhase: questionCount + 1, totalInPhase: qInPhase1, satisfactionActive: QUESTION_CATEGORIES.phase1.satisfactionActive };
         if (questionCount < qInPhase1 + qInPhase2) return { phase: 2, name: QUESTION_CATEGORIES.phase2.name, positionInPhase: questionCount - qInPhase1 + 1, totalInPhase: qInPhase2, satisfactionActive: QUESTION_CATEGORIES.phase2.satisfactionActive };
-        return { phase: 3, name: QUESTION_CATEGORIES.phase3.name, positionInPhase: questionCount - qInPhase1 - qInPhase2 + 1, totalInPhase: pkg.phases.phase3.questionnaires, satisfactionActive: QUESTION_CATEGORIES.phase3.satisfactionActive };
+        return { phase: 3, name: QUESTION_CATEGORIES.phase3.name, positionInPhase: questionCount - qInPhase1 - qInPhase2 + 1, totalInPhase: qInPhase3, satisfactionActive: QUESTION_CATEGORIES.phase3.satisfactionActive };
     }, [pkg]);
     
     const updateDashboard = useCallback(async (currentAnswers: Answer[]) => {
@@ -138,6 +160,13 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         // Bu, state güncellemesi gecikmelerini önler
         const answersToUse = options.currentAnswers || answers;
         console.log('🔍 fetchNextQuestion çağrıldı, answersToUse.length:', answersToUse.length, ', answers.length:', answers.length);
+        
+        if (isRequestPending) {
+            console.log('⏸️ Request already pending, skipping...');
+            return;
+        }
+        
+        setIsRequestPending(true);
         setIsLoading(true);
         setCurrentQuestion(null);
         try {
@@ -166,18 +195,68 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             const aiMessage: Message = { sender: 'ai', text: `${question.title}${question.description ? `\n\n${question.description}` : ''}`, question };
             setMessages(prev => [...prev, aiMessage]);
             if (speechSynthSupported && settings.voice) speak(aiMessage.text as string);
-        } catch (error) {
+        } catch (error: any) {
             console.error("❌ Error generating question:", error);
+            console.error("❌ Error details:", {
+                message: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack : undefined,
+                options,
+                answersLength: answersToUse.length,
+            });
+            
             const errorMessage = error instanceof Error ? error.message : "Une erreur inconnue s'est produite";
-            const userFriendlyMessage = errorMessage.includes('GEMINI_API_KEY') 
-                ? "⚠️ Erreur de configuration: Clé API Gemini manquante. Vérifiez votre fichier .env.local"
-                : "Désolé, une erreur est survenue. Laissez-moi un instant...";
-            setMessages(prev => [...prev, { sender: 'ai', text: userFriendlyMessage }]);
-            setTimeout(() => fetchNextQuestion(options), 3000);
+            const isRateLimit = error?.code === 429 ||
+                              error?.error?.code === 429 ||
+                              errorMessage.includes('429') || 
+                              errorMessage.includes('RESOURCE_EXHAUSTED') || 
+                              errorMessage.includes('quota');
+            
+            // Show single toast for rate limit
+            if (isRateLimit && !rateLimitToastShown) {
+                setRateLimitToastShown(true);
+                const retryAfter = error?.retryAfter;
+                const nextRetryAt = error?.nextRetryAt;
+                let toastMessage = "Model rate limit reached. We'll retry automatically.";
+                
+                if (nextRetryAt) {
+                    const retryTime = new Date(nextRetryAt).toLocaleTimeString();
+                    toastMessage += ` Next retry: ${retryTime}`;
+                } else if (retryAfter) {
+                    const retrySeconds = Math.round(retryAfter / 1000);
+                    toastMessage += ` Retrying in ${retrySeconds}s...`;
+                }
+                
+                showToast(toastMessage, 'warning', 8000);
+                
+                // Reset toast flag after delay
+                setTimeout(() => setRateLimitToastShown(false), 10000);
+            } else if (!isRateLimit) {
+                const userFriendlyMessage = errorMessage.includes('GEMINI_API_KEY') || errorMessage.includes('API_KEY')
+                    ? "⚠️ Erreur de configuration: Clé API manquante. Vérifiez votre fichier .env.local"
+                    : errorMessage.includes('503') || errorMessage.includes('UNAVAILABLE')
+                    ? "⚠️ Service temporairement indisponible. Réessayons dans quelques instants..."
+                    : "Désolé, une erreur est survenue. Laissez-moi un instant...";
+                setMessages(prev => [...prev, { sender: 'ai', text: userFriendlyMessage }]);
+                showToast(`Erreur: ${errorMessage.substring(0, 100)}`, 'error', 5000);
+            }
+            
+            // If all retries failed, show CTA
+            if (isRateLimit && error?.retried === false) {
+                const retryAfter = error?.retryAfter;
+                if (retryAfter) {
+                    const retrySeconds = Math.round(retryAfter / 1000);
+                    showToast(`Try again in ${retrySeconds} seconds`, 'info', 10000);
+                } else {
+                    showToast("Try again in a moment", 'info', 5000);
+                }
+            } else {
+                setTimeout(() => fetchNextQuestion(options), 3000);
+            }
         } finally {
             setIsLoading(false);
+            setIsRequestPending(false);
         }
-    }, [answers, userName, coachingStyle, getPhaseInfo, speak, speechSynthSupported, userProfile, activeModule, moduleQuestionCount, settings.voice]);
+    }, [answers, userName, coachingStyle, getPhaseInfo, speak, speechSynthSupported, userProfile, activeModule, moduleQuestionCount, settings.voice, isRequestPending, rateLimitToastShown, showToast]);
 
     const handleGenerateSynthesis = useCallback(async (currentAnswers: Answer[]) => {
         setIsLoading(true);
@@ -411,14 +490,71 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     useEffect(() => {
         if (synthesisConfirmed !== null) {
             console.log('✅ Synthesis confirmation alındı:', synthesisConfirmed);
+            console.log('📊 Mevcut answers:', answers.length, 'cevap');
             // Synthesis confirmation sonrası, synthesis kontrolünü atlayarak devam et
-            runNextStep(answers, true); // skipSynthesis = true
+            try {
+                runNextStep(answers, true); // skipSynthesis = true
+            } catch (error) {
+                console.error('❌ runNextStep hatası (synthesis confirmation sonrası):', error);
+                showToast('Erreur lors de la transition. Réessayons...', 'error', 3000);
+                // Retry after 2 seconds
+                setTimeout(() => {
+                    runNextStep(answers, true);
+                }, 2000);
+            }
             setSynthesisConfirmed(null);
         }
-    }, [synthesisConfirmed, answers, runNextStep]);
+    }, [synthesisConfirmed, answers, runNextStep, showToast]);
+
+    // Keyboard shortcuts
+    useKeyboardShortcuts([
+        {
+            key: 'k',
+            ctrl: true,
+            action: () => {
+                if (currentQuestion && !isLoading && !isAwaitingSynthesisConfirmation && !isRequestPending) {
+                    handleJoker();
+                }
+            },
+            description: 'Utiliser le joker (reformuler la question)'
+        },
+        {
+            key: 's',
+            ctrl: true,
+            action: () => {
+                if (answers.length > 0) {
+                    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(answers));
+                    showToast('Sauvegardé avec succès', 'success', 2000);
+                }
+            },
+            description: 'Sauvegarder la session'
+        },
+        {
+            key: 'Escape',
+            action: () => {
+                if (showSettings) {
+                    setShowSettings(false);
+                }
+                if (showSatisfactionModal) {
+                    setShowSatisfactionModal(false);
+                }
+            },
+            description: 'Fermer les modales'
+        }
+    ], !isLoading);
+
+    // Throttle answer submission
+    const throttledAnswerSubmit = useThrottle(async (value: string) => {
+        await handleAnswerSubmitInternal(value);
+    }, 1500);
 
     const handleAnswerSubmit = async (value: string) => {
-        if (isLoading || !currentQuestion || isAwaitingSynthesisConfirmation) return;
+        if (isLoading || !currentQuestion || isAwaitingSynthesisConfirmation || isRequestPending) return;
+        throttledAnswerSubmit(value);
+    };
+
+    const handleAnswerSubmitInternal = async (value: string) => {
+        if (isLoading || !currentQuestion || isAwaitingSynthesisConfirmation || isRequestPending) return;
         cancel();
         const newAnswer: Answer = { questionId: currentQuestion.id, value };
         
@@ -442,8 +578,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 await api.addAnswer(assessmentId, {
                     questionId: previousQuestion.id,
                     questionTitle: previousQuestion.title,
+                    questionDescription: previousQuestion.description,
                     questionType: previousQuestion.type === QuestionType.MULTIPLE_CHOICE ? 'MULTIPLE_CHOICE' : 'PARAGRAPH',
                     questionTheme: previousQuestion.theme,
+                    questionChoices: previousQuestion.choices,
                     value: value,
                 });
                 
@@ -556,11 +694,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 </div>
             )}
             
-            <div className="h-screen w-screen flex flex-col bg-slate-100">
-                <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 p-4 flex justify-between items-center shadow-sm">
+            <div className="h-screen w-screen flex flex-col bg-slate-100 dark:bg-slate-900 transition-colors">
+                <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center shadow-sm">
                     <div>
-                        <h1 className="font-bold text-lg text-primary-800 font-display">{pkg.name}</h1>
-                        <p className="text-sm text-slate-600">{currentPhaseInfo?.name}</p>
+                        <h1 className="font-bold text-lg text-primary-800 dark:text-primary-200 font-display">{pkg.name}</h1>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{currentPhaseInfo?.name}</p>
                     </div>
                     {currentPhaseInfo && <JourneyProgress current={answers.length} total={pkg.totalQuestionnaires} phases={[pkg.phases.phase1.questionnaires, pkg.phases.phase2.questionnaires, pkg.phases.phase3.questionnaires]} />}
                     <div className="flex items-center gap-4">
@@ -572,12 +710,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 {showSettings && speechSynthSupported && <div className="border-b"><SpeechSettings voices={voices} settings={settings} onSettingsChange={onSettingsChange} /></div>}
 
                 <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-                    <div className="lg:col-span-2 flex flex-col h-full bg-white rounded-xl shadow">
+                    <div className="lg:col-span-2 flex flex-col h-full bg-white dark:bg-slate-800 rounded-xl shadow transition-colors">
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             {messages.map((msg, index) => (
                                 <div key={index} className={`flex items-end gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    {msg.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center flex-shrink-0">IA</div>}
-                                    <div className={`max-w-xl p-4 rounded-2xl ${msg.sender === 'user' ? 'bg-primary-600 text-white rounded-br-none' : 'bg-slate-200 text-slate-800 rounded-bl-none'}`}>
+                                    {msg.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-primary-600 dark:bg-primary-500 text-white flex items-center justify-center flex-shrink-0">IA</div>}
+                                    <div className={`max-w-xl p-4 rounded-2xl ${msg.sender === 'user' ? 'bg-primary-600 dark:bg-primary-700 text-white rounded-br-none' : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none'}`}>
                                         <p>{msg.text}</p>
                                         {msg.isSynthesis && (
                                             <div className="mt-4 flex gap-2">
@@ -614,20 +752,20 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <div ref={chatEndRef} />
                         </div>
 
-                        <div className="p-4 border-t bg-white rounded-b-xl">
-                            {currentQuestion?.type === QuestionType.PARAGRAPH && (
-                                <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-center gap-2">
-                                    <input type="text" value={textInput} onChange={e => setTextInput(e.target.value)} placeholder="Écrivez votre réponse..." className="flex-1 w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" disabled={isLoading || isAwaitingSynthesisConfirmation} />
-                                    {speechRecSupported && <button type="button" onClick={() => isListening ? stopListening() : startListening()} className="p-3 text-slate-500 hover:text-primary-600"><MicIcon active={isListening} /></button>}
-                                    <button type="submit" className="bg-primary-600 text-white p-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400" disabled={isLoading || !textInput.trim() || isAwaitingSynthesisConfirmation}><SendIcon /></button>
-                                </form>
-                            )}
-                             <button onClick={handleJoker} className="mt-2 text-xs text-slate-500 hover:text-primary-600 flex items-center justify-center w-full disabled:opacity-50" disabled={isLoading || isAwaitingSynthesisConfirmation}>
+                    <div className="p-4 border-t bg-white dark:bg-slate-800 rounded-b-xl transition-colors">
+                        {currentQuestion?.type === QuestionType.PARAGRAPH && (
+                            <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-center gap-2">
+                                <input type="text" value={textInput} onChange={e => setTextInput(e.target.value)} placeholder="Écrivez votre réponse..." className="flex-1 w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100" disabled={isLoading || isAwaitingSynthesisConfirmation || isRequestPending} />
+                                {speechRecSupported && <button type="button" onClick={() => isListening ? stopListening() : startListening()} className="p-3 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400" disabled={isRequestPending}><MicIcon active={isListening} /></button>}
+                                <button type="submit" className="bg-primary-600 dark:bg-primary-700 text-white p-3 rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled={isLoading || !textInput.trim() || isAwaitingSynthesisConfirmation || isRequestPending}><SendIcon /></button>
+                            </form>
+                        )}
+                             <button onClick={handleJoker} className="mt-2 text-xs text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center justify-center w-full disabled:opacity-50 disabled:cursor-not-allowed" disabled={isLoading || isAwaitingSynthesisConfirmation || isRequestPending}>
                                 <JokerIcon/> J'ai besoin d'aide pour répondre
                             </button>
                         </div>
                     </div>
-                    <aside className="hidden lg:block h-full overflow-y-auto bg-white rounded-xl shadow p-6">
+                    <aside className="hidden lg:block h-full overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow p-6 transition-colors">
                         <Dashboard data={dashboardData} isLoading={isDashboardLoading} />
                     </aside>
                 </main>

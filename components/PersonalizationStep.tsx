@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile } from '../types';
-import { analyzeUserProfile } from '../services/geminiService';
+import { analyzeUserProfile } from '../services/aiService';
 
 interface PersonalizationStepProps {
   onComplete: (profile: UserProfile | null) => void;

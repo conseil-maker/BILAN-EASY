@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Summary, SummaryPoint, ActionPlanItem, Answer, DashboardData } from '../types';
-import { findResourceLeads, analyzeThemesAndSkills } from '../services/geminiService';
+import { findResourceLeads, analyzeThemesAndSkills } from '../services/aiService';
 import SkillsRadar from './SkillsRadar';
 
 interface SummaryDashboardProps {
@@ -235,15 +235,51 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
     };
 
     const handleExportCsv = () => {
+        // Gelişmiş CSV export - tüm soru ve cevap bilgileri
         let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "question_id,answer_value\r\n";
-        answers.forEach(row => {
-            csvContent += `${row.questionId.replace(/"/g, '""')},"${row.value.replace(/"/g, '""')}"\r\n`;
+        
+        // Header row - Excel uyumlu (UTF-8 BOM)
+        csvContent += "\ufeff"; // UTF-8 BOM for Excel
+        csvContent += "Soru ID,Soru Başlığı,Soru Açıklaması,Soru Tipi,Soru Teması,Soru Seçenekleri,Cevap,Tarih\r\n";
+        
+        // Her cevap için detaylı bilgi
+        answers.forEach((answer, index) => {
+            // Backend'den gelen answer objesi question bilgilerini içermeyebilir
+            // Bu yüzden sadece mevcut bilgileri kullanıyoruz
+            const questionId = answer.questionId || '';
+            const questionTitle = (answer as any).questionTitle || questionId;
+            const questionDescription = (answer as any).questionDescription || '';
+            const questionType = (answer as any).questionType || '';
+            const questionTheme = (answer as any).questionTheme || '';
+            const questionChoices = (answer as any).questionChoices ? 
+                JSON.stringify((answer as any).questionChoices) : '';
+            const value = answer.value || '';
+            const date = (answer as any).answeredAt ? 
+                new Date((answer as any).answeredAt).toLocaleString('fr-FR') : 
+                new Date().toLocaleString('fr-FR');
+            
+            // CSV escaping: double quotes içindeki tırnak işaretlerini escape et
+            const escapeCsv = (str: string) => {
+                if (!str) return '';
+                return `"${String(str).replace(/"/g, '""').replace(/\n/g, ' ').replace(/\r/g, '')}"`;
+            };
+            
+            csvContent += [
+                escapeCsv(questionId),
+                escapeCsv(questionTitle),
+                escapeCsv(questionDescription),
+                escapeCsv(questionType),
+                escapeCsv(questionTheme),
+                escapeCsv(questionChoices),
+                escapeCsv(value),
+                escapeCsv(date)
+            ].join(',') + '\r\n';
         });
+        
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Reponses_Bilan_${userName.replace(' ', '_')}.csv`);
+        link.setAttribute("download", `Bilan_Complet_${userName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

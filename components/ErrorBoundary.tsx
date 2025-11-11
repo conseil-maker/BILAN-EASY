@@ -1,4 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+// Sentry is disabled for now - enable it later by adding VITE_SENTRY_DSN to .env.local
+// import * as Sentry from '@sentry/react';
 
 interface Props {
   children: ReactNode;
@@ -31,6 +33,18 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // Sentry is disabled for now - enable it later by adding VITE_SENTRY_DSN to .env.local
+    // if (import.meta.env.VITE_SENTRY_DSN) {
+    //   Sentry.captureException(error, {
+    //     contexts: {
+    //       react: {
+    //         componentStack: errorInfo.componentStack,
+    //       },
+    //     },
+    //   });
+    // }
+    
     this.setState({
       error,
       errorInfo,

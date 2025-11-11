@@ -7,6 +7,7 @@ import PersonalizationStep from './components/PersonalizationStep';
 import Questionnaire from './components/Questionnaire';
 import SummaryDashboard from './components/SummaryDashboard';
 import HistoryScreen from './components/HistoryScreen';
+import ThemeToggle from './components/ThemeToggle';
 import { PACKAGES } from './constants';
 import { Package, Answer, Summary, HistoryItem, UserProfile, CoachingStyle } from './types';
 import { saveAssessmentToHistory } from './services/historyService';
@@ -204,12 +205,8 @@ const App: React.FC = () => {
     // Geçici olarak Clerk authentication'ı bypass ediyoruz (test için)
     // Production'da AuthGuard'ı geri açın
     return (
-        <div className="App">
-            {/* Bouton utilisateur Clerk en haut à droite - geçici olarak kapalı */}
-            {/* <div className="fixed top-4 right-4 z-50">
-                <UserButton afterSignOutUrl="/" />
-            </div> */}
-
+        <div className="App bg-slate-50 dark:bg-slate-900 min-h-screen transition-colors duration-200">
+            <ThemeToggle />
             {renderContent()}
         </div>
     );

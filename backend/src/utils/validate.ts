@@ -37,8 +37,10 @@ export const updateAssessmentSchema = z.object({
 export const createAnswerSchema = z.object({
   questionId: z.string().min(1).max(255),
   questionTitle: z.string().min(1),
+  questionDescription: z.string().optional(), // Soru açıklaması
   questionType: z.enum(['PARAGRAPH', 'MULTIPLE_CHOICE']),
   questionTheme: z.string().optional(),
+  questionChoices: z.array(z.string()).optional(), // Multiple choice seçenekleri
   value: z.string().min(1),
 });
 
