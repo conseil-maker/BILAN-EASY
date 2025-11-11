@@ -31,7 +31,7 @@ Une application interactive pour réaliser votre bilan de compétences avec l'ai
 
 **Version AI Studio**: [Voir dans AI Studio](https://ai.studio/apps/drive/1xKIXDV1a-WYTmcI6iSQtpDZmqzFlPdmG)
 
-### 🎉 Dernières améliorations (Dernière mise à jour: Décembre 2024)
+### 🎉 Dernières améliorations (Dernière mise à jour: Novembre 2024)
 
 ✅ **Backend complet intégré**: API REST avec Hono.js, PostgreSQL, Drizzle ORM
 ✅ **Authentification**: Système de session personnalisé (remplacement de Clerk)
@@ -40,7 +40,14 @@ Une application interactive pour réaliser votre bilan de compétences avec l'ai
 ✅ **Error Handling**: Error Boundary, Toast notifications, retry mechanism
 ✅ **Performance**: Debouncing, pagination, code splitting, connection pooling
 ✅ **PDF Export**: Génération PDF avec jsPDF et html2canvas
-✅ **API Retry**: Mécanisme de retry automatique pour erreurs Gemini API (503, 429)
+✅ **Multi-Provider AI**: Support Gemini, OpenAI, Claude avec fallback automatique
+✅ **Rate Limiting**: Exponential backoff, graceful retry, request queue
+✅ **UX Improvements**: 
+  - Typing indicators pour feedback visuel
+  - Break suggestions (toutes les 25 questions)
+  - Enhanced progress bar (phase bazlı + zaman tahmini)
+  - Milestone notifications (10, yarı yol, son 5 soru)
+✅ **AI Quality**: Soru tekrarı önleme, context-aware soru üretimi, zorluk seviyesi progresyonu
 ✅ **State Management**: Synchronisation d'état améliorée, prévention des boucles infinies
 ✅ **Questionnaire Flow**: Correction du flux multi-étapes, satisfaction modal unique par phase
 
@@ -48,9 +55,11 @@ Une application interactive pour réaliser votre bilan de compétences avec l'ai
 
 ### 🎤 **Interface conversationnelle**
 - Chat interactif avec l'IA coach
-- Questions dynamiques générées par Gemini
+- Questions dynamiques générées par AI (Gemini/OpenAI/Claude)
+- **Typing indicators**: Feedback visuel pendant la génération
 - Synthèses régulières toutes les 3 réponses
 - Support de la voix (speech-to-text et text-to-speech)
+- **Break suggestions**: Suggestions de pause automatiques
 
 ### 📦 **Trois formules de bilan**
 
@@ -68,7 +77,9 @@ Une application interactive pour réaliser votre bilan de compétences avec l'ai
 ### 📊 **Tableaux de bord en temps réel**
 - Nuage de mots (thèmes émergents)
 - Radar des compétences (5 dimensions)
-- Visualisation de la progression
+- **Enhanced Progress**: Barre de progression double (globale + phase)
+- **Temps estimé**: Affichage du temps restant
+- **Milestones**: Notifications à 10 questions, mi-parcours, et dernières 5 questions
 
 ### 💾 **Sauvegarde et historique**
 - Sauvegarde automatique toutes les 5 questions
@@ -103,7 +114,10 @@ BILAN-EASY/
 │   ├── SummaryDashboard.tsx    # Synthèse finale ⭐
 │   ├── HistoryScreen.tsx       # Historique des bilans
 │   ├── Dashboard.tsx           # Dashboard temps réel
-│   ├── JourneyProgress.tsx     # Barre de progression
+│   ├── JourneyProgress.tsx     # Barre de progression (legacy)
+│   ├── EnhancedProgress.tsx    # Barre de progression améliorée ⭐
+│   ├── TypingIndicator.tsx     # Indicateur de frappe AI ⭐
+│   ├── BreakSuggestionModal.tsx # Modal de suggestion de pause ⭐
 │   ├── SkillsRadar.tsx         # Graphique radar
 │   ├── WordCloud.tsx           # Nuage de mots
 │   ├── SpeechSettings.tsx      # Paramètres vocaux
@@ -112,7 +126,14 @@ BILAN-EASY/
 │   └── SkeletonLoader.tsx     # Loaders de chargement
 │
 ├── 📁 services/             # Logique métier
-│   ├── geminiService.ts        # API Gemini 2.5 (génération) ⭐
+│   ├── aiService.ts            # Multi-provider AI service ⭐
+│   ├── providers/              # AI Providers
+│   │   ├── geminiProvider.ts   # Gemini provider ⭐
+│   │   ├── openaiProvider.ts   # OpenAI provider ⭐
+│   │   └── claudeProvider.ts   # Claude provider ⭐
+│   ├── rateLimitClient.ts      # Rate limiting & retry ⭐
+│   ├── requestQueue.ts         # Request queue ⭐
+│   ├── geminiService.ts        # API Gemini 2.5 (legacy, deprecated)
 │   ├── apiClient.ts            # Client API backend ⭐
 │   ├── historyService.ts       # Gestion localStorage
 │   ├── ttsService.ts           # Text-to-speech
@@ -122,6 +143,9 @@ BILAN-EASY/
 │   ├── useSpeechRecognition.ts # Speech-to-text
 │   ├── useSpeechSynthesis.ts    # Text-to-speech
 │   ├── useDebounce.ts          # Debouncing
+│   ├── useThrottle.ts          # Throttling ⭐
+│   ├── useTheme.tsx            # Dark mode ⭐
+│   ├── useKeyboardShortcuts.ts # Raccourcis clavier ⭐
 │   └── useOfflineDetection.ts  # Détection hors ligne
 │
 ├── 📁 backend/              # Backend API (Hono.js + PostgreSQL)
@@ -152,6 +176,9 @@ BILAN-EASY/
 ├── 📄 index.tsx             # Point d'entrée
 ├── 📄 vite.config.ts        # Configuration Vite
 ├── 📄 tsconfig.json         # Configuration TypeScript
+├── 📄 tailwind.config.js    # Configuration Tailwind CSS ⭐
+├── 📄 postcss.config.js     # Configuration PostCSS ⭐
+├── 📄 src/index.css         # Styles Tailwind ⭐
 ├── 📄 package.json          # Dépendances npm
 ├── 📄 Dockerfile             # Docker frontend
 ├── 📄 docker-compose.yml     # Orchestration Docker
