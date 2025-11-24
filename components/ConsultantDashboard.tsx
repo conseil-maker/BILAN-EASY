@@ -3,6 +3,7 @@ import { assessmentService } from '../services/assessmentService';
 import { assignmentService } from '../services/assignmentService';
 import { Assessment } from '../lib/supabaseClient';
 import { supabase } from '../lib/supabaseClient';
+import { AssessmentDetailView } from './AssessmentDetailView';
 
 interface ConsultantDashboardProps {
   onBack: () => void;
@@ -21,6 +22,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
   const [clients, setClients] = useState<ClientInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'in_progress' | 'completed'>('all');
+  const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
 
   useEffect(() => {
     loadData();
@@ -78,6 +80,17 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
     inProgress: assessments.filter(a => a.status === 'in_progress').length,
     completed: assessments.filter(a => a.status === 'completed').length
   };
+
+  // Si un bilan est sélectionné, afficher la vue détaillée
+  if (selectedAssessment) {
+    return (
+      <AssessmentDetailView
+        assessment={selectedAssessment}
+        onBack={() => setSelectedAssessment(null)}
+        isConsultantView={true}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -243,7 +256,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                          'Archivé'}
                       </span>
                       <button
-                        onClick={() => onViewAssessment(assessment)}
+                        onClick={() => setSelectedAssessment(assessment)}
                         className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm"
                       >
                         Consulter
