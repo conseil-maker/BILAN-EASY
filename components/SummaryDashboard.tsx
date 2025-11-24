@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Summary, SummaryPoint, ActionPlanItem, Answer, DashboardData } from '../types';
 import { findResourceLeads, analyzeThemesAndSkills } from '../services/geminiService';
+import { pdfService } from '../services/pdfService';
+import { storageService } from '../services/storageService';
+import { assessmentService } from '../services/assessmentService';
 import SkillsRadar from './SkillsRadar';
 
 declare const jspdf: any;
@@ -217,6 +220,57 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
         setIsExportModalOpen(false);
     };
 
+    const handleGeneratePDF = async () => {
+        try {
+            // Préparer les données pour le PDF
+            const pdfData = {
+                title: `Bilan de Compétences - ${packageName}`,
+                clientName: userName,
+                date: new Date().toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }),
+                profileType: summary.profileType,
+                strengths: summary.keyStrengths.map((s: SummaryPoint) => s.text),
+                areasForDevelopment: summary.areasForDevelopment.map((a: SummaryPoint) => a.text),
+                recommendations: summary.recommendations,
+                actionPlan: [
+                    ...actionPlan.shortTerm.map(item => ({ action: item.text, timeline: 'Court terme (1-3 mois)' })),
+                    ...actionPlan.mediumTerm.map(item => ({ action: item.text, timeline: 'Moyen terme (3-6 mois)' }))
+                ]
+            };
+
+            // Générer le PDF
+            const pdfBlob = pdfService.generateAssessmentPDF(pdfData);
+
+            // Récupérer l'assessment actuel pour obtenir son ID
+            const assessments = await assessmentService.getUserAssessments();
+            if (assessments && assessments.length > 0) {
+                const currentAssessment = assessments[0]; // Le plus récent
+                
+                // Uploader le PDF vers Supabase Storage
+                const fileName = `synthese_${new Date().getTime()}.pdf`;
+                await storageService.uploadPDF(currentAssessment.id, pdfBlob, fileName);
+                
+                alert('PDF généré et sauvegardé avec succès!');
+            }
+
+            // Télécharger aussi le PDF localement
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Bilan_${userName.replace(' ', '_')}_${new Date().getTime()}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Erreur lors de la génération du PDF:', error);
+            alert('Erreur lors de la génération du PDF');
+        }
+    };
+
     const handleToggleActionItem = (id: string) => {
         const newActionPlan = {
             shortTerm: actionPlan.shortTerm.map(item => item.id === id ? { ...item, completed: !item.completed } : item),
@@ -291,7 +345,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
                 <div className="max-w-4xl mx-auto mt-8 flex flex-wrap justify-center items-center gap-4">
                      {!isHistoryView && <button onClick={onRestart} className="bg-primary-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-primary-700">Refaire un bilan</button>}
                      <button onClick={onViewHistory} className="bg-slate-200 text-slate-700 font-bold py-3 px-8 rounded-lg hover:bg-slate-300">{isHistoryView ? 'Retour à l\'historique' : 'Voir mon historique'}</button>
-                     <button onClick={handleDownloadPdf} className="bg-secondary text-white font-bold py-3 px-8 rounded-lg hover:bg-secondary-600">Télécharger en PDF</button>
+                     <button onClick={handleGeneratePDF} className="bg-secondary text-white font-bold py-3 px-8 rounded-lg hover:bg-secondary-600">Générer et Télécharger PDF</button>
                      <button onClick={() => setIsExportModalOpen(true)} className="text-sm text-slate-500 hover:text-primary-600">Exporter mes données</button>
                      <button onClick={() => setIsCoachModalOpen(true)} className="text-sm text-slate-500 hover:text-primary-600">Discuter avec un coach</button>
                 </div>
