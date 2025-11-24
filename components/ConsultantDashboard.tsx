@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { assessmentService } from '../services/assessmentService';
+import { assignmentService } from '../services/assignmentService';
 import { Assessment } from '../lib/supabaseClient';
 import { supabase } from '../lib/supabaseClient';
 
@@ -8,22 +9,43 @@ interface ConsultantDashboardProps {
   onViewAssessment: (assessment: Assessment) => void;
 }
 
+interface ClientInfo {
+  id: string;
+  email: string;
+  full_name?: string;
+  assignedAt: string;
+}
+
 export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack, onViewAssessment }) => {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [clients, setClients] = useState<ClientInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'in_progress' | 'completed'>('all');
 
   useEffect(() => {
-    loadAssessments();
+    loadData();
   }, []);
 
-  const loadAssessments = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await assessmentService.getConsultantAssessments();
-      setAssessments(data);
+      const [assessmentsData, clientsData] = await Promise.all([
+        assessmentService.getConsultantAssessments(),
+        assignmentService.getConsultantClients()
+      ]);
+      
+      setAssessments(assessmentsData);
+      
+      // Formater les données des clients
+      const formattedClients = clientsData.map((assignment: any) => ({
+        id: assignment.client.id,
+        email: assignment.client.email,
+        full_name: assignment.client.full_name,
+        assignedAt: assignment.assigned_at
+      }));
+      setClients(formattedClients);
     } catch (error) {
-      console.error('Erreur lors du chargement des bilans:', error);
+      console.error('Erreur lors du chargement des données:', error);
     } finally {
       setLoading(false);
     }
@@ -51,6 +73,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
   });
 
   const stats = {
+    totalClients: clients.length,
     total: assessments.length,
     inProgress: assessments.filter(a => a.status === 'in_progress').length,
     completed: assessments.filter(a => a.status === 'completed').length
@@ -86,7 +109,11 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
         </header>
 
         {/* Statistiques */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="text-3xl font-bold text-blue-600">{stats.totalClients}</div>
+            <div className="text-slate-600 mt-1">Clients assignés</div>
+          </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-primary-600">{stats.total}</div>
             <div className="text-slate-600 mt-1">Bilans totaux</div>
@@ -100,6 +127,28 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
             <div className="text-slate-600 mt-1">Complétés</div>
           </div>
         </div>
+
+        {/* Liste des clients assignés */}
+        {clients.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">Mes clients</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {clients.map(client => (
+                <div key={client.id} className="border border-slate-200 rounded-lg p-4 hover:border-primary-400 transition-colors">
+                  <div className="font-semibold text-slate-900">
+                    {client.full_name || client.email}
+                  </div>
+                  {client.full_name && (
+                    <div className="text-sm text-slate-500 mt-1">{client.email}</div>
+                  )}
+                  <div className="text-xs text-slate-400 mt-2">
+                    Assigné le {new Date(client.assignedAt).toLocaleDateString('fr-FR')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Filtres */}
         <div className="mb-6 flex gap-2">

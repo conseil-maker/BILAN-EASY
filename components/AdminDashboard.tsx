@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { AssignmentManager } from './AssignmentManager';
 
 interface User {
   id: string;
@@ -125,6 +126,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
             <div className="text-3xl font-bold text-purple-600">{stats.totalAssessments}</div>
             <div className="text-slate-600 mt-1">Bilans réalisés</div>
           </div>
+        </div>
+
+        {/* Gestion des affectations */}
+        <div className="mb-8">
+          <AssignmentManager />
         </div>
 
         {/* Liste des utilisateurs */}
