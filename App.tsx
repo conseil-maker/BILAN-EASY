@@ -15,23 +15,29 @@ const App: React.FC = () => {
   }, []);
 
   const checkAuth = async () => {
+    console.log('[APP] Vérification de l\'authentification');
     try {
       const user = await authService.getCurrentUser();
+      console.log('[APP] Utilisateur actuel:', user?.email || 'aucun');
       if (user) {
         const profile = await authService.getUserProfile();
+        console.log('[APP] Profil récupéré:', profile);
         if (profile) {
           setCurrentUser(profile);
           setIsAuthenticated(true);
+          console.log('[APP] Authentification réussie');
         }
       }
     } catch (error) {
-      console.error('Erreur auth:', error);
+      console.error('[APP] Erreur auth:', error);
     } finally {
       setLoading(false);
+      console.log('[APP] Fin de checkAuth');
     }
   };
 
   const handleLoginSuccess = async () => {
+    console.log('[APP] handleLoginSuccess appelé');
     await checkAuth();
   };
 

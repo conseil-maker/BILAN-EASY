@@ -17,19 +17,26 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    console.log('[LOGIN] Début de la soumission du formulaire');
 
     try {
       if (isSignUp) {
+        console.log('[LOGIN] Mode inscription');
         await authService.signUp(email, password, fullName);
-        alert('Inscription réussie ! Veuillez vérifier votre email pour confirmer votre compte.');
+        alert('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+        setIsSignUp(false);
       } else {
+        console.log('[LOGIN] Mode connexion');
         await authService.signIn(email, password);
+        console.log('[LOGIN] Appel de onLoginSuccess');
         onLoginSuccess();
       }
     } catch (err: any) {
+      console.error('[LOGIN] Erreur:', err);
       setError(err.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
+      console.log('[LOGIN] Fin de la soumission');
     }
   };
 

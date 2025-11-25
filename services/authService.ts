@@ -19,12 +19,17 @@ export const authService = {
 
   // Connexion
   async signIn(email: string, password: string) {
+    console.log('[AUTH] Tentative de connexion pour:', email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('[AUTH] Erreur de connexion:', error);
+      throw error;
+    }
+    console.log('[AUTH] Connexion réussie:', data.user?.email);
     return data;
   },
 
@@ -43,15 +48,23 @@ export const authService = {
   // Récupérer le profil complet
   async getUserProfile() {
     const user = await this.getCurrentUser();
-    if (!user) return null;
+    if (!user) {
+      console.log('[AUTH] Aucun utilisateur connecté');
+      return null;
+    }
     
+    console.log('[AUTH] Récupération du profil pour:', user.email);
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('[AUTH] Erreur récupération profil:', error);
+      throw error;
+    }
+    console.log('[AUTH] Profil récupéré:', data);
     return data;
   },
 
