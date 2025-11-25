@@ -2,156 +2,242 @@ import React, { useState, useEffect } from 'react';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ConsultantDashboard } from './components/ConsultantDashboard';
+import WelcomeScreen from './components/WelcomeScreen';
+import PackageSelector from './components/PackageSelector';
+import PhasePreliminaire from './components/PhasePreliminaire';
+import PersonalizationStep from './components/PersonalizationStep';
+import Questionnaire from './components/Questionnaire';
+import SummaryDashboard from './components/SummaryDashboard';
+import HistoryScreen from './components/HistoryScreen';
+import { PACKAGES } from './constants';
+import { Package, Answer, Summary, HistoryItem, UserProfile, CoachingStyle } from './types';
 import { authService } from './services/authService';
+import { assessmentService } from './services/assessmentService';
 import { Profile } from './lib/supabaseClient';
 
+type AppState = 'login' | 'welcome' | 'admin-dashboard' | 'consultant-dashboard' | 'package-selection' | 'preliminary-phase' | 'personalization-step' | 'questionnaire' | 'summary' | 'history' | 'view-history-record';
+
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+    const [appState, setAppState] = useState<AppState>('login');
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [currentUser, setCurrentUser] = useState<Profile | null>(null);
+    const [currentAssessmentId, setCurrentAssessmentId] = useState<string | null>(null);
+    
+    const [userName, setUserName] = useState('');
+    const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+    const [coachingStyle, setCoachingStyle] = useState<CoachingStyle>('collaborative');
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+    const [currentAnswers, setCurrentAnswers] = useState<Answer[]>([]);
+    const [currentSummary, setCurrentSummary] = useState<Summary | null>(null);
+    const [viewingRecord, setViewingRecord] = useState<HistoryItem | null>(null);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+    // Vérifier l'authentification au chargement
+    useEffect(() => {
+        checkAuth();
+        
+        // Écouter les changements d'authentification
+        const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                await loadUserProfile();
+            } else if (event === 'SIGNED_OUT') {
+                setIsAuthenticated(false);
+                setCurrentUser(null);
+                setAppState('login');
+            }
+        });
 
-  const checkAuth = async () => {
-    console.log('[APP] Vérification de l\'authentification');
-    try {
-      const user = await authService.getCurrentUser();
-      console.log('[APP] Utilisateur actuel:', user?.email || 'aucun');
-      if (user) {
-        const profile = await authService.getUserProfile();
-        console.log('[APP] Profil récupéré:', profile);
-        if (profile) {
-          setCurrentUser(profile);
-          setIsAuthenticated(true);
-          console.log('[APP] Authentification réussie');
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
+
+    const checkAuth = async () => {
+        try {
+            const user = await authService.getCurrentUser();
+            if (user) {
+                await loadUserProfile();
+            } else {
+                setAppState('login');
+            }
+        } catch (error) {
+            console.error('Erreur lors de la vérification de l\'authentification:', error);
+            setAppState('login');
         }
-      }
-    } catch (error) {
-      console.error('[APP] Erreur auth:', error);
-    } finally {
-      setLoading(false);
-      console.log('[APP] Fin de checkAuth');
-    }
-  };
+    };
 
-  const handleLoginSuccess = async () => {
-    console.log('[APP] handleLoginSuccess appelé');
-    await checkAuth();
-  };
+    const loadUserProfile = async () => {
+        try {
+            const profile = await authService.getUserProfile();
+            if (profile) {
+                setCurrentUser(profile);
+                setUserName(profile.full_name || profile.email);
+                setIsAuthenticated(true);
+                
+                // Rediriger vers le dashboard approprié selon le rôle
+                if (profile.role === 'admin') {
+                    setAppState('admin-dashboard');
+                } else if (profile.role === 'consultant') {
+                    setAppState('consultant-dashboard');
+                } else {
+                    setAppState('welcome');
+                }
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement du profil:', error);
+        }
+    };
 
-  const handleLogout = async () => {
-    try {
-      await authService.signOut();
-      setIsAuthenticated(false);
-      setCurrentUser(null);
-    } catch (error) {
-      console.error('Erreur déconnexion:', error);
-    }
-  };
+    const handleLoginSuccess = async () => {
+        await loadUserProfile();
+    };
 
-  if (loading) {
+    const handleStart = async (name: string) => {
+        setUserName(name);
+        setAppState('package-selection');
+    };
+
+    const handlePackageSelect = async (pkg: Package) => {
+        setSelectedPackage(pkg);
+        
+        // Créer un nouveau bilan dans Supabase
+        try {
+            const assessment = await assessmentService.createAssessment(
+                `Bilan ${pkg.name}`,
+                coachingStyle
+            );
+            setCurrentAssessmentId(assessment.id);
+            setAppState('preliminary-phase');
+        } catch (error) {
+            console.error('Erreur lors de la création du bilan:', error);
+            alert('Erreur lors de la création du bilan. Veuillez réessayer.');
+        }
+    };
+
+    const handlePreliminaryConfirm = () => {
+        setAppState('personalization-step');
+    };
+
+    const handlePersonalizationComplete = async (profile: UserProfile | null) => {
+        setUserProfile(profile);
+        
+        // Sauvegarder l'analyse du CV dans Supabase
+        if (currentAssessmentId && profile) {
+            try {
+                await assessmentService.saveCVAnalysis(currentAssessmentId, profile);
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde de l\'analyse CV:', error);
+            }
+        }
+        
+        setAppState('questionnaire');
+    };
+    
+    const handleBackToPackages = () => {
+        setSelectedPackage(null);
+        setAppState('package-selection');
+    };
+
+    const handleQuestionnaireComplete = async (answers: Answer[], summary: Summary) => {
+        setCurrentAnswers(answers);
+        setCurrentSummary(summary);
+        
+        // Sauvegarder dans Supabase
+        if (currentAssessmentId) {
+            try {
+                await assessmentService.saveQuestionnaireData(currentAssessmentId, {
+                    answers,
+                    userProfile
+                });
+                
+                await assessmentService.saveSummary(currentAssessmentId, summary);
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde du bilan:', error);
+            }
+        }
+
+        setAppState('summary');
+    };
+
+    const handleRestart = () => {
+        setUserName(currentUser?.full_name || currentUser?.email || '');
+        setSelectedPackage(null);
+        setCurrentAnswers([]);
+        setCurrentSummary(null);
+        setViewingRecord(null);
+        setUserProfile(null);
+        setCoachingStyle('collaborative');
+        setCurrentAssessmentId(null);
+        setAppState('welcome');
+    };
+    
+    const handleShowHistory = () => {
+        setAppState('history');
+    };
+
+    const handleViewRecord = (record: HistoryItem) => {
+        setViewingRecord(record);
+        setAppState('view-history-record');
+    };
+
+    const handleBackToHistory = () => {
+        setViewingRecord(null);
+        setAppState('history');
+    };
+
+    const handleLogout = async () => {
+        try {
+            await authService.signOut();
+            handleRestart();
+            setAppState('login');
+        } catch (error) {
+            console.error('Erreur lors de la déconnexion:', error);
+        }
+    };
+    
+    const renderContent = () => {
+        if (!isAuthenticated) {
+            return <Login onLoginSuccess={handleLoginSuccess} />;
+        }
+
+        switch (appState) {
+            case 'admin-dashboard':
+                return <AdminDashboard onBack={() => setAppState('welcome')} />;
+            case 'consultant-dashboard':
+                return <ConsultantDashboard onBack={() => setAppState('welcome')} onViewAssessment={(assessment) => {
+                    // TODO: Afficher le détail du bilan
+                    console.log('View assessment:', assessment);
+                }} />;
+            case 'welcome':
+                return <WelcomeScreen onStart={handleStart} onShowHistory={handleShowHistory} userName={userName} onLogout={handleLogout} />;
+            case 'package-selection':
+                return <PackageSelector packages={PACKAGES} onSelect={handlePackageSelect} />;
+            case 'preliminary-phase':
+                if (!selectedPackage || !userName) { handleRestart(); return null; }
+                return <PhasePreliminaire pkg={selectedPackage} userName={userName} onConfirm={handlePreliminaryConfirm} onGoBack={handleBackToPackages} coachingStyle={coachingStyle} setCoachingStyle={setCoachingStyle} />;
+            case 'personalization-step':
+                 if (!selectedPackage || !userName) { handleRestart(); return null; }
+                return <PersonalizationStep onComplete={handlePersonalizationComplete} />;
+            case 'questionnaire':
+                if (!selectedPackage || !userName) { handleRestart(); return null; }
+                return <Questionnaire pkg={selectedPackage} userName={userName} userProfile={userProfile} coachingStyle={coachingStyle} onComplete={handleQuestionnaireComplete} />;
+            case 'summary':
+                if (!currentSummary || !selectedPackage) { handleRestart(); return null; }
+                return <SummaryDashboard summary={currentSummary} answers={currentAnswers} userName={userName} packageName={selectedPackage.name} onRestart={handleRestart} onViewHistory={handleShowHistory} />;
+            case 'history':
+                return <HistoryScreen onViewRecord={handleViewRecord} onBack={handleRestart} />;
+            case 'view-history-record':
+                 if (!viewingRecord) { handleBackToHistory(); return null; }
+                 return <SummaryDashboard summary={viewingRecord.summary} answers={viewingRecord.answers} userName={viewingRecord.userName} packageName={viewingRecord.packageName} onRestart={handleRestart} onViewHistory={handleBackToHistory} isHistoryView={true} />;
+            default:
+                return <WelcomeScreen onStart={handleStart} onShowHistory={handleShowHistory} userName={userName} onLogout={handleLogout} />;
+        }
+    };
+
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      }}>
-        <div style={{ color: 'white', fontSize: '24px' }}>Chargement...</div>
-      </div>
+        <div className="App">
+            {renderContent()}
+        </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
-  }
-
-  // Afficher le dashboard selon le rôle
-  if (currentUser?.role === 'admin') {
-    return <AdminDashboard currentUser={currentUser} onLogout={handleLogout} />;
-  }
-
-  if (currentUser?.role === 'consultant') {
-    return <ConsultantDashboard currentUser={currentUser} onLogout={handleLogout} />;
-  }
-
-  // Interface client par défaut
-  return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '40px 20px'
-    }}>
-      <div style={{
-        maxWidth: '800px',
-        margin: '0 auto',
-        background: 'white',
-        borderRadius: '16px',
-        padding: '40px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: 'bold',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Bilan de Compétences IA
-          </h1>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: '10px 20px',
-              background: '#f44336',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '600'
-            }}
-          >
-            Déconnexion
-          </button>
-        </div>
-
-        <div style={{
-          padding: '32px',
-          background: '#f5f5f5',
-          borderRadius: '12px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{ fontSize: '24px', marginBottom: '16px', color: '#333' }}>
-            Bienvenue {currentUser?.full_name || 'Client'} !
-          </h2>
-          <p style={{ color: '#666', marginBottom: '8px' }}>
-            Email: {currentUser?.email}
-          </p>
-          <p style={{ color: '#666', marginBottom: '24px' }}>
-            Rôle: {currentUser?.role}
-          </p>
-          <div style={{
-            padding: '24px',
-            background: 'white',
-            borderRadius: '8px',
-            border: '2px dashed #667eea'
-          }}>
-            <p style={{ color: '#667eea', fontSize: '18px', fontWeight: '600' }}>
-              Interface client en cours de développement
-            </p>
-            <p style={{ color: '#999', marginTop: '12px' }}>
-              Le parcours complet de bilan de compétences sera bientôt disponible
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 export default App;
