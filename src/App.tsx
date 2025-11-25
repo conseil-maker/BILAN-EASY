@@ -1,45 +1,40 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './lib/supabaseClient';
 
 function App() {
   const [status, setStatus] = useState('Initialisation...');
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const checkEnv = () => {
+    const checkAuth = async () => {
       try {
-        setStatus('Vérification des variables d\'environnement...');
+        setStatus('Connexion à Supabase...');
         
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-        if (!supabaseUrl) {
-          throw new Error('VITE_SUPABASE_URL manquante');
-        }
-        if (!supabaseKey) {
-          throw new Error('VITE_SUPABASE_ANON_KEY manquante');
-        }
-        if (!geminiKey) {
-          throw new Error('VITE_GEMINI_API_KEY manquante');
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          throw new Error(`Erreur session: ${sessionError.message}`);
         }
 
-        setStatus(`✅ Toutes les variables sont configurées !
+        setStatus(`✅ Connexion Supabase réussie !
         
-Supabase URL: ${supabaseUrl.substring(0, 30)}...
-Supabase Key: ${supabaseKey.substring(0, 20)}...
-Gemini Key: ${geminiKey.substring(0, 20)}...`);
+User: ${data.session?.user?.email || 'Non connecté'}
+Session: ${data.session ? 'Active' : 'Aucune'}`);
+        
+        setUser(data.session?.user);
       } catch (err: any) {
         setError(err.message);
-        setStatus('❌ Erreur de configuration');
+        setStatus('❌ Erreur de connexion Supabase');
       }
     };
 
-    checkEnv();
+    checkAuth();
   }, []);
 
   return (
     <div style={{ padding: '50px', fontFamily: 'Arial', maxWidth: '800px', margin: '0 auto' }}>
-      <h1>🔍 Diagnostic Bilan Easy</h1>
+      <h1>🔍 Test Supabase Auth</h1>
       <div style={{ 
         padding: '20px', 
         background: error ? '#fee' : '#efe', 
