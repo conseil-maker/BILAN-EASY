@@ -53,22 +53,27 @@ const App: React.FC = () => {
 
     const checkAuth = async () => {
         try {
+            console.log('[APP] Vérification authentification...');
             const user = await authService.getCurrentUser();
             if (user) {
+                console.log('[APP] Utilisateur trouvé:', user.email);
                 await loadUserProfile();
             } else {
+                console.log('[APP] Aucun utilisateur connecté');
                 setAppState('login');
             }
         } catch (error) {
-            console.error('Erreur lors de la vérification de l\'authentification:', error);
+            console.error('[APP] Erreur auth:', error);
             setAppState('login');
         }
     };
 
     const loadUserProfile = async () => {
         try {
+            console.log('[APP] Chargement du profil...');
             const profile = await authService.getUserProfile();
             if (profile) {
+                console.log('[APP] Profil chargé:', profile.role);
                 setCurrentUser(profile);
                 setUserName(profile.full_name || profile.email);
                 setIsAuthenticated(true);
@@ -81,9 +86,14 @@ const App: React.FC = () => {
                 } else {
                     setAppState('welcome');
                 }
+            } else {
+                console.log('[APP] Aucun profil trouvé');
+                setAppState('login');
             }
         } catch (error) {
-            console.error('Erreur lors du chargement du profil:', error);
+            console.error('[APP] Erreur chargement profil:', error);
+            // Ne pas bloquer, continuer vers login
+            setAppState('login');
         }
     };
 
