@@ -8,7 +8,6 @@ import { ConsultantDashboard } from './components/ConsultantDashboard';
 const App: React.FC = () => {
   const renderByRole = (user: User, userRole: string) => {
     const handleBack = () => {
-      // Logout or navigate back
       window.location.reload();
     };
 
