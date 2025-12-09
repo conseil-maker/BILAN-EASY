@@ -10,12 +10,14 @@ import Dashboard from './Dashboard';
 import JourneyProgress from './JourneyProgress';
 import Confetti from './Confetti';
 import { supabase } from '../lib/supabaseClient';
+import { downloadPDF } from '../utils/pdfGenerator';
 
 const SendIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>;
 const MicIcon = ({ active }: { active: boolean }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${active ? 'text-red-500 animate-pulse' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-14 0m7 10v4M5 8v4a7 7 0 0014 0V8M12 15a3 3 0 003-3V5a3 3 0 00-6 0v7a3 3 0 003 3z" /></svg>;
 const SpeakerIcon = ({ active }: { active: boolean }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${active ? 'text-blue-500' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.858 17.142a5 5 0 010-7.072m2.828 9.9a9 9 0 010-12.728M12 12h.01" /></svg>;
 const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066 2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>;
+const DownloadIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>;
 const JokerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-5 5a1 1 0 01-1-1v-2a1 1 0 112 0v2a1 1 0 01-1 1zm2-3a1 1 0 00-1.414 1.414L8.586 18l-1.293 1.293a1 1 0 101.414 1.414L10 19.414l1.293 1.293a1 1 0 001.414-1.414L11.414 18l1.293-1.293a1 1 0 00-1.414-1.414L10 16.586 8.707 15.293zM5 11a1 1 0 100 2h.01a1 1 0 100-2H5zm14-1a1 1 0 11-2 0v-2a1 1 0 112 0v2zM15 9a1 1 0 100-2h-.01a1 1 0 100 2H15z" clipRule="evenodd" /></svg>;
 
 const BadgeNotification: React.FC<{ phaseName: string; onClose: () => void }> = ({ phaseName, onClose }) => {
@@ -335,6 +337,16 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         window.location.href = '/login';
     };
 
+    const handleExportPDF = async () => {
+        try {
+            await downloadPDF(userName, pkg.name, answers, dashboardData);
+            alert('🎉 Votre rapport a été téléchargé avec succès !');
+        } catch (error) {
+            console.error('Erreur lors de l\'export PDF:', error);
+            alert('❌ Une erreur est survenue lors de l\'export du rapport.');
+        }
+    };
+
     if (isSummarizing) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="text-2xl font-bold">Génération de votre synthèse...</div><p>Veuillez patienter.</p></div></div>;
 
     return (
@@ -528,13 +540,41 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 </svg>
                             )}
                         </button>
-                        <button onClick={() => setShowHelpModal(true)} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="Aide">
+                        <button 
+                            onClick={handleExportPDF} 
+                            className="text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 transition-colors focus:ring-2 focus:ring-green-500 focus:outline-none rounded-lg p-1" 
+                            title="Télécharger le rapport"
+                            aria-label="Télécharger le rapport en PDF"
+                            disabled={answers.length === 0}
+                        >
+                            <DownloadIcon />
+                        </button>
+                        <button 
+                            onClick={() => setShowHelpModal(true)} 
+                            className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-1" 
+                            title="Aide"
+                            aria-label="Ouvrir l'aide et les conseils"
+                        >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </button>
-                        <button onClick={() => setShowSettings(!showSettings)} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="Paramètres"><SettingsIcon /></button>
-                        <button onClick={handleLogout} className="text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Déconnexion"><LogoutIcon /></button>
+                        <button 
+                            onClick={() => setShowSettings(!showSettings)} 
+                            className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-1" 
+                            title="Paramètres"
+                            aria-label="Ouvrir les paramètres de lecture vocale"
+                        >
+                            <SettingsIcon />
+                        </button>
+                        <button 
+                            onClick={handleLogout} 
+                            className="text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none rounded-lg p-1" 
+                            title="Déconnexion"
+                            aria-label="Se déconnecter de l'application"
+                        >
+                            <LogoutIcon />
+                        </button>
                     </div>
                 </header>
                 
@@ -549,15 +589,34 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <div className={`max-w-xl p-4 rounded-2xl transition-all duration-300 hover:shadow-lg ${msg.sender === 'user' ? 'bg-primary-600 dark:bg-primary-500 text-white rounded-br-none' : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-none'}`}>
                                         <p>{msg.text}</p>
                                         {msg.isSynthesis && (
-                                            <div className="mt-4 flex gap-2">
-                                                <button onClick={() => handleSynthesisConfirmation(true)} className="bg-white/20 px-3 py-1 rounded-full text-xs">Oui, c'est exact</button>
-                                                <button onClick={() => handleSynthesisConfirmation(false)} className="bg-white/20 px-3 py-1 rounded-full text-xs">Non, pas tout à fait</button>
+                                            <div className="mt-4 flex gap-2" role="group" aria-label="Confirmation de la synthèse">
+                                                <button 
+                                                    onClick={() => handleSynthesisConfirmation(true)} 
+                                                    className="bg-white/20 px-3 py-1 rounded-full text-xs hover:bg-white/30 focus:ring-2 focus:ring-white focus:outline-none transition-all"
+                                                    aria-label="Confirmer que la synthèse est exacte"
+                                                >
+                                                    Oui, c'est exact
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleSynthesisConfirmation(false)} 
+                                                    className="bg-white/20 px-3 py-1 rounded-full text-xs hover:bg-white/30 focus:ring-2 focus:ring-white focus:outline-none transition-all"
+                                                    aria-label="Indiquer que la synthèse n'est pas tout à fait exacte"
+                                                >
+                                                    Non, pas tout à fait
+                                                </button>
                                             </div>
                                         )}
                                         {msg.question?.type === QuestionType.MULTIPLE_CHOICE && msg.question.choices && (
-                                            <div className="mt-4 space-y-2">
-                                                {msg.question.choices.map(choice => (
-                                                    <button key={choice} onClick={() => handleAnswerSubmit(choice)} className="w-full text-left bg-primary-50 text-primary-800 p-3 rounded-lg hover:bg-primary-100 transition">
+                                            <div className="mt-4 space-y-2" role="radiogroup" aria-label="Choix de réponse">
+                                                {msg.question.choices.map((choice, choiceIndex) => (
+                                                    <button 
+                                                        key={choice} 
+                                                        onClick={() => handleAnswerSubmit(choice)} 
+                                                        className="w-full text-left bg-primary-50 dark:bg-primary-900/20 text-primary-800 dark:text-primary-200 p-3 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all focus:ring-2 focus:ring-primary-500 focus:outline-none"
+                                                        role="radio"
+                                                        aria-checked="false"
+                                                        aria-label={`Choix ${choiceIndex + 1}: ${choice}`}
+                                                    >
                                                         {choice}
                                                     </button>
                                                 ))}
@@ -570,20 +629,57 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <div ref={chatEndRef} />
                         </div>
 
-                        <div className="p-4 border-t bg-white rounded-b-xl">
+                        <div className="p-4 border-t bg-white dark:bg-slate-800 rounded-b-xl transition-colors duration-300">
                             {currentQuestion?.type === QuestionType.PARAGRAPH && (
-                                <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-center gap-2">
-                                    <input type="text" value={textInput} onChange={e => setTextInput(e.target.value)} placeholder="Écrivez votre réponse..." className="flex-1 w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" disabled={isLoading || isAwaitingSynthesisConfirmation} />
-                                    {speechRecSupported && <button type="button" onClick={() => isListening ? stopListening() : startListening()} className="p-3 text-slate-500 hover:text-primary-600"><MicIcon active={isListening} /></button>}
-                                    <button type="submit" className="bg-primary-600 text-white p-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400" disabled={isLoading || !textInput.trim() || isAwaitingSynthesisConfirmation}><SendIcon /></button>
+                                <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-center gap-2" role="form" aria-label="Formulaire de réponse">
+                                    <label htmlFor="answer-input" className="sr-only">Écrivez votre réponse</label>
+                                    <input 
+                                        id="answer-input"
+                                        type="text" 
+                                        value={textInput} 
+                                        onChange={e => setTextInput(e.target.value)} 
+                                        placeholder="Écrivez votre réponse..." 
+                                        className="flex-1 w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300" 
+                                        disabled={isLoading || isAwaitingSynthesisConfirmation}
+                                        aria-label="Champ de saisie de votre réponse"
+                                        aria-required="true"
+                                    />
+                                    {speechRecSupported && (
+                                        <button 
+                                            type="button" 
+                                            onClick={() => isListening ? stopListening() : startListening()} 
+                                            className="p-3 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg transition-colors"
+                                            aria-label={isListening ? 'Arrêter l\'enregistrement vocal' : 'Démarrer l\'enregistrement vocal'}
+                                            aria-pressed={isListening}
+                                        >
+                                            <MicIcon active={isListening} />
+                                        </button>
+                                    )}
+                                    <button 
+                                        type="submit" 
+                                        className="bg-primary-600 text-white p-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all" 
+                                        disabled={isLoading || !textInput.trim() || isAwaitingSynthesisConfirmation}
+                                        aria-label="Envoyer la réponse"
+                                    >
+                                        <SendIcon />
+                                    </button>
                                 </form>
                             )}
-                             <button onClick={handleJoker} className="mt-2 text-xs text-slate-500 hover:text-primary-600 flex items-center justify-center w-full disabled:opacity-50" disabled={isLoading || isAwaitingSynthesisConfirmation}>
+                             <button 
+                                onClick={handleJoker} 
+                                className="mt-2 text-xs text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center justify-center w-full disabled:opacity-50 focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-2 transition-colors" 
+                                disabled={isLoading || isAwaitingSynthesisConfirmation}
+                                aria-label="Demander de l'aide pour répondre à la question"
+                            >
                                 <JokerIcon/> J'ai besoin d'aide pour répondre
                             </button>
                         </div>
                     </div>
-                    <aside className="hidden lg:block h-full overflow-y-auto bg-white rounded-xl shadow p-6">
+                    <aside 
+                        className="hidden lg:block h-full overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 transition-colors duration-300"
+                        role="complementary"
+                        aria-label="Tableau de bord avec thèmes émergents et analyse des compétences"
+                    >
                         <Dashboard data={dashboardData} isLoading={isDashboardLoading} />
                     </aside>
                 </main>
