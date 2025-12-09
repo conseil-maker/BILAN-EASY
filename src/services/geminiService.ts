@@ -182,6 +182,7 @@ export const generateQuestion = async (
 ): Promise<Question> => {
     const systemInstruction = getSystemInstruction(coachingStyle);
     const history = previousAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
+    const previousQuestionIds = previousAnswers.map(a => a.questionId).join(', ');
 
     let taskDescription = "";
     if (options.isModuleQuestion) {
@@ -204,7 +205,8 @@ export const generateQuestion = async (
         specialInstruction = `CRITICAL INSTRUCTION: The user mentioned an interest in '${options.searchTopic}'. Use the provided Google Search results to ask an enriched follow-up question that connects their interest to the current reality of the job market. Example: 'Intéressant, le métier de ${options.searchTopic}. Je vois que les offres d'emploi actuelles insistent beaucoup sur la compétence [Compétence trouvée via recherche]. Est-ce un domaine qui vous attire ?'`;
     }
 
-    const prompt = `Context: User Name: ${userName}. ${profileContext} Previous Q&A: ${history || "None."} ${specialInstruction} Task: ${taskDescription} The response MUST be a valid JSON object. Do not repeat questions.`;
+    const previousQuestionsWarning = previousQuestionIds ? `\n\nIMPORTANT: Questions already asked (DO NOT repeat these topics): ${previousQuestionIds}. Generate a DIFFERENT question on a NEW aspect of the current category.` : "";
+    const prompt = `Context: User Name: ${userName}. ${profileContext} Previous Q&A: ${history || "None."}${previousQuestionsWarning} ${specialInstruction} Task: ${taskDescription} The response MUST be a valid JSON object.`;
 
     const config: any = { 
         systemInstruction,
