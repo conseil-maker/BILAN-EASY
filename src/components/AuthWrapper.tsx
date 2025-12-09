@@ -15,15 +15,31 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const [showSignup, setShowSignup] = useState(false);
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserRole(session.user.id);
-      } else {
+    // Timeout de 10 secondes pour éviter le blocage infini
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.error('Timeout: Supabase session loading took too long');
         setLoading(false);
       }
-    });
+    }, 10000);
+
+    // Check current session
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchUserRole(session.user.id);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error('Error getting session:', error);
+        setLoading(false);
+      })
+      .finally(() => {
+        clearTimeout(timeout);
+      });
 
     // Listen for auth changes
     const {
