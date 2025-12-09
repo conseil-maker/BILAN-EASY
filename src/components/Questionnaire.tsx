@@ -123,6 +123,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [activeModule, setActiveModule] = useState<string | null>(null);
     const [moduleQuestionCount, setModuleQuestionCount] = useState(0);
     const [satisfactionSubmittedPhases, setSatisfactionSubmittedPhases] = useState<Set<number>>(new Set());
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -179,8 +180,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             if (speechSynthSupported && settings.voice) speak(aiMessage.text as string);
         } catch (error) {
             console.error("Error generating question:", error);
-            setMessages(prev => [...prev, { sender: 'ai', text: "Désolé, une erreur est survenue. Laissez-moi un instant..." }]);
-            setTimeout(() => fetchNextQuestion(), 3000);
+            // Réessayer automatiquement sans afficher de message pour ne pas inquiéter l'utilisateur
+            setTimeout(() => fetchNextQuestion(), 2000);
         } finally {
             setIsLoading(false);
         }
@@ -303,17 +304,20 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         }
         setShowSatisfactionModal(false);
         setSatisfactionPhaseInfo(null);
-        runNextStep(answers);
+        // Appeler directement fetchNextQuestion au lieu de runNextStep pour éviter la boucle
+        fetchNextQuestion();
     };
 
     const handleModuleAccept = () => { setActiveModule(suggestedModule!.id); setSuggestedModule(null); fetchNextQuestion(); };
     const handleModuleDecline = () => { setSuggestedModule(null); runNextStep(answers); };
     const handleJoker = () => { if (!isLoading) { fetchNextQuestion({ useJoker: true }); } };
-    const handleLogout = async () => {
-        if (window.confirm("Êtes-vous sûr de vouloir vous déconnecter ? Votre progression sera sauvegardée.")) {
-            await supabase.auth.signOut();
-            window.location.href = '/login';
-        }
+    const handleLogout = () => {
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = async () => {
+        await supabase.auth.signOut();
+        window.location.href = '/login';
     };
 
     if (isSummarizing) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="text-2xl font-bold">Génération de votre synthèse...</div><p>Veuillez patienter.</p></div></div>;
@@ -323,6 +327,35 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             {unlockedBadge && <BadgeNotification phaseName={unlockedBadge} onClose={() => setUnlockedBadge(null)} />}
             {showSatisfactionModal && satisfactionPhaseInfo && <SatisfactionModal phaseName={satisfactionPhaseInfo.name} onSubmit={handleSatisfactionSubmit} />}
             {suggestedModule && <ModuleModal reason={suggestedModule.reason} onAccept={handleModuleAccept} onDecline={handleModuleDecline} />}
+            {showLogoutModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowLogoutModal(false)}>
+                    <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-800 mb-2">Êtes-vous sûr ?</h3>
+                            <p className="text-slate-600 mb-6">Votre progression sera sauvegardée automatiquement. Vous pourrez reprendre là où vous vous êtes arrêté lors de votre prochaine connexion.</p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowLogoutModal(false)}
+                                    className="flex-1 px-6 py-3 bg-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-300 transition-colors"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    onClick={confirmLogout}
+                                    className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                                >
+                                    Se déconnecter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {showSaveNotification && <div className="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-sm shadow-lg z-50">Progrès sauvegardé !</div>}
             
             <div className="h-screen w-screen flex flex-col bg-slate-100">
