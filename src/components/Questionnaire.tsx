@@ -120,6 +120,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [suggestedModule, setSuggestedModule] = useState<{ id: string, reason: string } | null>(null);
     const [activeModule, setActiveModule] = useState<string | null>(null);
     const [moduleQuestionCount, setModuleQuestionCount] = useState(0);
+    const [satisfactionSubmittedPhases, setSatisfactionSubmittedPhases] = useState<Set<number>>(new Set());
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -223,7 +224,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     setSuggestedModule({ id: moduleSuggestion.moduleId, reason: moduleSuggestion.reason });
                     return;
                 }
-                if (prevInfo.satisfactionActive) {
+                if (prevInfo.satisfactionActive && !satisfactionSubmittedPhases.has(prevInfo.phase)) {
                     setSatisfactionPhaseInfo(prevInfo);
                     setShowSatisfactionModal(true);
                     return;
@@ -237,7 +238,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         }
         
         await fetchNextQuestion();
-    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis]);
+    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases]);
 
     useEffect(() => {
         const loadSession = async () => {
@@ -295,6 +296,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     
     const handleSatisfactionSubmit = (rating: number, comment: string) => {
         console.log({ phase: satisfactionPhaseInfo?.name, rating, comment });
+        if (satisfactionPhaseInfo) {
+            setSatisfactionSubmittedPhases(prev => new Set(prev).add(satisfactionPhaseInfo.phase));
+        }
         setShowSatisfactionModal(false);
         setSatisfactionPhaseInfo(null);
         runNextStep(answers);
