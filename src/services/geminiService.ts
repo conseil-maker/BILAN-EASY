@@ -2,7 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Answer, Package, Question, QuestionType, Summary, UserProfile, DashboardData, ActionPlanItem, CoachingStyle } from '../types';
 import { QUESTION_CATEGORIES } from "../constants";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY! });
 
 // --- SCHEMAS ---
 
