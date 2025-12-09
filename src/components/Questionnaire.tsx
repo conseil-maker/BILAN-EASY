@@ -4,6 +4,7 @@ import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndS
 import { QUESTION_CATEGORIES } from '../constants';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import { useDarkMode } from '../hooks/useDarkMode';
 import SpeechSettings from './SpeechSettings';
 import Dashboard from './Dashboard';
 import JourneyProgress from './JourneyProgress';
@@ -131,6 +132,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
     const { isSpeaking, isSupported: speechSynthSupported, voices, settings, speak, cancel, onSettingsChange } = useSpeechSynthesis();
     const { isListening, isSupported: speechRecSupported, interimTranscript, finalTranscript, startListening, stopListening } = useSpeechRecognition({ lang: 'fr-FR' });
+    const { isDarkMode, toggleDarkMode } = useDarkMode();
 
     useEffect(() => { setTextInput(interimTranscript || finalTranscript); }, [interimTranscript, finalTranscript]);
     const scrollToBottom = () => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
@@ -496,34 +498,45 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 )}
             </div>
             
-            <div className="h-screen w-screen flex flex-col bg-slate-100">
-                <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 p-4 flex justify-between items-center shadow-sm">
+            <div className="h-screen w-screen flex flex-col bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
+                <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center shadow-sm transition-colors duration-300">
                     <div>
-                        <h1 className="font-bold text-lg text-primary-800 font-display">{pkg.name}</h1>
-                        <p className="text-sm text-slate-600">{currentPhaseInfo?.name}</p>
+                        <h1 className="font-bold text-lg text-primary-800 dark:text-primary-300 font-display transition-colors duration-300">{pkg.name}</h1>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">{currentPhaseInfo?.name}</p>
                     </div>
                     {currentPhaseInfo && <JourneyProgress current={answers.length} total={pkg.totalQuestionnaires} phases={[pkg.phases.phase1.questionnaires, pkg.phases.phase2.questionnaires, pkg.phases.phase3.questionnaires]} />}
                     <div className="flex items-center gap-4">
-                        {speechSynthSupported && <button onClick={() => isSpeaking ? cancel() : speak(messages[messages.length - 1]?.text as string)} className="text-slate-500 hover:text-primary-600" title="Lecture vocale"><SpeakerIcon active={isSpeaking} /></button>}
-                        <button onClick={() => setShowHelpModal(true)} className="text-slate-500 hover:text-primary-600 transition-colors" title="Aide">
+                        {speechSynthSupported && <button onClick={() => isSpeaking ? cancel() : speak(messages[messages.length - 1]?.text as string)} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="Lecture vocale"><SpeakerIcon active={isSpeaking} /></button>}
+                        <button onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300" title={isDarkMode ? 'Mode clair' : 'Mode sombre'} aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}>
+                            {isDarkMode ? (
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            ) : (
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            )}
+                        </button>
+                        <button onClick={() => setShowHelpModal(true)} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="Aide">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </button>
-                        <button onClick={() => setShowSettings(!showSettings)} className="text-slate-500 hover:text-primary-600" title="Paramètres"><SettingsIcon /></button>
-                        <button onClick={handleLogout} className="text-slate-500 hover:text-red-600 transition-colors" title="Déconnexion"><LogoutIcon /></button>
+                        <button onClick={() => setShowSettings(!showSettings)} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="Paramètres"><SettingsIcon /></button>
+                        <button onClick={handleLogout} className="text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Déconnexion"><LogoutIcon /></button>
                     </div>
                 </header>
                 
                 {showSettings && speechSynthSupported && <div className="border-b"><SpeechSettings voices={voices} settings={settings} onSettingsChange={onSettingsChange} /></div>}
 
                 <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-                    <div className="lg:col-span-2 flex flex-col h-full bg-white rounded-xl shadow">
+                    <div className="lg:col-span-2 flex flex-col h-full bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 transition-colors duration-300">
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             {messages.map((msg, index) => (
                                 <div key={index} className={`flex items-end gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`} style={{animationDelay: `${index * 0.05}s`}}>
                                     {msg.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center flex-shrink-0 animate-scale-in">IA</div>}
-                                    <div className={`max-w-xl p-4 rounded-2xl transition-all duration-300 hover:shadow-lg ${msg.sender === 'user' ? 'bg-primary-600 text-white rounded-br-none' : 'bg-slate-200 text-slate-800 rounded-bl-none'}`}>
+                                    <div className={`max-w-xl p-4 rounded-2xl transition-all duration-300 hover:shadow-lg ${msg.sender === 'user' ? 'bg-primary-600 dark:bg-primary-500 text-white rounded-br-none' : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-none'}`}>
                                         <p>{msg.text}</p>
                                         {msg.isSynthesis && (
                                             <div className="mt-4 flex gap-2">
