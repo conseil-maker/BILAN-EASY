@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface JourneyProgressProps {
   current: number;
@@ -6,11 +6,14 @@ interface JourneyProgressProps {
   phases: number[]; // Number of questions in each phase
 }
 
-const JourneyProgress: React.FC<JourneyProgressProps> = ({ current, total, phases }) => {
-  const phaseBoundaries = phases.reduce((acc, val, i) => {
-    acc.push((acc[i-1] || 0) + val);
-    return acc;
-  }, [] as number[]);
+const JourneyProgress: React.FC<JourneyProgressProps> = React.memo(({ current, total, phases }) => {
+  const phaseBoundaries = useMemo(() => 
+    phases.reduce((acc, val, i) => {
+      acc.push((acc[i-1] || 0) + val);
+      return acc;
+    }, [] as number[]),
+    [phases]
+  );
 
   const getStepStatus = (stepIndex: number) => {
     if (stepIndex < current) return 'completed';
@@ -100,6 +103,6 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({ current, total, phase
       </div>
     </div>
   );
-};
+});
 
 export default JourneyProgress;

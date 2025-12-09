@@ -8,6 +8,7 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import SpeechSettings from './SpeechSettings';
 import Dashboard from './Dashboard';
 import JourneyProgress from './JourneyProgress';
+import Confetti from './Confetti';
 import { supabase } from '../lib/supabaseClient';
 
 const SendIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>;
@@ -18,16 +19,25 @@ const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 
 const JokerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-5 5a1 1 0 01-1-1v-2a1 1 0 112 0v2a1 1 0 01-1 1zm2-3a1 1 0 00-1.414 1.414L8.586 18l-1.293 1.293a1 1 0 101.414 1.414L10 19.414l1.293 1.293a1 1 0 001.414-1.414L11.414 18l1.293-1.293a1 1 0 00-1.414-1.414L10 16.586 8.707 15.293zM5 11a1 1 0 100 2h.01a1 1 0 100-2H5zm14-1a1 1 0 11-2 0v-2a1 1 0 112 0v2zM15 9a1 1 0 100-2h-.01a1 1 0 100 2H15z" clipRule="evenodd" /></svg>;
 
 const BadgeNotification: React.FC<{ phaseName: string; onClose: () => void }> = ({ phaseName, onClose }) => {
+    const [showConfetti, setShowConfetti] = useState(true);
+    
     useEffect(() => {
-        const timer = setTimeout(onClose, 4000);
-        return () => clearTimeout(timer);
+        const confettiTimer = setTimeout(() => setShowConfetti(false), 3000);
+        const badgeTimer = setTimeout(onClose, 4000);
+        return () => {
+            clearTimeout(confettiTimer);
+            clearTimeout(badgeTimer);
+        };
     }, [onClose]);
 
     return (
-        <div className="fixed top-5 right-5 bg-secondary text-white p-4 rounded-lg shadow-lg animate-fade-in-down z-50">
-            <p className="font-bold">🎉 Badge débloqué !</p>
-            <p>Vous avez terminé : {phaseName}</p>
-        </div>
+        <>
+            {showConfetti && <Confetti duration={3000} />}
+            <div className="fixed top-5 right-5 bg-gradient-to-r from-secondary to-primary-600 text-white p-6 rounded-xl shadow-2xl animate-fade-in-down z-50 border-2 border-white/30">
+                <p className="font-bold text-xl mb-1">🎉 Badge débloqué !</p>
+                <p className="text-white/90">Vous avez terminé : {phaseName}</p>
+            </div>
+        </>
     );
 };
 
