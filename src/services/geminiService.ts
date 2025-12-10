@@ -252,7 +252,48 @@ export const generateSummary = async (answers: Answer[], pkg: Package, userName:
     const systemInstruction = getSystemInstruction(coachingStyle);
     const fullTranscript = answers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
     const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}, Transcript: ${fullTranscript}. Task: Analyze the transcript and generate a comprehensive summary in French. The response MUST be a valid JSON object conforming to the schema. For 'keyStrengths' and 'areasForDevelopment', each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. For 'actionPlan', each item must have a unique 'id' and 'text'.`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } });
+    
+    // Fonction avec timeout
+    const generateWithTimeout = async (model: string, timeoutMs: number = 60000) => {
+        return Promise.race([
+            ai.models.generateContent({ model, contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } }),
+            new Promise<never>((_, reject) => 
+                setTimeout(() => reject(new Error(`Timeout après ${timeoutMs/1000}s`)), timeoutMs)
+            )
+        ]);
+    };
+    
+    // Retry avec fallback vers flash
+    let response;
+    let lastError;
+    
+    // Tentative 1 : gemini-2.5-pro avec 60s timeout
+    try {
+        console.log('[generateSummary] Tentative 1/3 avec gemini-2.5-pro...');
+        response = await generateWithTimeout('gemini-2.5-pro', 60000);
+    } catch (error) {
+        console.warn('[generateSummary] Échec tentative 1:', error);
+        lastError = error;
+        
+        // Tentative 2 : gemini-2.5-flash avec 45s timeout
+        try {
+            console.log('[generateSummary] Tentative 2/3 avec gemini-2.5-flash...');
+            response = await generateWithTimeout('gemini-2.5-flash', 45000);
+        } catch (error2) {
+            console.warn('[generateSummary] Échec tentative 2:', error2);
+            lastError = error2;
+            
+            // Tentative 3 : dernier essai avec flash et 30s timeout
+            try {
+                console.log('[generateSummary] Tentative 3/3 (dernière chance)...');
+                response = await generateWithTimeout('gemini-2.5-flash', 30000);
+            } catch (error3) {
+                console.error('[generateSummary] Toutes les tentatives ont échoué:', error3);
+                throw new Error(`Impossible de générer la synthèse après 3 tentatives. Dernière erreur: ${error3}`);
+            }
+        }
+    }
+    
     const summaryData = parseJsonResponse<any>(response.text, 'generateSummary');
     const processActionPlan = (items: any[]): ActionPlanItem[] => items.map(item => ({...item, completed: false}));
     

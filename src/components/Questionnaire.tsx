@@ -161,7 +161,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     }, [pkg]);
     
     const updateDashboard = useCallback(async (currentAnswers: Answer[]) => {
-        if (currentAnswers.length < 2) return;
+        // Analyser dès la première réponse pour montrer les thèmes progressivement
+        if (currentAnswers.length < 1) return;
         setIsDashboardLoading(true);
         try {
             const data = await analyzeThemesAndSkills(currentAnswers);
@@ -221,16 +222,38 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const runNextStep = useCallback(async (currentAnswers: Answer[]) => {
         if (currentAnswers.length >= pkg.totalQuestionnaires) {
             setIsSummarizing(true);
-            const finalSummary = await generateSummary(currentAnswers, pkg, userName, coachingStyle);
-            localStorage.removeItem(SESSION_STORAGE_KEY);
-            onComplete(currentAnswers, finalSummary);
+            try {
+                const finalSummary = await generateSummary(currentAnswers, pkg, userName, coachingStyle);
+                localStorage.removeItem(SESSION_STORAGE_KEY);
+                onComplete(currentAnswers, finalSummary);
+            } catch (error) {
+                console.error('[runNextStep] Erreur lors de la génération de la synthèse:', error);
+                setIsSummarizing(false);
+                const retry = window.confirm(
+                    `❌ Une erreur est survenue lors de la génération de votre synthèse.\n\n` +
+                    `Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}\n\n` +
+                    `Voulez-vous réessayer ?`
+                );
+                if (retry) {
+                    // Réessayer
+                    runNextStep(currentAnswers);
+                } else {
+                    // Retourner au questionnaire
+                    alert('💾 Votre progression a été sauvegardée. Vous pouvez réessayer plus tard.');
+                }
+            }
             return;
         }
 
+        // Sauvegarde tous les 5 réponses
         if (currentAnswers.length > 0 && currentAnswers.length % 5 === 0) {
             localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentAnswers));
             setLastSaveTime(new Date());
             setShowSaveNotification(true); setTimeout(() => setShowSaveNotification(false), 3000);
+        }
+        
+        // Mise à jour du dashboard tous les 3 réponses (plus fréquent)
+        if (currentAnswers.length > 0 && currentAnswers.length % 3 === 0) {
             updateDashboard(currentAnswers);
         }
 
@@ -347,7 +370,37 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         }
     };
 
-    if (isSummarizing) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="text-2xl font-bold">Génération de votre synthèse...</div><p>Veuillez patienter.</p></div></div>;
+    if (isSummarizing) return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
+            <div className="text-center max-w-md mx-4">
+                <div className="mb-8">
+                    <svg className="w-24 h-24 mx-auto text-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-4">
+                    🧠 Génération de votre synthèse...
+                </h2>
+                <p className="text-slate-600 dark:text-slate-300 mb-6">
+                    Notre IA analyse vos réponses pour créer un rapport personnalisé.
+                </p>
+                <div className="bg-white dark:bg-slate-700 rounded-xl p-6 shadow-lg">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-sm text-slate-600 dark:text-slate-300">Analyse en cours...</span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                        ⏱️ Cela peut prendre jusqu'à 60 secondes.<br/>
+                        Merci de votre patience !
+                    </p>
+                </div>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-6">
+                    💾 Votre progression est automatiquement sauvegardée
+                </p>
+            </div>
+        </div>
+    );
 
     return (
         <>

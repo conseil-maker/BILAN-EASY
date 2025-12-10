@@ -103,11 +103,8 @@ export default function Login({ onToggle }: LoginProps) {
         </div>
 
         <div className="text-center text-sm text-gray-500">
-          <p>Comptes de test disponibles :</p>
-          <p className="mt-1">Admin: testfinal@bilancompetences.com</p>
-          <p>Consultant: test.nouveau@gmail.com</p>
-          <p>Client: admin.bilan@gmail.com</p>
-          <p className="mt-1 text-xs">(Mot de passe: password123)</p>
+          <p>Nouveau sur la plateforme ?</p>
+          <p className="mt-1 text-primary-600 font-medium">Créez votre compte gratuitement !</p>
         </div>
       </div>
     </div>
