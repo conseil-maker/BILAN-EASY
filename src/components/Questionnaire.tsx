@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Package, Answer, Question, QuestionType, Message, CurrentPhaseInfo, Summary, UserProfile, DashboardData, CoachingStyle } from '../types';
 import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule } from '../services/geminiService';
-import { QUESTION_CATEGORIES } from '../constants';
+import { QUESTION_CATEGORIES, getTimeBudget, getCurrentPhase, isJourneyComplete, determineQuestionComplexity, shouldDeepenCategory, QUESTION_COMPLEXITY_TIME } from '../constants';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -139,6 +139,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false);
     const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
+    const [categoryProgress, setCategoryProgress] = useState<Map<string, number>>(new Map());
+    const [currentCategoryId, setCurrentCategoryId] = useState<string | null>(null);
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -150,14 +152,18 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const scrollToBottom = () => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
     useEffect(scrollToBottom, [messages]);
 
-    const getPhaseInfo = useCallback((questionCount: number): CurrentPhaseInfo => {
-        const { phase1, phase2 } = pkg.phases;
-        const qInPhase1 = phase1.questionnaires;
-        const qInPhase2 = phase2.questionnaires;
-
-        if (questionCount < qInPhase1) return { phase: 1, name: QUESTION_CATEGORIES.phase1.name, positionInPhase: questionCount + 1, totalInPhase: qInPhase1, satisfactionActive: QUESTION_CATEGORIES.phase1.satisfactionActive };
-        if (questionCount < qInPhase1 + qInPhase2) return { phase: 2, name: QUESTION_CATEGORIES.phase2.name, positionInPhase: questionCount - qInPhase1 + 1, totalInPhase: qInPhase2, satisfactionActive: QUESTION_CATEGORIES.phase2.satisfactionActive };
-        return { phase: 3, name: QUESTION_CATEGORIES.phase3.name, positionInPhase: questionCount - qInPhase1 - qInPhase2 + 1, totalInPhase: pkg.phases.phase3.questionnaires, satisfactionActive: QUESTION_CATEGORIES.phase3.satisfactionActive };
+    const getPhaseInfo = useCallback((currentAnswers: Answer[]): CurrentPhaseInfo => {
+        const currentPhase = getCurrentPhase(pkg.id, currentAnswers);
+        const phaseKey = `phase${currentPhase.phase}` as 'phase1' | 'phase2' | 'phase3';
+        const phaseCategories = QUESTION_CATEGORIES[phaseKey];
+        
+        return { 
+            phase: currentPhase.phase, 
+            name: currentPhase.name, 
+            positionInPhase: currentPhase.questionnaire, 
+            totalInPhase: pkg.phases[phaseKey].questionnaires, 
+            satisfactionActive: phaseCategories.satisfactionActive 
+        };
     }, [pkg]);
     
     const updateDashboard = useCallback(async (currentAnswers: Answer[]) => {
@@ -179,14 +185,66 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             if (activeModule) {
                 question = await generateQuestion('phase2', 0, answers, userName, coachingStyle, null, { isModuleQuestion: { moduleId: activeModule, questionNum: moduleQuestionCount + 1 } });
             } else {
-                const info = getPhaseInfo(answers.length);
+                const info = getPhaseInfo(answers);
                 setCurrentPhaseInfo(info);
                 const phaseKey = `phase${info.phase}` as 'phase1' | 'phase2' | 'phase3';
                 const phaseCategories = QUESTION_CATEGORIES[phaseKey].categories;
-                const categoryIndex = (info.positionInPhase - 1) % phaseCategories.length;
                 
-                let genOptions: any = { useJoker: options.useJoker };
-                if (info.phase === 2 && info.positionInPhase === 2 && answers.length > 0 && answers[answers.length - 1].value.length > 3) {
+                // Trouver la prochaine catégorie à explorer
+                let selectedCategory = null;
+                let categoryIndex = 0;
+                
+                for (let i = 0; i < phaseCategories.length; i++) {
+                    const cat = phaseCategories[i];
+                    const questionsAsked = categoryProgress.get(cat.id) || 0;
+                    
+                    // Si la catégorie n'a pas atteint son minimum, la sélectionner
+                    if (questionsAsked < cat.minQuestions) {
+                        selectedCategory = cat;
+                        categoryIndex = i;
+                        break;
+                    }
+                    
+                    // Sinon, vérifier si on doit l'approfondir
+                    const timeBudget = getTimeBudget(pkg.id, answers);
+                    const phaseTimeRemaining = timeBudget[`phase${info.phase}Remaining` as 'phase1Remaining' | 'phase2Remaining' | 'phase3Remaining'];
+                    
+                    if (shouldDeepenCategory(cat.id, phaseKey, questionsAsked, phaseTimeRemaining)) {
+                        selectedCategory = cat;
+                        categoryIndex = i;
+                        break;
+                    }
+                }
+                
+                // Si aucune catégorie trouvée, prendre la première non-maximale
+                if (!selectedCategory) {
+                    for (let i = 0; i < phaseCategories.length; i++) {
+                        const cat = phaseCategories[i];
+                        const questionsAsked = categoryProgress.get(cat.id) || 0;
+                        if (questionsAsked < cat.maxQuestions) {
+                            selectedCategory = cat;
+                            categoryIndex = i;
+                            break;
+                        }
+                    }
+                }
+                
+                // Si toujours rien, prendre la première
+                if (!selectedCategory) {
+                    selectedCategory = phaseCategories[0];
+                    categoryIndex = 0;
+                }
+                
+                setCurrentCategoryId(selectedCategory.id);
+                
+                // Déterminer la complexité optimale
+                const timeBudget = getTimeBudget(pkg.id, answers);
+                const phaseTimeRemaining = timeBudget[`phase${info.phase}Remaining` as 'phase1Remaining' | 'phase2Remaining' | 'phase3Remaining'];
+                const questionsAskedInCategory = categoryProgress.get(selectedCategory.id) || 0;
+                const complexity = determineQuestionComplexity(selectedCategory.id, phaseKey, phaseTimeRemaining, questionsAskedInCategory);
+                
+                let genOptions: any = { useJoker: options.useJoker, targetComplexity: complexity, categoryId: selectedCategory.id };
+                if (info.phase === 2 && answers.length > 0 && answers[answers.length - 1].value.length > 3) {
                     genOptions.useGoogleSearch = true; genOptions.searchTopic = answers[answers.length - 1].value;
                 }
                 question = await generateQuestion(phaseKey, categoryIndex, answers, userName, coachingStyle, answers.length === 0 ? userProfile : null, genOptions);
@@ -220,7 +278,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     }, [userName, coachingStyle, fetchNextQuestion]);
 
     const runNextStep = useCallback(async (currentAnswers: Answer[]) => {
-        if (currentAnswers.length >= pkg.totalQuestionnaires) {
+        // Vérifier si le parcours est terminé basé sur le budget temps
+        if (isJourneyComplete(pkg.id, currentAnswers)) {
             setIsSummarizing(true);
             try {
                 const finalSummary = await generateSummary(currentAnswers, pkg, userName, coachingStyle);
@@ -258,8 +317,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         }
 
         if (currentAnswers.length > 0) {
-            const info = getPhaseInfo(currentAnswers.length);
-            const prevInfo = getPhaseInfo(currentAnswers.length - 1);
+            const info = getPhaseInfo(currentAnswers);
+            const prevAnswers = currentAnswers.slice(0, -1);
+            const prevInfo = prevAnswers.length > 0 ? getPhaseInfo(prevAnswers) : { phase: 1, name: '', satisfactionActive: false };
             if (info.phase !== prevInfo.phase) {
                 setUnlockedBadge(`Phase ${prevInfo.phase} : ${prevInfo.name}`);
                 const moduleSuggestion = await suggestOptionalModule(currentAnswers);
@@ -312,11 +372,33 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const handleAnswerSubmit = (value: string) => {
         if (isLoading || !currentQuestion || isAwaitingSynthesisConfirmation) return;
         cancel();
-        const newAnswer: Answer = { questionId: currentQuestion.id, value };
+        
+        // Déterminer la complexité de la question (estimée par la longueur de la réponse et le contexte)
+        let estimatedComplexity: 'simple' | 'moyenne' | 'complexe' | 'reflexion' = 'moyenne';
+        if (value.length < 50) estimatedComplexity = 'simple';
+        else if (value.length > 200) estimatedComplexity = 'complexe';
+        else if (value.length > 400) estimatedComplexity = 'reflexion';
+        
+        const newAnswer: Answer = { 
+            questionId: currentQuestion.id, 
+            value,
+            complexity: estimatedComplexity,
+            categoryId: currentCategoryId || undefined,
+            timestamp: Date.now()
+        };
         const newAnswers = [...answers, newAnswer];
         setMessages(prev => [...prev, { sender: 'user', text: value }]);
         setAnswers(newAnswers);
         setTextInput('');
+        
+        // Mettre à jour le progrès de la catégorie
+        if (currentCategoryId) {
+            setCategoryProgress(prev => {
+                const newMap = new Map(prev);
+                newMap.set(currentCategoryId, (newMap.get(currentCategoryId) || 0) + 1);
+                return newMap;
+            });
+        }
 
         if (activeModule) {
             if (moduleQuestionCount + 1 >= 3) {
@@ -579,7 +661,19 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         <h1 className="font-bold text-lg text-primary-800 dark:text-primary-300 font-display transition-colors duration-300">{pkg.name}</h1>
                         <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">{currentPhaseInfo?.name}</p>
                     </div>
-                    {currentPhaseInfo && <JourneyProgress current={answers.length} total={pkg.totalQuestionnaires} phases={[pkg.phases.phase1.questionnaires, pkg.phases.phase2.questionnaires, pkg.phases.phase3.questionnaires]} />}
+                    {currentPhaseInfo && (() => {
+                        const timeBudget = getTimeBudget(pkg.id, answers);
+                        return (
+                            <div className="text-center">
+                                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    {Math.floor(timeBudget.spent)} / {timeBudget.total} min
+                                </div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                    {answers.length} questions | {timeBudget.percentage.toFixed(0)}% complété
+                                </div>
+                            </div>
+                        );
+                    })()}
                     <div className="flex items-center gap-4">
                         {speechSynthSupported && <button onClick={() => isSpeaking ? cancel() : speak(messages[messages.length - 1]?.text as string)} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="Lecture vocale"><SpeakerIcon active={isSpeaking} /></button>}
                         <button onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300" title={isDarkMode ? 'Mode clair' : 'Mode sombre'} aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}>

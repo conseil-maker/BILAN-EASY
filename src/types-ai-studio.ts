@@ -20,12 +20,23 @@ export interface Question {
 export interface Answer {
   questionId: string;
   value: string;
+  complexity?: QuestionComplexity;
+  categoryId?: string;
+  timestamp?: number;
 }
 
 export interface Phase {
   questionnaires: number;
   duration_min: number;
   name: string;
+}
+
+export type QuestionComplexity = 'simple' | 'moyenne' | 'complexe' | 'reflexion';
+
+export interface CategoryProgress {
+  categoryId: string;
+  questionsAsked: number;
+  timeSpent: number;
 }
 
 export interface Package {
@@ -39,6 +50,12 @@ export interface Package {
     phase1: Phase;
     phase2: Phase;
     phase3: Phase;
+  };
+  timeBudget: {
+    total: number;
+    phase1: number;
+    phase2: number;
+    phase3: number;
   };
 }
 

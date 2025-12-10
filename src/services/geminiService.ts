@@ -178,7 +178,7 @@ export const generateQuestion = async (
   userName: string,
   coachingStyle: CoachingStyle,
   userProfile: UserProfile | null = null,
-  options: { useJoker?: boolean, useGoogleSearch?: boolean, searchTopic?: string, isModuleQuestion?: { moduleId: string, questionNum: number } } = {}
+  options: { useJoker?: boolean, useGoogleSearch?: boolean, searchTopic?: string, isModuleQuestion?: { moduleId: string, questionNum: number }, targetComplexity?: 'simple' | 'moyenne' | 'complexe' | 'reflexion', categoryId?: string } = {}
 ): Promise<Question> => {
     const systemInstruction = getSystemInstruction(coachingStyle);
     const history = previousAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
@@ -190,7 +190,27 @@ export const generateQuestion = async (
     } else {
         const phaseInfo = QUESTION_CATEGORIES[phaseKey];
         const category = phaseInfo.categories[categoryIndex];
-        taskDescription = `This is the main assessment. Phase: ${phaseInfo.name}, Current Category: ${category}. Generate the next question.`
+        
+        // Ajouter des instructions sur la complexité cible
+        let complexityInstruction = "";
+        if (options.targetComplexity) {
+            switch (options.targetComplexity) {
+                case 'simple':
+                    complexityInstruction = " COMPLEXITY: Ask a SIMPLE, factual question that can be answered in 1-2 minutes (e.g., 'What is your current role?', 'Which sector do you work in?'). Keep it straightforward and concise.";
+                    break;
+                case 'moyenne':
+                    complexityInstruction = " COMPLEXITY: Ask a MEDIUM-depth question requiring 3-5 minutes to answer (e.g., 'Describe your main technical skills', 'What motivates you in your work?'). Encourage detailed but focused responses.";
+                    break;
+                case 'complexe':
+                    complexityInstruction = " COMPLEXITY: Ask a COMPLEX, analytical question requiring 5-10 minutes (e.g., 'Analyze a situation where you had to manage a team conflict', 'How do your values align with your career choices?'). Encourage deep reflection with concrete examples.";
+                    break;
+                case 'reflexion':
+                    complexityInstruction = " COMPLEXITY: Ask a DEEP REFLECTION question requiring 10-15 minutes (e.g., 'Project yourself 5 years from now: what would your ideal career path look like?', 'How have your past experiences shaped your professional identity?'). Encourage introspection and long-term vision.";
+                    break;
+            }
+        }
+        
+        taskDescription = `This is the main assessment. Phase: ${phaseInfo.name}, Current Category: ${category.name} (ID: ${options.categoryId || 'unknown'}).${complexityInstruction} Generate the next question.`
     }
 
     let profileContext = "";
