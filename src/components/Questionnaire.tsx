@@ -154,11 +154,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
 
     const getPhaseInfo = useCallback((currentAnswers: Answer[]): CurrentPhaseInfo => {
         const currentPhase = getCurrentPhase(pkg.id, currentAnswers);
-        const phaseKey = `phase${currentPhase.phase}` as 'phase1' | 'phase2' | 'phase3';
+        const phaseKey = currentPhase.phase; // 'phase1' | 'phase2' | 'phase3'
         const phaseCategories = QUESTION_CATEGORIES[phaseKey];
         
+        // Extraire le numéro de phase (1, 2, 3) depuis la clé ('phase1', 'phase2', 'phase3')
+        const phaseNumber = parseInt(phaseKey.replace('phase', ''));
+        
         return { 
-            phase: currentPhase.phase, 
+            phase: phaseNumber, 
             name: currentPhase.name, 
             positionInPhase: currentPhase.questionnaire, 
             totalInPhase: pkg.phases[phaseKey].questionnaires, 
@@ -177,18 +180,23 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         finally { setIsDashboardLoading(false); }
     }, []);
 
-    const fetchNextQuestion = useCallback(async (options: { useJoker?: boolean } = {}) => {
+    const MAX_RETRIES = 3;
+
+    const fetchNextQuestion = useCallback(async (options: { useJoker?: boolean } = {}, currentRetry = 0) => {
         setIsLoading(true);
         setCurrentQuestion(null);
+        console.log(`[fetchNextQuestion] Attempt ${currentRetry + 1}/${MAX_RETRIES}`);
         try {
             let question;
             if (activeModule) {
                 question = await generateQuestion('phase2', 0, answers, userName, coachingStyle, null, { isModuleQuestion: { moduleId: activeModule, questionNum: moduleQuestionCount + 1 } });
             } else {
                 const info = getPhaseInfo(answers);
+                console.log('[fetchNextQuestion] Phase info:', info);
                 setCurrentPhaseInfo(info);
                 const phaseKey = `phase${info.phase}` as 'phase1' | 'phase2' | 'phase3';
                 const phaseCategories = QUESTION_CATEGORIES[phaseKey].categories;
+                console.log('[fetchNextQuestion] Phase categories:', phaseCategories.length);
                 
                 // Trouver la prochaine catégorie à explorer
                 let selectedCategory = null;
@@ -235,13 +243,16 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     categoryIndex = 0;
                 }
                 
+                console.log('[fetchNextQuestion] Selected category:', selectedCategory.id, 'at index:', categoryIndex);
                 setCurrentCategoryId(selectedCategory.id);
                 
                 // Déterminer la complexité optimale
                 const timeBudget = getTimeBudget(pkg.id, answers);
+                console.log('[fetchNextQuestion] Time budget:', timeBudget);
                 const phaseTimeRemaining = timeBudget[`phase${info.phase}Remaining` as 'phase1Remaining' | 'phase2Remaining' | 'phase3Remaining'];
                 const questionsAskedInCategory = categoryProgress.get(selectedCategory.id) || 0;
                 const complexity = determineQuestionComplexity(selectedCategory.id, phaseKey, phaseTimeRemaining, questionsAskedInCategory);
+                console.log('[fetchNextQuestion] Complexity:', complexity, 'for category:', selectedCategory.id);
                 
                 let genOptions: any = { useJoker: options.useJoker, targetComplexity: complexity, categoryId: selectedCategory.id };
                 if (info.phase === 2 && answers.length > 0 && answers[answers.length - 1].value.length > 3) {
@@ -254,13 +265,27 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             setMessages(prev => [...prev, aiMessage]);
             if (speechSynthSupported && settings.voice) speak(aiMessage.text as string);
         } catch (error) {
-            console.error("Error generating question:", error);
-            // Réessayer automatiquement sans afficher de message pour ne pas inquiéter l'utilisateur
-            setTimeout(() => fetchNextQuestion(), 2000);
+            console.error(`[fetchNextQuestion] Error on attempt ${currentRetry + 1}:`, error);
+            
+            if (currentRetry < MAX_RETRIES - 1) {
+                // Réessayer après un délai
+                const delay = (currentRetry + 1) * 2000; // 2s, 4s, 6s
+                console.log(`[fetchNextQuestion] Retrying in ${delay}ms...`);
+                setTimeout(() => fetchNextQuestion(options, currentRetry + 1), delay);
+                return; // Ne pas exécuter le finally pour garder isLoading à true
+            } else {
+                // Toutes les tentatives ont échoué, afficher un message d'erreur
+                console.error('[fetchNextQuestion] All retries failed');
+                alert(
+                    `❌ Une erreur est survenue lors de la génération de la question.\n\n` +
+                    `Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}\n\n` +
+                    `Veuillez rafraîchir la page ou réessayer plus tard.`
+                );
+            }
         } finally {
             setIsLoading(false);
         }
-    }, [answers, userName, coachingStyle, getPhaseInfo, speak, speechSynthSupported, userProfile, activeModule, moduleQuestionCount, settings.voice]);
+    }, [answers, userName, coachingStyle, getPhaseInfo, speak, speechSynthSupported, userProfile, activeModule, moduleQuestionCount, settings.voice, pkg.id]);
 
     const handleGenerateSynthesis = useCallback(async (currentAnswers: Answer[]) => {
         setIsLoading(true);
@@ -278,8 +303,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     }, [userName, coachingStyle, fetchNextQuestion]);
 
     const runNextStep = useCallback(async (currentAnswers: Answer[]) => {
+        console.log('[runNextStep] Called with', currentAnswers.length, 'answers');
         // Vérifier si le parcours est terminé basé sur le budget temps
-        if (isJourneyComplete(pkg.id, currentAnswers)) {
+        const journeyComplete = isJourneyComplete(pkg.id, currentAnswers);
+        console.log('[runNextStep] Journey complete?', journeyComplete);
+        if (journeyComplete) {
             setIsSummarizing(true);
             try {
                 const finalSummary = await generateSummary(currentAnswers, pkg, userName, coachingStyle);
