@@ -218,11 +218,34 @@ export const generateQuestion = async (
         config.tools = [{googleSearch: {}}];
     }
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: config,
-    });
+    // Timeout et retry pour éviter les blocages
+    const generateWithTimeout = async (timeoutMs: number = 30000) => {
+        return Promise.race([
+            ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: config,
+            }),
+            new Promise<never>((_, reject) => 
+                setTimeout(() => reject(new Error(`Timeout après ${timeoutMs/1000}s`)), timeoutMs)
+            )
+        ]);
+    };
+
+    let response;
+    try {
+        console.log('[generateQuestion] Tentative 1: gemini-2.5-flash 30s');
+        response = await generateWithTimeout(30000);
+    } catch (error) {
+        console.warn('[generateQuestion] Échec tentative 1:', error);
+        try {
+            console.log('[generateQuestion] Tentative 2: gemini-2.5-flash 20s');
+            response = await generateWithTimeout(20000);
+        } catch (error2) {
+            console.error('[generateQuestion] Échec tentative 2:', error2);
+            throw new Error('Impossible de générer la question après 2 tentatives. Veuillez réessayer.');
+        }
+    }
 
     const questionData = parseJsonResponse<any>(response.text, 'generateQuestion');
     const type = questionData.type?.toUpperCase() === 'MULTIPLE_CHOICE' ? QuestionType.MULTIPLE_CHOICE : QuestionType.PARAGRAPH;
