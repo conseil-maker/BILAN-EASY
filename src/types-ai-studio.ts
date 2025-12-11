@@ -64,6 +64,8 @@ export interface Message {
   text: string | ReactNode;
   question?: Question;
   isSynthesis?: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
 export interface CurrentPhaseInfo {

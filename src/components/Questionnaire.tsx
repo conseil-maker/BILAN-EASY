@@ -186,6 +186,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         setIsLoading(true);
         setCurrentQuestion(null);
         console.log(`[fetchNextQuestion] Attempt ${currentRetry + 1}/${MAX_RETRIES}`);
+        
+        // Ajouter un message de chargement visible
+        if (currentRetry === 0) {
+            const loadingMessage: Message = { sender: 'ai', text: '🤔 L\'IA réfléchit à votre prochaine question...', isLoading: true };
+            setMessages(prev => [...prev, loadingMessage]);
+        }
         try {
             let question;
             if (activeModule) {
@@ -261,8 +267,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 question = await generateQuestion(phaseKey, categoryIndex, answers, userName, coachingStyle, answers.length === 0 ? userProfile : null, genOptions);
             }
             setCurrentQuestion(question);
-            const aiMessage: Message = { sender: 'ai', text: `${question.title}${question.description ? `\n\n${question.description}` : ''}`, question };
-            setMessages(prev => [...prev, aiMessage]);
+            // Supprimer le message de chargement et ajouter la vraie question
+            setMessages(prev => {
+                const filtered = prev.filter(m => !m.isLoading);
+                const aiMessage: Message = { sender: 'ai', text: `${question.title}${question.description ? `\n\n${question.description}` : ''}`, question };
+                return [...filtered, aiMessage];
+            });
             if (speechSynthSupported && settings.voice) speak(aiMessage.text as string);
         } catch (error) {
             console.error(`[fetchNextQuestion] Error on attempt ${currentRetry + 1}:`, error);
@@ -274,13 +284,26 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 setTimeout(() => fetchNextQuestion(options, currentRetry + 1), delay);
                 return; // Ne pas exécuter le finally pour garder isLoading à true
             } else {
-                // Toutes les tentatives ont échoué, afficher un message d'erreur
+                // Toutes les tentatives ont échoué, afficher un message d'erreur avec bouton
                 console.error('[fetchNextQuestion] All retries failed');
-                alert(
+                setMessages(prev => {
+                    const filtered = prev.filter(m => !m.isLoading);
+                    const errorMessage: Message = { 
+                        sender: 'ai', 
+                        text: `❌ Désolé, la génération de la question a échoué après ${MAX_RETRIES} tentatives.\n\nErreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}\n\n💡 Vous pouvez réessayer ou passer à la synthèse.`,
+                        isError: true
+                    };
+                    return [...filtered, errorMessage];
+                });
+                // Afficher une alerte pour proposer de réessayer
+                const retry = window.confirm(
                     `❌ Une erreur est survenue lors de la génération de la question.\n\n` +
                     `Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}\n\n` +
-                    `Veuillez rafraîchir la page ou réessayer plus tard.`
+                    `Voulez-vous réessayer ?`
                 );
+                if (retry) {
+                    fetchNextQuestion(options, 0); // Réessayer depuis le début
+                }
             }
         } finally {
             setIsLoading(false);
