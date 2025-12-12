@@ -267,10 +267,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 question = await generateQuestion(phaseKey, categoryIndex, answers, userName, coachingStyle, answers.length === 0 ? userProfile : null, genOptions);
             }
             setCurrentQuestion(question);
+            // Créer le message AI avant de l'ajouter aux messages
+            const aiMessage: Message = { sender: 'ai', text: `${question.title}${question.description ? `\n\n${question.description}` : ''}`, question };
             // Supprimer le message de chargement et ajouter la vraie question
             setMessages(prev => {
                 const filtered = prev.filter(m => !m.isLoading);
-                const aiMessage: Message = { sender: 'ai', text: `${question.title}${question.description ? `\n\n${question.description}` : ''}`, question };
                 return [...filtered, aiMessage];
             });
             if (speechSynthSupported && settings.voice) speak(aiMessage.text as string);
