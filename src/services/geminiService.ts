@@ -1,6 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Answer, Package, Question, QuestionType, Summary, UserProfile, DashboardData, ActionPlanItem, CoachingStyle } from '../types';
 import { QUESTION_CATEGORIES } from "../constants";
+import { selectFallbackQuestion } from '../data/fallbackQuestions';
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY! });
 
@@ -263,6 +264,21 @@ export const generateQuestion = async (
             response = await generateWithTimeout(20000);
         } catch (error2) {
             console.error('[generateQuestion] Échec tentative 2:', error2);
+            console.warn('[generateQuestion] Fallback: utilisation de questions pré-générées');
+            
+            // Fallback avec questions pré-générées
+            const fallbackQuestion = selectFallbackQuestion(
+                options.categoryId || 'parcours_professionnel',
+                options.isModuleQuestion ? 2 : 1,
+                previousAnswers.map(a => a.questionId)
+            );
+            
+            if (fallbackQuestion) {
+                console.log('[generateQuestion] Question de fallback sélectionnée:', fallbackQuestion.id);
+                return fallbackQuestion;
+            }
+            
+            // Si même le fallback échoue, lever l'erreur
             throw new Error('Impossible de générer la question après 2 tentatives. Veuillez réessayer.');
         }
     }
