@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import DOMPurify from 'dompurify';
 import { emailTemplates } from '../services/emailService';
 
 interface EmailPreviewProps {
@@ -137,7 +138,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
           {viewMode === 'html' ? (
             <div 
               className="bg-white rounded-lg shadow-inner"
-              dangerouslySetInnerHTML={{ __html: template.html }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.html) }}
             />
           ) : (
             <pre className="whitespace-pre-wrap font-mono text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">

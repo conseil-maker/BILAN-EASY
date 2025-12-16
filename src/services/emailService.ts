@@ -7,11 +7,12 @@
  * - Notifications de fin de bilan
  * - Documents disponibles
  * 
- * Note : L'envoi réel nécessite une intégration avec un service
- * comme SendGrid, Resend, ou Mailgun via une Edge Function Supabase.
+ * Intégration avec Resend pour l'envoi réel d'emails.
+ * Configuration requise : VITE_RESEND_API_KEY dans les variables d'environnement.
  */
 
 import { organizationConfig } from '../config/organization';
+import { emailConfig, isEmailConfigured } from '../config/email';
 
 // Types
 export interface EmailTemplate {
@@ -406,21 +407,58 @@ export const emailTemplates = {
   }),
 };
 
-// Fonction d'envoi (simulation - à connecter à un vrai service)
+// Fonction d'envoi avec Resend
 export const sendEmail = async (emailData: EmailData): Promise<boolean> => {
   console.log('📧 Email à envoyer:', {
     to: emailData.to.email,
     subject: emailData.template.subject,
+    mode: emailConfig.mode,
   });
   
-  // TODO: Intégrer avec SendGrid, Resend, ou Mailgun
-  // Exemple avec Supabase Edge Function:
-  // const { error } = await supabase.functions.invoke('send-email', {
-  //   body: emailData
-  // });
+  // Vérifier si le service est configuré
+  if (!isEmailConfigured()) {
+    console.warn('⚠️ Service d\'email non configuré - Email simulé');
+    console.log('Pour activer les emails réels, configurez VITE_RESEND_API_KEY');
+    return true; // Simulation de succès
+  }
   
-  // Simulation de succès
-  return true;
+  // Mode développement : simulation
+  if (emailConfig.mode === 'development') {
+    console.log('🛠️ Mode développement - Email simulé');
+    console.log('Contenu:', emailData.template.text.substring(0, 200) + '...');
+    return true;
+  }
+  
+  // Mode production : envoi réel via Resend
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${emailConfig.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: `${emailConfig.fromName} <${emailConfig.fromEmail}>`,
+        to: [emailData.to.email],
+        subject: emailData.template.subject,
+        html: emailData.template.html,
+        text: emailData.template.text,
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Erreur Resend:', errorData);
+      return false;
+    }
+    
+    const result = await response.json();
+    console.log('✅ Email envoyé avec succès:', result.id);
+    return true;
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'envoi de l\'email:', error);
+    return false;
+  }
 };
 
 // Fonctions utilitaires pour envoyer des emails spécifiques
