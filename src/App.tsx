@@ -15,6 +15,7 @@ import { MetiersFormationsExplorer } from './components/MetiersFormationsExplore
 import { MyDocuments } from './components/MyDocuments';
 import { ClientDashboard } from './components/ClientDashboard';
 import { AppointmentSystem } from './components/AppointmentSystem';
+import { AboutPage } from './components/AboutPage';
 
 // Simple router based on hash
 const useHashRouter = () => {
@@ -124,6 +125,18 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
         {renderLegalPage()}
+        <CookieConsent />
+      </div>
+    );
+  }
+
+  // About page (accessible without auth)
+  if (route === '/about') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+        <BackButton />
+        <AboutPage />
+        <Footer />
         <CookieConsent />
       </div>
     );
