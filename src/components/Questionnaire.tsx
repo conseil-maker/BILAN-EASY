@@ -7,6 +7,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useDarkMode } from '../hooks/useDarkMode';
 import SpeechSettings from './SpeechSettings';
 import Dashboard from './Dashboard';
+import EnhancedDashboard from './EnhancedDashboard';
 import JourneyProgress from './JourneyProgress';
 import Confetti from './Confetti';
 import { supabase } from '../lib/supabaseClient';
@@ -879,7 +880,15 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         role="complementary"
                         aria-label="Tableau de bord avec thèmes émergents et analyse des compétences"
                     >
-                        <Dashboard data={dashboardData} isLoading={isDashboardLoading} />
+                        <EnhancedDashboard 
+                            data={dashboardData} 
+                            isLoading={isDashboardLoading}
+                            userName={userName}
+                            currentPhase={currentPhaseInfo?.name}
+                            questionsAnswered={answers.length}
+                            totalQuestions={pkg.questions}
+                            timeSpent={Math.floor((Date.now() - (window as any).bilanStartTime || Date.now()) / 60000)}
+                        />
                     </aside>
                 </main>
             </div>
