@@ -13,6 +13,8 @@ import Confetti from './Confetti';
 import { supabase } from '../lib/supabaseClient';
 import { downloadPDF } from '../utils/pdfGenerator';
 import { saveAssessmentToHistory } from '../services/historyService';
+import { useAutoSave } from '../hooks/useAutoSave';
+import { useToast } from './ToastProvider';
 
 const SendIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>;
 const MicIcon = ({ active }: { active: boolean }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${active ? 'text-red-500 animate-pulse' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-14 0m7 10v4M5 8v4a7 7 0 0014 0V8M12 15a3 3 0 003-3V5a3 3 0 00-6 0v7a3 3 0 003 3z" /></svg>;
@@ -150,6 +152,35 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const { isSpeaking, isSupported: speechSynthSupported, voices, settings, speak, cancel, onSettingsChange } = useSpeechSynthesis();
     const { isListening, isSupported: speechRecSupported, interimTranscript, finalTranscript, startListening, stopListening } = useSpeechRecognition({ lang: 'fr-FR' });
     const { isDarkMode, toggleDarkMode } = useDarkMode();
+    const { showSuccess, showError, showInfo } = useToast();
+    const [userId, setUserId] = useState<string | undefined>(undefined);
+
+    // Récupérer l'ID utilisateur pour l'auto-save
+    useEffect(() => {
+        const getUserId = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) setUserId(user.id);
+        };
+        getUserId();
+    }, []);
+
+    // Auto-save toutes les 5 minutes
+    const { save: manualSave } = useAutoSave({
+        userId,
+        packageName: pkg.name,
+        userName,
+        answers,
+        enabled: answers.length > 0,
+        interval: 5 * 60 * 1000, // 5 minutes
+        onSave: () => {
+            setLastSaveTime(new Date());
+            showInfo('💾 Progression sauvegardée automatiquement');
+        },
+        onError: (error) => {
+            console.error('Erreur auto-save:', error);
+            showError('Erreur lors de la sauvegarde automatique');
+        },
+    });
 
     useEffect(() => { setTextInput(interimTranscript || finalTranscript); }, [interimTranscript, finalTranscript]);
     const scrollToBottom = () => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
@@ -520,10 +551,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const handleExportPDF = async () => {
         try {
             await downloadPDF(userName, pkg.name, answers, dashboardData);
-            alert('🎉 Votre rapport a été téléchargé avec succès !');
+            showSuccess('Votre rapport a été téléchargé avec succès !');
         } catch (error) {
             console.error('Erreur lors de l\'export PDF:', error);
-            alert('❌ Une erreur est survenue lors de l\'export du rapport.');
+            showError('Une erreur est survenue lors de l\'export du rapport.');
         }
     };
 

@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabaseClient';
 import { qualiopiDocuments, ConventionData, AttestationData } from '../services/qualiopiDocuments';
 import { syntheseService, SyntheseData } from '../services/syntheseService';
 import { organizationConfig, getFullAddress } from '../config/organization';
+import { exportToExcel } from '../services/excelExportService';
+import { useToast } from './ToastProvider';
 
 interface MyDocumentsProps {
   user: User;
@@ -44,6 +46,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     loadProfile();
@@ -117,6 +120,31 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
       qualiopi: false,
     },
   ];
+
+  const handleExportExcel = async () => {
+    try {
+      setLoading('excel');
+      const userName = profile?.full_name || user.email?.split('@')[0] || 'Utilisateur';
+      
+      exportToExcel({
+        userName,
+        packageName,
+        startDate,
+        endDate,
+        answers,
+        summary,
+        competences: summary?.competences || [],
+        themes: summary?.themes || [],
+      });
+      
+      showSuccess('Export Excel téléchargé avec succès !');
+    } catch (err) {
+      console.error('Erreur export Excel:', err);
+      showError('Erreur lors de l\'export Excel');
+    } finally {
+      setLoading(null);
+    }
+  };
 
   const downloadDocument = async (doc: DocumentItem) => {
     try {
@@ -383,6 +411,57 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Export Excel */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+          <span className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mr-3 text-emerald-600">
+            📊
+          </span>
+          Export des données
+        </h2>
+        
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-5">
+          <div className="flex items-start gap-4">
+            <span className="text-3xl">📈</span>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Export Excel (CSV)
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Téléchargez toutes vos réponses et analyses au format Excel pour une exploitation personnalisée
+              </p>
+              
+              {answers.length === 0 && (
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center">
+                  <span className="mr-1">⏳</span>
+                  Disponible après avoir répondu à des questions
+                </p>
+              )}
+              
+              <button
+                onClick={handleExportExcel}
+                disabled={loading === 'excel' || answers.length === 0}
+                className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors text-sm"
+              >
+                {loading === 'excel' ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                    Génération...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {answers.length > 0 ? 'Télécharger Excel' : 'Non disponible'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

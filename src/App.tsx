@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import AuthWrapper from './components/AuthWrapper';
 import ClientApp from './components/ClientApp';
+import { ToastProvider } from './components/ToastProvider';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminDashboardPro } from './components/AdminDashboardPro';
 import { ConsultantDashboard } from './components/ConsultantDashboard';
@@ -282,20 +283,22 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      <AuthWrapper>
-        {(user, userRole) => (
-          <>
-            <div className="flex-grow">
-              {renderByRole(user, userRole)}
-            </div>
-            {/* Don't show footer on Pro dashboards */}
-            {!['admin', 'consultant'].includes(userRole) && <Footer />}
-          </>
-        )}
-      </AuthWrapper>
-      <CookieConsent />
-    </div>
+    <ToastProvider>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+        <AuthWrapper>
+          {(user, userRole) => (
+            <>
+              <div className="flex-grow">
+                {renderByRole(user, userRole)}
+              </div>
+              {/* Don't show footer on Pro dashboards */}
+              {!['admin', 'consultant'].includes(userRole) && <Footer />}
+            </>
+          )}
+        </AuthWrapper>
+        <CookieConsent />
+      </div>
+    </ToastProvider>
   );
 };
 
