@@ -21,7 +21,7 @@ export const saveAssessmentToHistory = async (item: HistoryItem, userId?: string
         .from('assessments')
         .upsert({
           id: item.id,
-          user_id: userId,
+          client_id: userId,
           package_name: item.packageName,
           package_duration: item.packageDuration || 0,
           package_price: item.packagePrice || 0,
