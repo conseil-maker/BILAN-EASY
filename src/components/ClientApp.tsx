@@ -3,6 +3,7 @@ import { User } from '@supabase/supabase-js';
 import WelcomeScreen from './WelcomeScreen';
 import PackageSelector from './PackageSelector';
 import PhasePreliminaire from './PhasePreliminaire';
+import PhasePreliminaireQualiopi, { ConsentData } from './PhasePreliminaireQualiopi';
 import PersonalizationStep from './PersonalizationStep';
 import Questionnaire from './Questionnaire';
 import SummaryDashboard from './SummaryDashboard';
@@ -23,6 +24,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [coachingStyle, setCoachingStyle] = useState<CoachingStyle>('collaborative');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [consentData, setConsentData] = useState<ConsentData | null>(null);
   const [currentAnswers, setCurrentAnswers] = useState<Answer[]>([]);
   const [currentSummary, setCurrentSummary] = useState<Summary | null>(null);
   const [viewingRecord, setViewingRecord] = useState<HistoryItem | null>(null);
@@ -37,7 +39,8 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     setAppState('preliminary-phase');
   };
 
-  const handlePreliminaryConfirm = () => {
+  const handlePreliminaryConfirm = (consent: ConsentData) => {
+    setConsentData(consent);
     setAppState('personalization-step');
   };
 
@@ -104,7 +107,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
           return null;
         }
         return (
-          <PhasePreliminaire
+          <PhasePreliminaireQualiopi
             pkg={selectedPackage}
             userName={userName}
             onConfirm={handlePreliminaryConfirm}
