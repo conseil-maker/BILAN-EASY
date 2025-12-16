@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { Summary, Answer } from '../types-ai-studio';
+import { organizationConfig, getFullAddress } from '../config/organization';
 
 export interface SyntheseData {
   userName: string;

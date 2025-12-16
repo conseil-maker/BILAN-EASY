@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { organizationConfig, getFullAddress } from '../config/organization';
 
 export interface ConventionData {
   clientName: string;
