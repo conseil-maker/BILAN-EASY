@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Summary, Answer } from '../types';
+import { Summary, Answer } from '../types-ai-studio';
 import { SatisfactionSurvey } from './SatisfactionSurvey';
 import { DocumentsQualiopi } from './DocumentsQualiopi';
 import { supabase } from '../lib/supabaseClient';
