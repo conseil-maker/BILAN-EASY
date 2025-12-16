@@ -1,10 +1,11 @@
 /**
  * Configuration de l'organisme de formation
  * 
- * Ces informations sont utilisées dans les documents officiels
- * (Convention, Attestation, Synthèse) et les pages légales.
- * 
- * À personnaliser avec les vraies informations de votre organisme.
+ * NETZ INFORMATIQUE - Organisme certifié Qualiopi
+ * Certificat N° FP 2022/0076-4
+ * Validité : 10/02/2025 - 09/02/2028
+ * Catégories : Actions de Formation, Bilans de compétences
+ * Organisme certificateur : QUALIBAT
  */
 
 export interface OrganizationConfig {
@@ -12,8 +13,13 @@ export interface OrganizationConfig {
   name: string;
   legalName: string;
   siret: string;
+  siren: string;
   nda: string; // Numéro de déclaration d'activité
   qualiopi: string; // Numéro de certification Qualiopi
+  qualiopiValidFrom: string;
+  qualiopiValidTo: string;
+  qualiopiCategories: string[];
+  certificationBody: string;
   
   // Coordonnées
   address: {
@@ -21,6 +27,7 @@ export interface OrganizationConfig {
     postalCode: string;
     city: string;
     country: string;
+    full: string;
   };
   phone: string;
   email: string;
@@ -44,6 +51,7 @@ export interface OrganizationConfig {
     name: string;
     email: string;
     title: string;
+    phone: string;
   };
   
   // Tarifs
@@ -56,50 +64,57 @@ export interface OrganizationConfig {
 }
 
 /**
- * Configuration par défaut - À PERSONNALISER
+ * Configuration NETZ INFORMATIQUE
  */
 export const organizationConfig: OrganizationConfig = {
-  // Informations légales
-  name: 'Bilan-Easy',
-  legalName: 'Bilan-Easy SAS', // À personnaliser
-  siret: '123 456 789 00012', // À personnaliser
-  nda: '11 75 12345 75', // Numéro de déclaration d'activité - À personnaliser
-  qualiopi: 'FR-2024-XXXXX', // Numéro Qualiopi - À personnaliser
+  // Informations légales officielles (certificat Qualiopi)
+  name: 'NETZ INFORMATIQUE',
+  legalName: 'NETZ INFORMATIQUE',
+  siret: '818 347 346 00029', // SIREN + NIC (NIC à vérifier)
+  siren: '818347346',
+  nda: '446706715 67', // Numéro de Déclaration d'Activité
+  qualiopi: 'FP 2022/0076-4',
+  qualiopiValidFrom: '10/02/2025',
+  qualiopiValidTo: '09/02/2028',
+  qualiopiCategories: ['Actions de Formation', 'Bilans de compétences'],
+  certificationBody: 'QUALIBAT',
   
-  // Coordonnées
+  // Coordonnées officielles
   address: {
-    street: '123 Avenue de l\'Innovation', // À personnaliser
-    postalCode: '75001', // À personnaliser
-    city: 'Paris', // À personnaliser
+    street: '1A, route de Schweighouse',
+    postalCode: '67500',
+    city: 'HAGUENAU',
     country: 'France',
+    full: '1A, route de Schweighouse - 67500 HAGUENAU',
   },
-  phone: '+33 1 23 45 67 89', // À personnaliser
-  email: 'contact@bilan-easy.fr',
+  phone: '+33 3 XX XX XX XX', // À compléter
+  email: 'contact@netz-informatique.fr', // À compléter
   website: 'https://bilan-easy.vercel.app',
   
   // Contact RGPD
   dpo: {
-    name: 'Délégué à la Protection des Données', // À personnaliser
-    email: 'rgpd@bilan-easy.fr',
+    name: 'Délégué à la Protection des Données',
+    email: 'rgpd@netz-informatique.fr', // À compléter
   },
   
-  // Informations bancaires (optionnel)
+  // Informations bancaires (à compléter)
   bank: {
-    name: 'Banque Exemple', // À personnaliser
-    iban: 'FR76 XXXX XXXX XXXX XXXX XXXX XXX', // À personnaliser
-    bic: 'BNPAFRPP', // À personnaliser
+    name: 'À préciser',
+    iban: 'FR76 XXXX XXXX XXXX XXXX XXXX XXX',
+    bic: 'XXXXXXXX',
   },
   
   // Consultant par défaut
   defaultConsultant: {
-    name: 'Consultant Bilan-Easy', // À personnaliser
-    email: 'consultant@bilan-easy.fr',
+    name: 'Consultant NETZ INFORMATIQUE', // À personnaliser
+    email: 'consultant@netz-informatique.fr', // À compléter
     title: 'Consultant en Bilan de Compétences',
+    phone: '+33 3 XX XX XX XX', // À compléter
   },
   
   // Tarifs TTC
   pricing: {
-    test: 200,
+    test: 0, // Forfait découverte gratuit
     essentiel: 1200,
     approfondi: 1800,
     strategique: 2400,
@@ -110,8 +125,7 @@ export const organizationConfig: OrganizationConfig = {
  * Obtenir l'adresse complète formatée
  */
 export const getFullAddress = (): string => {
-  const { street, postalCode, city, country } = organizationConfig.address;
-  return `${street}, ${postalCode} ${city}, ${country}`;
+  return organizationConfig.address.full;
 };
 
 /**
@@ -119,6 +133,13 @@ export const getFullAddress = (): string => {
  */
 export const getLegalInfo = (): string => {
   return `${organizationConfig.legalName} - SIRET: ${organizationConfig.siret} - NDA: ${organizationConfig.nda}`;
+};
+
+/**
+ * Obtenir les informations Qualiopi formatées
+ */
+export const getQualiopiInfo = (): string => {
+  return `Certifié Qualiopi N° ${organizationConfig.qualiopi} - Valide du ${organizationConfig.qualiopiValidFrom} au ${organizationConfig.qualiopiValidTo}`;
 };
 
 /**
