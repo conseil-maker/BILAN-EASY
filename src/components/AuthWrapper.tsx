@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
-import Login from './Login';
+import LoginPro from './LoginPro';
 import Signup from './Signup';
 
 interface AuthWrapperProps {
@@ -92,7 +92,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         {showSignup ? (
           <Signup onToggle={() => setShowSignup(false)} />
         ) : (
-          <Login onToggle={() => setShowSignup(true)} />
+          <LoginPro onToggle={() => setShowSignup(true)} />
         )}
       </div>
     );
