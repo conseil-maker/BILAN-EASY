@@ -142,6 +142,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
     const [categoryProgress, setCategoryProgress] = useState<Map<string, number>>(new Map());
     const [currentCategoryId, setCurrentCategoryId] = useState<string | null>(null);
+    const [bilanStartTime] = useState<number>(Date.now());
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -887,7 +888,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             currentPhase={currentPhaseInfo?.name}
                             questionsAnswered={answers.length}
                             totalQuestions={pkg.questions}
-                            timeSpent={Math.floor((Date.now() - (window as any).bilanStartTime || Date.now()) / 60000)}
+                            timeSpent={Math.floor((Date.now() - bilanStartTime) / 60000)}
                         />
                     </aside>
                 </main>
