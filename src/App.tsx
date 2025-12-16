@@ -14,6 +14,7 @@ import { DocumentLibrary } from './components/DocumentLibrary';
 import { MetiersFormationsExplorer } from './components/MetiersFormationsExplorer';
 import { MyDocuments } from './components/MyDocuments';
 import { ClientDashboard } from './components/ClientDashboard';
+import { AppointmentSystem } from './components/AppointmentSystem';
 
 // Simple router based on hash
 const useHashRouter = () => {
@@ -215,6 +216,20 @@ const App: React.FC = () => {
           <ClientDashboard
             user={user}
             onStartBilan={() => window.location.hash = '#/'}
+          />
+        </div>
+      );
+    }
+
+    if (route === '/rendez-vous') {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <BackButton />
+          <AppointmentSystem
+            userId={user.id}
+            userName={user.email?.split('@')[0] || 'Utilisateur'}
+            userEmail={user.email || ''}
+            mode="client"
           />
         </div>
       );
