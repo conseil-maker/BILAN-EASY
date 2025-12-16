@@ -8,6 +8,8 @@ import { CGU, CGV, Privacy, CookiesPolicy } from './components/legal';
 import { CookieConsent } from './components/CookieConsent';
 import { SatisfactionSurvey } from './components/SatisfactionSurvey';
 import { DocumentsQualiopi } from './components/DocumentsQualiopi';
+import { DocumentLibrary } from './components/DocumentLibrary';
+import { MetiersFormationsExplorer } from './components/MetiersFormationsExplorer';
 
 // Simple router based on hash
 const useHashRouter = () => {
@@ -150,6 +152,35 @@ const App: React.FC = () => {
             packagePrice={1200}
             startDate={new Date().toLocaleDateString('fr-FR')}
             isCompleted={false}
+          />
+        </div>
+      );
+    }
+
+    if (route === '/library') {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <BackButton />
+          <DocumentLibrary
+            userId={user.id}
+            userName={user.email?.split('@')[0] || 'Utilisateur'}
+            userEmail={user.email || ''}
+            packageName="Essentiel"
+            packageDuration={12}
+            packagePrice={1200}
+            startDate={new Date().toLocaleDateString('fr-FR')}
+            isCompleted={false}
+          />
+        </div>
+      );
+    }
+
+    if (route === '/metiers') {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <BackButton />
+          <MetiersFormationsExplorer
+            userCompetences={['Management', 'Communication', 'Gestion de projet']}
           />
         </div>
       );
