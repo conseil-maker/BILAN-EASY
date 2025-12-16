@@ -10,6 +10,7 @@ import { SatisfactionSurvey } from './components/SatisfactionSurvey';
 import { DocumentsQualiopi } from './components/DocumentsQualiopi';
 import { DocumentLibrary } from './components/DocumentLibrary';
 import { MetiersFormationsExplorer } from './components/MetiersFormationsExplorer';
+import { MyDocuments } from './components/MyDocuments';
 
 // Simple router based on hash
 const useHashRouter = () => {
@@ -181,6 +182,22 @@ const App: React.FC = () => {
           <BackButton />
           <MetiersFormationsExplorer
             userCompetences={['Management', 'Communication', 'Gestion de projet']}
+          />
+        </div>
+      );
+    }
+
+    if (route === '/mes-documents') {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <BackButton />
+          <MyDocuments
+            user={user}
+            packageName="Essentiel"
+            packageDuration={12}
+            packagePrice={1200}
+            startDate={new Date().toLocaleDateString('fr-FR')}
+            isCompleted={false}
           />
         </div>
       );
