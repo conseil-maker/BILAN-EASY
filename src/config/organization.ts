@@ -14,12 +14,14 @@ export interface OrganizationConfig {
   legalName: string;
   siret: string;
   siren: string;
-  nda: string; // Numéro de déclaration d'activité
-  qualiopi: string; // Numéro de certification Qualiopi
+  nda: string;
+  qualiopi: string;
   qualiopiValidFrom: string;
   qualiopiValidTo: string;
   qualiopiCategories: string[];
   certificationBody: string;
+  codeNaf: string;
+  urssaf: string;
   
   // Coordonnées
   address: {
@@ -39,11 +41,25 @@ export interface OrganizationConfig {
     email: string;
   };
   
-  // Informations bancaires (pour les CGV)
-  bank?: {
+  // Informations bancaires
+  bank: {
     name: string;
     iban: string;
     bic: string;
+    domiciliation: string;
+  };
+  
+  // Équipe / Consultants
+  team: {
+    president: {
+      name: string;
+      title: string;
+    };
+    consultants: Array<{
+      name: string;
+      title: string;
+      email: string;
+    }>;
   };
   
   // Consultant par défaut
@@ -64,20 +80,22 @@ export interface OrganizationConfig {
 }
 
 /**
- * Configuration NETZ INFORMATIQUE
+ * Configuration NETZ INFORMATIQUE - Données officielles
  */
 export const organizationConfig: OrganizationConfig = {
-  // Informations légales officielles (certificat Qualiopi)
+  // Informations légales officielles
   name: 'NETZ INFORMATIQUE',
   legalName: 'NETZ INFORMATIQUE',
-  siret: '818 347 346 00029', // SIREN + NIC (NIC à vérifier)
+  siret: '818 347 346 00020',
   siren: '818347346',
-  nda: '446706715 67', // Numéro de Déclaration d'Activité
+  nda: '446706715 67',
   qualiopi: 'FP 2022/0076-4',
   qualiopiValidFrom: '10/02/2025',
   qualiopiValidTo: '09/02/2028',
   qualiopiCategories: ['Actions de Formation', 'Bilans de compétences'],
   certificationBody: 'QUALIBAT',
+  codeNaf: '8559B',
+  urssaf: '427 320834682',
   
   // Coordonnées officielles
   address: {
@@ -87,34 +105,55 @@ export const organizationConfig: OrganizationConfig = {
     country: 'France',
     full: '1A, route de Schweighouse - 67500 HAGUENAU',
   },
-  phone: '+33 3 XX XX XX XX', // À compléter
-  email: 'contact@netz-informatique.fr', // À compléter
+  phone: '03 67 31 02 01',
+  email: 'contact@netzinformatique.fr',
   website: 'https://bilan-easy.vercel.app',
   
   // Contact RGPD
   dpo: {
-    name: 'Délégué à la Protection des Données',
-    email: 'rgpd@netz-informatique.fr', // À compléter
+    name: 'Mikail LEKESIZ',
+    email: 'contact@netzinformatique.fr',
   },
   
-  // Informations bancaires (à compléter)
+  // Informations bancaires (RIB CIC)
   bank: {
-    name: 'À préciser',
-    iban: 'FR76 XXXX XXXX XXXX XXXX XXXX XXX',
-    bic: 'XXXXXXXX',
+    name: 'CIC',
+    iban: 'FR76 3008 7330 4000 0215 9600 155',
+    bic: 'CMCIFRPP',
+    domiciliation: 'CIC HAGUENAU - 12 Place d\'Armes - 67500 HAGUENAU',
   },
   
-  // Consultant par défaut
+  // Équipe
+  team: {
+    president: {
+      name: 'Mikail LEKESIZ',
+      title: 'Président',
+    },
+    consultants: [
+      {
+        name: 'Mikail LEKESIZ',
+        title: 'Président - Consultant en Bilan de Compétences',
+        email: 'contact@netzinformatique.fr',
+      },
+      {
+        name: 'Bahtisen AKINET',
+        title: 'Assistante Administrative et Formatrice',
+        email: 'contact@netzinformatique.fr',
+      },
+    ],
+  },
+  
+  // Consultant par défaut pour les documents
   defaultConsultant: {
-    name: 'Consultant NETZ INFORMATIQUE', // À personnaliser
-    email: 'consultant@netz-informatique.fr', // À compléter
+    name: 'Mikail LEKESIZ',
+    email: 'contact@netzinformatique.fr',
     title: 'Consultant en Bilan de Compétences',
-    phone: '+33 3 XX XX XX XX', // À compléter
+    phone: '03 67 31 02 01',
   },
   
   // Tarifs TTC
   pricing: {
-    test: 0, // Forfait découverte gratuit
+    test: 0,
     essentiel: 1200,
     approfondi: 1800,
     strategique: 2400,
@@ -151,7 +190,7 @@ export const getPackagePrice = (packageName: string): number => {
   if (name.includes('essentiel')) return organizationConfig.pricing.essentiel;
   if (name.includes('approfondi')) return organizationConfig.pricing.approfondi;
   if (name.includes('stratégique') || name.includes('strategique')) return organizationConfig.pricing.strategique;
-  return organizationConfig.pricing.essentiel; // Par défaut
+  return organizationConfig.pricing.essentiel;
 };
 
 /**
@@ -163,7 +202,15 @@ export const getPackageDuration = (packageName: string): number => {
   if (name.includes('essentiel')) return 12;
   if (name.includes('approfondi')) return 18;
   if (name.includes('stratégique') || name.includes('strategique')) return 24;
-  return 12; // Par défaut
+  return 12;
+};
+
+/**
+ * Obtenir les informations bancaires formatées pour les CGV
+ */
+export const getBankInfo = (): string => {
+  const { bank } = organizationConfig;
+  return `${bank.name} - IBAN: ${bank.iban} - BIC: ${bank.bic}`;
 };
 
 export default organizationConfig;
