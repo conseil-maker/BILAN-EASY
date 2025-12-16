@@ -3,7 +3,9 @@ import { User } from '@supabase/supabase-js';
 import AuthWrapper from './components/AuthWrapper';
 import ClientApp from './components/ClientApp';
 import { AdminDashboard } from './components/AdminDashboard';
+import { AdminDashboardPro } from './components/AdminDashboardPro';
 import { ConsultantDashboard } from './components/ConsultantDashboard';
+import { ConsultantDashboardPro } from './components/ConsultantDashboardPro';
 import { CGU, CGV, Privacy, CookiesPolicy } from './components/legal';
 import { CookieConsent } from './components/CookieConsent';
 import { SatisfactionSurvey } from './components/SatisfactionSurvey';
@@ -11,6 +13,7 @@ import { DocumentsQualiopi } from './components/DocumentsQualiopi';
 import { DocumentLibrary } from './components/DocumentLibrary';
 import { MetiersFormationsExplorer } from './components/MetiersFormationsExplorer';
 import { MyDocuments } from './components/MyDocuments';
+import { ClientDashboard } from './components/ClientDashboard';
 
 // Simple router based on hash
 const useHashRouter = () => {
@@ -72,6 +75,8 @@ const BackButton: React.FC = () => (
 
 const App: React.FC = () => {
   const route = useHashRouter();
+  // Use Pro dashboards by default (can be toggled)
+  const [useProDashboards] = useState(true);
 
   // Legal pages (accessible without auth)
   const renderLegalPage = () => {
@@ -125,7 +130,7 @@ const App: React.FC = () => {
 
   const renderByRole = (user: User, userRole: string) => {
     const handleBack = () => {
-      window.location.reload();
+      window.location.hash = '#/';
     };
 
     // Check for special routes
@@ -203,11 +208,42 @@ const App: React.FC = () => {
       );
     }
 
+    if (route === '/dashboard') {
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <BackButton />
+          <ClientDashboard
+            user={user}
+            onStartBilan={() => window.location.hash = '#/'}
+          />
+        </div>
+      );
+    }
+
+    // Admin routes
+    if (route === '/admin' || route === '/admin/dashboard') {
+      return useProDashboards 
+        ? <AdminDashboardPro onBack={handleBack} />
+        : <AdminDashboard onBack={handleBack} />;
+    }
+
+    // Consultant routes
+    if (route === '/consultant' || route === '/consultant/dashboard') {
+      return useProDashboards
+        ? <ConsultantDashboardPro onBack={handleBack} />
+        : <ConsultantDashboard onBack={handleBack} />;
+    }
+
+    // Role-based default view
     switch (userRole) {
       case 'admin':
-        return <AdminDashboard onBack={handleBack} />;
+        return useProDashboards 
+          ? <AdminDashboardPro onBack={handleBack} />
+          : <AdminDashboard onBack={handleBack} />;
       case 'consultant':
-        return <ConsultantDashboard onBack={handleBack} />;
+        return useProDashboards
+          ? <ConsultantDashboardPro onBack={handleBack} />
+          : <ConsultantDashboard onBack={handleBack} />;
       case 'client':
       default:
         return <ClientApp user={user} />;
@@ -222,7 +258,8 @@ const App: React.FC = () => {
             <div className="flex-grow">
               {renderByRole(user, userRole)}
             </div>
-            <Footer />
+            {/* Don't show footer on Pro dashboards */}
+            {!['admin', 'consultant'].includes(userRole) && <Footer />}
           </>
         )}
       </AuthWrapper>
