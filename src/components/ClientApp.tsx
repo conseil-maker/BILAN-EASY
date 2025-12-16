@@ -266,7 +266,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         packageName={selectedPackage?.name}
         progress={progress}
         timeSpent={timeSpent}
-        totalTime={selectedPackage ? selectedPackage.duration / 60 : 120}
+        totalTime={selectedPackage ? selectedPackage.timeBudget.total : 120}
       />
       
       {/* Contenu principal */}
