@@ -16,6 +16,7 @@ import { MyDocuments } from './components/MyDocuments';
 import { ClientDashboard } from './components/ClientDashboard';
 import { AppointmentSystem } from './components/AppointmentSystem';
 import { AboutPage } from './components/AboutPage';
+import { GlobalNavbar } from './components/GlobalNavbar';
 
 // Simple router based on hash
 const useHashRouter = () => {
@@ -151,7 +152,7 @@ const App: React.FC = () => {
     if (route === '/satisfaction') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <BackButton />
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Satisfaction" />
           <SatisfactionSurvey 
             userId={user.id} 
             assessmentId="current" 
@@ -163,16 +164,18 @@ const App: React.FC = () => {
 
     if (route === '/documents') {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-          <BackButton />
-          <DocumentsQualiopi
-            userId={user.id}
-            packageName="Essentiel"
-            packageDuration={12}
-            packagePrice={1200}
-            startDate={new Date().toLocaleDateString('fr-FR')}
-            isCompleted={false}
-          />
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Documents" />
+          <div className="p-6">
+            <DocumentsQualiopi
+              userId={user.id}
+              packageName="Essentiel"
+              packageDuration={12}
+              packagePrice={1200}
+              startDate={new Date().toLocaleDateString('fr-FR')}
+              isCompleted={false}
+            />
+          </div>
         </div>
       );
     }
@@ -180,7 +183,7 @@ const App: React.FC = () => {
     if (route === '/library') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <BackButton />
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Bibliothèque" />
           <DocumentLibrary
             userId={user.id}
             userName={user.email?.split('@')[0] || 'Utilisateur'}
@@ -198,7 +201,7 @@ const App: React.FC = () => {
     if (route === '/metiers') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <BackButton />
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Métiers & Formations" />
           <MetiersFormationsExplorer
             userCompetences={['Management', 'Communication', 'Gestion de projet']}
           />
@@ -209,7 +212,7 @@ const App: React.FC = () => {
     if (route === '/mes-documents') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <BackButton />
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mes Documents" />
           <MyDocuments
             user={user}
             packageName="Essentiel"
@@ -225,7 +228,7 @@ const App: React.FC = () => {
     if (route === '/dashboard') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <BackButton />
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mon Tableau de Bord" />
           <ClientDashboard
             user={user}
             onStartBilan={() => window.location.hash = '#/'}
@@ -237,7 +240,7 @@ const App: React.FC = () => {
     if (route === '/rendez-vous') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <BackButton />
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mes Rendez-vous" />
           <AppointmentSystem
             userId={user.id}
             userName={user.email?.split('@')[0] || 'Utilisateur'}
