@@ -3,6 +3,7 @@ import { User } from '@supabase/supabase-js';
 import AuthWrapper from './components/AuthWrapper';
 import ClientApp from './components/ClientApp';
 import { ToastProvider } from './components/ToastProvider';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminDashboardPro } from './components/AdminDashboardPro';
 import { ConsultantDashboard } from './components/ConsultantDashboard';
@@ -297,6 +298,7 @@ const App: React.FC = () => {
           )}
         </AuthWrapper>
         <CookieConsent />
+        <OfflineIndicator />
       </div>
     </ToastProvider>
   );

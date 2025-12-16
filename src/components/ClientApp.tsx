@@ -9,9 +9,11 @@ import SummaryDashboard from './SummaryDashboard';
 import HistoryScreen from './HistoryScreen';
 import { BilanCompletion } from './BilanCompletion';
 import { EnhancedNavigation, BilanPhase } from './EnhancedNavigation';
+import DraftRecovery from './DraftRecovery';
 import { PACKAGES } from '../constants';
 import { Package, Answer, Summary, HistoryItem, UserProfile, CoachingStyle } from '../types-ai-studio';
 import { saveAssessmentToHistory } from '../services/historyService';
+import { useToast } from './ToastProvider';
 
 type AppState = 'welcome' | 'package-selection' | 'preliminary-phase' | 'personalization-step' | 'questionnaire' | 'completion' | 'summary' | 'history' | 'view-history-record';
 
@@ -32,6 +34,8 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const [startDate, setStartDate] = useState<string>('');
   const [progress, setProgress] = useState(0);
   const [timeSpent, setTimeSpent] = useState(0);
+  const [showDraftRecovery, setShowDraftRecovery] = useState(true);
+  const { showSuccess, showInfo } = useToast();
 
   // Timer pour suivre le temps passé
   useEffect(() => {
@@ -257,8 +261,40 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     }
   };
 
+  // Fonction pour reprendre un brouillon
+  const handleResumeDraft = (draft: any) => {
+    // Trouver le package correspondant
+    const pkg = PACKAGES.find(p => p.name === draft.package_name);
+    if (pkg) {
+      setSelectedPackage(pkg);
+      setCurrentAnswers(draft.answers || []);
+      setStartDate(draft.created_at ? new Date(draft.created_at).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR'));
+      setAppState('questionnaire');
+      showSuccess(`Brouillon repris avec ${draft.answers?.length || 0} réponses`);
+    } else {
+      // Si le package n'est pas trouvé, aller à la sélection
+      setAppState('package-selection');
+      showInfo('Package non trouvé, veuillez en sélectionner un nouveau');
+    }
+    setShowDraftRecovery(false);
+  };
+
+  const handleDiscardDraft = () => {
+    setShowDraftRecovery(false);
+    showInfo('Nouveau bilan démarré');
+  };
+
   return (
     <div className="App min-h-screen flex flex-col">
+      {/* Modal de récupération de brouillon */}
+      {showDraftRecovery && appState === 'welcome' && (
+        <DraftRecovery
+          userId={user.id}
+          onResume={handleResumeDraft}
+          onDiscard={handleDiscardDraft}
+        />
+      )}
+
       {/* Navigation améliorée avec fil d'Ariane */}
       <EnhancedNavigation
         currentPhase={mapStateToBilanPhase(appState)}

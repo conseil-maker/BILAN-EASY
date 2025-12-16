@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bilan-Easy - Mode Hors-Ligne</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+    }
+    
+    .container {
+      text-align: center;
+      max-width: 500px;
+    }
+    
+    .icon {
+      font-size: 80px;
+      margin-bottom: 24px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      opacity: 0.9;
+      margin-bottom: 24px;
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    
+    .card ul {
+      list-style: none;
+      text-align: left;
+    }
+    
+    .card li {
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .card li::before {
+      content: "✓";
+      margin-right: 12px;
+      color: #4ade80;
+    }
+    
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .retry-btn:active {
+      transform: translateY(0);
+    }
+    
+    .status {
+      margin-top: 24px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .status.online {
+      background: rgba(74, 222, 128, 0.2);
+    }
+    
+    .footer {
+      margin-top: 40px;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📡</div>
+    <h1>Mode Hors-Ligne</h1>
+    <p>
+      Vous êtes actuellement hors connexion. Certaines fonctionnalités 
+      ne sont pas disponibles, mais vos données sont sauvegardées localement.
+    </p>
+    
+    <div class="card">
+      <h2>Ce que vous pouvez faire :</h2>
+      <ul>
+        <li>Consulter vos réponses sauvegardées</li>
+        <li>Continuer à répondre au questionnaire</li>
+        <li>Vos réponses seront synchronisées automatiquement</li>
+      </ul>
+    </div>
+    
+    <button class="retry-btn" onclick="checkConnection()">
+      <span>🔄</span>
+      Réessayer la connexion
+    </button>
+    
+    <div id="status" class="status">
+      Vérification de la connexion...
+    </div>
+    
+    <div class="footer">
+      <p>Bilan-Easy - Organisme certifié Qualiopi</p>
+      <p>NETZ INFORMATIQUE</p>
+    </div>
+  </div>
+  
+  <script>
+    function checkConnection() {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'Vérification en cours...';
+      statusEl.className = 'status';
+      
+      fetch('/', { method: 'HEAD', cache: 'no-store' })
+        .then(() => {
+          statusEl.textContent = '✅ Connexion rétablie ! Redirection...';
+          statusEl.className = 'status online';
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        })
+        .catch(() => {
+          statusEl.textContent = '❌ Toujours hors-ligne. Réessayez plus tard.';
+          statusEl.className = 'status';
+        });
+    }
+    
+    // Vérifier automatiquement la connexion
+    window.addEventListener('online', () => {
+      checkConnection();
+    });
+    
+    // Vérification initiale
+    setTimeout(checkConnection, 1000);
+    
+    // Vérification périodique
+    setInterval(checkConnection, 30000);
+  </script>
+</body>
+</html>
