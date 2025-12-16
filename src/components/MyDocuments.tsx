@@ -3,6 +3,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { qualiopiDocuments, ConventionData, AttestationData } from '../services/qualiopiDocuments';
 import { syntheseService, SyntheseData } from '../services/syntheseService';
+import { organizationConfig, getFullAddress } from '../config/organization';
 
 interface MyDocumentsProps {
   user: User;
@@ -141,11 +142,11 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
             packageDuration,
             packagePrice,
             startDate,
-            consultantName: 'Consultant Bilan-Easy',
-            consultantEmail: 'consultant@bilan-easy.fr',
-            organizationName: 'Bilan-Easy',
-            organizationAddress: '123 Avenue de l\'Innovation, 75001 Paris',
-            organizationSiret: '123 456 789 00012',
+            consultantName: organizationConfig.consultant.name,
+            consultantEmail: organizationConfig.consultant.email,
+            organizationName: organizationConfig.name,
+            organizationAddress: getFullAddress(),
+            organizationSiret: organizationConfig.siret,
           };
           blob = qualiopiDocuments.generateConvention(conventionData);
           filename = `convention-${userName.replace(/\s+/g, '-')}-${Date.now()}.pdf`;
@@ -158,8 +159,8 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
             packageDuration,
             startDate,
             endDate: currentEndDate,
-            consultantName: 'Consultant Bilan-Easy',
-            organizationName: 'Bilan-Easy',
+            consultantName: organizationConfig.consultant.name,
+            organizationName: organizationConfig.name,
           };
           blob = qualiopiDocuments.generateAttestation(attestationData);
           filename = `attestation-${userName.replace(/\s+/g, '-')}-${Date.now()}.pdf`;
@@ -177,8 +178,8 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
             packageName,
             startDate,
             endDate: currentEndDate,
-            consultantName: 'Consultant Bilan-Easy',
-            organizationName: 'Bilan-Easy',
+            consultantName: organizationConfig.consultant.name,
+            organizationName: organizationConfig.name,
             summary: summary || {},
             answers: answers || [],
           };
@@ -193,8 +194,8 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
             packageName,
             startDate,
             endDate: currentEndDate,
-            consultantName: 'Consultant Bilan-Easy',
-            organizationName: 'Bilan-Easy',
+            consultantName: organizationConfig.consultant.name,
+            organizationName: organizationConfig.name,
             summary: summary || {},
             answers: answers || [],
             planAction: summary?.actionPlan?.map((item: any, index: number) => ({

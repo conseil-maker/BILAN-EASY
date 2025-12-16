@@ -98,7 +98,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
       summary: summary,
       answers: answers,
     };
-    saveAssessmentToHistory(historyItem);
+    saveAssessmentToHistory(historyItem, user.id);
 
     // Aller vers le parcours de fin au lieu du summary direct
     setAppState('completion');
