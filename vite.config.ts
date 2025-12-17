@@ -9,20 +9,26 @@ export default defineConfig({
     host: '0.0.0.0',
     allowedHosts: 'all',
   },
+  preview: {
+    host: '0.0.0.0',
+    allowedHosts: 'all',
+  },
   plugins: [react()],
   build: {
     outDir: 'dist',
     sourcemap: true,
     // Augmenter la limite d'avertissement
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
         // Séparation intelligente des chunks
+        // IMPORTANT: lucide-react doit être avec React pour éviter la dépendance circulaire
         manualChunks: (id) => {
-          // Vendors React
+          // Vendors React + lucide-react (même chunk pour éviter dépendance circulaire)
           if (id.includes('node_modules/react') || 
               id.includes('node_modules/react-dom') ||
-              id.includes('node_modules/scheduler')) {
+              id.includes('node_modules/scheduler') ||
+              id.includes('node_modules/lucide-react')) {
             return 'vendor-react';
           }
           
@@ -60,7 +66,7 @@ export default defineConfig({
   },
   // Optimisation des dépendances
   optimizeDeps: {
-    include: ['react', 'react-dom', '@supabase/supabase-js'],
+    include: ['react', 'react-dom', '@supabase/supabase-js', 'lucide-react'],
     exclude: ['jspdf', 'html2canvas'],
   },
 });
