@@ -14,6 +14,7 @@ import { PACKAGES } from '../constants';
 import { Package, Answer, Summary, HistoryItem, UserProfile, CoachingStyle } from '../types-ai-studio';
 import { saveAssessmentToHistory } from '../services/historyService';
 import { useToast } from './ToastProvider';
+import { NotificationManager } from './NotificationManager';
 
 type AppState = 'welcome' | 'package-selection' | 'preliminary-phase' | 'personalization-step' | 'questionnaire' | 'completion' | 'summary' | 'history' | 'view-history-record';
 
@@ -286,6 +287,16 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   return (
     <div className="App min-h-screen flex flex-col">
+      {/* Gestionnaire de notifications push */}
+      <NotificationManager 
+        userName={userName}
+        onPermissionChange={(permission) => {
+          if (permission === 'granted') {
+            console.log('[Notifications] Permission accordée');
+          }
+        }}
+      />
+
       {/* Modal de récupération de brouillon */}
       {showDraftRecovery && appState === 'welcome' && (
         <DraftRecovery

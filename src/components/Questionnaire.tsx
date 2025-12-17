@@ -15,6 +15,12 @@ import { downloadPDF } from '../utils/pdfGenerator';
 import { saveAssessmentToHistory } from '../services/historyService';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useToast } from './ToastProvider';
+import { 
+  sendLocalNotification, 
+  notifications, 
+  getPermissionStatus,
+  scheduleNotification 
+} from '../services/pushNotificationService';
 
 const SendIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>;
 const MicIcon = ({ active }: { active: boolean }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${active ? 'text-red-500 animate-pulse' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-14 0m7 10v4M5 8v4a7 7 0 0014 0V8M12 15a3 3 0 003-3V5a3 3 0 00-6 0v7a3 3 0 003 3z" /></svg>;
@@ -185,6 +191,27 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     useEffect(() => { setTextInput(interimTranscript || finalTranscript); }, [interimTranscript, finalTranscript]);
     const scrollToBottom = () => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
     useEffect(scrollToBottom, [messages]);
+
+    // Planifier un rappel de notification si l'utilisateur quitte sans terminer
+    useEffect(() => {
+        const totalQuestions = pkg.phases.phase1.questionnaires + pkg.phases.phase2.questionnaires + pkg.phases.phase3.questionnaires;
+        const questionsRestantes = totalQuestions - answers.length;
+        
+        // Planifier un rappel dans 24h si le bilan n'est pas terminé
+        let reminderTimeout: NodeJS.Timeout | null = null;
+        
+        if (answers.length > 0 && questionsRestantes > 0 && getPermissionStatus() === 'granted') {
+            // Rappel après 24h d'inactivité
+            reminderTimeout = scheduleNotification(
+                notifications.continuerBilan(questionsRestantes),
+                24 * 60 * 60 * 1000 // 24 heures
+            );
+        }
+        
+        return () => {
+            if (reminderTimeout) clearTimeout(reminderTimeout);
+        };
+    }, [answers.length, pkg]);
 
     const getPhaseInfo = useCallback((currentAnswers: Answer[]): CurrentPhaseInfo => {
         const currentPhase = getCurrentPhase(pkg.id, currentAnswers);
@@ -370,6 +397,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             try {
                 const finalSummary = await generateSummary(currentAnswers, pkg, userName, coachingStyle);
                 localStorage.removeItem(SESSION_STORAGE_KEY);
+                
+                // Envoyer une notification de bilan terminé
+                if (getPermissionStatus() === 'granted') {
+                    sendLocalNotification(notifications.bilanTermine());
+                }
+                
                 onComplete(currentAnswers, finalSummary);
             } catch (error) {
                 console.error('[runNextStep] Erreur lors de la génération de la synthèse:', error);

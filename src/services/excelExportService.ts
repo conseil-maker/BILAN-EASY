@@ -44,9 +44,9 @@ export const exportToExcel = (data: ExportData): void => {
   csvContent += '\n';
   csvContent += 'INFORMATIONS GÉNÉRALES\n';
   csvContent += `Organisme,${escapeCSV(organizationConfig.name)}\n`;
-  csvContent += `N° Qualiopi,${escapeCSV(organizationConfig.qualiopi.number)}\n`;
+  csvContent += `N° Qualiopi,${escapeCSV(organizationConfig.qualiopi)}\n`;
   csvContent += `Adresse,${escapeCSV(getFullAddress())}\n`;
-  csvContent += `Consultant,${escapeCSV(organizationConfig.consultant.name)}\n`;
+  csvContent += `Consultant,${escapeCSV(organizationConfig.defaultConsultant.name)}\n`;
   csvContent += '\n';
   csvContent += 'BÉNÉFICIAIRE\n';
   csvContent += `Nom,${escapeCSV(userName)}\n`;
