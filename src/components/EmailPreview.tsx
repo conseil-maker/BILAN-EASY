@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import DOMPurify from 'dompurify';
 import { emailTemplates } from '../services/emailService';
+import { gmailTemplates } from '../services/gmailService';
 
 interface EmailPreviewProps {
   onClose: () => void;
@@ -147,10 +148,32 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
           )}
         </div>
 
+        {/* Gmail Preview */}
+        <div className="p-4 border-t dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">📧</span>
+            <span className="font-medium text-blue-800 dark:text-blue-300">Version Gmail (texte brut)</span>
+          </div>
+          <pre className="whitespace-pre-wrap font-mono text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 p-3 rounded-lg max-h-32 overflow-auto">
+            {(() => {
+              const gmailMsg = selectedType === 'welcome' 
+                ? gmailTemplates.welcome(testData.userName, testData.packageName)
+                : selectedType === 'appointmentConfirmation'
+                ? gmailTemplates.appointmentConfirmation(testData.userName, testData.date, testData.time, testData.type, testData.consultantName)
+                : selectedType === 'appointmentReminder'
+                ? gmailTemplates.appointmentReminder(testData.userName, testData.date, testData.time, testData.type)
+                : selectedType === 'bilanCompleted'
+                ? gmailTemplates.bilanCompleted(testData.userName)
+                : gmailTemplates.followUp6Months(testData.userName);
+              return gmailMsg.content;
+            })()}
+          </pre>
+        </div>
+
         {/* Footer */}
         <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            💡 Ces emails sont envoyés automatiquement via le service d'emails
+            💡 Emails envoyés via Gmail / Google Workspace
           </p>
           <button
             onClick={onClose}
