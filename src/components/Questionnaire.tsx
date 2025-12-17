@@ -243,7 +243,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
 
     const MAX_RETRIES = 3;
 
-    const fetchNextQuestion = useCallback(async (options: { useJoker?: boolean } = {}, currentRetry = 0) => {
+    const fetchNextQuestion = useCallback(async (options: { useJoker?: boolean } = {}, currentRetry = 0, currentAnswers?: Answer[]) => {
+        // Utiliser les réponses passées en paramètre ou celles du state
+        const answersToUse = currentAnswers || answers;
+        console.log(`[fetchNextQuestion] Using ${answersToUse.length} answers (param: ${currentAnswers?.length || 'none'}, state: ${answers.length})`);
+        
         setIsLoading(true);
         setCurrentQuestion(null);
         console.log(`[fetchNextQuestion] Attempt ${currentRetry + 1}/${MAX_RETRIES}`);
@@ -256,9 +260,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         try {
             let question;
             if (activeModule) {
-                question = await generateQuestion('phase2', 0, answers, userName, coachingStyle, null, { isModuleQuestion: { moduleId: activeModule, questionNum: moduleQuestionCount + 1 } });
+                question = await generateQuestion('phase2', 0, answersToUse, userName, coachingStyle, null, { isModuleQuestion: { moduleId: activeModule, questionNum: moduleQuestionCount + 1 } });
             } else {
-                const info = getPhaseInfo(answers);
+                const info = getPhaseInfo(answersToUse);
                 console.log('[fetchNextQuestion] Phase info:', info);
                 setCurrentPhaseInfo(info);
                 const phaseKey = `phase${info.phase}` as 'phase1' | 'phase2' | 'phase3';
@@ -281,7 +285,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     }
                     
                     // Sinon, vérifier si on doit l'approfondir
-                    const timeBudget = getTimeBudget(pkg.id, answers);
+                    const timeBudget = getTimeBudget(pkg.id, answersToUse);
                     const phaseTimeRemaining = timeBudget[`phase${info.phase}Remaining` as 'phase1Remaining' | 'phase2Remaining' | 'phase3Remaining'];
                     
                     if (shouldDeepenCategory(cat.id, phaseKey, questionsAsked, phaseTimeRemaining)) {
@@ -314,7 +318,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 setCurrentCategoryId(selectedCategory.id);
                 
                 // Déterminer la complexité optimale
-                const timeBudget = getTimeBudget(pkg.id, answers);
+                const timeBudget = getTimeBudget(pkg.id, answersToUse);
                 console.log('[fetchNextQuestion] Time budget:', timeBudget);
                 const phaseTimeRemaining = timeBudget[`phase${info.phase}Remaining` as 'phase1Remaining' | 'phase2Remaining' | 'phase3Remaining'];
                 const questionsAskedInCategory = categoryProgress.get(selectedCategory.id) || 0;
@@ -322,10 +326,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 console.log('[fetchNextQuestion] Complexity:', complexity, 'for category:', selectedCategory.id);
                 
                 let genOptions: any = { useJoker: options.useJoker, targetComplexity: complexity, categoryId: selectedCategory.id };
-                if (info.phase === 2 && answers.length > 0 && answers[answers.length - 1].value.length > 3) {
-                    genOptions.useGoogleSearch = true; genOptions.searchTopic = answers[answers.length - 1].value;
+                if (info.phase === 2 && answersToUse.length > 0 && answersToUse[answersToUse.length - 1].value.length > 3) {
+                    genOptions.useGoogleSearch = true; genOptions.searchTopic = answersToUse[answersToUse.length - 1].value;
                 }
-                question = await generateQuestion(phaseKey, categoryIndex, answers, userName, coachingStyle, answers.length === 0 ? userProfile : null, genOptions);
+                question = await generateQuestion(phaseKey, categoryIndex, answersToUse, userName, coachingStyle, answersToUse.length === 0 ? userProfile : null, genOptions);
             }
             setCurrentQuestion(question);
             // Créer le message AI avant de l'ajouter aux messages
@@ -343,7 +347,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 // Réessayer après un délai
                 const delay = (currentRetry + 1) * 2000; // 2s, 4s, 6s
                 console.log(`[fetchNextQuestion] Retrying in ${delay}ms...`);
-                setTimeout(() => fetchNextQuestion(options, currentRetry + 1), delay);
+                setTimeout(() => fetchNextQuestion(options, currentRetry + 1, currentAnswers), delay);
                 return; // Ne pas exécuter le finally pour garder isLoading à true
             } else {
                 // Toutes les tentatives ont échoué, afficher un message d'erreur avec bouton
@@ -364,7 +368,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     `Voulez-vous réessayer ?`
                 );
                 if (retry) {
-                    fetchNextQuestion(options, 0); // Réessayer depuis le début
+                    fetchNextQuestion(options, 0, currentAnswers); // Réessayer depuis le début
                 }
             }
         } finally {
@@ -381,7 +385,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             setIsAwaitingSynthesisConfirmation(true);
         } catch (error) {
             console.error("Error generating synthesis:", error);
-            await fetchNextQuestion();
+            await fetchNextQuestion({}, 0, currentAnswers);
         } finally {
             setIsLoading(false);
         }
@@ -475,9 +479,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             return;
         }
         
-        // Générer la prochaine question
-        console.log('[runNextStep] Appel de fetchNextQuestion');
-        await fetchNextQuestion();
+        // Générer la prochaine question avec les réponses à jour
+        console.log('[runNextStep] Appel de fetchNextQuestion avec', currentAnswers.length, 'réponses');
+        await fetchNextQuestion({}, 0, currentAnswers);
     }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases]);
 
     useEffect(() => {
@@ -494,7 +498,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     localStorage.removeItem(SESSION_STORAGE_KEY);
                 }
             }
-            await fetchNextQuestion();
+            await fetchNextQuestion({}, 0, savedAnswers);
         };
         loadSession();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -544,7 +548,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 runNextStep(newAnswers);
             } else {
                 setModuleQuestionCount(prev => prev + 1);
-                fetchNextQuestion();
+                fetchNextQuestion({}, 0, newAnswers);
             }
         } else {
             runNextStep(newAnswers);
@@ -565,12 +569,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         setShowSatisfactionModal(false);
         setSatisfactionPhaseInfo(null);
         // Appeler directement fetchNextQuestion au lieu de runNextStep pour éviter la boucle
-        fetchNextQuestion();
+        fetchNextQuestion({}, 0, answers);
     };
 
-    const handleModuleAccept = () => { setActiveModule(suggestedModule!.id); setSuggestedModule(null); fetchNextQuestion(); };
+    const handleModuleAccept = () => { setActiveModule(suggestedModule!.id); setSuggestedModule(null); fetchNextQuestion({}, 0, answers); };
     const handleModuleDecline = () => { setSuggestedModule(null); runNextStep(answers); };
-    const handleJoker = () => { if (!isLoading) { fetchNextQuestion({ useJoker: true }); } };
+    const handleJoker = () => { if (!isLoading) { fetchNextQuestion({ useJoker: true }, 0, answers); } };
     const handleLogout = () => {
         setShowLogoutModal(true);
     };
