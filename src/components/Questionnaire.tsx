@@ -439,26 +439,44 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             const info = getPhaseInfo(currentAnswers);
             const prevAnswers = currentAnswers.slice(0, -1);
             const prevInfo = prevAnswers.length > 0 ? getPhaseInfo(prevAnswers) : { phase: 1, name: '', satisfactionActive: false };
+            
+            // Vérifier si on change de phase
             if (info.phase !== prevInfo.phase) {
+                console.log(`[runNextStep] Transition de phase: ${prevInfo.phase} -> ${info.phase}`);
                 setUnlockedBadge(`Phase ${prevInfo.phase} : ${prevInfo.name}`);
-                const moduleSuggestion = await suggestOptionalModule(currentAnswers);
-                if (moduleSuggestion.isNeeded && moduleSuggestion.moduleId && moduleSuggestion.reason) {
-                    setSuggestedModule({ id: moduleSuggestion.moduleId, reason: moduleSuggestion.reason });
-                    return;
+                
+                // Vérifier si un module optionnel est suggéré
+                try {
+                    const moduleSuggestion = await suggestOptionalModule(currentAnswers);
+                    if (moduleSuggestion.isNeeded && moduleSuggestion.moduleId && moduleSuggestion.reason) {
+                        setSuggestedModule({ id: moduleSuggestion.moduleId, reason: moduleSuggestion.reason });
+                        return; // Attendre que l'utilisateur réponde au module
+                    }
+                } catch (error) {
+                    console.error('[runNextStep] Erreur lors de la suggestion de module:', error);
+                    // Continuer même si la suggestion échoue
                 }
+                
+                // Vérifier si la satisfaction est active pour cette phase
                 if (prevInfo.satisfactionActive && !satisfactionSubmittedPhases.has(prevInfo.phase)) {
                     setSatisfactionPhaseInfo(prevInfo);
                     setShowSatisfactionModal(true);
-                    return;
+                    return; // Attendre que l'utilisateur soumette la satisfaction
                 }
+                
+                // IMPORTANT: Après le changement de phase, continuer vers la prochaine question
+                console.log('[runNextStep] Transition de phase terminée, passage à la prochaine question');
             }
         }
 
+        // Synthèse intermédiaire tous les 3 réponses (sauf multiples de 5)
         if (currentAnswers.length > 0 && currentAnswers.length % 3 === 0 && currentAnswers.length % 5 !== 0) {
             await handleGenerateSynthesis(currentAnswers);
             return;
         }
         
+        // Générer la prochaine question
+        console.log('[runNextStep] Appel de fetchNextQuestion');
         await fetchNextQuestion();
     }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases]);
 
