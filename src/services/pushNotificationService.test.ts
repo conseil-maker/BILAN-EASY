@@ -6,8 +6,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   isNotificationSupported,
   getPermissionStatus,
+  requestPermission,
+  sendLocalNotification,
   notifications,
   scheduleNotification,
+  scheduleRappelQuotidien,
+  registerPushServiceWorker,
 } from './pushNotificationService';
 
 describe('pushNotificationService', () => {
@@ -41,6 +45,60 @@ describe('pushNotificationService', () => {
     });
   });
 
+  describe('requestPermission', () => {
+    it('devrait être une fonction async', () => {
+      const result = requestPermission();
+      expect(result).toBeInstanceOf(Promise);
+    });
+
+    it('devrait retourner une permission', async () => {
+      const permission = await requestPermission();
+      expect(['default', 'granted', 'denied']).toContain(permission);
+    });
+  });
+
+  describe('sendLocalNotification', () => {
+    it('devrait être une fonction async', () => {
+      const result = sendLocalNotification({ title: 'Test', body: 'Test body' });
+      expect(result).toBeInstanceOf(Promise);
+    });
+
+    it('devrait retourner un booléen', async () => {
+      const result = await sendLocalNotification({ title: 'Test', body: 'Test' });
+      expect(typeof result).toBe('boolean');
+    });
+  });
+
+  describe('registerPushServiceWorker', () => {
+    it('devrait être une fonction async', () => {
+      const result = registerPushServiceWorker();
+      expect(result).toBeInstanceOf(Promise);
+    });
+
+    it('devrait retourner une registration ou null', async () => {
+      const registration = await registerPushServiceWorker();
+      expect(registration === null || typeof registration === 'object').toBe(true);
+    });
+  });
+
+  describe('scheduleRappelQuotidien', () => {
+    it('devrait être une fonction', () => {
+      expect(typeof scheduleRappelQuotidien).toBe('function');
+    });
+
+    it('devrait accepter un nombre de questions', () => {
+      vi.useFakeTimers();
+      expect(() => scheduleRappelQuotidien(5)).not.toThrow();
+      vi.useRealTimers();
+    });
+
+    it('devrait accepter une heure de rappel optionnelle', () => {
+      vi.useFakeTimers();
+      expect(() => scheduleRappelQuotidien(10, 14)).not.toThrow();
+      vi.useRealTimers();
+    });
+  });
+
   describe('notifications templates', () => {
     describe('bienvenue', () => {
       it('devrait créer une notification de bienvenue', () => {
@@ -58,6 +116,16 @@ describe('pushNotificationService', () => {
       it('devrait avoir une icône définie', () => {
         const notif = notifications.bienvenue('Test');
         expect(notif.icon).toBeDefined();
+      });
+
+      it('devrait inclure le nom de l\'organisation', () => {
+        const notif = notifications.bienvenue('Test');
+        expect(notif.body).toContain('NETZ INFORMATIQUE');
+      });
+
+      it('devrait avoir des données de type bienvenue', () => {
+        const notif = notifications.bienvenue('Test');
+        expect(notif.data?.type).toBe('bienvenue');
       });
     });
 
@@ -86,6 +154,12 @@ describe('pushNotificationService', () => {
         expect(notif.actions?.[0].action).toBe('continuer');
         expect(notif.actions?.[1].action).toBe('plus-tard');
       });
+
+      it('devrait avoir des données avec type et action', () => {
+        const notif = notifications.continuerBilan(5);
+        expect(notif.data?.type).toBe('rappel-bilan');
+        expect(notif.data?.action).toBe('continuer');
+      });
     });
 
     describe('rappelRendezVous', () => {
@@ -107,6 +181,18 @@ describe('pushNotificationService', () => {
         expect(notif.data?.date).toBe('22/12/2025');
         expect(notif.data?.heure).toBe('09:00');
       });
+
+      it('devrait avoir requireInteraction à true', () => {
+        const notif = notifications.rappelRendezVous('22/12/2025', '09:00', 'Test');
+        expect(notif.requireInteraction).toBe(true);
+      });
+
+      it('devrait avoir des actions voir et ok', () => {
+        const notif = notifications.rappelRendezVous('22/12/2025', '09:00', 'Test');
+        expect(notif.actions).toHaveLength(2);
+        expect(notif.actions?.[0].action).toBe('voir');
+        expect(notif.actions?.[1].action).toBe('ok');
+      });
     });
 
     describe('bilanTermine', () => {
@@ -126,6 +212,17 @@ describe('pushNotificationService', () => {
         expect(notif.actions).toBeDefined();
         expect(notif.actions?.[0].action).toBe('voir-documents');
       });
+
+      it('devrait avoir requireInteraction à true', () => {
+        const notif = notifications.bilanTermine();
+        expect(notif.requireInteraction).toBe(true);
+      });
+
+      it('devrait avoir des données avec type et action', () => {
+        const notif = notifications.bilanTermine();
+        expect(notif.data?.type).toBe('bilan-termine');
+        expect(notif.data?.action).toBe('voir-documents');
+      });
     });
 
     describe('documentsDisponibles', () => {
@@ -138,6 +235,17 @@ describe('pushNotificationService', () => {
       it('devrait mentionner Qualiopi', () => {
         const notif = notifications.documentsDisponibles();
         expect(notif.body).toContain('Qualiopi');
+      });
+
+      it('devrait avoir une action télécharger', () => {
+        const notif = notifications.documentsDisponibles();
+        expect(notif.actions).toBeDefined();
+        expect(notif.actions?.[0].action).toBe('telecharger');
+      });
+
+      it('devrait avoir des données avec type', () => {
+        const notif = notifications.documentsDisponibles();
+        expect(notif.data?.type).toBe('documents-prets');
       });
     });
 
@@ -158,6 +266,12 @@ describe('pushNotificationService', () => {
         expect(notif.actions).toBeDefined();
         expect(notif.actions?.[0].action).toBe('lire');
       });
+
+      it('devrait avoir des données avec type et from', () => {
+        const notif = notifications.messageConsultant('Jean');
+        expect(notif.data?.type).toBe('message');
+        expect(notif.data?.from).toBe('Jean');
+      });
     });
   });
 
@@ -176,6 +290,23 @@ describe('pushNotificationService', () => {
       expect(timeout).toBeDefined();
       vi.advanceTimersByTime(1000);
       clearTimeout(timeout);
+    });
+
+    it('devrait accepter différents délais', () => {
+      vi.useFakeTimers();
+      const notif = notifications.bienvenue('Test');
+      
+      const timeout1 = scheduleNotification(notif, 100);
+      const timeout2 = scheduleNotification(notif, 5000);
+      const timeout3 = scheduleNotification(notif, 60000);
+      
+      expect(timeout1).toBeDefined();
+      expect(timeout2).toBeDefined();
+      expect(timeout3).toBeDefined();
+      
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+      clearTimeout(timeout3);
     });
   });
 
@@ -196,6 +327,19 @@ describe('pushNotificationService', () => {
     it('devrait avoir un export par défaut', async () => {
       const module = await import('./pushNotificationService');
       expect(module.default).toBeDefined();
+    });
+
+    it('devrait avoir toutes les fonctions dans l\'export par défaut', async () => {
+      const module = await import('./pushNotificationService');
+      
+      expect(module.default.isNotificationSupported).toBeDefined();
+      expect(module.default.getPermissionStatus).toBeDefined();
+      expect(module.default.requestPermission).toBeDefined();
+      expect(module.default.sendLocalNotification).toBeDefined();
+      expect(module.default.notifications).toBeDefined();
+      expect(module.default.scheduleNotification).toBeDefined();
+      expect(module.default.scheduleRappelQuotidien).toBeDefined();
+      expect(module.default.registerPushServiceWorker).toBeDefined();
     });
   });
 });
