@@ -329,7 +329,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 if (info.phase === 2 && answersToUse.length > 0 && answersToUse[answersToUse.length - 1].value.length > 3) {
                     genOptions.useGoogleSearch = true; genOptions.searchTopic = answersToUse[answersToUse.length - 1].value;
                 }
+                console.log('[fetchNextQuestion] Calling generateQuestion with:', { phaseKey, categoryIndex, answersCount: answersToUse.length, userName, coachingStyle, hasProfile: !!userProfile, genOptions });
                 question = await generateQuestion(phaseKey, categoryIndex, answersToUse, userName, coachingStyle, answersToUse.length === 0 ? userProfile : null, genOptions);
+                console.log('[fetchNextQuestion] Question generated:', { id: question.id, title: question.title?.substring(0, 50) });
             }
             setCurrentQuestion(question);
             // Créer le message AI avant de l'ajouter aux messages
@@ -498,7 +500,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     localStorage.removeItem(SESSION_STORAGE_KEY);
                 }
             }
-            await fetchNextQuestion({}, 0, savedAnswers);
+            // Première question - pas de réponses précédentes
+            console.log('[loadSession] Démarrage du bilan - première question');
+            await fetchNextQuestion({}, 0, []);
         };
         loadSession();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps

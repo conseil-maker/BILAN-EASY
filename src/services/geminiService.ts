@@ -181,6 +181,7 @@ export const generateQuestion = async (
   userProfile: UserProfile | null = null,
   options: { useJoker?: boolean, useGoogleSearch?: boolean, searchTopic?: string, isModuleQuestion?: { moduleId: string, questionNum: number }, targetComplexity?: 'simple' | 'moyenne' | 'complexe' | 'reflexion', categoryId?: string } = {}
 ): Promise<Question> => {
+    console.log('[generateQuestion] START - Phase:', phaseKey, 'Category:', options.categoryId, 'Answers:', previousAnswers.length);
     const systemInstruction = getSystemInstruction(coachingStyle);
     const history = previousAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
     const previousQuestionIds = previousAnswers.map(a => a.questionId).join(', ');
