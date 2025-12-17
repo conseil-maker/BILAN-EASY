@@ -289,12 +289,12 @@ export default function LoginPro({ onToggle }: LoginProProps) {
           <div className="mt-6 text-center text-xs text-gray-500">
             <p>Besoin d'aide ? Contactez-nous</p>
             <p className="mt-1">
-              <a href={`mailto:${ORGANIZATION.contact.email}`} className="text-indigo-600 hover:underline">
-                {ORGANIZATION.contact.email}
+              <a href={`mailto:${ORGANIZATION.email}`} className="text-indigo-600 hover:underline">
+                {ORGANIZATION.email}
               </a>
               {' • '}
-              <a href={`tel:${ORGANIZATION.contact.phone}`} className="text-indigo-600 hover:underline">
-                {ORGANIZATION.contact.phone}
+              <a href={`tel:${ORGANIZATION.phone}`} className="text-indigo-600 hover:underline">
+                {ORGANIZATION.phone}
               </a>
             </p>
           </div>
