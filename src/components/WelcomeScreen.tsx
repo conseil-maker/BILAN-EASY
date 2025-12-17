@@ -11,6 +11,8 @@ interface WelcomeScreenProps {
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, userName, onLogout }) => {
   const [name, setName] = useState(userName || '');
   const [hasHistory, setHasHistory] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     // Vérifier si l'utilisateur a des bilans dans Supabase
@@ -26,11 +28,42 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
     }
   };
 
+  const validateName = (value: string): string | null => {
+    if (!value.trim()) {
+      return 'Veuillez entrer votre prénom pour continuer';
+    }
+    if (value.trim().length < 2) {
+      return 'Le prénom doit contenir au moins 2 caractères';
+    }
+    if (value.trim().length > 50) {
+      return 'Le prénom ne peut pas dépasser 50 caractères';
+    }
+    return null;
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    if (touched) {
+      setError(validateName(value));
+    }
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+    setError(validateName(name));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onStart(name.trim());
+    setTouched(true);
+    const validationError = validateName(name);
+    if (validationError) {
+      setError(validationError);
+      return;
     }
+    setError(null);
+    onStart(name.trim());
   };
 
   return (
@@ -66,11 +99,24 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
               id="name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={handleNameChange}
+              onBlur={handleBlur}
               placeholder="Entrez votre prénom"
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg text-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
+              className={`w-full px-4 py-3 border rounded-lg text-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
+                error && touched ? 'border-red-500 bg-red-50' : 'border-slate-300'
+              }`}
               required
+              aria-invalid={error && touched ? 'true' : 'false'}
+              aria-describedby={error && touched ? 'name-error' : undefined}
             />
+            {error && touched && (
+              <p id="name-error" className="mt-2 text-sm text-red-600 text-left flex items-center gap-1" role="alert">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </p>
+            )}
           </div>
           <button
             type="submit"

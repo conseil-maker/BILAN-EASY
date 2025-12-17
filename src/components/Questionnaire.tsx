@@ -916,7 +916,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         </div>
 
                         <div className="p-4 border-t bg-white dark:bg-slate-800 rounded-b-xl transition-colors duration-300">
-                            {currentQuestion?.type === QuestionType.PARAGRAPH && (
+                            {currentQuestion && currentQuestion.type !== QuestionType.MULTIPLE_CHOICE && (
                                 <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-center gap-2" role="form" aria-label="Formulaire de réponse">
                                     <label htmlFor="answer-input" className="sr-only">Écrivez votre réponse</label>
                                     <input 

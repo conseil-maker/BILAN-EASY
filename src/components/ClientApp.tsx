@@ -22,21 +22,101 @@ interface ClientAppProps {
   user: User;
 }
 
+// Clé pour la persistance de session
+const SESSION_STORAGE_KEY = 'bilan_easy_session';
+
+interface SessionData {
+  appState: AppState;
+  userName: string;
+  selectedPackageId: string | null;
+  coachingStyle: CoachingStyle;
+  currentAnswers: Answer[];
+  startDate: string;
+  timeSpent: number;
+  lastUpdated: string;
+}
+
 const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
-  const [appState, setAppState] = useState<AppState>('welcome');
-  const [userName, setUserName] = useState(user.email?.split('@')[0] || 'Utilisateur');
-  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [coachingStyle, setCoachingStyle] = useState<CoachingStyle>('collaborative');
+  // Charger la session depuis localStorage au démarrage
+  const loadSession = (): Partial<SessionData> | null => {
+    try {
+      const saved = localStorage.getItem(`${SESSION_STORAGE_KEY}_${user.id}`);
+      if (saved) {
+        const session = JSON.parse(saved) as SessionData;
+        // Vérifier si la session n'est pas trop ancienne (24h)
+        const lastUpdated = new Date(session.lastUpdated);
+        const now = new Date();
+        const hoursDiff = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60);
+        if (hoursDiff < 24) {
+          return session;
+        }
+      }
+    } catch (error) {
+      console.error('[Session] Erreur lors du chargement de la session:', error);
+    }
+    return null;
+  };
+
+  const savedSession = loadSession();
+  const savedPackage = savedSession?.selectedPackageId 
+    ? PACKAGES.find(p => p.id === savedSession.selectedPackageId) 
+    : null;
+
+  const [appState, setAppState] = useState<AppState>(savedSession?.appState || 'welcome');
+  const [userName, setUserName] = useState(savedSession?.userName || user.email?.split('@')[0] || 'Utilisateur');
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(savedPackage);
+  const [coachingStyle, setCoachingStyle] = useState<CoachingStyle>(savedSession?.coachingStyle || 'collaborative');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [consentData, setConsentData] = useState<ConsentData | null>(null);
-  const [currentAnswers, setCurrentAnswers] = useState<Answer[]>([]);
+  const [currentAnswers, setCurrentAnswers] = useState<Answer[]>(savedSession?.currentAnswers || []);
   const [currentSummary, setCurrentSummary] = useState<Summary | null>(null);
   const [viewingRecord, setViewingRecord] = useState<HistoryItem | null>(null);
-  const [startDate, setStartDate] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>(savedSession?.startDate || '');
   const [progress, setProgress] = useState(0);
-  const [timeSpent, setTimeSpent] = useState(0);
-  const [showDraftRecovery, setShowDraftRecovery] = useState(true);
+  const [timeSpent, setTimeSpent] = useState(savedSession?.timeSpent || 0);
+  const [showDraftRecovery, setShowDraftRecovery] = useState(!savedSession);
   const { showSuccess, showInfo } = useToast();
+
+  // Sauvegarder la session à chaque changement d'état important
+  useEffect(() => {
+    // Ne pas sauvegarder si on est sur les écrans de fin ou d'historique
+    if (['completion', 'summary', 'history', 'view-history-record'].includes(appState)) {
+      return;
+    }
+    
+    // Ne sauvegarder que si on a commencé le bilan
+    if (appState === 'welcome') {
+      return;
+    }
+
+    const sessionData: SessionData = {
+      appState,
+      userName,
+      selectedPackageId: selectedPackage?.id || null,
+      coachingStyle,
+      currentAnswers,
+      startDate,
+      timeSpent,
+      lastUpdated: new Date().toISOString(),
+    };
+
+    try {
+      localStorage.setItem(`${SESSION_STORAGE_KEY}_${user.id}`, JSON.stringify(sessionData));
+      console.log('[Session] Session sauvegardée:', appState, currentAnswers.length, 'réponses');
+    } catch (error) {
+      console.error('[Session] Erreur lors de la sauvegarde de la session:', error);
+    }
+  }, [appState, userName, selectedPackage, coachingStyle, currentAnswers, startDate, timeSpent, user.id]);
+
+  // Nettoyer la session quand le bilan est terminé
+  const clearSession = () => {
+    try {
+      localStorage.removeItem(`${SESSION_STORAGE_KEY}_${user.id}`);
+      console.log('[Session] Session supprimée');
+    } catch (error) {
+      console.error('[Session] Erreur lors de la suppression de la session:', error);
+    }
+  };
 
   // Timer pour suivre le temps passé
   useEffect(() => {
@@ -105,6 +185,9 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     };
     saveAssessmentToHistory(historyItem, user.id);
 
+    // Nettoyer la session car le bilan est terminé
+    clearSession();
+
     // Aller vers le parcours de fin au lieu du summary direct
     setAppState('completion');
   };
@@ -114,6 +197,9 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   };
 
   const handleRestart = () => {
+    // Nettoyer la session
+    clearSession();
+    
     setSelectedPackage(null);
     setCurrentAnswers([]);
     setCurrentSummary(null);
