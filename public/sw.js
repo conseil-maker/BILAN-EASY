@@ -182,4 +182,77 @@ async function syncAnswers() {
   }
 }
 
-console.log('[SW] Service Worker chargé');
+// Gestion des clics sur les notifications
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Clic sur notification:', event.notification.tag);
+  
+  event.notification.close();
+  
+  const data = event.notification.data || {};
+  let targetUrl = '/';
+  
+  // Déterminer l'URL en fonction de l'action
+  if (event.action === 'continuer' || data.type === 'rappel-bilan') {
+    targetUrl = '/#/';
+  } else if (event.action === 'voir' || data.type === 'rappel-rdv') {
+    targetUrl = '/#/rendez-vous';
+  } else if (event.action === 'voir-documents' || data.type === 'bilan-termine') {
+    targetUrl = '/#/mes-documents';
+  } else if (event.action === 'telecharger' || data.type === 'documents-prets') {
+    targetUrl = '/#/mes-documents';
+  } else if (event.action === 'lire' || data.type === 'message') {
+    targetUrl = '/#/dashboard';
+  }
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Si une fenêtre est déjà ouverte, la focus
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.navigate(targetUrl);
+            return client.focus();
+          }
+        }
+        // Sinon, ouvrir une nouvelle fenêtre
+        if (clients.openWindow) {
+          return clients.openWindow(targetUrl);
+        }
+      })
+  );
+});
+
+// Gestion de la fermeture des notifications
+self.addEventListener('notificationclose', (event) => {
+  console.log('[SW] Notification fermée:', event.notification.tag);
+});
+
+// Gestion des push notifications du serveur (pour plus tard)
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push reçu');
+  
+  let data = { title: 'Bilan-Easy', body: 'Nouvelle notification' };
+  
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data.body = event.data.text();
+    }
+  }
+  
+  const options = {
+    body: data.body,
+    icon: '/icon-192.png',
+    badge: '/icon-72.png',
+    tag: data.tag || 'push-notification',
+    data: data.data || {},
+    requireInteraction: data.requireInteraction || false,
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+console.log('[SW] Service Worker chargé avec support notifications');

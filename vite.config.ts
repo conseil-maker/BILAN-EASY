@@ -13,9 +13,43 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    // Augmenter la limite d'avertissement
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks: undefined,
+        // Séparation intelligente des chunks
+        manualChunks: (id) => {
+          // Vendors React
+          if (id.includes('node_modules/react') || 
+              id.includes('node_modules/react-dom') ||
+              id.includes('node_modules/scheduler')) {
+            return 'vendor-react';
+          }
+          
+          // Supabase
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+          
+          // PDF et export
+          if (id.includes('jspdf') || 
+              id.includes('html2canvas') ||
+              id.includes('dompurify')) {
+            return 'vendor-pdf';
+          }
+          
+          // Charts et visualisation
+          if (id.includes('chart.js') || 
+              id.includes('recharts') ||
+              id.includes('d3')) {
+            return 'vendor-charts';
+          }
+          
+          // Autres vendors
+          if (id.includes('node_modules')) {
+            return 'vendor-misc';
+          }
+        },
       },
     },
   },
@@ -23,5 +57,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, '.'),
     }
-  }
+  },
+  // Optimisation des dépendances
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@supabase/supabase-js'],
+    exclude: ['jspdf', 'html2canvas'],
+  },
 });

@@ -1,26 +1,69 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { User } from '@supabase/supabase-js';
 import AuthWrapper from './components/AuthWrapper';
-import ClientApp from './components/ClientApp';
 import { ToastProvider } from './components/ToastProvider';
 import { OfflineIndicator } from './components/OfflineIndicator';
-import { AdminDashboard } from './components/AdminDashboard';
-import { AdminDashboardPro } from './components/AdminDashboardPro';
-import { ConsultantDashboard } from './components/ConsultantDashboard';
-import { ConsultantDashboardPro } from './components/ConsultantDashboardPro';
-import { CGU, CGV, Privacy, CookiesPolicy } from './components/legal';
 import { CookieConsent } from './components/CookieConsent';
-import { SatisfactionSurvey } from './components/SatisfactionSurvey';
-import { DocumentsQualiopi } from './components/DocumentsQualiopi';
-import { DocumentLibrary } from './components/DocumentLibrary';
-import { MetiersFormationsExplorer } from './components/MetiersFormationsExplorer';
-import { MyDocuments } from './components/MyDocuments';
-import { ClientDashboard } from './components/ClientDashboard';
-import { AppointmentSystem } from './components/AppointmentSystem';
-import { AboutPage } from './components/AboutPage';
 import { GlobalNavbar } from './components/GlobalNavbar';
+import { LoadingSpinner, FullPageLoader } from './components/LazyComponents';
 
-// Simple router based on hash
+// ============================================
+// LAZY IMPORTS - Chargement à la demande
+// ============================================
+
+// Composants principaux
+const ClientApp = lazy(() => import('./components/ClientApp'));
+
+// Dashboards Admin/Consultant
+const AdminDashboard = lazy(() => 
+  import('./components/AdminDashboard').then(m => ({ default: m.AdminDashboard }))
+);
+const AdminDashboardPro = lazy(() => 
+  import('./components/AdminDashboardPro').then(m => ({ default: m.AdminDashboardPro }))
+);
+const ConsultantDashboard = lazy(() => 
+  import('./components/ConsultantDashboard').then(m => ({ default: m.ConsultantDashboard }))
+);
+const ConsultantDashboardPro = lazy(() => 
+  import('./components/ConsultantDashboardPro').then(m => ({ default: m.ConsultantDashboardPro }))
+);
+
+// Pages légales
+const CGU = lazy(() => import('./components/legal').then(m => ({ default: m.CGU })));
+const CGV = lazy(() => import('./components/legal').then(m => ({ default: m.CGV })));
+const Privacy = lazy(() => import('./components/legal').then(m => ({ default: m.Privacy })));
+const CookiesPolicy = lazy(() => import('./components/legal').then(m => ({ default: m.CookiesPolicy })));
+
+// Fonctionnalités
+const SatisfactionSurvey = lazy(() => 
+  import('./components/SatisfactionSurvey').then(m => ({ default: m.SatisfactionSurvey }))
+);
+const DocumentsQualiopi = lazy(() => 
+  import('./components/DocumentsQualiopi').then(m => ({ default: m.DocumentsQualiopi }))
+);
+const DocumentLibrary = lazy(() => 
+  import('./components/DocumentLibrary').then(m => ({ default: m.DocumentLibrary }))
+);
+const MetiersFormationsExplorer = lazy(() => 
+  import('./components/MetiersFormationsExplorer').then(m => ({ default: m.MetiersFormationsExplorer }))
+);
+const MyDocuments = lazy(() => 
+  import('./components/MyDocuments').then(m => ({ default: m.MyDocuments }))
+);
+const ClientDashboard = lazy(() => 
+  import('./components/ClientDashboard').then(m => ({ default: m.ClientDashboard }))
+);
+const AppointmentSystem = lazy(() => 
+  import('./components/AppointmentSystem').then(m => ({ default: m.AppointmentSystem }))
+);
+const AboutPage = lazy(() => 
+  import('./components/AboutPage').then(m => ({ default: m.AboutPage }))
+);
+
+// ============================================
+// ROUTER
+// ============================================
+
 const useHashRouter = () => {
   const [route, setRoute] = useState(window.location.hash.slice(1) || '/');
 
@@ -35,7 +78,10 @@ const useHashRouter = () => {
   return route;
 };
 
-// Footer with legal links
+// ============================================
+// COMPOSANTS UI
+// ============================================
+
 const Footer: React.FC = () => (
   <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-6 mt-auto">
     <div className="max-w-7xl mx-auto px-4">
@@ -63,7 +109,6 @@ const Footer: React.FC = () => (
   </footer>
 );
 
-// Back to home button for legal pages
 const BackButton: React.FC = () => (
   <div className="fixed top-4 left-4 z-40">
     <a
@@ -78,19 +123,24 @@ const BackButton: React.FC = () => (
   </div>
 );
 
+// ============================================
+// APP PRINCIPALE
+// ============================================
+
 const App: React.FC = () => {
   const route = useHashRouter();
-  // Use Pro dashboards by default (can be toggled)
   const [useProDashboards] = useState(true);
 
-  // Legal pages (accessible without auth)
+  // Pages légales (sans auth)
   const renderLegalPage = () => {
     switch (route) {
       case '/legal/cgu':
         return (
           <>
             <BackButton />
-            <CGU />
+            <Suspense fallback={<LoadingSpinner />}>
+              <CGU />
+            </Suspense>
             <Footer />
           </>
         );
@@ -98,7 +148,9 @@ const App: React.FC = () => {
         return (
           <>
             <BackButton />
-            <CGV />
+            <Suspense fallback={<LoadingSpinner />}>
+              <CGV />
+            </Suspense>
             <Footer />
           </>
         );
@@ -106,7 +158,9 @@ const App: React.FC = () => {
         return (
           <>
             <BackButton />
-            <Privacy />
+            <Suspense fallback={<LoadingSpinner />}>
+              <Privacy />
+            </Suspense>
             <Footer />
           </>
         );
@@ -114,7 +168,9 @@ const App: React.FC = () => {
         return (
           <>
             <BackButton />
-            <CookiesPolicy />
+            <Suspense fallback={<LoadingSpinner />}>
+              <CookiesPolicy />
+            </Suspense>
             <Footer />
           </>
         );
@@ -123,7 +179,7 @@ const App: React.FC = () => {
     }
   };
 
-  // Check if current route is a legal page
+  // Routes légales
   if (route.startsWith('/legal/')) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
@@ -133,12 +189,14 @@ const App: React.FC = () => {
     );
   }
 
-  // About page (accessible without auth)
+  // Page À propos
   if (route === '/about') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
         <BackButton />
-        <AboutPage />
+        <Suspense fallback={<LoadingSpinner />}>
+          <AboutPage />
+        </Suspense>
         <Footer />
         <CookieConsent />
       </div>
@@ -150,16 +208,18 @@ const App: React.FC = () => {
       window.location.hash = '#/';
     };
 
-    // Check for special routes
+    // Routes spéciales avec lazy loading
     if (route === '/satisfaction') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Satisfaction" />
-          <SatisfactionSurvey 
-            userId={user.id} 
-            assessmentId="current" 
-            onComplete={() => window.location.hash = '#/'}
-          />
+          <Suspense fallback={<LoadingSpinner message="Chargement du questionnaire..." />}>
+            <SatisfactionSurvey 
+              userId={user.id} 
+              assessmentId="current" 
+              onComplete={() => window.location.hash = '#/'}
+            />
+          </Suspense>
         </div>
       );
     }
@@ -169,14 +229,16 @@ const App: React.FC = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Documents" />
           <div className="p-6">
-            <DocumentsQualiopi
-              userId={user.id}
-              packageName="Essentiel"
-              packageDuration={12}
-              packagePrice={1200}
-              startDate={new Date().toLocaleDateString('fr-FR')}
-              isCompleted={false}
-            />
+            <Suspense fallback={<LoadingSpinner message="Chargement des documents..." />}>
+              <DocumentsQualiopi
+                userId={user.id}
+                packageName="Essentiel"
+                packageDuration={12}
+                packagePrice={1200}
+                startDate={new Date().toLocaleDateString('fr-FR')}
+                isCompleted={false}
+              />
+            </Suspense>
           </div>
         </div>
       );
@@ -186,16 +248,18 @@ const App: React.FC = () => {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Bibliothèque" />
-          <DocumentLibrary
-            userId={user.id}
-            userName={user.email?.split('@')[0] || 'Utilisateur'}
-            userEmail={user.email || ''}
-            packageName="Essentiel"
-            packageDuration={12}
-            packagePrice={1200}
-            startDate={new Date().toLocaleDateString('fr-FR')}
-            isCompleted={false}
-          />
+          <Suspense fallback={<LoadingSpinner message="Chargement de la bibliothèque..." />}>
+            <DocumentLibrary
+              userId={user.id}
+              userName={user.email?.split('@')[0] || 'Utilisateur'}
+              userEmail={user.email || ''}
+              packageName="Essentiel"
+              packageDuration={12}
+              packagePrice={1200}
+              startDate={new Date().toLocaleDateString('fr-FR')}
+              isCompleted={false}
+            />
+          </Suspense>
         </div>
       );
     }
@@ -204,9 +268,11 @@ const App: React.FC = () => {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Métiers & Formations" />
-          <MetiersFormationsExplorer
-            userCompetences={['Management', 'Communication', 'Gestion de projet']}
-          />
+          <Suspense fallback={<LoadingSpinner message="Chargement de l'explorateur..." />}>
+            <MetiersFormationsExplorer
+              userCompetences={['Management', 'Communication', 'Gestion de projet']}
+            />
+          </Suspense>
         </div>
       );
     }
@@ -215,14 +281,16 @@ const App: React.FC = () => {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mes Documents" />
-          <MyDocuments
-            user={user}
-            packageName="Essentiel"
-            packageDuration={12}
-            packagePrice={1200}
-            startDate={new Date().toLocaleDateString('fr-FR')}
-            isCompleted={false}
-          />
+          <Suspense fallback={<LoadingSpinner message="Chargement de vos documents..." />}>
+            <MyDocuments
+              user={user}
+              packageName="Essentiel"
+              packageDuration={12}
+              packagePrice={1200}
+              startDate={new Date().toLocaleDateString('fr-FR')}
+              isCompleted={false}
+            />
+          </Suspense>
         </div>
       );
     }
@@ -231,10 +299,12 @@ const App: React.FC = () => {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mon Tableau de Bord" />
-          <ClientDashboard
-            user={user}
-            onStartBilan={() => window.location.hash = '#/'}
-          />
+          <Suspense fallback={<LoadingSpinner message="Chargement du tableau de bord..." />}>
+            <ClientDashboard
+              user={user}
+              onStartBilan={() => window.location.hash = '#/'}
+            />
+          </Suspense>
         </div>
       );
     }
@@ -243,43 +313,65 @@ const App: React.FC = () => {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mes Rendez-vous" />
-          <AppointmentSystem
-            userId={user.id}
-            userName={user.email?.split('@')[0] || 'Utilisateur'}
-            userEmail={user.email || ''}
-            mode="client"
-          />
+          <Suspense fallback={<LoadingSpinner message="Chargement des rendez-vous..." />}>
+            <AppointmentSystem
+              userId={user.id}
+              userName={user.email?.split('@')[0] || 'Utilisateur'}
+              userEmail={user.email || ''}
+              mode="client"
+            />
+          </Suspense>
         </div>
       );
     }
 
-    // Admin routes
+    // Routes Admin
     if (route === '/admin' || route === '/admin/dashboard') {
-      return useProDashboards 
-        ? <AdminDashboardPro onBack={handleBack} />
-        : <AdminDashboard onBack={handleBack} />;
+      return (
+        <Suspense fallback={<FullPageLoader message="Chargement du dashboard admin..." />}>
+          {useProDashboards 
+            ? <AdminDashboardPro onBack={handleBack} />
+            : <AdminDashboard onBack={handleBack} />}
+        </Suspense>
+      );
     }
 
-    // Consultant routes
+    // Routes Consultant
     if (route === '/consultant' || route === '/consultant/dashboard') {
-      return useProDashboards
-        ? <ConsultantDashboardPro onBack={handleBack} />
-        : <ConsultantDashboard onBack={handleBack} />;
+      return (
+        <Suspense fallback={<FullPageLoader message="Chargement du dashboard consultant..." />}>
+          {useProDashboards
+            ? <ConsultantDashboardPro onBack={handleBack} />
+            : <ConsultantDashboard onBack={handleBack} />}
+        </Suspense>
+      );
     }
 
-    // Role-based default view
+    // Vue par défaut selon le rôle
     switch (userRole) {
       case 'admin':
-        return useProDashboards 
-          ? <AdminDashboardPro onBack={handleBack} />
-          : <AdminDashboard onBack={handleBack} />;
+        return (
+          <Suspense fallback={<FullPageLoader message="Chargement du dashboard admin..." />}>
+            {useProDashboards 
+              ? <AdminDashboardPro onBack={handleBack} />
+              : <AdminDashboard onBack={handleBack} />}
+          </Suspense>
+        );
       case 'consultant':
-        return useProDashboards
-          ? <ConsultantDashboardPro onBack={handleBack} />
-          : <ConsultantDashboard onBack={handleBack} />;
+        return (
+          <Suspense fallback={<FullPageLoader message="Chargement du dashboard consultant..." />}>
+            {useProDashboards
+              ? <ConsultantDashboardPro onBack={handleBack} />
+              : <ConsultantDashboard onBack={handleBack} />}
+          </Suspense>
+        );
       case 'client':
       default:
-        return <ClientApp user={user} />;
+        return (
+          <Suspense fallback={<FullPageLoader message="Chargement de l'application..." />}>
+            <ClientApp user={user} />
+          </Suspense>
+        );
     }
   };
 
@@ -292,7 +384,6 @@ const App: React.FC = () => {
               <div className="flex-grow">
                 {renderByRole(user, userRole)}
               </div>
-              {/* Don't show footer on Pro dashboards */}
               {!['admin', 'consultant'].includes(userRole) && <Footer />}
             </>
           )}
@@ -305,4 +396,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-// Force redeploy Tue Dec 16 10:32:08 EST 2025
