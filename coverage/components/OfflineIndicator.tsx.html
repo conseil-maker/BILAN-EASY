@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">55% </span>
+                <span class="strong">85% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>11/20</span>
+                <span class='fraction'>17/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">34.61% </span>
+                <span class="strong">84.61% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>9/26</span>
+                <span class='fraction'>22/26</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/4</span>
+                <span class='fraction'>3/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">55% </span>
+                <span class="strong">85% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>11/20</span>
+                <span class='fraction'>17/20</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -194,35 +194,35 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -323,9 +323,9 @@ export const OfflineIndicator: React.FC&lt;OfflineIndicatorProps&gt; = ({ showSy
   const [wasOffline, setWasOffline] = useState(false);
 &nbsp;
   useEffect(() =&gt; {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!isOnline) {
-<span class="cstat-no" title="statement not covered" >      setShowBanner(true);</span>
-<span class="cstat-no" title="statement not covered" >      setWasOffline(true);</span>
+    if (!isOnline) {
+      setShowBanner(true);
+      setWasOffline(true);
     <span class="missing-if-branch" title="if path not taken" >I</span>} else if (wasOffline) {
       // Afficher brièvement le message "Connexion rétablie"
 <span class="cstat-no" title="statement not covered" >      setTimeout(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
@@ -335,17 +335,17 @@ export const OfflineIndicator: React.FC&lt;OfflineIndicatorProps&gt; = ({ showSy
     }
   }, [isOnline, wasOffline]);
 &nbsp;
-  const handleSync = <span class="fstat-no" title="function not covered" >async () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    setIsSyncing(true);</span>
-<span class="cstat-no" title="statement not covered" >    await syncNow();</span>
-<span class="cstat-no" title="statement not covered" >    setIsSyncing(false);</span>
+  const handleSync = async () =&gt; {
+    setIsSyncing(true);
+    await syncNow();
+    setIsSyncing(false);
   };
 &nbsp;
-  <span class="missing-if-branch" title="else path not taken" >E</span>if (!showBanner &amp;&amp; isOnline &amp;&amp; pendingSyncCount === 0) {
+  if (!showBanner &amp;&amp; isOnline &amp;&amp; pendingSyncCount === 0) {
     return null;
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;&gt;
       {/* Barre de statut hors-ligne */}
       {!isOnline &amp;&amp; (
@@ -368,7 +368,7 @@ export const OfflineIndicator: React.FC&lt;OfflineIndicatorProps&gt; = ({ showSy
       )}
 &nbsp;
       {/* Message de connexion rétablie */}
-      {isOnline &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >wasOffline &amp;&amp; (</span>
+      {isOnline &amp;&amp; wasOffline &amp;&amp; (
 <span class="branch-2 cbranch-no" title="branch not covered" >        &lt;div className="fixed bottom-0 left-0 right-0 bg-green-500 text-white py-3 px-4 z-50 shadow-lg animate-slide-up"&gt;</span>
           &lt;div className="max-w-7xl mx-auto flex items-center justify-between"&gt;
             &lt;div className="flex items-center gap-3"&gt;
@@ -387,8 +387,8 @@ export const OfflineIndicator: React.FC&lt;OfflineIndicatorProps&gt; = ({ showSy
       )}
 &nbsp;
       {/* Indicateur de synchronisation en attente (quand en ligne) */}
-      {isOnline &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >!wasOffline &amp;&amp; <span class="branch-2 cbranch-no" title="branch not covered" >p</span>endingSyncCount &gt; 0 &amp;&amp; <span class="branch-3 cbranch-no" title="branch not covered" >s</span>howSyncButton &amp;&amp; (</span>
-<span class="branch-4 cbranch-no" title="branch not covered" >        &lt;div className="fixed bottom-4 right-4 z-50"&gt;</span>
+      {isOnline &amp;&amp; !wasOffline &amp;&amp; pendingSyncCount &gt; 0 &amp;&amp; showSyncButton &amp;&amp; (
+        &lt;div className="fixed bottom-4 right-4 z-50"&gt;
           &lt;button
             onClick={handleSync}
             disabled={isSyncing}
@@ -439,7 +439,7 @@ export default OfflineIndicator;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-17T13:53:22.077Z
+                at 2025-12-17T14:32:26.536Z
             </div>
         <script src="../prettify.js"></script>
         <script>
