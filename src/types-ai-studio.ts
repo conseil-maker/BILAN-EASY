@@ -19,6 +19,7 @@ export interface Question {
 
 export interface Answer {
   questionId: string;
+  questionTitle?: string; // Titre de la question pour éviter les répétitions
   value: string;
   complexity?: QuestionComplexity;
   categoryId?: string;

@@ -184,6 +184,12 @@ export const generateQuestion = async (
     const systemInstruction = getSystemInstruction(coachingStyle);
     const history = previousAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
     const previousQuestionIds = previousAnswers.map(a => a.questionId).join(', ');
+    
+    // Extraire les titres des questions précédentes pour éviter les répétitions
+    const previousQuestionTitles = previousAnswers
+        .filter(a => a.questionTitle)
+        .map(a => `- ${a.questionTitle}`)
+        .join('\n');
 
     let taskDescription = "";
     if (options.isModuleQuestion) {
@@ -226,7 +232,28 @@ export const generateQuestion = async (
         specialInstruction = `CRITICAL INSTRUCTION: The user mentioned an interest in '${options.searchTopic}'. Use the provided Google Search results to ask an enriched follow-up question that connects their interest to the current reality of the job market. Example: 'Intéressant, le métier de ${options.searchTopic}. Je vois que les offres d'emploi actuelles insistent beaucoup sur la compétence [Compétence trouvée via recherche]. Est-ce un domaine qui vous attire ?'`;
     }
 
-    const previousQuestionsWarning = previousQuestionIds ? `\n\nIMPORTANT: Questions already asked (DO NOT repeat these topics): ${previousQuestionIds}. Generate a DIFFERENT question on a NEW aspect of the current category.` : "";
+    // Construire un avertissement plus efficace avec les titres des questions
+    let previousQuestionsWarning = "";
+    if (previousAnswers.length > 0) {
+        const recentQuestions = previousAnswers.slice(-10); // Les 10 dernières questions
+        const questionSummary = recentQuestions.map((a, i) => {
+            const title = a.questionTitle || a.questionId;
+            const shortAnswer = a.value.substring(0, 100) + (a.value.length > 100 ? '...' : '');
+            return `${i + 1}. Q: "${title}" -> R: "${shortAnswer}"`;
+        }).join('\n');
+        
+        previousQuestionsWarning = `\n\n=== CRITICAL: AVOID REPETITION ===
+You have already asked ${previousAnswers.length} questions. Here are the most recent ones:
+${questionSummary}
+
+RULES:
+1. DO NOT ask the same question again, even rephrased
+2. DO NOT ask about topics already covered in previous answers
+3. Each new question MUST explore a DIFFERENT aspect
+4. If the user mentioned something specific, build on it but don't repeat the question
+5. Generate a question ID that is UNIQUE (use format: q_${Date.now()}_${Math.random().toString(36).substr(2, 5)})
+=================================`;
+    }
     const prompt = `Context: User Name: ${userName}. ${profileContext} Previous Q&A: ${history || "None."}${previousQuestionsWarning} ${specialInstruction} Task: ${taskDescription} The response MUST be a valid JSON object.`;
 
     const config: any = { 
@@ -285,7 +312,16 @@ export const generateQuestion = async (
 
     const questionData = parseJsonResponse<any>(response.text, 'generateQuestion');
     const type = questionData.type?.toUpperCase() === 'MULTIPLE_CHOICE' ? QuestionType.MULTIPLE_CHOICE : QuestionType.PARAGRAPH;
-    return { ...questionData, type, choices: type === QuestionType.MULTIPLE_CHOICE ? questionData.choices : undefined } as Question;
+    
+    // Générer un ID unique côté client pour éviter les doublons
+    const uniqueId = `q_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    return { 
+        ...questionData, 
+        id: uniqueId, // Forcer un ID unique
+        type, 
+        choices: type === QuestionType.MULTIPLE_CHOICE ? questionData.choices : undefined 
+    } as Question;
 };
 
 export const suggestOptionalModule = async (answers: Answer[]): Promise<{ isNeeded: boolean, moduleId?: string, reason?: string }> => {

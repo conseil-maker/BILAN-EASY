@@ -499,7 +499,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         else if (value.length > 400) estimatedComplexity = 'reflexion';
         
         const newAnswer: Answer = { 
-            questionId: currentQuestion.id, 
+            questionId: currentQuestion.id,
+            questionTitle: currentQuestion.title, // Sauvegarder le titre pour éviter les répétitions
             value,
             complexity: estimatedComplexity,
             categoryId: currentCategoryId || undefined,
