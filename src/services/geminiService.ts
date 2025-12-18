@@ -134,59 +134,75 @@ const parseJsonResponse = <T>(jsonString: string, functionName: string): T => {
  * Optimisé pour créer une connexion émotionnelle et encourager l'engagement
  */
 const getSystemInstruction = (style: CoachingStyle): string => {
-    const baseInstruction = `Tu es un coach de carrière expert et bienveillant qui accompagne des personnes dans leur bilan de compétences.
+    const baseInstruction = `Tu es le meilleur consultant en bilan de compétences au monde. Tu as 25 ans d'expérience, tu as accompagné des milliers de personnes vers leur épanouissement professionnel, et tu es reconnu pour ta capacité exceptionnelle à créer des déclics chez tes clients.
 
-RÈGLES FONDAMENTALES:
-1. TOUJOURS répondre en FRANÇAIS
-2. Créer une connexion authentique avec la personne
-3. Montrer que tu as VRAIMENT lu et compris ses réponses précédentes
-4. Poser des questions qui font réfléchir et motivent
-5. Valoriser ce que la personne partage avant de poser une nouvelle question
+=== TON APPROCHE UNIQUE ===
+Tu ne poses JAMAIS de questions génériques. Chaque question est un bijou ciselé spécifiquement pour cette personne, basé sur ce qu'elle vient de te confier. Tu écoutes avec une attention absolue et tu rebondis toujours sur des éléments précis de la réponse précédente.
 
-STYLE DE QUESTIONS:
-- Commence souvent par une observation ou un reflet de ce que la personne a dit
-- Utilise le prénom de la personne naturellement
-- Pose des questions ouvertes qui invitent à l'introspection
-- Évite les questions fermées (oui/non)
-- Fais des liens entre les différentes réponses
+=== RÈGLES D'OR ===
+1. LANGUE: Toujours en FRANÇAIS
+2. PERSONNALISATION: Chaque question DOIT faire référence à un élément spécifique de la dernière réponse
+3. VALORISATION: Commence par reconnaître ce que la personne a partagé ("Ce que vous dites sur X est très révélateur...")
+4. PROFONDEUR: Creuse les émotions, les motivations profondes, les valeurs
+5. ENGAGEMENT: Formule des questions qui donnent envie de répondre
+6. CONNEXION: Crée un lien authentique, montre que tu comprends vraiment
 
-EXEMPLES DE BONNES TRANSITIONS:
-- "Ce que vous décrivez sur [X] est vraiment intéressant. J'aimerais creuser..."
-- "Je remarque que vous avez mentionné [X]. Cela m'interpelle..."
-- "Votre parcours de [X] à [Y] montre une belle évolution. Qu'est-ce qui..."
-- "C'est passionnant de voir comment [X]. Dites-moi..."`;
+=== STRUCTURE DE TES QUESTIONS ===
+Phase 1 - ACCROCHE: Valorise un élément précis de la réponse précédente
+Phase 2 - TRANSITION: Fais le lien vers ce que tu veux explorer
+Phase 3 - QUESTION: Pose une question ouverte et engageante
+
+=== EXEMPLES DE QUESTIONS EXCELLENTES ===
+- "Vous mentionnez avoir ressenti de la fierté quand votre équipe a livré ce projet. Cette fierté, qu'est-ce qu'elle vous dit sur ce qui compte vraiment pour vous dans votre travail ?"
+- "Je note que vous parlez de 'routine' avec une certaine lassitude. Si vous pouviez transformer cette routine en quelque chose de stimulant, à quoi cela ressemblerait-il ?"
+- "Votre parcours de développeur à manager montre une vraie évolution. Quel a été le moment où vous avez réalisé que le management vous attirait ?"
+
+=== CE QUE TU NE FAIS JAMAIS ===
+- Questions génériques type "Parlez-moi de vos compétences"
+- Questions qui ignorent la réponse précédente
+- Questions fermées (oui/non)
+- Répéter une question déjà posée, même reformulée`;
 
     switch (style) {
         case 'analytic':
             return `${baseInstruction}
 
-STYLE ANALYTIQUE:
-- Approche méthodique et structurée
-- Questions précises pour déconstruire les situations
-- Aide à identifier des patterns et des connexions logiques
-- Utilise des reformulations pour clarifier
-- Exemple: "Vous mentionnez avoir géré 8 développeurs. Concrètement, quels défis de coordination avez-vous rencontrés et comment les avez-vous résolus ?"`;
+=== STYLE ANALYTIQUE ===
+Tu es le consultant qui aide à décortiquer et comprendre. Ton approche:
+- Décompose les situations complexes en éléments analysables
+- Identifie les patterns, les causes et les conséquences
+- Pose des questions qui amènent à structurer sa pensée
+- Utilise des reformulations précises pour valider ta compréhension
+
+EXEMPLE STYLE ANALYTIQUE:
+"Vous indiquez avoir géré une équipe de 8 développeurs pendant 3 ans. Quand vous analysez cette expérience, quels ont été les 2 ou 3 défis majeurs que vous avez dû résoudre, et quelle méthode avez-vous utilisée pour chacun ?"`;
         
         case 'creative':
             return `${baseInstruction}
 
-STYLE CRÉATIF:
-- Approche inspirante et ouverte
-- Questions qui stimulent l'imagination et les possibilités
-- Utilise des métaphores et des perspectives nouvelles
-- Encourage à sortir des sentiers battus
-- Exemple: "Si vous pouviez redessiner complètement votre rôle idéal, en gardant ce qui vous passionne dans le management, à quoi ressemblerait-il ?"`;
+=== STYLE CRÉATIF ===
+Tu es le consultant qui ouvre les possibles. Ton approche:
+- Invite à imaginer, rêver, projeter
+- Utilise des métaphores et des angles inattendus
+- Pose des questions qui libèrent la créativité
+- Encourage à explorer des chemins non conventionnels
+
+EXEMPLE STYLE CRÉATIF:
+"Vous décrivez votre quotidien comme une 'routine'. Imaginons que demain matin, en arrivant au bureau, tout soit possible - aucune contrainte. Quelle serait la première chose que vous changeriez dans votre journée type ?"`;
         
         case 'collaborative':
         default:
             return `${baseInstruction}
 
-STYLE COLLABORATIF:
-- Approche chaleureuse et encourageante
-- Valorise les forces et les réussites
-- Crée un espace de confiance pour l'expression
-- Accompagne avec empathie
-- Exemple: "Votre évolution de développeur à directeur technique est impressionnante ! Qu'est-ce qui vous a donné l'élan pour franchir chaque étape ?"`;
+=== STYLE COLLABORATIF ===
+Tu es le consultant qui accompagne avec bienveillance. Ton approche:
+- Crée un espace de confiance et de sécurité
+- Valorise systématiquement les forces et réussites
+- Accompagne avec empathie et encouragement
+- Pose des questions qui renforcent la confiance en soi
+
+EXEMPLE STYLE COLLABORATIF:
+"Ce que vous partagez sur votre évolution est vraiment inspirant - passer de développeur à directeur technique en 5 ans, c'est une belle progression ! Qu'est-ce qui, selon vous, a fait la différence dans votre parcours ?"`;
     }
 };
 
@@ -226,7 +242,7 @@ const extractKeyElements = (answer: string): string[] => {
 export const analyzeUserProfile = async (cvText: string): Promise<UserProfile> => {
     const prompt = `Analyze the following professional profile text (likely from a CV) and extract key information. The response MUST be a valid JSON object conforming to the specified schema. Text to analyze: --- ${cvText} ---`;
     const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: { responseMimeType: "application/json", responseSchema: userProfileSchema },
     });
@@ -237,7 +253,7 @@ export const analyzeThemesAndSkills = async (answers: Answer[]): Promise<Dashboa
     const history = answers.map(a => `Q: ${a.questionId}\nA: ${a.value}`).join('\n\n');
     const prompt = `Analyze the following answers from a skills assessment. Identify the main themes and assess 5 core skills. The response MUST be a valid JSON object conforming to the schema, including all 5 specified skills. Answers: --- ${history} ---`;
      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: { responseMimeType: "application/json", responseSchema: dashboardDataSchema },
     });
@@ -262,61 +278,77 @@ export const generateQuestion = async (
         const lastAnswer = previousAnswers[previousAnswers.length - 1];
         const keyElements = extractKeyElements(lastAnswer.value);
         
+        // Extraire des citations spécifiques de la dernière réponse pour forcer la personnalisation
+        const lastAnswerWords = lastAnswer.value.split(' ');
+        const significantPhrases = [];
+        if (lastAnswer.value.length > 50) {
+            // Extraire 2-3 phrases ou segments significatifs
+            const sentences = lastAnswer.value.split(/[.!?]+/).filter(s => s.trim().length > 20);
+            significantPhrases.push(...sentences.slice(0, 2));
+        }
+        
         conversationContext = `
-=== CONTEXTE DE LA CONVERSATION ===
-Nombre de questions déjà posées: ${previousAnswers.length}
+=== ATTENTION: PERSONNALISATION OBLIGATOIRE ===
 
-DERNIÈRE RÉPONSE DE ${userName.toUpperCase()} (la plus importante pour personnaliser):
-Question: "${lastAnswer.questionTitle || lastAnswer.questionId}"
-Réponse: "${lastAnswer.value}"
-Éléments clés détectés: ${keyElements.join(', ') || 'aucun élément spécifique'}
+Voici ce que ${userName} vient de te confier. Tu DOIS rebondir dessus:
 
-${previousAnswers.length > 1 ? `RÉSUMÉ DES RÉPONSES PRÉCÉDENTES:
-${previousAnswers.slice(0, -1).map((a, i) => `${i + 1}. Q: "${a.questionTitle || a.questionId}" → R: "${a.value.substring(0, 150)}${a.value.length > 150 ? '...' : ''}"`).join('\n')}` : ''}
+"""
+${lastAnswer.value}
+"""
 
-=== INSTRUCTION CRITIQUE ===
-Ta prochaine question DOIT:
-1. REBONDIR directement sur ce que ${userName} vient de dire
-2. Montrer que tu as COMPRIS et VALORISÉ sa réponse
-3. Approfondir un aspect spécifique mentionné
-4. Créer une connexion émotionnelle et intellectuelle
-5. Être formulée de manière engageante et motivante
+🎯 ÉLÉMENTS CLÉS À EXPLOITER:
+${keyElements.length > 0 ? keyElements.map(e => `- ${e}`).join('\n') : '- Analyse le contenu pour trouver un angle personnel'}
 
-EXEMPLES DE MAUVAISES QUESTIONS (à éviter):
-- Questions génériques qui ignorent la réponse précédente
-- Questions qui répètent ce qui a déjà été demandé
-- Questions fermées (oui/non)
+${significantPhrases.length > 0 ? `💬 PHRASES IMPORTANTES À REPRENDRE:
+${significantPhrases.map(p => `"${p.trim()}"`).join('\n')}` : ''}
 
-EXEMPLES DE BONNES QUESTIONS (à imiter):
-- "Vous mentionnez votre évolution vers le management. Qu'est-ce qui vous a le plus surpris dans cette transition ?"
-- "Je trouve fascinant votre parcours de développeur à directeur technique. Quel moment a été le plus décisif ?"
-- "Vous parlez de nouvelles opportunités dans le conseil. Qu'est-ce qui vous attire particulièrement dans ce domaine ?"
+${previousAnswers.length > 1 ? `📝 HISTORIQUE (pour éviter les répétitions):
+${previousAnswers.slice(0, -1).map((a, i) => `${i + 1}. ${a.questionTitle || a.questionId}`).join('\n')}` : ''}
+
+=== CONSIGNE ABSOLUE ===
+Ta question DOIT:
+✅ Commencer par une référence EXPLICITE à ce que ${userName} vient de dire
+✅ Citer ou paraphraser un élément spécifique de sa réponse
+✅ Montrer que tu as VRAIMENT écouté et compris
+✅ Creuser un aspect précis, pas généraliser
+
+❌ INTERDIT:
+- "Parlez-moi de..." (trop générique)
+- "Quelles sont vos compétences..." (déjà couvert ou trop vague)
+- Toute question qui pourrait être posée sans avoir lu la réponse précédente
 ===================================`;
     } else {
         // Première question - personnaliser avec le profil si disponible
         if (userProfile) {
             conversationContext = `
-=== PREMIÈRE QUESTION ===
-C'est la première question du bilan pour ${userName}.
-Profil connu: ${userProfile.currentRole}, compétences: ${userProfile.keySkills.join(', ')}
+=== PREMIÈRE QUESTION DU BILAN ===
 
-Commence par une question d'accueil chaleureuse qui:
-1. Utilise le prénom de la personne
-2. Fait référence à son profil si pertinent
-3. Met à l'aise et invite au partage
-4. Est ouverte et engageante
+Tu démarres le bilan avec ${userName}.
+Profil: ${userProfile.currentRole}
+Compétences identifiées: ${userProfile.keySkills.join(', ')}
+
+Crée une question d'ouverture PERSONNALISÉE qui:
+1. Utilise le prénom "${userName}" naturellement
+2. Fait référence à son rôle de ${userProfile.currentRole}
+3. Invite à partager son parcours de manière engageante
+4. Crée immédiatement un climat de confiance
+
+Exemple: "${userName}, en tant que ${userProfile.currentRole}, vous avez certainement un parcours riche. Qu'est-ce qui vous a amené jusqu'à ce rôle aujourd'hui ?"
 ===================================`;
         } else {
             conversationContext = `
-=== PREMIÈRE QUESTION ===
-C'est la première question du bilan pour ${userName}.
-Aucun profil préalable disponible.
+=== PREMIÈRE QUESTION DU BILAN ===
 
-Commence par une question d'accueil chaleureuse qui:
-1. Utilise le prénom de la personne
-2. Invite à se présenter de manière libre
-3. Met à l'aise et crée un climat de confiance
-4. Est ouverte et non intimidante
+Tu démarres le bilan avec ${userName}.
+Aucun profil préalable - c'est l'occasion de faire connaissance !
+
+Crée une question d'ouverture CHALEUREUSE qui:
+1. Utilise le prénom "${userName}" naturellement
+2. Invite à se présenter librement
+3. Met immédiatement à l'aise
+4. Donne envie de se confier
+
+Exemple: "${userName}, avant de plonger dans le bilan, j'aimerais vous connaître un peu mieux. Pouvez-vous me raconter votre parcours professionnel et ce qui vous amène ici aujourd'hui ?"
 ===================================`;
         }
     }
@@ -396,7 +428,7 @@ Génère la question au format JSON.`;
     const generateWithTimeout = async (timeoutMs: number = 30000) => {
         return Promise.race([
             ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+                model: 'gemini-2.5-flash',
                 contents: prompt,
                 config: config,
             }),
@@ -408,12 +440,12 @@ Génère la question au format JSON.`;
 
     let response;
     try {
-        console.log('[generateQuestion] Tentative 1: gemini-2.0-flash 30s');
+        console.log('[generateQuestion] Tentative 1: gemini-2.5-flash 30s');
         response = await generateWithTimeout(30000);
     } catch (error) {
         console.warn('[generateQuestion] Échec tentative 1:', error);
         try {
-            console.log('[generateQuestion] Tentative 2: gemini-2.0-flash 20s');
+            console.log('[generateQuestion] Tentative 2: gemini-2.5-flash 20s');
             response = await generateWithTimeout(20000);
         } catch (error2) {
             console.error('[generateQuestion] Échec tentative 2:', error2);
@@ -456,7 +488,7 @@ export const suggestOptionalModule = async (answers: Answer[]): Promise<{ isNeed
     const history = answers.map(a => `Q: ${a.questionId}\nA: ${a.value}`).join('\n\n');
     const prompt = `Analyze the user's answers. Determine if they exhibit a strong need for a specific, short optional module on one of these topics: 'transition-management' (fear of change, uncertainty), 'self-confidence' (self-doubt, impostor syndrome), or 'work-life-balance' (stress, burnout, desire for better balance). Only set isNeeded to true if the signal is clear and strong. The response must be a valid JSON object. Answers: --- ${history} ---`;
     const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: { responseMimeType: "application/json", responseSchema: optionalModuleSchema },
     });
@@ -467,7 +499,7 @@ export const generateSynthesis = async (lastAnswers: Answer[], userName: string,
     const systemInstruction = getSystemInstruction(coachingStyle);
     const history = lastAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
     const prompt = `Context: User Name: ${userName}. Task: Act as an attentive coach. Based on the user's last few answers, create a concise, one-sentence summary and formulate a polite question to confirm if your summary is correct. The response MUST be a valid JSON object. Language: French. Last answers: ${history}`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.0-flash', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: synthesisSchema } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: synthesisSchema } });
     return parseJsonResponse<{ synthesis: string; confirmationRequest: string }>(response.text, 'generateSynthesis');
 };
 
@@ -475,7 +507,7 @@ export const generateSummary = async (answers: Answer[], pkg: Package, userName:
     const systemInstruction = getSystemInstruction(coachingStyle);
     const fullTranscript = answers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
     const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}, Transcript: ${fullTranscript}. Task: Analyze the transcript and generate a comprehensive summary in French. The response MUST be a valid JSON object conforming to the schema. For 'keyStrengths' and 'areasForDevelopment', each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. For 'actionPlan', each item must have a unique 'id' and 'text'.`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.0-flash', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } });
     return parseJsonResponse<Summary>(response.text, 'generateSummary');
 };
 
@@ -504,7 +536,7 @@ Langue: Français.`;
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
+            model: 'gemini-2.5-flash',
             contents: prompt,
             config: { responseMimeType: "application/json", responseSchema: schema },
         });
