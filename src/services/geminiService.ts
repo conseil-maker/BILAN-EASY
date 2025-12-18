@@ -158,11 +158,22 @@ Phase 3 - QUESTION: Pose une question ouverte et engageante
 - "Je note que vous parlez de 'routine' avec une certaine lassitude. Si vous pouviez transformer cette routine en quelque chose de stimulant, à quoi cela ressemblerait-il ?"
 - "Votre parcours de développeur à manager montre une vraie évolution. Quel a été le moment où vous avez réalisé que le management vous attirait ?"
 
-=== CE QUE TU NE FAIS JAMAIS ===
+=== CE QUE TU NE FAIS JAMAIS (INTERDIT ABSOLU) ===
 - Questions génériques type "Parlez-moi de vos compétences"
 - Questions qui ignorent la réponse précédente
 - Questions fermées (oui/non)
-- Répéter une question déjà posée, même reformulée`;
+- Répéter une question déjà posée, même reformulée
+- JAMAIS de questions de validation/synthèse type "Est-ce que cette synthèse capture bien..." ou "Si je résume votre pensée..."
+- JAMAIS de questions qui demandent de confirmer une analyse
+- JAMAIS reformuler ce que la personne a dit pour demander validation
+
+=== TYPES DE QUESTIONS À ALTERNER ===
+Varie OBLIGATOIREMENT entre ces types (ne jamais poser 2 questions du même type consécutives) :
+1. EXPLORATION : Découvrir de nouveaux aspects ("Qu'est-ce qui...?", "Comment avez-vous...?")
+2. APPROFONDISSEMENT : Creuser un élément précis ("Pouvez-vous me décrire plus précisément...?")
+3. PROJECTION : Imaginer l'avenir ("Si vous pouviez...?", "Dans l'idéal...?")
+4. ÉMOTION : Explorer les ressentis ("Qu'avez-vous ressenti quand...?", "Comment vivez-vous...?")
+5. VALEURS : Identifier ce qui compte ("Qu'est-ce qui est important pour vous dans...?")`;
 
     switch (style) {
         case 'analytic':
@@ -303,8 +314,13 @@ ${keyElements.length > 0 ? keyElements.map(e => `- ${e}`).join('\n') : '- Analys
 ${significantPhrases.length > 0 ? `💬 PHRASES IMPORTANTES À REPRENDRE:
 ${significantPhrases.map(p => `"${p.trim()}"`).join('\n')}` : ''}
 
-${previousAnswers.length > 1 ? `📝 HISTORIQUE (pour éviter les répétitions):
-${previousAnswers.slice(0, -1).map((a, i) => `${i + 1}. ${a.questionTitle || a.questionId}`).join('\n')}` : ''}
+${previousAnswers.length > 1 ? `📝 QUESTIONS DÉJÀ POSÉES (NE PAS RÉPÉTER NI REFORMULER):
+${previousAnswers.slice(0, -1).map((a, i) => `${i + 1}. "${a.questionTitle || a.questionId}"`).join('\n')}` : ''}
+
+🚨 ALERTE ANTI-RÉPÉTITION 🚨
+Nombre de questions déjà posées: ${previousAnswers.length}
+Tu DOIS poser une question COMPLÈTEMENT DIFFÉRENTE des précédentes.
+Si tu as déjà posé une question sur un thème, explore un AUTRE thème.
 
 === CONSIGNE ABSOLUE ===
 Ta question DOIT:
@@ -312,10 +328,14 @@ Ta question DOIT:
 ✅ Citer ou paraphraser un élément spécifique de sa réponse
 ✅ Montrer que tu as VRAIMENT écouté et compris
 ✅ Creuser un aspect précis, pas généraliser
+✅ Être d'un TYPE DIFFÉRENT de la question précédente (exploration/approfondissement/projection/émotion/valeurs)
 
-❌ INTERDIT:
+❌ STRICTEMENT INTERDIT:
 - "Parlez-moi de..." (trop générique)
 - "Quelles sont vos compétences..." (déjà couvert ou trop vague)
+- "Est-ce que cette synthèse capture bien..." (JAMAIS de validation)
+- "Si je résume..." ou "Si je comprends bien..." (JAMAIS de reformulation pour validation)
+- Toute question demandant de confirmer une analyse
 - Toute question qui pourrait être posée sans avoir lu la réponse précédente
 ===================================`;
     } else {
