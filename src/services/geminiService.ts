@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { Answer, Package, Question, QuestionType, Summary, UserProfile, DashboardData, ActionPlanItem, CoachingStyle } from '../types';
 import { QUESTION_CATEGORIES } from "../constants";
 import { selectFallbackQuestion } from '../data/fallbackQuestions';
+import { generateSmartQuestion, generateOpeningQuestion } from './smartQuestionGenerator';
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY! });
 
@@ -451,7 +452,25 @@ Génère la question au format JSON.`;
             console.error('[generateQuestion] Échec tentative 2:', error2);
             console.warn('[generateQuestion] Fallback: utilisation de questions pré-générées');
             
-            // Fallback avec questions pré-générées
+            // Fallback intelligent: générer une question personnalisée côté client
+            console.log('[generateQuestion] Tentative de génération intelligente côté client');
+            
+            // Si c'est la première question, utiliser la question d'ouverture personnalisée
+            if (previousAnswers.length === 0) {
+                const openingQuestion = generateOpeningQuestion(userName, coachingStyle);
+                console.log('[generateQuestion] Question d\'ouverture générée:', openingQuestion.title.substring(0, 50));
+                return openingQuestion;
+            }
+            
+            // Sinon, générer une question basée sur la dernière réponse
+            const smartQuestion = generateSmartQuestion(previousAnswers, userName, coachingStyle);
+            if (smartQuestion) {
+                console.log('[generateQuestion] Question intelligente générée:', smartQuestion.title.substring(0, 50));
+                return smartQuestion;
+            }
+            
+            // Dernier recours: questions de fallback statiques
+            console.log('[generateQuestion] Fallback statique utilisé');
             const fallbackQuestion = selectFallbackQuestion(
                 options.categoryId || 'parcours_professionnel',
                 options.isModuleQuestion ? 2 : 1,
