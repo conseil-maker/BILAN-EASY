@@ -243,7 +243,7 @@ const extractKeyElements = (answer: string): string[] => {
 export const analyzeUserProfile = async (cvText: string): Promise<UserProfile> => {
     const prompt = `Analyze the following professional profile text (likely from a CV) and extract key information. The response MUST be a valid JSON object conforming to the specified schema. Text to analyze: --- ${cvText} ---`;
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-pro',
         contents: prompt,
         config: { responseMimeType: "application/json", responseSchema: userProfileSchema },
     });
@@ -254,7 +254,7 @@ export const analyzeThemesAndSkills = async (answers: Answer[]): Promise<Dashboa
     const history = answers.map(a => `Q: ${a.questionId}\nA: ${a.value}`).join('\n\n');
     const prompt = `Analyze the following answers from a skills assessment. Identify the main themes and assess 5 core skills. The response MUST be a valid JSON object conforming to the schema, including all 5 specified skills. Answers: --- ${history} ---`;
      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-pro',
         contents: prompt,
         config: { responseMimeType: "application/json", responseSchema: dashboardDataSchema },
     });
@@ -429,7 +429,7 @@ Génère la question au format JSON.`;
     const generateWithTimeout = async (timeoutMs: number = 30000) => {
         return Promise.race([
             ai.models.generateContent({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-2.5-pro',
                 contents: prompt,
                 config: config,
             }),
@@ -441,12 +441,12 @@ Génère la question au format JSON.`;
 
     let response;
     try {
-        console.log('[generateQuestion] Tentative 1: gemini-2.5-flash 30s');
+        console.log('[generateQuestion] Tentative 1: gemini-2.5-pro 30s');
         response = await generateWithTimeout(30000);
     } catch (error) {
         console.warn('[generateQuestion] Échec tentative 1:', error);
         try {
-            console.log('[generateQuestion] Tentative 2: gemini-2.5-flash 20s');
+            console.log('[generateQuestion] Tentative 2: gemini-2.5-pro 20s');
             response = await generateWithTimeout(20000);
         } catch (error2) {
             console.error('[generateQuestion] Échec tentative 2:', error2);
@@ -507,7 +507,7 @@ export const suggestOptionalModule = async (answers: Answer[]): Promise<{ isNeed
     const history = answers.map(a => `Q: ${a.questionId}\nA: ${a.value}`).join('\n\n');
     const prompt = `Analyze the user's answers. Determine if they exhibit a strong need for a specific, short optional module on one of these topics: 'transition-management' (fear of change, uncertainty), 'self-confidence' (self-doubt, impostor syndrome), or 'work-life-balance' (stress, burnout, desire for better balance). Only set isNeeded to true if the signal is clear and strong. The response must be a valid JSON object. Answers: --- ${history} ---`;
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-pro',
         contents: prompt,
         config: { responseMimeType: "application/json", responseSchema: optionalModuleSchema },
     });
@@ -518,7 +518,7 @@ export const generateSynthesis = async (lastAnswers: Answer[], userName: string,
     const systemInstruction = getSystemInstruction(coachingStyle);
     const history = lastAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
     const prompt = `Context: User Name: ${userName}. Task: Act as an attentive coach. Based on the user's last few answers, create a concise, one-sentence summary and formulate a polite question to confirm if your summary is correct. The response MUST be a valid JSON object. Language: French. Last answers: ${history}`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: synthesisSchema } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: synthesisSchema } });
     return parseJsonResponse<{ synthesis: string; confirmationRequest: string }>(response.text, 'generateSynthesis');
 };
 
@@ -526,7 +526,7 @@ export const generateSummary = async (answers: Answer[], pkg: Package, userName:
     const systemInstruction = getSystemInstruction(coachingStyle);
     const fullTranscript = answers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
     const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}, Transcript: ${fullTranscript}. Task: Analyze the transcript and generate a comprehensive summary in French. The response MUST be a valid JSON object conforming to the schema. For 'keyStrengths' and 'areasForDevelopment', each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. For 'actionPlan', each item must have a unique 'id' and 'text'.`;
-    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } });
     return parseJsonResponse<Summary>(response.text, 'generateSummary');
 };
 
@@ -555,7 +555,7 @@ Langue: Français.`;
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-2.5-pro',
             contents: prompt,
             config: { responseMimeType: "application/json", responseSchema: schema },
         });
