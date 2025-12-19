@@ -475,11 +475,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             }
         }
 
-        // Synthèse intermédiaire tous les 3 réponses (sauf multiples de 5)
-        if (currentAnswers.length > 0 && currentAnswers.length % 3 === 0 && currentAnswers.length % 5 !== 0) {
-            await handleGenerateSynthesis(currentAnswers);
-            return;
-        }
+        // DÉSACTIVÉ : La synthèse intermédiaire génère des questions de validation interdites
+        // Le système génère maintenant des questions personnalisées en continu sans interruption
+        // if (currentAnswers.length > 0 && currentAnswers.length % 3 === 0 && currentAnswers.length % 5 !== 0) {
+        //     await handleGenerateSynthesis(currentAnswers);
+        //     return;
+        // }
         
         // Générer la prochaine question avec les réponses à jour
         console.log('[runNextStep] Appel de fetchNextQuestion avec', currentAnswers.length, 'réponses');
