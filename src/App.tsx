@@ -384,7 +384,7 @@ const App: React.FC = () => {
               <div className="flex-grow">
                 {renderByRole(user, userRole)}
               </div>
-              {!['admin', 'consultant'].includes(userRole) && <Footer />}
+              {/* Footer supprimé pour les clients - le Questionnaire a son propre footer intégré */}
             </>
           )}
         </AuthWrapper>
