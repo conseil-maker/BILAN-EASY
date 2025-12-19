@@ -373,7 +373,21 @@ Ta question DOIT:
 ❌ STRICTEMENT INTERDIT (VIOLATION = ÉCHEC TOTAL):
 - "Parlez-moi de..." (trop générique)
 - "Quelles sont vos compétences..." (déjà couvert ou trop vague)
+- "Je vous écoute" (trop passif, ne pose pas de vraie question)
+- "C'est passionnant" ou "C'est intéressant" seuls (commentaires vides)
 - Toute question qui pourrait être posée sans avoir lu la réponse précédente
+
+🛑🛑🛑 INTERDICTION ABSOLUE - PHRASES INUTILES 🛑🛑🛑
+NE GÉNÈRE JAMAIS ces phrases dans le champ "description" :
+- "Question générée en fonction de votre réponse précédente" (ÉVIDENT ET INUTILE)
+- "Question générée en fonction de..." (INUTILE)
+- "Cette question fait suite à..." (INUTILE)
+- Toute méta-explication sur pourquoi tu poses cette question
+
+Le champ "description" doit contenir UNIQUEMENT:
+- Une valorisation sincère de ce que la personne a partagé
+- Un lien émotionnel avec la question
+- PAS de méta-commentaire technique
 
 🛑🛑🛑 INTERDICTION ABSOLUE - QUESTIONS DE VALIDATION 🛑🛑🛑
 NE GÉNÈRE JAMAIS une question contenant ces patterns :
@@ -387,8 +401,25 @@ NE GÉNÈRE JAMAIS une question contenant ces patterns :
 - "Diriez-vous que..."
 - Toute demande de CONFIRMER ou VALIDER
 
+🎯 MAINTENIR LA PROFONDEUR (APRÈS Q8+)
+Même après plusieurs questions, chaque question doit être PROFONDE et PERCUTANTE :
+- Creuser les CONTRADICTIONS détectées
+- Explorer les PEURS sous-jacentes
+- Questionner les CROYANCES limitantes
+- Projeter vers des SCÉNARIOS concrets
+- Demander des EXEMPLES précis et des MOMENTS clés
+
+Éviter les questions "light" comme :
+- "Comment cette expérience a-t-elle influencé..." (trop vague)
+- "Qu'est-ce qui l'a rendu possible..." (trop simple)
+
+Préférer des questions PROFONDES comme :
+- "Si vous deviez revivre ce moment de fierté avec Sophie, qu'est-ce que vous feriez différemment avec le recul ?"
+- "Qu'est-ce qui vous empêche VRAIMENT de devenir coach aujourd'hui ? Quelle est la peur derrière ?"
+- "Si votre mari vous disait demain 'Lance-toi, je te soutiens', que feriez-vous concrètement dans les 48h ?"
+
 Ces questions sont INTERDITES car elles ne font pas avancer le bilan.
-Pose plutôt une question qui EXPLORE quelque chose de NOUVEAU.
+Pose plutôt une question qui EXPLORE quelque chose de NOUVEAU et PROFOND.
 ===================================`;
     } else {
         // Première question - personnaliser avec le profil si disponible
