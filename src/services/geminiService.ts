@@ -629,9 +629,31 @@ Génère la question au format JSON.`;
     
     console.log('[generateQuestion] Question générée avec succès:', questionData.title?.substring(0, 60));
     
+    // === FILTRE POST-GÉNÉRATION : SUPPRIMER LES PHRASES TECHNIQUES INUTILES ===
+    let cleanDescription = questionData.description || '';
+    const technicalPhrases = [
+        /question générée en fonction de votre réponse précédente\.?/gi,
+        /question générée en fonction de\.{0,3}/gi,
+        /cette question fait suite à\.{0,3}/gi,
+        /cette question est basée sur\.{0,3}/gi,
+        /en réponse à ce que vous avez partagé\.?/gi
+    ];
+    
+    for (const pattern of technicalPhrases) {
+        cleanDescription = cleanDescription.replace(pattern, '').trim();
+    }
+    
+    // Nettoyer les espaces multiples et les phrases vides
+    cleanDescription = cleanDescription.replace(/\s{2,}/g, ' ').trim();
+    
+    if (cleanDescription !== questionData.description) {
+        console.log('[generateQuestion] Phrase technique supprimée du champ description');
+    }
+    
     return { 
         ...questionData, 
         id: uniqueId, // Forcer un ID unique
+        description: cleanDescription || undefined,
         type, 
         choices: type === QuestionType.MULTIPLE_CHOICE ? questionData.choices : undefined 
     } as Question;
