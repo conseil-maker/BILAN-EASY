@@ -145,6 +145,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [suggestedModule, setSuggestedModule] = useState<{ id: string, reason: string } | null>(null);
     const [activeModule, setActiveModule] = useState<string | null>(null);
     const [moduleQuestionCount, setModuleQuestionCount] = useState(0);
+    const [declinedModules, setDeclinedModules] = useState<Set<string>>(new Set()); // Track des modules refusés
     const [satisfactionSubmittedPhases, setSatisfactionSubmittedPhases] = useState<Set<number>>(new Set());
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false);
@@ -451,12 +452,15 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 console.log(`[runNextStep] Transition de phase: ${prevInfo.phase} -> ${info.phase}`);
                 setUnlockedBadge(`Phase ${prevInfo.phase} : ${prevInfo.name}`);
                 
-                // Vérifier si un module optionnel est suggéré
+                // Vérifier si un module optionnel est suggéré (seulement si pas déjà refusé)
                 try {
                     const moduleSuggestion = await suggestOptionalModule(currentAnswers);
                     if (moduleSuggestion.isNeeded && moduleSuggestion.moduleId && moduleSuggestion.reason) {
-                        setSuggestedModule({ id: moduleSuggestion.moduleId, reason: moduleSuggestion.reason });
-                        return; // Attendre que l'utilisateur réponde au module
+                        // Ne pas reproposer un module déjà refusé
+                        if (!declinedModules.has(moduleSuggestion.moduleId)) {
+                            setSuggestedModule({ id: moduleSuggestion.moduleId, reason: moduleSuggestion.reason });
+                            return; // Attendre que l'utilisateur réponde au module
+                        }
                     }
                 } catch (error) {
                     console.error('[runNextStep] Erreur lors de la suggestion de module:', error);
@@ -578,7 +582,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     };
 
     const handleModuleAccept = () => { setActiveModule(suggestedModule!.id); setSuggestedModule(null); fetchNextQuestion({}, 0, answers); };
-    const handleModuleDecline = () => { setSuggestedModule(null); runNextStep(answers); };
+    const handleModuleDecline = () => { 
+        // Tracker le module refusé pour ne pas le reproposer
+        if (suggestedModule) {
+            setDeclinedModules(prev => new Set(prev).add(suggestedModule.id));
+        }
+        setSuggestedModule(null); 
+        fetchNextQuestion({}, 0, answers); // Utiliser fetchNextQuestion au lieu de runNextStep pour éviter la boucle
+    };
     const handleJoker = () => { if (!isLoading) { fetchNextQuestion({ useJoker: true }, 0, answers); } };
     const handleLogout = () => {
         setShowLogoutModal(true);

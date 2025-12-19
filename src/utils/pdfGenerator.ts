@@ -145,8 +145,8 @@ export const generatePDF = async (
     <h2>💬 Vos Réponses</h2>
     ${answers.map((answer, index) => `
       <div class="answer">
-        <div class="question">Question ${index + 1}: ${answer.question}</div>
-        <div class="response">${answer.answer}</div>
+        <div class="question">Question ${index + 1}: ${answer.questionTitle || answer.questionId}</div>
+        <div class="response">${answer.value}</div>
       </div>
     `).join('')}
   </div>
