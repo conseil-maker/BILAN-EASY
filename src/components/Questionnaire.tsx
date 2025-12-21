@@ -840,7 +840,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">{currentPhaseInfo?.name}</p>
                     </div>
                     {currentPhaseInfo && (() => {
-                        const timeBudget = getTimeBudget(pkg.id, answers);
+                        const timeBudget = getTimeBudget(pkg.id, answers, bilanStartTime);
                         return (
                             <div className="text-center">
                                 <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">

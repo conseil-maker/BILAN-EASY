@@ -304,10 +304,14 @@ export const calculateTimeSpent = (answers: Array<{ complexity?: QuestionComplex
 
 /**
  * Calcule le budget temps restant
+ * @param packageId - ID du package
+ * @param answers - Réponses de l'utilisateur
+ * @param bilanStartTime - Timestamp de début du bilan (optionnel, pour calcul temps réel)
  */
 export const getTimeBudget = (
   packageId: string,
-  answers: Array<{ complexity?: QuestionComplexity }>
+  answers: Array<{ complexity?: QuestionComplexity }>,
+  bilanStartTime?: number
 ): { 
   spent: number; 
   total: number; 
@@ -328,7 +332,10 @@ export const getTimeBudget = (
     phase3Remaining: 0
   };
   
-  const spent = calculateTimeSpent(answers);
+  // Utiliser le temps réel si disponible, sinon l'estimation
+  const spent = bilanStartTime 
+    ? Math.floor((Date.now() - bilanStartTime) / 60000) 
+    : calculateTimeSpent(answers);
   const total = pkg.timeBudget.total;
   const remaining = total - spent;
   const percentage = (spent / total) * 100;
