@@ -335,8 +335,24 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 console.log('[fetchNextQuestion] Question generated:', { id: question.id, title: question.title?.substring(0, 50) });
             }
             setCurrentQuestion(question);
-            // Créer le message AI avant de l'ajouter aux messages
-            const aiMessage: Message = { sender: 'ai', text: `${question.title}${question.description ? `\n\n${question.description}` : ''}`, question };
+            // Fonction pour nettoyer les phrases techniques générées par l'IA
+            const cleanTechnicalPhrases = (text: string): string => {
+                const patterns = [
+                    /\s*Question générée en fonction de votre réponse précédente\.?\s*/gi,
+                    /\s*Question basée sur votre réponse précédente\.?\s*/gi,
+                    /\s*Cette question est générée[^.]*\.?\s*/gi,
+                    /\s*Généré automatiquement[^.]*\.?\s*/gi
+                ];
+                let cleaned = text;
+                for (const pattern of patterns) {
+                    cleaned = cleaned.replace(pattern, ' ');
+                }
+                return cleaned.trim().replace(/\s+/g, ' ');
+            };
+            // Créer le message AI avant de l'ajouter aux messages (avec nettoyage)
+            const cleanTitle = cleanTechnicalPhrases(question.title || '');
+            const cleanDescription = question.description ? cleanTechnicalPhrases(question.description) : '';
+            const aiMessage: Message = { sender: 'ai', text: `${cleanTitle}${cleanDescription ? `\n\n${cleanDescription}` : ''}`, question }; 
             // Supprimer le message de chargement et ajouter la vraie question
             setMessages(prev => {
                 const filtered = prev.filter(m => !m.isLoading);
