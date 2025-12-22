@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from './ToastProvider';
 import { HistoryItem } from '../types';
-import { assessmentService } from '../services/assessmentService';
-import { Assessment } from '../lib/supabaseClient';
+import { getAssessmentHistory, deleteAssessmentFromSupabase, syncLocalToSupabase } from '../services/historyService';
+import { supabase } from '../lib/supabaseClient';
 
 interface HistoryScreenProps {
     onViewRecord: (record: HistoryItem) => void;
@@ -10,9 +10,10 @@ interface HistoryScreenProps {
 }
 
 const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewRecord, onBack }) => {
-    const { showError } = useToast();
+    const { showError, showSuccess, showInfo } = useToast();
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
 
     useEffect(() => {
         loadHistory();
@@ -21,36 +22,75 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewRecord, onBack }) =
     const loadHistory = async () => {
         try {
             setLoading(true);
-            const assessments = await assessmentService.getClientAssessments();
             
-            // Convertir les assessments Supabase en HistoryItems
-            const historyItems: HistoryItem[] = assessments
-                .filter(a => a.summary_data) // Seulement les bilans complétés
-                .map(a => ({
-                    id: a.id,
-                    date: a.completed_at || a.created_at,
-                    userName: '', // Sera rempli depuis le profil si nécessaire
-                    packageName: a.title,
-                    summary: a.summary_data,
-                    answers: a.questionnaire_data?.answers || []
-                }));
+            // Récupérer l'utilisateur connecté
+            const { data: { user } } = await supabase.auth.getUser();
             
+            // Charger l'historique fusionné (Supabase + localStorage)
+            const historyItems = await getAssessmentHistory(user?.id);
             setHistory(historyItems);
+            
+            // Synchroniser automatiquement les bilans locaux vers Supabase
+            if (user?.id) {
+                const syncedCount = await syncLocalToSupabase(user.id);
+                if (syncedCount > 0) {
+                    showInfo(`${syncedCount} bilan(s) synchronisé(s) avec le cloud`);
+                    // Recharger après synchronisation
+                    const updatedHistory = await getAssessmentHistory(user.id);
+                    setHistory(updatedHistory);
+                }
+            }
         } catch (error) {
             console.error('Erreur lors du chargement de l\'historique:', error);
+            showError('Erreur lors du chargement de l\'historique');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSyncToCloud = async () => {
+        try {
+            setSyncing(true);
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user?.id) {
+                showError('Vous devez être connecté pour synchroniser');
+                return;
+            }
+            
+            const syncedCount = await syncLocalToSupabase(user.id);
+            
+            if (syncedCount > 0) {
+                showSuccess(`${syncedCount} bilan(s) synchronisé(s) avec succès`);
+                // Recharger l'historique
+                const updatedHistory = await getAssessmentHistory(user.id);
+                setHistory(updatedHistory);
+            } else {
+                showInfo('Tous les bilans sont déjà synchronisés');
+            }
+        } catch (error) {
+            console.error('Erreur de synchronisation:', error);
+            showError('Erreur lors de la synchronisation');
+        } finally {
+            setSyncing(false);
         }
     };
 
     const handleDeleteAssessment = async (assessmentId: string) => {
         if (window.confirm("Êtes-vous sûr de vouloir supprimer ce bilan ? Cette action est irréversible.")) {
             try {
-                await assessmentService.deleteAssessment(assessmentId);
-                setHistory(history.filter(item => item.id !== assessmentId));
+                const success = await deleteAssessmentFromSupabase(assessmentId);
+                if (success) {
+                    setHistory(history.filter(item => item.id !== assessmentId));
+                    showSuccess('Bilan supprimé avec succès');
+                } else {
+                    // Supprimer uniquement du state local si pas dans Supabase
+                    setHistory(history.filter(item => item.id !== assessmentId));
+                    showInfo('Bilan supprimé localement');
+                }
             } catch (error) {
                 console.error('Erreur lors de la suppression du bilan:', error);
-                showError('Erreur lors de la suppression du bilan.');
+                showError('Erreur lors de la suppression du bilan');
             }
         }
     };
@@ -69,10 +109,36 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewRecord, onBack }) =
     return (
         <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
             <div className="max-w-4xl mx-auto">
-                <header className="text-center mb-12">
+                <header className="text-center mb-8">
                     <h1 className="text-4xl md:text-5xl font-display font-bold text-primary-800 mb-3">Historique des Bilans</h1>
                     <p className="text-lg text-slate-600">Consultez vos évaluations précédentes.</p>
                 </header>
+
+                {/* Bouton de synchronisation */}
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={handleSyncToCloud}
+                        disabled={syncing}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50"
+                    >
+                        {syncing ? (
+                            <>
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Synchronisation...
+                            </>
+                        ) : (
+                            <>
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                Synchroniser avec le cloud
+                            </>
+                        )}
+                    </button>
+                </div>
 
                 {history.length === 0 ? (
                     <div className="text-center bg-white p-8 rounded-xl shadow-md">
@@ -86,7 +152,14 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewRecord, onBack }) =
                         {history.map((item) => (
                             <div key={item.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex-grow">
-                                    <p className="font-bold text-primary-800">{item.packageName}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-bold text-primary-800">{item.packageName}</p>
+                                        {item.id.includes('-') && (
+                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                                ☁️ Cloud
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-sm text-slate-500">
                                         Complété le {new Date(item.date).toLocaleDateString('fr-FR', {
                                             year: 'numeric',
@@ -96,6 +169,11 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewRecord, onBack }) =
                                     </p>
                                     {item.summary?.profileType && (
                                         <p className="text-slate-700 mt-1">Profil : {item.summary.profileType}</p>
+                                    )}
+                                    {item.answers && (
+                                        <p className="text-xs text-slate-400 mt-1">
+                                            {item.answers.length} réponse(s)
+                                        </p>
                                     )}
                                 </div>
                                 <div className="flex gap-2 w-full sm:w-auto">
