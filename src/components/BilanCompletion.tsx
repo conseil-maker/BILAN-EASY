@@ -106,6 +106,46 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
   const handleGenerateSynthese = async () => {
     setIsGeneratingSynthese(true);
     try {
+      // Helper pour extraire les textes de manière sécurisée
+      const safeSlice = (arr: any[] | undefined, start: number, end?: number): any[] => {
+        if (!arr || !Array.isArray(arr)) return [];
+        return arr.slice(start, end);
+      };
+      
+      const safeMap = (arr: any[] | undefined, mapper: (item: any) => string): string[] => {
+        if (!arr || !Array.isArray(arr)) return [];
+        return arr.map(mapper).filter(Boolean);
+      };
+
+      // Extraire les forces (keyStrengths ou strengths selon la structure)
+      const strengths = summary.keyStrengths || (summary as any).strengths || [];
+      const strengthTexts = safeMap(strengths, (s) => typeof s === 'string' ? s : s?.text || '');
+      
+      // Extraire les axes de développement (areasForDevelopment ou developmentAreas)
+      const devAreas = summary.areasForDevelopment || (summary as any).developmentAreas || [];
+      const devAreaTexts = safeMap(devAreas, (d) => typeof d === 'string' ? d : d?.text || '');
+      
+      // Extraire les recommandations (peut être string[] ou objet[])
+      const recommendations = summary.recommendations || [];
+      const recommendationTexts = safeMap(recommendations, (r) => typeof r === 'string' ? r : r?.text || '');
+      
+      // Extraire le plan d'action (structure différente selon la source)
+      const actionPlan = summary.actionPlan || {};
+      let shortTermActions: string[] = [];
+      let mediumTermActions: string[] = [];
+      let longTermActions: string[] = [];
+      
+      if (Array.isArray(actionPlan)) {
+        // Ancien format: tableau plat
+        shortTermActions = safeSlice(actionPlan, 0, 2).map((a: any) => typeof a === 'string' ? a : a?.text || '');
+        mediumTermActions = safeSlice(actionPlan, 2, 4).map((a: any) => typeof a === 'string' ? a : a?.text || '');
+        longTermActions = safeSlice(actionPlan, 4).map((a: any) => typeof a === 'string' ? a : a?.text || '');
+      } else if (actionPlan.shortTerm || actionPlan.mediumTerm) {
+        // Nouveau format: objet avec shortTerm/mediumTerm
+        shortTermActions = safeMap(actionPlan.shortTerm, (a) => typeof a === 'string' ? a : a?.text || '');
+        mediumTermActions = safeMap(actionPlan.mediumTerm, (a) => typeof a === 'string' ? a : a?.text || '');
+      }
+
       // Préparer les données pour la synthèse
       const data: SyntheseData = {
         beneficiaire: {
@@ -122,35 +162,35 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
           consultant: 'Consultant Bilan-Easy',
         },
         parcoursProfessionnel: {
-          resume: summary.strengths?.map(s => s.text).join('. ') || '',
+          resume: strengthTexts.join('. ') || '',
           experiencesCles: answers
-            .filter(a => a.category === 'parcours')
-            .map(a => a.text)
+            .filter(a => (a as any).category === 'parcours')
+            .map(a => (a as any).text || a.value || '')
             .slice(0, 5),
         },
         competences: {
-          techniques: summary.strengths?.slice(0, 3).map(s => s.text) || [],
-          transversales: summary.developmentAreas?.slice(0, 3).map(d => d.text) || [],
+          techniques: strengthTexts.slice(0, 3),
+          transversales: devAreaTexts.slice(0, 3),
           personnelles: [],
         },
         interetsMotivations: {
           valeurs: [],
-          interetsProfessionnels: summary.recommendations?.slice(0, 3).map(r => r.text) || [],
+          interetsProfessionnels: recommendationTexts.slice(0, 3),
           facteursMotivation: [],
         },
         projetProfessionnel: {
           projetPrincipal: summary.profileType || 'Projet en cours de définition',
           projetAlternatif: '',
-          coherenceAnalysis: summary.recommendations?.[0]?.text || '',
+          coherenceAnalysis: recommendationTexts[0] || '',
         },
         planAction: {
-          courtTerme: summary.actionPlan?.slice(0, 2).map(a => a.text) || [],
-          moyenTerme: summary.actionPlan?.slice(2, 4).map(a => a.text) || [],
-          longTerme: summary.actionPlan?.slice(4).map(a => a.text) || [],
+          courtTerme: shortTermActions,
+          moyenTerme: mediumTermActions,
+          longTerme: longTermActions,
         },
         conclusion: {
           syntheseGlobale: `${userName} a complété son bilan de compétences avec succès. Les résultats montrent un profil ${summary.profileType || 'riche et diversifié'}.`,
-          recommandationsFinales: summary.recommendations?.map(r => r.text) || [],
+          recommandationsFinales: recommendationTexts,
         },
       };
 
