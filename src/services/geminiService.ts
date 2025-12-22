@@ -321,7 +321,7 @@ export const generateQuestion = async (
   userProfile: UserProfile | null = null,
   options: { useJoker?: boolean, useGoogleSearch?: boolean, searchTopic?: string, isModuleQuestion?: { moduleId: string, questionNum: number }, targetComplexity?: 'simple' | 'moyenne' | 'complexe' | 'reflexion', categoryId?: string } = {}
 ): Promise<Question> => {
-    console.log('[generateQuestion] START - Phase:', phaseKey, 'Category:', options.categoryId, 'Answers:', previousAnswers.length);
+    // console.log('[generateQuestion] START - Phase:', phaseKey, 'Category:', options.categoryId, 'Answers:', previousAnswers.length);
     const systemInstruction = getSystemInstruction(coachingStyle);
     
     // Construire l'historique de conversation de manière plus riche
@@ -544,36 +544,36 @@ Génère la question au format JSON.`;
 
     let response;
     try {
-        console.log('[generateQuestion] Tentative 1: gemini-2.5-pro 30s');
+        // console.log('[generateQuestion] Tentative 1: gemini-2.5-pro 30s');
         response = await generateWithTimeout(30000);
     } catch (error) {
         console.warn('[generateQuestion] Échec tentative 1:', error);
         try {
-            console.log('[generateQuestion] Tentative 2: gemini-2.5-pro 20s');
+            // console.log('[generateQuestion] Tentative 2: gemini-2.5-pro 20s');
             response = await generateWithTimeout(20000);
         } catch (error2) {
             console.error('[generateQuestion] Échec tentative 2:', error2);
             console.warn('[generateQuestion] Fallback: utilisation de questions pré-générées');
             
             // Fallback intelligent: générer une question personnalisée côté client
-            console.log('[generateQuestion] Tentative de génération intelligente côté client');
+            // console.log('[generateQuestion] Tentative de génération intelligente côté client');
             
             // Si c'est la première question, utiliser la question d'ouverture personnalisée
             if (previousAnswers.length === 0) {
                 const openingQuestion = generateOpeningQuestion(userName, coachingStyle);
-                console.log('[generateQuestion] Question d\'ouverture générée:', openingQuestion.title.substring(0, 50));
+                // console.log('[generateQuestion] Question d\'ouverture générée:', openingQuestion.title.substring(0, 50));
                 return openingQuestion;
             }
             
             // Sinon, générer une question basée sur la dernière réponse
             const smartQuestion = generateSmartQuestion(previousAnswers, userName, coachingStyle);
             if (smartQuestion) {
-                console.log('[generateQuestion] Question intelligente générée:', smartQuestion.title.substring(0, 50));
+                // console.log('[generateQuestion] Question intelligente générée:', smartQuestion.title.substring(0, 50));
                 return smartQuestion;
             }
             
             // Dernier recours: questions de fallback statiques
-            console.log('[generateQuestion] Fallback statique utilisé');
+            // console.log('[generateQuestion] Fallback statique utilisé');
             const fallbackQuestion = selectFallbackQuestion(
                 options.categoryId || 'parcours_professionnel',
                 options.isModuleQuestion ? 2 : 1,
@@ -581,7 +581,7 @@ Génère la question au format JSON.`;
             );
             
             if (fallbackQuestion) {
-                console.log('[generateQuestion] Question de fallback sélectionnée:', fallbackQuestion.id);
+                // console.log('[generateQuestion] Question de fallback sélectionnée:', fallbackQuestion.id);
                 return fallbackQuestion;
             }
             
@@ -622,21 +622,30 @@ Génère la question au format JSON.`;
         // Générer une question alternative via le système intelligent
         const smartQuestion = generateSmartQuestion(previousAnswers, userName, coachingStyle);
         if (smartQuestion) {
-            console.log('[generateQuestion] Question alternative générée:', smartQuestion.title.substring(0, 50));
+            // console.log('[generateQuestion] Question alternative générée:', smartQuestion.title.substring(0, 50));
             return smartQuestion;
         }
     }
     
-    console.log('[generateQuestion] Question générée avec succès:', questionData.title?.substring(0, 60));
+    // console.log('[generateQuestion] Question générée avec succès:', questionData.title?.substring(0, 60));
     
     // === FILTRE POST-GÉNÉRATION : SUPPRIMER LES PHRASES TECHNIQUES INUTILES ===
     const technicalPhrases = [
+        // Patterns spécifiques
         /question générée en fonction de votre réponse précédente\.?/gi,
-        /question générée en fonction de\.{0,3}/gi,
-        /cette question fait suite à\.{0,3}/gi,
-        /cette question est basée sur\.{0,3}/gi,
+        /question générée en fonction de[^.]*\.?/gi,
+        /question basée sur votre réponse[^.]*\.?/gi,
+        /cette question fait suite à[^.]*\.?/gi,
+        /cette question est basée sur[^.]*\.?/gi,
+        /cette question est générée[^.]*\.?/gi,
         /en réponse à ce que vous avez partagé\.?/gi,
-        /générée? en fonction de/gi
+        /générée? en fonction de[^.]*\.?/gi,
+        /suite à votre réponse[^.]*\.?/gi,
+        /en lien avec votre réponse[^.]*\.?/gi,
+        /basée? sur vos réponses[^.]*\.?/gi,
+        // Patterns ultra-génériques (dernière ligne de défense)
+        /\bquestion\s+générée\b[^.]*\.?/gi,
+        /\bgénérée?\s+automatiquement\b[^.]*\.?/gi
     ];
     
     // Nettoyer le champ description
@@ -654,7 +663,7 @@ Génère la question au format JSON.`;
     cleanTitle = cleanTitle.replace(/\s{2,}/g, ' ').trim();
     
     if (cleanDescription !== questionData.description || cleanTitle !== questionData.title) {
-        console.log('[generateQuestion] Phrase technique supprimée');
+        // console.log('[generateQuestion] Phrase technique supprimée');
     }
     
     return { 

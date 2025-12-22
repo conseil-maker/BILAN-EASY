@@ -338,7 +338,7 @@ export const getTimeBudget = (
     : calculateTimeSpent(answers);
   const total = pkg.timeBudget.total;
   const remaining = total - spent;
-  const percentage = (spent / total) * 100;
+  const percentage = Math.min((spent / total) * 100, 100);
   
   // Calcul du temps restant par phase (approximatif)
   const currentPhase = getCurrentPhase(packageId, answers);

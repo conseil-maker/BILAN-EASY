@@ -68,12 +68,12 @@ const SatisfactionModal: React.FC<{ phaseName: string; onSubmit: (rating: number
     }, [rating, comment, onSubmit]);
     
     const handleStarClick = (star: number) => {
-        console.log('Rating set to:', star);
+        // console.log('Rating set to:', star);
         setRating(star);
     };
     
     const handleSubmit = () => {
-        console.log('Submitting rating:', rating, 'comment:', comment);
+        // console.log('Submitting rating:', rating, 'comment:', comment);
         onSubmit(rating, comment);
     };
     
@@ -247,11 +247,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const fetchNextQuestion = useCallback(async (options: { useJoker?: boolean } = {}, currentRetry = 0, currentAnswers?: Answer[]) => {
         // Utiliser les réponses passées en paramètre ou celles du state
         const answersToUse = currentAnswers || answers;
-        console.log(`[fetchNextQuestion] Using ${answersToUse.length} answers (param: ${currentAnswers?.length || 'none'}, state: ${answers.length})`);
+        // console.log(`[fetchNextQuestion] Using ${answersToUse.length} answers (param: ${currentAnswers?.length || 'none'}, state: ${answers.length})`);
         
         setIsLoading(true);
         setCurrentQuestion(null);
-        console.log(`[fetchNextQuestion] Attempt ${currentRetry + 1}/${MAX_RETRIES}`);
+        // console.log(`[fetchNextQuestion] Attempt ${currentRetry + 1}/${MAX_RETRIES}`);
         
         // Ajouter un message de chargement visible
         if (currentRetry === 0) {
@@ -264,11 +264,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 question = await generateQuestion('phase2', 0, answersToUse, userName, coachingStyle, null, { isModuleQuestion: { moduleId: activeModule, questionNum: moduleQuestionCount + 1 } });
             } else {
                 const info = getPhaseInfo(answersToUse);
-                console.log('[fetchNextQuestion] Phase info:', info);
+                // console.log('[fetchNextQuestion] Phase info:', info);
                 setCurrentPhaseInfo(info);
                 const phaseKey = `phase${info.phase}` as 'phase1' | 'phase2' | 'phase3';
                 const phaseCategories = QUESTION_CATEGORIES[phaseKey].categories;
-                console.log('[fetchNextQuestion] Phase categories:', phaseCategories.length);
+                // console.log('[fetchNextQuestion] Phase categories:', phaseCategories.length);
                 
                 // Trouver la prochaine catégorie à explorer
                 let selectedCategory = null;
@@ -315,24 +315,24 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     categoryIndex = 0;
                 }
                 
-                console.log('[fetchNextQuestion] Selected category:', selectedCategory.id, 'at index:', categoryIndex);
+                // console.log('[fetchNextQuestion] Selected category:', selectedCategory.id, 'at index:', categoryIndex);
                 setCurrentCategoryId(selectedCategory.id);
                 
                 // Déterminer la complexité optimale
                 const timeBudget = getTimeBudget(pkg.id, answersToUse);
-                console.log('[fetchNextQuestion] Time budget:', timeBudget);
+                // console.log('[fetchNextQuestion] Time budget:', timeBudget);
                 const phaseTimeRemaining = timeBudget[`phase${info.phase}Remaining` as 'phase1Remaining' | 'phase2Remaining' | 'phase3Remaining'];
                 const questionsAskedInCategory = categoryProgress.get(selectedCategory.id) || 0;
                 const complexity = determineQuestionComplexity(selectedCategory.id, phaseKey, phaseTimeRemaining, questionsAskedInCategory);
-                console.log('[fetchNextQuestion] Complexity:', complexity, 'for category:', selectedCategory.id);
+                // console.log('[fetchNextQuestion] Complexity:', complexity, 'for category:', selectedCategory.id);
                 
                 let genOptions: any = { useJoker: options.useJoker, targetComplexity: complexity, categoryId: selectedCategory.id };
                 if (info.phase === 2 && answersToUse.length > 0 && answersToUse[answersToUse.length - 1].value.length > 3) {
                     genOptions.useGoogleSearch = true; genOptions.searchTopic = answersToUse[answersToUse.length - 1].value;
                 }
-                console.log('[fetchNextQuestion] Calling generateQuestion with:', { phaseKey, categoryIndex, answersCount: answersToUse.length, userName, coachingStyle, hasProfile: !!userProfile, genOptions });
+                // console.log('[fetchNextQuestion] Calling generateQuestion with:', { phaseKey, categoryIndex, answersCount: answersToUse.length, userName, coachingStyle, hasProfile: !!userProfile, genOptions });
                 question = await generateQuestion(phaseKey, categoryIndex, answersToUse, userName, coachingStyle, answersToUse.length === 0 ? userProfile : null, genOptions);
-                console.log('[fetchNextQuestion] Question generated:', { id: question.id, title: question.title?.substring(0, 50) });
+                // console.log('[fetchNextQuestion] Question generated:', { id: question.id, title: question.title?.substring(0, 50) });
             }
             setCurrentQuestion(question);
             // Fonction pour nettoyer les phrases techniques générées par l'IA
@@ -365,7 +365,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             if (currentRetry < MAX_RETRIES - 1) {
                 // Réessayer après un délai
                 const delay = (currentRetry + 1) * 2000; // 2s, 4s, 6s
-                console.log(`[fetchNextQuestion] Retrying in ${delay}ms...`);
+                // console.log(`[fetchNextQuestion] Retrying in ${delay}ms...`);
                 setTimeout(() => fetchNextQuestion(options, currentRetry + 1, currentAnswers), delay);
                 return; // Ne pas exécuter le finally pour garder isLoading à true
             } else {
@@ -411,10 +411,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     }, [userName, coachingStyle, fetchNextQuestion]);
 
     const runNextStep = useCallback(async (currentAnswers: Answer[]) => {
-        console.log('[runNextStep] Called with', currentAnswers.length, 'answers');
+        // console.log('[runNextStep] Called with', currentAnswers.length, 'answers');
         // Vérifier si le parcours est terminé basé sur le budget temps
         const journeyComplete = isJourneyComplete(pkg.id, currentAnswers);
-        console.log('[runNextStep] Journey complete?', journeyComplete);
+        // console.log('[runNextStep] Journey complete?', journeyComplete);
         if (journeyComplete) {
             setIsSummarizing(true);
             try {
@@ -465,7 +465,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             
             // Vérifier si on change de phase
             if (info.phase !== prevInfo.phase) {
-                console.log(`[runNextStep] Transition de phase: ${prevInfo.phase} -> ${info.phase}`);
+                // console.log(`[runNextStep] Transition de phase: ${prevInfo.phase} -> ${info.phase}`);
                 setUnlockedBadge(`Phase ${prevInfo.phase} : ${prevInfo.name}`);
                 
                 // Vérifier si un module optionnel est suggéré (seulement si pas déjà refusé)
@@ -491,7 +491,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 }
                 
                 // IMPORTANT: Après le changement de phase, continuer vers la prochaine question
-                console.log('[runNextStep] Transition de phase terminée, passage à la prochaine question');
+                // console.log('[runNextStep] Transition de phase terminée, passage à la prochaine question');
             }
         }
 
@@ -503,7 +503,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         // }
         
         // Générer la prochaine question avec les réponses à jour
-        console.log('[runNextStep] Appel de fetchNextQuestion avec', currentAnswers.length, 'réponses');
+        // console.log('[runNextStep] Appel de fetchNextQuestion avec', currentAnswers.length, 'réponses');
         await fetchNextQuestion({}, 0, currentAnswers);
     }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases]);
 
@@ -522,7 +522,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 }
             }
             // Première question - pas de réponses précédentes
-            console.log('[loadSession] Démarrage du bilan - première question');
+            // console.log('[loadSession] Démarrage du bilan - première question');
             await fetchNextQuestion({}, 0, []);
         };
         loadSession();
@@ -587,7 +587,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     };
     
     const handleSatisfactionSubmit = (rating: number, comment: string) => {
-        console.log({ phase: satisfactionPhaseInfo?.name, rating, comment });
+        // console.log({ phase: satisfactionPhaseInfo?.name, rating, comment });
         if (satisfactionPhaseInfo) {
             setSatisfactionSubmittedPhases(prev => new Set(prev).add(satisfactionPhaseInfo.phase));
         }
@@ -626,7 +626,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         answers: answers,
                         summary: null,
                     }, user.id);
-                    console.log('Brouillon sauvegardé avant déconnexion');
+                    // console.log('Brouillon sauvegardé avant déconnexion');
                 }
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde du brouillon:', error);
