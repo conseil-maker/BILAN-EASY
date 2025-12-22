@@ -142,6 +142,31 @@ export const deleteAssessmentFromSupabase = async (assessmentId: string): Promis
 };
 
 /**
+ * Récupère le dernier bilan complété d'un utilisateur
+ */
+export const getLatestCompletedAssessment = async (userId: string): Promise<HistoryItem | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('assessments')
+      .select('*')
+      .eq('client_id', userId)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return assessmentToHistoryItem(data);
+  } catch (error) {
+    console.error("[HistoryService] Erreur récupération dernier bilan:", error);
+    return null;
+  }
+};
+
+/**
  * Efface l'historique - non implémenté car dangereux
  * Les suppressions doivent être faites individuellement
  */

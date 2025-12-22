@@ -11,7 +11,7 @@ import { BilanCompletion } from './BilanCompletion';
 import { EnhancedNavigation, BilanPhase } from './EnhancedNavigation';
 import { PACKAGES } from '../constants';
 import { Package, Answer, Summary, HistoryItem, UserProfile, CoachingStyle } from '../types-ai-studio';
-import { saveAssessmentToHistory } from '../services/historyService';
+import { saveAssessmentToHistory, getLatestCompletedAssessment } from '../services/historyService';
 import { saveSession, loadSession, clearSession } from '../services/sessionService';
 import { useToast } from './ToastProvider';
 
@@ -47,7 +47,6 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             ? PACKAGES.find(p => p.id === session.selected_package_id) 
             : null;
           
-          setAppState(session.app_state as AppState || 'welcome');
           setUserName(session.user_name || user.email?.split('@')[0] || 'Utilisateur');
           setSelectedPackage(pkg);
           setCoachingStyle(session.coaching_style || 'collaborative');
@@ -55,8 +54,23 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
           setStartDate(session.start_date || '');
           setTimeSpent(session.time_spent || 0);
           
-          if (session.current_answers?.length > 0) {
-            showInfo(`Session reprise avec ${session.current_answers.length} réponse(s)`);
+          // Si en état completion, récupérer le dernier bilan pour avoir le summary
+          if (session.app_state === 'completion') {
+            const latestBilan = await getLatestCompletedAssessment(user.id);
+            if (latestBilan && latestBilan.summary) {
+              setCurrentSummary(latestBilan.summary);
+              setCurrentAnswers(latestBilan.answers || session.current_answers || []);
+              setAppState('completion');
+              showInfo('Reprise de votre bilan terminé');
+            } else {
+              // Pas de bilan trouvé, revenir à l'accueil
+              setAppState('welcome');
+            }
+          } else {
+            setAppState(session.app_state as AppState || 'welcome');
+            if (session.current_answers?.length > 0) {
+              showInfo(`Session reprise avec ${session.current_answers.length} réponse(s)`);
+            }
           }
         }
       } catch (error) {
@@ -71,7 +85,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   // Sauvegarder la session dans Supabase à chaque changement important
   const saveCurrentSession = useCallback(async () => {
-    if (['completion', 'summary', 'history', 'view-history-record', 'welcome'].includes(appState)) {
+    if (['summary', 'history', 'view-history-record', 'welcome'].includes(appState)) {
       return;
     }
 
@@ -173,7 +187,17 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     
     try {
       await saveAssessmentToHistory(historyItem, user.id);
-      await clearSession(user.id);
+      // Ne pas effacer la session ici - elle sera effacée quand l'utilisateur clique sur "Terminer"
+      // Sauvegarder l'état 'completion' dans la session pour permettre la reprise
+      await saveSession(user.id, {
+        app_state: 'completion',
+        user_name: userName,
+        selected_package_id: selectedPackage!.id,
+        coaching_style: coachingStyle,
+        current_answers: answers,
+        start_date: startDate,
+        time_spent: timeSpent
+      });
       showSuccess('Bilan sauvegardé avec succès !');
     } catch (error) {
       console.error('[ClientApp] Erreur sauvegarde bilan:', error);
@@ -304,7 +328,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             userName={userName}
             userEmail={user.email || ''}
             packageName={selectedPackage.name}
-            packageDuration={selectedPackage.duration / 60}
+            packageDuration={selectedPackage.totalHours}
             packagePrice={selectedPackage.price || 0}
             summary={currentSummary}
             answers={currentAnswers}
