@@ -421,14 +421,49 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
             </div>
             
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Bilan terminé !
+              Félicitations {userName} !
             </h2>
             
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Merci {userName} pour votre confiance.
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
+              Votre bilan de compétences est terminé.
             </p>
 
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-6 mb-8">
+            {/* Message de redirection vers le Dashboard */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 mb-8">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 className="font-bold text-green-800 dark:text-green-200 text-lg">
+                  Vos documents sont prêts !
+                </h3>
+              </div>
+              <p className="text-green-700 dark:text-green-300 mb-4">
+                Retrouvez dans votre <strong>Dashboard</strong> :
+              </p>
+              <ul className="text-left text-green-700 dark:text-green-300 space-y-2 max-w-md mx-auto">
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span><strong>Synthèse PDF</strong> de votre bilan téléchargeable</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span><strong>Historique des échanges</strong> exportable en Excel/CSV</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span><strong>Documents Qualiopi</strong> (convention, attestation...)</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 mb-8">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
                 Récapitulatif de votre bilan
               </h3>
@@ -444,10 +479,8 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Documents générés</p>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {syntheseGenerated ? '✅ Synthèse' : '⏳ En attente'}
-                  </p>
+                  <p className="text-sm text-gray-500">Questions répondues</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{answers.length}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Satisfaction</p>
@@ -460,28 +493,33 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
+                onClick={() => window.location.hash = '#/dashboard'}
+                className="bg-green-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Accéder à mon Dashboard
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-3 justify-center mt-6">
+              <button
                 onClick={onViewHistory}
-                className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-xl font-semibold border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-sm"
               >
                 Voir mon historique
               </button>
-              <button
-                onClick={() => window.location.hash = '#/documents'}
-                className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-6 py-3 rounded-xl font-semibold hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
-              >
-                Mes documents
-              </button>
+              <span className="text-gray-300 dark:text-gray-600">|</span>
               <button
                 onClick={onRestart}
-                className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
+                className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-sm"
               >
-                Nouveau bilan
+                Commencer un nouveau bilan
               </button>
             </div>
 
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-              Vos documents restent accessibles depuis votre espace personnel.
-              <br />
               Pour toute question, contactez-nous à support@bilan-easy.fr
             </p>
           </div>
