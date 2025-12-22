@@ -67,12 +67,13 @@ export const loadSession = async (userId: string): Promise<SessionData | null> =
       return null;
     }
 
-    // Vérifier si la session n'est pas trop ancienne (24h)
+    // Vérifier si la session n'est pas trop ancienne (7 jours)
+    // Un bilan de compétences peut s'étaler sur plusieurs jours
     if (data?.updated_at) {
       const lastUpdated = new Date(data.updated_at);
       const now = new Date();
-      const hoursDiff = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60);
-      if (hoursDiff > 24) {
+      const daysDiff = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysDiff > 7) {
         await clearSession(userId);
         return null;
       }

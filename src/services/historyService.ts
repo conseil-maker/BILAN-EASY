@@ -78,7 +78,7 @@ export const saveAssessmentToHistory = async (item: HistoryItem, userId?: string
       throw error;
     }
     
-    console.log("[HistoryService] Bilan sauvegardé dans Supabase:", data?.id);
+    // Bilan sauvegardé avec succès
   } catch (error) {
     console.error("[HistoryService] Erreur lors de la sauvegarde:", error);
     throw error;
@@ -133,7 +133,7 @@ export const deleteAssessmentFromSupabase = async (assessmentId: string): Promis
       return false;
     }
     
-    console.log("[HistoryService] Bilan supprimé:", assessmentId);
+    // Bilan supprimé avec succès
     return true;
   } catch (error) {
     console.error("[HistoryService] Erreur suppression:", error);

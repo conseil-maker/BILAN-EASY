@@ -69,7 +69,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       const { data: assessments } = await supabase
         .from('assessments')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('client_id', user.id)
         .order('created_at', { ascending: false });
 
       if (assessments) {

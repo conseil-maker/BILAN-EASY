@@ -86,7 +86,7 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
         .from('assessments')
         .upsert({
           id,
-          user_id: userId,
+          client_id: userId,
           package_name: packageName,
           status: 'completed',
           summary: summary,

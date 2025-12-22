@@ -246,7 +246,7 @@ export function generateSmartQuestion(
     required: true
   };
   
-  console.log('[SmartQuestionGenerator] Question générée:', question.title.substring(0, 50));
+  // Question générée avec succès
   return question;
 }
 
