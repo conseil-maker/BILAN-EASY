@@ -123,9 +123,10 @@ interface QuestionnaireProps {
   userProfile: UserProfile | null;
   coachingStyle: CoachingStyle;
   onComplete: (answers: Answer[], summary: Summary) => void;
+  onDashboard: () => void;
 }
 
-const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete }) => {
+const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete, onDashboard }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -862,6 +863,18 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         );
                     })()}
                     <div className="flex items-center gap-4">
+                        {/* Bouton Dashboard */}
+                        <button 
+                            onClick={onDashboard} 
+                            className="flex items-center gap-2 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800/50 transition-colors text-sm font-medium"
+                            title="Retour au Dashboard"
+                            aria-label="Retourner au tableau de bord"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Dashboard
+                        </button>
                         {speechSynthSupported && <button onClick={() => isSpeaking ? cancel() : speak(messages[messages.length - 1]?.text as string)} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="Lecture vocale"><SpeakerIcon active={isSpeaking} /></button>}
                         <button onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300" title={isDarkMode ? 'Mode clair' : 'Mode sombre'} aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}>
                             {isDarkMode ? (

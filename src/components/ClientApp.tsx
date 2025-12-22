@@ -214,6 +214,13 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     setAppState('history');
   };
 
+  const handleDashboard = () => {
+    // Sauvegarder la progression avant de quitter
+    saveSession();
+    // Rediriger vers le dashboard client (page externe)
+    window.location.href = '/#/dashboard';
+  };
+
   const handleViewRecord = (record: HistoryItem) => {
     setViewingRecord(record);
     setAppState('view-history-record');
@@ -283,6 +290,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             userProfile={userProfile}
             coachingStyle={coachingStyle}
             onComplete={handleQuestionnaireComplete}
+            onDashboard={handleDashboard}
           />
         );
       
@@ -400,6 +408,14 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         progress={progress}
         timeSpent={timeSpent}
         totalTime={selectedPackage ? selectedPackage.timeBudget.total : 120}
+        onNavigate={(phase) => {
+          // Permettre de revenir aux étapes précédentes
+          if (phase === 'welcome') {
+            handleDashboard();
+          } else {
+            setAppState(phase);
+          }
+        }}
       />
       
       {/* Contenu principal */}

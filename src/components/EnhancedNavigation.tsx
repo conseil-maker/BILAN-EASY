@@ -74,6 +74,7 @@ interface EnhancedNavigationProps {
   progress?: number;
   timeSpent?: number;
   totalTime?: number;
+  onNavigate?: (phase: BilanPhase) => void;
 }
 
 export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
@@ -83,6 +84,7 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
   progress = 0,
   timeSpent = 0,
   totalTime = 120,
+  onNavigate,
 }) => {
   const currentIndex = PHASES.findIndex(p => p.id === currentPhase);
   const currentPhaseInfo = PHASES[currentIndex];
@@ -113,17 +115,22 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 )}
-                <span
-                  className={`flex items-center gap-1 whitespace-nowrap ${
+                <button
+                  onClick={() => onNavigate && index < currentIndex && onNavigate(phase.id)}
+                  disabled={!onNavigate || index >= currentIndex}
+                  className={`flex items-center gap-1 whitespace-nowrap transition-colors ${
                     index === currentIndex
-                      ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
-                      : 'text-gray-500 dark:text-gray-400'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-semibold cursor-default'
+                      : onNavigate && index < currentIndex
+                        ? 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer'
+                        : 'text-gray-500 dark:text-gray-400 cursor-default'
                   }`}
+                  title={index < currentIndex && onNavigate ? `Retourner à ${phase.label}` : undefined}
                 >
                   <span className="hidden sm:inline">{phase.icon}</span>
                   <span className="hidden md:inline">{phase.label}</span>
                   <span className="md:hidden">{phase.shortLabel}</span>
-                </span>
+                </button>
               </React.Fragment>
             ))}
           </nav>
