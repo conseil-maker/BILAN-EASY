@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { HistoryItem } from '../types-ai-studio';
+import { downloadPDF } from '../utils/pdfGenerator';
 
 interface ClientDashboardProps {
   user: User;
@@ -167,6 +168,107 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     if (diffDays < 7) return `Il y a ${diffDays} jours`;
     if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} semaines`;
     return formatDate(dateString);
+  };
+
+  // Télécharger la synthèse PDF d'un bilan
+  const handleDownloadPDF = async (item: HistoryItem) => {
+    try {
+      await downloadPDF(
+        item.userName,
+        item.packageName,
+        item.answers || [],
+        null // dashboardData sera généré à partir des réponses
+      );
+    } catch (error) {
+      console.error('Erreur lors du téléchargement PDF:', error);
+      alert('Une erreur est survenue lors du téléchargement du PDF.');
+    }
+  };
+
+  // Exporter l'historique en Excel
+  const handleExportExcel = () => {
+    try {
+      // Préparer les données pour Excel
+      const data: string[][] = [
+        ['Date', 'Forfait', 'Question', 'Réponse', 'Catégorie']
+      ];
+      
+      history.forEach(item => {
+        if (item.answers) {
+          item.answers.forEach(answer => {
+            data.push([
+              formatDate(item.date),
+              item.packageName,
+              answer.question,
+              answer.answer,
+              answer.category || ''
+            ]);
+          });
+        }
+      });
+
+      // Créer le contenu Excel (format TSV compatible)
+      const excelContent = data.map(row => 
+        row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join('\t')
+      ).join('\n');
+      
+      // Télécharger le fichier
+      const blob = new Blob([`\uFEFF${excelContent}`], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `historique_bilan_${new Date().toISOString().split('T')[0]}.xls`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erreur lors de l\'export Excel:', error);
+      alert('Une erreur est survenue lors de l\'export Excel.');
+    }
+  };
+
+  // Exporter l'historique en CSV
+  const handleExportCSV = () => {
+    try {
+      // Préparer les données pour CSV
+      const data: string[][] = [
+        ['Date', 'Forfait', 'Question', 'Réponse', 'Catégorie']
+      ];
+      
+      history.forEach(item => {
+        if (item.answers) {
+          item.answers.forEach(answer => {
+            data.push([
+              formatDate(item.date),
+              item.packageName,
+              answer.question,
+              answer.answer,
+              answer.category || ''
+            ]);
+          });
+        }
+      });
+
+      // Créer le contenu CSV
+      const csvContent = data.map(row => 
+        row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(',')
+      ).join('\n');
+      
+      // Télécharger le fichier
+      const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `historique_bilan_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erreur lors de l\'export CSV:', error);
+      alert('Une erreur est survenue lors de l\'export CSV.');
+    }
   };
 
   if (loading) {
@@ -394,55 +496,131 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
         {/* Documents */}
         {activeTab === 'documents' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Mes documents
-              </h2>
-              <a
-                href="#/mes-documents"
-                className="text-indigo-600 dark:text-indigo-400 hover:underline"
-              >
-                Voir tous →
-              </a>
-            </div>
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Mes documents
+            </h2>
             
-            {recentDocuments.length === 0 ? (
+            {/* Section Bilans terminés avec synthèse */}
+            {history.filter(h => h.summary).length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span>📊</span> Synthèses de vos bilans
+                </h3>
+                <div className="space-y-3">
+                  {history.filter(h => h.summary).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">📄</span>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            Synthèse - {item.packageName}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {formatDate(item.date)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDownloadPDF(item)}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Télécharger PDF
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Section Export historique */}
+            {history.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span>📝</span> Historique des échanges
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Exportez l'historique complet de vos échanges avec l'IA au format Excel.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => handleExportExcel()}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Exporter en Excel
+                  </button>
+                  <button
+                    onClick={() => handleExportCSV()}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Exporter en CSV
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Documents récents */}
+            {recentDocuments.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>📁</span> Documents récents
+                  </h3>
+                  <a
+                    href="#/mes-documents"
+                    className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm"
+                  >
+                    Voir tous →
+                  </a>
+                </div>
+                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {recentDocuments.map((doc) => (
+                    <div key={doc.id} className="py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">
+                          {doc.type === 'convention' ? '📄' :
+                           doc.type === 'attestation' ? '✅' :
+                           doc.type === 'livret' ? '📘' :
+                           doc.type === 'synthese' ? '📋' : '📎'}
+                        </span>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white text-sm">{doc.name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {formatRelativeTime(doc.downloadedAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Message si aucun document */}
+            {history.length === 0 && recentDocuments.length === 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
                 <span className="text-4xl mb-4 block">📄</span>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                  Aucun document téléchargé
+                  Aucun document disponible
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Vos documents apparaîtront ici après téléchargement.
+                  Terminez votre premier bilan pour obtenir votre synthèse PDF et l'historique de vos échanges.
                 </p>
-                <a
-                  href="#/mes-documents"
+                <button
+                  onClick={onStartNewBilan}
                   className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
-                  Accéder à mes documents
-                </a>
-              </div>
-            ) : (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
-                {recentDocuments.map((doc) => (
-                  <div key={doc.id} className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">
-                        {doc.type === 'convention' ? '📄' :
-                         doc.type === 'attestation' ? '✅' :
-                         doc.type === 'livret' ? '📘' :
-                         doc.type === 'synthese' ? '📋' : '📎'}
-                      </span>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{doc.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {formatRelativeTime(doc.downloadedAt)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  Commencer mon bilan
+                </button>
               </div>
             )}
           </div>
