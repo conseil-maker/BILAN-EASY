@@ -124,9 +124,10 @@ interface QuestionnaireProps {
   coachingStyle: CoachingStyle;
   onComplete: (answers: Answer[], summary: Summary) => void;
   onDashboard: () => void;
+  onAnswersUpdate?: (answers: Answer[]) => void;
 }
 
-const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete, onDashboard }) => {
+const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete, onDashboard, onAnswersUpdate }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -528,6 +529,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         const newAnswers = [...answers, newAnswer];
         setMessages(prev => [...prev, { sender: 'user', text: value }]);
         setAnswers(newAnswers);
+        onAnswersUpdate?.(newAnswers); // Synchroniser avec ClientApp pour sauvegarde Supabase
         setTextInput('');
         
         // Mettre à jour le progrès de la catégorie

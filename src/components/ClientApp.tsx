@@ -289,6 +289,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             coachingStyle={coachingStyle}
             onComplete={handleQuestionnaireComplete}
             onDashboard={handleDashboard}
+            onAnswersUpdate={setCurrentAnswers}
           />
         );
       
