@@ -125,11 +125,12 @@ interface QuestionnaireProps {
   onComplete: (answers: Answer[], summary: Summary) => void;
   onDashboard: () => void;
   onAnswersUpdate?: (answers: Answer[]) => void;
+  initialAnswers?: Answer[]; // Pour restaurer une session en cours
 }
 
-const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete, onDashboard, onAnswersUpdate }) => {
+const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete, onDashboard, onAnswersUpdate, initialAnswers }) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [answers, setAnswers] = useState<Answer[]>([]);
+    const [answers, setAnswers] = useState<Answer[]>(initialAnswers || []);
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSummarizing, setIsSummarizing] = useState(false);
@@ -494,9 +495,33 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
 
     useEffect(() => {
         // La session est gérée par Supabase dans ClientApp
-        // Démarrer directement avec la première question
         const startQuestionnaire = async () => {
-            await fetchNextQuestion({}, 0, []);
+            // Si on a des réponses initiales (reprise de session), les afficher comme messages
+            if (initialAnswers && initialAnswers.length > 0) {
+                const restoredMessages: Message[] = [];
+                initialAnswers.forEach((answer) => {
+                    // Ajouter la question (si on a le titre)
+                    if (answer.questionTitle) {
+                        restoredMessages.push({
+                            sender: 'ai',
+                            text: answer.questionTitle
+                        });
+                    }
+                    // Ajouter la réponse
+                    restoredMessages.push({
+                        sender: 'user',
+                        text: answer.value
+                    });
+                });
+                setMessages(restoredMessages);
+                // Mettre à jour le dashboard avec les réponses restaurées
+                updateDashboard(initialAnswers);
+                // Continuer avec la prochaine question
+                await fetchNextQuestion({}, 0, initialAnswers);
+            } else {
+                // Démarrer normalement avec la première question
+                await fetchNextQuestion({}, 0, []);
+            }
         };
         startQuestionnaire();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps

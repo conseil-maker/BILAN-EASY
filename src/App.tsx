@@ -59,6 +59,9 @@ const AppointmentSystem = lazy(() =>
 const AboutPage = lazy(() => 
   import('./components/AboutPage').then(m => ({ default: m.AboutPage }))
 );
+const UserProfile = lazy(() => 
+  import('./components/UserProfile').then(m => ({ default: m.UserProfile }))
+);
 
 // ============================================
 // ROUTER
@@ -322,6 +325,17 @@ const App: React.FC = () => {
             />
           </Suspense>
         </div>
+      );
+    }
+
+    if (route === '/profile') {
+      return (
+        <Suspense fallback={<LoadingSpinner message="Chargement du profil..." />}>
+          <UserProfile
+            user={user}
+            onBack={handleBack}
+          />
+        </Suspense>
       );
     }
 

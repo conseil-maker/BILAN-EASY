@@ -314,6 +314,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             onComplete={handleQuestionnaireComplete}
             onDashboard={handleDashboard}
             onAnswersUpdate={setCurrentAnswers}
+            initialAnswers={currentAnswers.length > 0 ? currentAnswers : undefined}
           />
         );
       
