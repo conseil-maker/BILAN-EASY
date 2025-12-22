@@ -217,8 +217,8 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const handleDashboard = () => {
     // Sauvegarder la progression avant de quitter
     saveSession();
-    // Rediriger vers le dashboard client (page externe)
-    window.location.href = '/#/dashboard';
+    // Retourner à l'écran d'accueil (qui affiche le dashboard)
+    setAppState('welcome');
   };
 
   const handleViewRecord = (record: HistoryItem) => {
