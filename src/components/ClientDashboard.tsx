@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
+import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
 import { HistoryItem } from '../types-ai-studio';
 import { downloadPDF } from '../utils/pdfGenerator';
@@ -34,6 +35,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   onContinueBilan,
   onViewHistory,
 }) => {
+  const { showError, showSuccess } = useToast();
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [stats, setStats] = useState<BilanStats>({
     totalBilans: 0,
@@ -181,7 +183,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       );
     } catch (error) {
       console.error('Erreur lors du téléchargement PDF:', error);
-      alert('Une erreur est survenue lors du téléchargement du PDF.');
+      showError('Une erreur est survenue lors du téléchargement du PDF.');
     }
   };
 
@@ -224,7 +226,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Erreur lors de l\'export Excel:', error);
-      alert('Une erreur est survenue lors de l\'export Excel.');
+      showError('Une erreur est survenue lors de l\'export Excel.');
     }
   };
 
@@ -267,7 +269,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Erreur lors de l\'export CSV:', error);
-      alert('Une erreur est survenue lors de l\'export CSV.');
+      showError('Une erreur est survenue lors de l\'export CSV.');
     }
   };
 

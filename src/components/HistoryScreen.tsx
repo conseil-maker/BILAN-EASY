@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from './ToastProvider';
 import { HistoryItem } from '../types';
 import { assessmentService } from '../services/assessmentService';
 import { Assessment } from '../lib/supabaseClient';
@@ -9,6 +10,7 @@ interface HistoryScreenProps {
 }
 
 const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewRecord, onBack }) => {
+    const { showError } = useToast();
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -48,7 +50,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewRecord, onBack }) =
                 setHistory(history.filter(item => item.id !== assessmentId));
             } catch (error) {
                 console.error('Erreur lors de la suppression du bilan:', error);
-                alert('Erreur lors de la suppression du bilan.');
+                showError('Erreur lors de la suppression du bilan.');
             }
         }
     };

@@ -440,7 +440,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     runNextStep(currentAnswers);
                 } else {
                     // Retourner au questionnaire
-                    alert('💾 Votre progression a été sauvegardée. Vous pouvez réessayer plus tard.');
+                    showInfo('💾 Votre progression a été sauvegardée. Vous pouvez réessayer plus tard.');
                 }
             }
             return;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useToast } from './ToastProvider';
 import { Summary, SummaryPoint, ActionPlanItem, Answer, DashboardData } from '../types';
 import { findResourceLeads, analyzeThemesAndSkills } from '../services/geminiService';
 import { pdfService } from '../services/pdfService';
@@ -115,6 +116,7 @@ const ActionItem: React.FC<{ item: ActionPlanItem, onToggle: (id: string) => voi
 );
 
 const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, userName, packageName, onRestart, onViewHistory, isHistoryView = false }) => {
+    const { showSuccess, showError } = useToast();
     const [selectedSources, setSelectedSources] = useState<string[] | null>(null);
     const [isCoachModalOpen, setIsCoachModalOpen] = useState(false);
     const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
@@ -253,7 +255,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
                 const fileName = `synthese_${new Date().getTime()}.pdf`;
                 await storageService.uploadPDF(currentAssessment.id, pdfBlob, fileName);
                 
-                alert('PDF généré et sauvegardé avec succès!');
+                showSuccess('PDF généré et sauvegardé avec succès!');
             }
 
             // Télécharger aussi le PDF localement
@@ -267,7 +269,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
             URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Erreur lors de la génération du PDF:', error);
-            alert('Erreur lors de la génération du PDF');
+            showError('Erreur lors de la génération du PDF');
         }
     };
 

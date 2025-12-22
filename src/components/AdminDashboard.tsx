@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
 import { AssignmentManager } from './AssignmentManager';
 
@@ -15,6 +16,7 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
+  const { showSuccess, showError } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -72,10 +74,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
       
       // Recharger les données
       await loadData();
-      alert('Rôle mis à jour avec succès !');
+      showSuccess('Rôle mis à jour avec succès !');
     } catch (error) {
       console.error('Erreur lors de la mise à jour du rôle:', error);
-      alert('Erreur lors de la mise à jour du rôle.');
+      showError('Erreur lors de la mise à jour du rôle.');
     }
   };
 

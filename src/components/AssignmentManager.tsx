@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from './ToastProvider';
 import { assignmentService } from '../services/assignmentService';
 
 interface Client {
@@ -21,6 +22,7 @@ interface Assignment {
 }
 
 export const AssignmentManager: React.FC = () => {
+  const { showSuccess, showError, showWarning } = useToast();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [unassignedClients, setUnassignedClients] = useState<Client[]>([]);
   const [consultants, setConsultants] = useState<Consultant[]>([]);
@@ -48,7 +50,7 @@ export const AssignmentManager: React.FC = () => {
       setConsultants(consultantsData);
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
-      alert('Erreur lors du chargement des données');
+      showError('Erreur lors du chargement des données');
     } finally {
       setLoading(false);
     }
@@ -56,7 +58,7 @@ export const AssignmentManager: React.FC = () => {
 
   const handleAssign = async () => {
     if (!selectedClient || !selectedConsultant) {
-      alert('Veuillez sélectionner un client et un consultant');
+      showWarning('Veuillez sélectionner un client et un consultant');
       return;
     }
 
@@ -67,10 +69,10 @@ export const AssignmentManager: React.FC = () => {
       setSelectedClient('');
       setSelectedConsultant('');
       await loadData();
-      alert('Client assigné avec succès !');
+      showSuccess('Client assigné avec succès !');
     } catch (error: any) {
       console.error('Erreur lors de l\'affectation:', error);
-      alert(error.message || 'Erreur lors de l\'affectation');
+      showError(error.message || 'Erreur lors de l\'affectation');
     } finally {
       setProcessing(false);
     }
@@ -84,10 +86,10 @@ export const AssignmentManager: React.FC = () => {
     try {
       await assignmentService.unassignClient(assignmentId);
       await loadData();
-      alert('Affectation retirée avec succès !');
+      showSuccess('Affectation retirée avec succès !');
     } catch (error) {
       console.error('Erreur lors du retrait de l\'affectation:', error);
-      alert('Erreur lors du retrait de l\'affectation');
+      showError('Erreur lors du retrait de l\'affectation');
     }
   };
 

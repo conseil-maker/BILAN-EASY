@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
 import { authService } from '../services/authService';
 
@@ -14,6 +15,7 @@ interface ConsultantNotesProps {
 }
 
 export const ConsultantNotes: React.FC<ConsultantNotesProps> = ({ assessmentId }) => {
+  const { showError } = useToast();
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState('');
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,7 @@ export const ConsultantNotes: React.FC<ConsultantNotesProps> = ({ assessmentId }
       setNewNote('');
     } catch (error) {
       console.error('Erreur lors de l\'ajout de la note:', error);
-      alert('Erreur lors de l\'ajout de la note');
+      showError('Erreur lors de l\'ajout de la note');
     } finally {
       setSaving(false);
     }
@@ -99,7 +101,7 @@ export const ConsultantNotes: React.FC<ConsultantNotesProps> = ({ assessmentId }
       setNotes(updatedNotes);
     } catch (error) {
       console.error('Erreur lors de la suppression de la note:', error);
-      alert('Erreur lors de la suppression de la note');
+      showError('Erreur lors de la suppression de la note');
     }
   };
 
