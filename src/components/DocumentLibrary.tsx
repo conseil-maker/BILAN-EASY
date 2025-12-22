@@ -47,18 +47,10 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [downloadHistory, setDownloadHistory] = useState<{id: string, date: string}[]>([]);
 
-  useEffect(() => {
-    // Charger l'historique des téléchargements
-    const history = localStorage.getItem(`doc_history_${userId}`);
-    if (history) {
-      setDownloadHistory(JSON.parse(history));
-    }
-  }, [userId]);
-
+  // Historique des téléchargements géré en mémoire uniquement
   const saveDownload = (docId: string) => {
     const newHistory = [...downloadHistory, { id: docId, date: new Date().toISOString() }];
     setDownloadHistory(newHistory);
-    localStorage.setItem(`doc_history_${userId}`, JSON.stringify(newHistory));
   };
 
   const downloadBlob = (blob: Blob, filename: string, docId: string) => {

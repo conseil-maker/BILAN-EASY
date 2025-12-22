@@ -128,14 +128,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
 
     const ACTION_PLAN_STORAGE_KEY = `actionPlan-${userName}-${packageName}-${summary.profileType}`;
 
-    useEffect(() => {
-        if (!isHistoryView) {
-            const savedPlan = localStorage.getItem(ACTION_PLAN_STORAGE_KEY);
-            if (savedPlan) {
-                setActionPlan(JSON.parse(savedPlan));
-            }
-        }
-    }, [isHistoryView, ACTION_PLAN_STORAGE_KEY]);
+    // Plan d'action stocké en mémoire uniquement (pas de localStorage)
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -157,11 +150,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
         fetchDashboardData();
     }, [answers]);
 
-    useEffect(() => {
-        if (!isHistoryView) {
-            localStorage.setItem(ACTION_PLAN_STORAGE_KEY, JSON.stringify(actionPlan));
-        }
-    }, [actionPlan, isHistoryView, ACTION_PLAN_STORAGE_KEY]);
+    // Plan d'action géré en mémoire uniquement
     
     const summaryRef = useRef<HTMLDivElement>(null);
     const { PDF } = jspdf;

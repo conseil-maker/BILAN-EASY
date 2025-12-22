@@ -2,7 +2,7 @@ import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { User } from '@supabase/supabase-js';
 import AuthWrapper from './components/AuthWrapper';
 import { ToastProvider } from './components/ToastProvider';
-import { OfflineIndicator } from './components/OfflineIndicator';
+// OfflineIndicator supprimé - application 100% online
 import { CookieConsent } from './components/CookieConsent';
 import { GlobalNavbar } from './components/GlobalNavbar';
 import { LoadingSpinner, FullPageLoader } from './components/LazyComponents';
@@ -389,7 +389,6 @@ const App: React.FC = () => {
           )}
         </AuthWrapper>
         <CookieConsent />
-        <OfflineIndicator />
       </div>
     </ToastProvider>
   );

@@ -34,8 +34,8 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
     const status = getPermissionStatus();
     setPermission(status);
 
-    // Afficher la bannière si pas encore décidé
-    const hasSeenBanner = localStorage.getItem('notification-banner-dismissed');
+    // Afficher la bannière si pas encore décidé (sessionStorage pour cette session uniquement)
+    const hasSeenBanner = sessionStorage.getItem('notification-banner-dismissed');
     if (status === 'default' && !hasSeenBanner) {
       // Attendre un peu avant d'afficher
       const timer = setTimeout(() => setShowBanner(true), 5000);
@@ -47,7 +47,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
     const result = await requestPermission();
     setPermission(result);
     setShowBanner(false);
-    localStorage.setItem('notification-banner-dismissed', 'true');
+    sessionStorage.setItem('notification-banner-dismissed', 'true');
 
     if (result === 'granted') {
       showSuccess('Notifications activées !');
@@ -68,7 +68,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
   const handleDismiss = () => {
     setShowBanner(false);
     setDismissed(true);
-    localStorage.setItem('notification-banner-dismissed', 'true');
+    sessionStorage.setItem('notification-banner-dismissed', 'true');
   };
 
   // Ne pas afficher si non supporté ou déjà décidé

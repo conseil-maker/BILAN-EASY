@@ -124,25 +124,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     }
   };
 
-  // Charger aussi depuis localStorage pour l'historique local
-  useEffect(() => {
-    const localHistory = localStorage.getItem('bilanHistory');
-    if (localHistory && history.length === 0) {
-      try {
-        const parsed = JSON.parse(localHistory);
-        if (Array.isArray(parsed)) {
-          setHistory(parsed);
-          setStats(prev => ({
-            ...prev,
-            totalBilans: parsed.length,
-            completedBilans: parsed.length,
-          }));
-        }
-      } catch (err) {
-        console.error('Erreur parsing historique local:', err);
-      }
-    }
-  }, []);
+  // Historique chargé uniquement depuis Supabase (pas de localStorage)
 
   const tabs = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: '📊' },

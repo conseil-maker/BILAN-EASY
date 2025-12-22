@@ -13,7 +13,7 @@ import Confetti from './Confetti';
 import { supabase } from '../lib/supabaseClient';
 // import { downloadPDF } from '../utils/pdfGenerator'; // Déplacé vers ClientDashboard
 import { saveAssessmentToHistory } from '../services/historyService';
-import { useAutoSave } from '../hooks/useAutoSave';
+// useAutoSave supprimé - session gérée par Supabase dans ClientApp
 import { useToast } from './ToastProvider';
 import { 
   sendLocalNotification, 
@@ -172,23 +172,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         getUserId();
     }, []);
 
-    // Auto-save toutes les 5 minutes
-    const { save: manualSave } = useAutoSave({
-        userId,
-        packageName: pkg.name,
-        userName,
-        answers,
-        enabled: answers.length > 0,
-        interval: 5 * 60 * 1000, // 5 minutes
-        onSave: () => {
-            setLastSaveTime(new Date());
-            showInfo('💾 Progression sauvegardée automatiquement');
-        },
-        onError: (error) => {
-            console.error('Erreur auto-save:', error);
-            showError('Erreur lors de la sauvegarde automatique');
-        },
-    });
+    // Auto-save géré par Supabase dans ClientApp
 
     useEffect(() => { setTextInput(interimTranscript || finalTranscript); }, [interimTranscript, finalTranscript]);
     const scrollToBottom = () => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
@@ -420,7 +404,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             setIsSummarizing(true);
             try {
                 const finalSummary = await generateSummary(currentAnswers, pkg, userName, coachingStyle);
-                localStorage.removeItem(SESSION_STORAGE_KEY);
+                // Session nettoyée par Supabase dans ClientApp
                 
                 // Envoyer une notification de bilan terminé
                 if (getPermissionStatus() === 'granted') {
@@ -447,9 +431,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             return;
         }
 
-        // Sauvegarde tous les 5 réponses
+        // Notification de sauvegarde (gérée par Supabase dans ClientApp)
         if (currentAnswers.length > 0 && currentAnswers.length % 5 === 0) {
-            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(currentAnswers));
             setLastSaveTime(new Date());
             setShowSaveNotification(true); setTimeout(() => setShowSaveNotification(false), 3000);
         }
@@ -509,24 +492,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases]);
 
     useEffect(() => {
-        const loadSession = async () => {
-            const savedAnswersJSON = localStorage.getItem(SESSION_STORAGE_KEY);
-            if (savedAnswersJSON) {
-                const savedAnswers: Answer[] = JSON.parse(savedAnswersJSON);
-                if (window.confirm("Une session inachevée a été trouvée. Voulez-vous la reprendre ?")) {
-                    setAnswers(savedAnswers);
-                    setMessages([{ sender: 'ai', text: `Bonjour ${userName}, reprenons où nous nous étions arrêtés.` }]);
-                    await runNextStep(savedAnswers);
-                    return;
-                } else {
-                    localStorage.removeItem(SESSION_STORAGE_KEY);
-                }
-            }
-            // Première question - pas de réponses précédentes
-            // console.log('[loadSession] Démarrage du bilan - première question');
+        // La session est gérée par Supabase dans ClientApp
+        // Démarrer directement avec la première question
+        const startQuestionnaire = async () => {
             await fetchNextQuestion({}, 0, []);
         };
-        loadSession();
+        startQuestionnaire();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {

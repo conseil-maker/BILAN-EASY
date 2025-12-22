@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react';
 
 export const useDarkMode = () => {
-  // Vérifier la préférence système ou localStorage
-  const getInitialMode = () => {
-    const savedMode = localStorage.getItem('darkMode');
-    if (savedMode !== null) {
-      return savedMode === 'true';
-    }
-    // Vérifier la préférence système
+  // Utiliser uniquement la préférence système (pas de localStorage)
+  const getSystemPreference = () => {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   };
 
-  const [isDarkMode, setIsDarkMode] = useState(getInitialMode);
+  const [isDarkMode, setIsDarkMode] = useState(getSystemPreference);
+
+  useEffect(() => {
+    // Écouter les changements de préférence système
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches);
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     // Appliquer la classe au document
@@ -20,9 +26,6 @@ export const useDarkMode = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    
-    // Sauvegarder la préférence
-    localStorage.setItem('darkMode', isDarkMode.toString());
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {
