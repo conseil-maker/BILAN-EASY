@@ -215,8 +215,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   };
 
   const handleDashboard = () => {
-    // Sauvegarder la progression avant de quitter
-    saveSession();
+    // La sauvegarde de session est automatique via useEffect
     // Retourner à l'écran d'accueil (qui affiche le dashboard)
     setAppState('welcome');
   };
