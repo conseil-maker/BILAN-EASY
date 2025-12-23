@@ -4,7 +4,7 @@
 
 **Bilan Easy** est une plateforme SaaS complète pour la réalisation de bilans de compétences assistés par intelligence artificielle. Elle intègre :
 
-- ✅ **Google AI Studio** : Interface utilisateur élégante avec IA conversationnelle (Coach Live + Coach Chat)
+- ✅ **API Gemini** : IA conversationnelle pour un accompagnement personnalisé (Coach Live + Coach Chat)
 - ✅ **Supabase** : Backend avec authentification et base de données PostgreSQL
 - ✅ **Architecture Multi-tenant** : 3 rôles (Admin, Consultant, Client)
 - ✅ **Vercel** : Déploiement et hébergement
@@ -37,7 +37,7 @@ Déploiement:
 ├── src/
 │   ├── components/           # Composants React
 │   │   ├── AuthWrapper.tsx   # Gestion authentification
-│   │   ├── ClientApp.tsx     # Application client (AI Studio)
+│   │   ├── ClientApp.tsx     # Application client principale
 │   │   ├── AdminDashboard.tsx
 │   │   ├── ConsultantDashboard.tsx
 │   │   ├── WelcomeScreen.tsx
@@ -45,7 +45,7 @@ Déploiement:
 │   │   ├── Questionnaire.tsx
 │   │   ├── CoachChat.tsx     # Coach textuel
 │   │   ├── LiveCoach.tsx     # Coach vocal
-│   │   └── ... (14 composants AI Studio)
+│   │   └── ... (14 composants client)
 │   │
 │   ├── services/             # Services métier
 │   │   ├── geminiService.ts  # Intégration Gemini AI
@@ -84,7 +84,7 @@ Déploiement:
 
 ### 👤 Client
 
-**Accès** : Interface complète Google AI Studio
+**Accès** : Interface client complète
 
 **Fonctionnalités** :
 - ✅ Sélection de package (Essentiel, Complet, Premium)
@@ -296,7 +296,7 @@ VITE_GEMINI_API_KEY
 
 ---
 
-## 🎨 Fonctionnalités AI Studio Intégrées
+## 🎨 Fonctionnalités IA Intégrées
 
 ### 1. Questionnaires Adaptatifs
 

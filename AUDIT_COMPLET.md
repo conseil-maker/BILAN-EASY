@@ -94,7 +94,7 @@ Le bilan commence mais :
 
 | Fonctionnalité prévue | État actuel |
 |----------------------|-------------|
-| Google AI Studio intégré | ✅ Partiellement |
+| API Gemini intégrée | ✅ Partiellement |
 | Supabase Auth | ❌ Non fonctionnel en production |
 | Architecture Multi-tenant (Admin/Consultant/Client) | ❌ Non accessible |
 | Coach Chat | ⚠️ Existe mais pas de conversation persistante |

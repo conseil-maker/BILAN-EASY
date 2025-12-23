@@ -35,9 +35,9 @@ cp .env.example .env
    - **anon public** → `VITE_SUPABASE_ANON_KEY`
 
 #### Google Gemini
-1. Aller sur https://aistudio.google.com/apikey
-2. Créer un nouveau projet (si nécessaire)
-3. Cliquer sur **Create API Key**
+1. Aller sur https://ai.google.dev/
+2. Cliquer sur **Get API key**
+3. Créer ou sélectionner un projet Google Cloud
 4. Copier la clé → `VITE_GEMINI_API_KEY`
 
 ### Étape 3 : Remplir le fichier .env
@@ -123,9 +123,9 @@ Si vous avez accidentellement exposé des clés API :
 ### 1. Révoquer immédiatement les clés
 
 #### Gemini
-1. Aller sur https://aistudio.google.com/apikey
-2. Trouver la clé exposée
-3. Cliquer sur **Delete**
+1. Aller sur https://ai.google.dev/
+2. Accéder à la gestion des clés API
+3. Trouver la clé exposée et la supprimer
 
 #### Supabase
 1. Aller sur https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api

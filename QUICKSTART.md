@@ -83,7 +83,7 @@ npx serve dist -l 5001
 - [x] Inscription (si activée)
 - [x] Persistance de session
 
-### ✅ Interface Client (AI Studio)
+### ✅ Interface Client
 - [x] Sélection de package
 - [x] Questionnaires adaptatifs
 - [x] Coach Chat (IA textuelle)
