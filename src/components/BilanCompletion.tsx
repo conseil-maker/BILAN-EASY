@@ -70,22 +70,21 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
   const [isGeneratingSynthese, setIsGeneratingSynthese] = useState(false);
   const [satisfactionCompleted, setSatisfactionCompleted] = useState(false);
   const [assessmentId, setAssessmentId] = useState<string>('');
+  const [isAssessmentSaving, setIsAssessmentSaving] = useState(true);
 
-  // Générer un ID d'évaluation unique (UUID v4 valide)
+  // Générer u  // Générer un ID d'évaluation unique (UUID v4 valide) et sauvegarder
   useEffect(() => {
-    // Générer un UUID v4 valide
-    const generateUUID = () => {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
+    const initAssessment = async () => {
+      const id = crypto.randomUUID();
+      console.log('Generated Assessment ID:', id);
+      setAssessmentId(id);
+      
+      // Sauvegarder le bilan complété en base et attendre
+      await saveBilanToDatabase(id);
+      setIsAssessmentSaving(false); // Fin du chargement
     };
-    const id = generateUUID();
-    setAssessmentId(id);
     
-    // Sauvegarder le bilan complété en base
-    saveBilanToDatabase(id);
+    initAssessment();
   }, [userId]);
 
   const saveBilanToDatabase = async (id: string) => {
@@ -105,9 +104,12 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
 
       if (error) {
         console.error('Erreur sauvegarde bilan:', error);
+        return false;
       }
+      return true;
     } catch (err) {
       console.error('Erreur:', err);
+      return false;
     }
   };
 
@@ -450,12 +452,17 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                 Vos retours sont précieux pour l'amélioration continue de nos services.
               </p>
             </div>
-            
-            <SatisfactionSurvey
-              userId={userId}
-              assessmentId={assessmentId}
-              onComplete={handleSatisfactionComplete}
-            />
+            <div className="mt-8">
+              {isAssessmentSaving ? (
+                <div className="text-center p-10">Chargement du questionnaire...</div>
+              ) : (
+                <SatisfactionSurvey
+                  userId={userId}
+                  assessmentId={assessmentId}
+                  onComplete={handleSatisfactionComplete}
+                />
+              )}
+            </div>
           </div>
         )}
 

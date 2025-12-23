@@ -200,6 +200,14 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
       const globalScore = allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length;
 
       // Sauvegarder dans Supabase
+      console.log('Data to insert:', {
+        user_id: userId,
+        assessment_id: assessmentId,
+        answers: answers,
+        category_scores: categoryScores,
+        global_score: globalScore,
+        submitted_at: new Date().toISOString()
+      });
       const { error: insertError } = await supabase
         .from('satisfaction_surveys')
         .insert({

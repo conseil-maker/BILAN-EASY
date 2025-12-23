@@ -219,8 +219,8 @@ const App: React.FC = () => {
           <Suspense fallback={<LoadingSpinner message="Chargement du questionnaire..." />}>
             <SatisfactionSurvey 
               userId={user.id} 
-              assessmentId="current" 
-              onComplete={() => window.location.hash = '#/'}
+              assessmentId={crypto.randomUUID()} 
+              onComplete={() => window.location.hash = '#/dashboard'}
             />
           </Suspense>
         </div>
