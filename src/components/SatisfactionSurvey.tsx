@@ -199,13 +199,15 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
         .filter((r): r is number => r !== undefined);
       const globalScore = allRatings.reduce((sum, r) => sum + r, 0) / allRatings.length;
 
-      // Sauvegarder dans Supabase - sans assessment_id car il peut ne pas exister
+      // Sauvegarder dans Supabase - colonnes correspondant à la structure de la table
       const insertData: Record<string, unknown> = {
         user_id: userId,
-        answers: answers,
+        responses: answers,
         category_scores: categoryScores,
-        global_score: globalScore,
-        submitted_at: new Date().toISOString()
+        overall_rating: globalScore,
+        nps_score: Math.round(globalScore * 2), // Convertir le score sur 5 en NPS sur 10
+        comments: answers['commentaires'] || null,
+        created_at: new Date().toISOString()
       };
       
       console.log('Data to insert:', insertData);
