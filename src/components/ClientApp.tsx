@@ -36,6 +36,8 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const [startDate, setStartDate] = useState<string>('');
   const [progress, setProgress] = useState(0);
   const [timeSpent, setTimeSpent] = useState(0);
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false);
+  const [resumeInfo, setResumeInfo] = useState<{ answersCount: number; lastUpdate: string } | null>(null);
   const { showSuccess, showInfo, showError } = useToast();
 
   // Charger la session depuis Supabase au démarrage
@@ -71,8 +73,21 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             // Si la session est en welcome, aller directement à package-selection
             const targetState = session.app_state === 'welcome' ? 'package-selection' : session.app_state;
             setAppState(targetState as AppState || 'package-selection');
-            if (session.current_answers?.length > 0) {
-              showInfo(`Session reprise avec ${session.current_answers.length} réponse(s)`);
+            
+            // Afficher le message de bienvenue personnalisé si l'utilisateur a un bilan en cours
+            if (session.current_answers?.length > 0 && session.app_state === 'questionnaire') {
+              const lastUpdate = session.updated_at ? new Date(session.updated_at).toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : '';
+              setResumeInfo({
+                answersCount: session.current_answers.length,
+                lastUpdate
+              });
+              setShowWelcomeBack(true);
             }
           }
         } else {
@@ -391,6 +406,53 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   return (
     <div className="App min-h-screen flex flex-col">
+      {/* Modal de bienvenue personnalisé pour la reprise de session */}
+      {showWelcomeBack && resumeInfo && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+            <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-primary-800 mb-3">
+              Ravi de vous revoir, {userName} !
+            </h2>
+            <p className="text-slate-600 mb-4">
+              On peut reprendre dès que vous serez disponible.
+            </p>
+            <div className="bg-slate-50 rounded-xl p-4 mb-6">
+              <p className="text-sm text-slate-500 mb-2">
+                Dernière session : {resumeInfo.lastUpdate}
+              </p>
+              <p className="text-lg font-semibold text-primary-700">
+                {resumeInfo.answersCount} question{resumeInfo.answersCount > 1 ? 's' : ''} déjà complétée{resumeInfo.answersCount > 1 ? 's' : ''}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowWelcomeBack(false);
+                  // Rester sur le questionnaire pour reprendre
+                }}
+                className="flex-1 bg-primary-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors"
+              >
+                Reprendre mon bilan
+              </button>
+              <button
+                onClick={() => {
+                  setShowWelcomeBack(false);
+                  handleDashboard();
+                }}
+                className="px-6 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors"
+              >
+                Plus tard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Navigation améliorée avec fil d'Ariane */}
       <EnhancedNavigation
         currentPhase={mapStateToBilanPhase(appState)}

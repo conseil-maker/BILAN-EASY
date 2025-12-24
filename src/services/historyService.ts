@@ -142,6 +142,94 @@ export const deleteAssessmentFromSupabase = async (assessmentId: string): Promis
 };
 
 /**
+ * Sauvegarde un bilan en cours (brouillon)
+ */
+export const saveInProgressAssessment = async (
+  userId: string,
+  assessmentId: string,
+  data: {
+    userName: string;
+    packageName: string;
+    answers: any[];
+    currentQuestion?: any;
+    messages?: any[];
+    timeConsumed?: number;
+    phase?: string;
+  }
+): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('assessments')
+      .upsert({
+        id: assessmentId,
+        client_id: userId,
+        title: `Bilan ${data.userName} - ${data.packageName}`,
+        package_name: data.packageName,
+        status: 'in_progress',
+        answers: data.answers || [],
+        current_state: {
+          currentQuestion: data.currentQuestion,
+          messages: data.messages,
+          timeConsumed: data.timeConsumed,
+          phase: data.phase,
+        },
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'id'
+      });
+
+    if (error) {
+      console.error("[HistoryService] Erreur sauvegarde en cours:", error.message);
+      throw error;
+    }
+  } catch (error) {
+    console.error("[HistoryService] Erreur sauvegarde en cours:", error);
+  }
+};
+
+/**
+ * Récupère le bilan en cours d'un utilisateur
+ */
+export const getInProgressAssessment = async (userId: string): Promise<{
+  id: string;
+  userName: string;
+  packageName: string;
+  answers: any[];
+  currentState: any;
+  updatedAt: string;
+} | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('assessments')
+      .select('*')
+      .eq('client_id', userId)
+      .eq('status', 'in_progress')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    const titleMatch = data.title?.match(/Bilan (.+?) - /);
+    const userName = titleMatch ? titleMatch[1] : 'Utilisateur';
+
+    return {
+      id: data.id,
+      userName,
+      packageName: data.package_name || 'Forfait Standard',
+      answers: data.answers || [],
+      currentState: data.current_state || {},
+      updatedAt: data.updated_at,
+    };
+  } catch (error) {
+    console.error("[HistoryService] Erreur récupération bilan en cours:", error);
+    return null;
+  }
+};
+
+/**
  * Récupère le dernier bilan complété d'un utilisateur
  */
 export const getLatestCompletedAssessment = async (userId: string): Promise<HistoryItem | null> => {

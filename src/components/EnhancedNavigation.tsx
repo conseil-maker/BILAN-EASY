@@ -152,18 +152,22 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
               </span>
             )}
 
-            {/* Timer */}
-            <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-mono">{timeSpent} / {totalTime} min</span>
-            </span>
+            {/* Timer - Affiché uniquement après le choix du forfait */}
+            {currentPhase !== 'package-selection' && packageName && (
+              <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-mono">{timeSpent} / {totalTime} min</span>
+              </span>
+            )}
 
-            {/* Progression */}
-            <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
-              {Math.round(progress)}%
-            </span>
+            {/* Progression - Affichée uniquement après le choix du forfait */}
+            {currentPhase !== 'package-selection' && packageName && (
+              <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
+                {Math.round(progress)}%
+              </span>
+            )}
           </div>
         </div>
 

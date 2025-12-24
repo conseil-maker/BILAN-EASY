@@ -5,6 +5,7 @@ export interface SpeechSettings {
   rate: number;
   pitch: number;
   volume: number;
+  enabled: boolean; // Nouveau: contrôle si la voix est activée
 }
 
 export const useSpeechSynthesis = () => {
@@ -16,6 +17,7 @@ export const useSpeechSynthesis = () => {
     rate: 1,
     pitch: 1,
     volume: 1,
+    enabled: false, // Désactivé par défaut
   });
 
   useEffect(() => {
@@ -26,8 +28,20 @@ export const useSpeechSynthesis = () => {
       const updateVoices = () => {
         const availableVoices = synth.getVoices().filter(v => v.lang.startsWith('fr'));
         setVoices(availableVoices);
+        
+        // Sélectionner la meilleure voix française par défaut
         if (!settings.voice && availableVoices.length > 0) {
-          setSettings(prev => ({ ...prev, voice: availableVoices[0] }));
+          // Priorité: Google français > Microsoft français > Autre français
+          const googleFrench = availableVoices.find(v => 
+            v.name.toLowerCase().includes('google') && v.lang === 'fr-FR'
+          );
+          const microsoftFrench = availableVoices.find(v => 
+            v.name.toLowerCase().includes('microsoft') && v.lang === 'fr-FR'
+          );
+          const anyFrench = availableVoices.find(v => v.lang === 'fr-FR');
+          
+          const bestVoice = googleFrench || microsoftFrench || anyFrench || availableVoices[0];
+          setSettings(prev => ({ ...prev, voice: bestVoice }));
         }
       };
 
@@ -43,7 +57,9 @@ export const useSpeechSynthesis = () => {
   }, [settings.voice]);
 
   const speak = useCallback((text: string) => {
-    if (!isSupported || !text) return;
+    // Ne pas parler si désactivé ou pas de texte
+    if (!isSupported || !text || !settings.enabled) return;
+    
     const synth = window.speechSynthesis;
     
     // Cancel any current speech before starting a new one
@@ -58,6 +74,7 @@ export const useSpeechSynthesis = () => {
     utterance.rate = settings.rate;
     utterance.pitch = settings.pitch;
     utterance.volume = settings.volume;
+    utterance.lang = 'fr-FR'; // Forcer le français
     
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
@@ -79,5 +96,9 @@ export const useSpeechSynthesis = () => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   }, []);
 
-  return { isSpeaking, isSupported, voices, settings, speak, cancel, onSettingsChange };
+  const toggleEnabled = useCallback(() => {
+    setSettings(prev => ({ ...prev, enabled: !prev.enabled }));
+  }, []);
+
+  return { isSpeaking, isSupported, voices, settings, speak, cancel, onSettingsChange, toggleEnabled };
 };

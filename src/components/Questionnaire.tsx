@@ -353,7 +353,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 const filtered = prev.filter(m => !m.isLoading);
                 return [...filtered, aiMessage];
             });
-            if (speechSynthSupported && settings.voice) speak(aiMessage.text as string);
+            // La voix est maintenant contrôlée par settings.enabled dans le hook
+            if (speechSynthSupported && settings.enabled) speak(aiMessage.text as string);
         } catch (error) {
             console.error(`[fetchNextQuestion] Error on attempt ${currentRetry + 1}:`, error);
             
@@ -563,6 +564,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const handleAnswerSubmit = (value: string) => {
         if (isLoading || !currentQuestion || isAwaitingSynthesisConfirmation) return;
         cancel();
+        
+        // Désactiver le micro automatiquement après l'envoi du message
+        if (isListening) {
+            stopListening();
+        }
         
         // Déterminer la complexité de la question (estimée par la longueur de la réponse et le contexte)
         let estimatedComplexity: 'simple' | 'moyenne' | 'complexe' | 'reflexion' = 'moyenne';
@@ -971,28 +977,42 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             </div>
             
             <div className="h-screen w-screen flex flex-col bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
-                <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center shadow-sm transition-colors duration-300">
-                    <div>
-                        <h1 className="font-bold text-lg text-primary-800 dark:text-primary-300 font-display transition-colors duration-300">{pkg.name}</h1>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">{currentPhaseInfo?.name}</p>
-                    </div>
+                <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+                    {/* Barre de progression unique et cohérente */}
                     {currentPhaseInfo && (() => {
                         const timeBudget = getTimeBudget(pkg.id, answers, bilanStartTime);
                         return (
-                            <div className="text-center">
-                                <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                    {Math.floor(timeBudget.spent)} / {timeBudget.total} min
-                                </div>
-                                <div className="text-xs text-slate-500 dark:text-slate-400">
-                                    {answers.length} questions | {timeBudget.percentage.toFixed(0)}% complété
-                                </div>
+                            <div className="h-1 bg-slate-200 dark:bg-slate-700">
+                                <div 
+                                    className="h-full bg-gradient-to-r from-primary-500 to-purple-500 transition-all duration-500"
+                                    style={{ width: `${Math.max(2, timeBudget.percentage)}%` }}
+                                />
                             </div>
                         );
                     })()}
-                    <div className="flex items-center gap-4">
-                        {/* Bouton Dashboard */}
-                        <button 
-                            onClick={onDashboard} 
+                    
+                    <div className="p-4 flex justify-between items-center">
+                        <div>
+                            <h1 className="font-bold text-lg text-primary-800 dark:text-primary-300 font-display transition-colors duration-300">{pkg.name}</h1>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">{currentPhaseInfo?.name}</p>
+                        </div>
+                        {currentPhaseInfo && (() => {
+                            const timeBudget = getTimeBudget(pkg.id, answers, bilanStartTime);
+                            return (
+                                <div className="text-center px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                                    <div className="text-lg font-bold text-primary-600 dark:text-primary-400">
+                                        {timeBudget.percentage.toFixed(0)}%
+                                    </div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                                        {answers.length} réponses · {Math.floor(timeBudget.spent)} min
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                        <div className="flex items-center gap-4">
+                            {/* Bouton Dashboard */}
+                            <button 
+                                onClick={onDashboard} 
                             className="flex items-center gap-2 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800/50 transition-colors text-sm font-medium"
                             title="Retour au Dashboard"
                             aria-label="Retourner au tableau de bord"
@@ -1040,11 +1060,28 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             aria-label="Se déconnecter de l'application"
                         >
                             <LogoutIcon />
-                        </button>
+                            </button>
+                        </div>
                     </div>
                 </header>
                 
-                {showSettings && speechSynthSupported && <div className="border-b"><SpeechSettings voices={voices} settings={settings} onSettingsChange={onSettingsChange} /></div>}
+                {/* Panneau des paramètres voix - positionné en absolu pour ne pas décaler le contenu */}
+                {showSettings && speechSynthSupported && (
+                    <div className="absolute top-[60px] right-4 z-40 w-80 shadow-xl rounded-xl overflow-hidden animate-fade-in-down">
+                        <div className="relative">
+                            <button 
+                                onClick={() => setShowSettings(false)}
+                                className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 z-10"
+                                aria-label="Fermer les paramètres"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <SpeechSettings voices={voices} settings={settings} onSettingsChange={onSettingsChange} />
+                        </div>
+                    </div>
+                )}
 
                 <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
                     <div className="lg:col-span-2 flex flex-col h-full bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 transition-colors duration-300">

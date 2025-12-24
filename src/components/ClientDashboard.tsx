@@ -49,6 +49,17 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentBilan, setCurrentBilan] = useState<any>(null);
+  
+  // États pour l'édition du profil
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editedProfile, setEditedProfile] = useState({
+    full_name: '',
+    phone: '',
+    address: '',
+    birth_date: '',
+    profession: '',
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -124,7 +135,45 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     }
   };
 
-  // Historique chargé uniquement depuis Supabase (pas de localStorage)
+  // Fonctions pour l'édition du profil
+  const startEditingProfile = () => {
+    setEditedProfile({
+      full_name: profile?.full_name || '',
+      phone: profile?.phone || '',
+      address: profile?.address || '',
+      birth_date: profile?.birth_date || '',
+      profession: profile?.profession || '',
+    });
+    setIsEditingProfile(true);
+  };
+
+  const cancelEditingProfile = () => {
+    setIsEditingProfile(false);
+  };
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          ...editedProfile,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      setProfile({ ...profile, ...editedProfile });
+      setIsEditingProfile(false);
+      showSuccess('Profil mis à jour avec succès');
+    } catch (err) {
+      console.error('Erreur sauvegarde profil:', err);
+      showError('Erreur lors de la sauvegarde du profil');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const tabs = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: '📊' },
@@ -613,39 +662,169 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         {/* Profil */}
         {activeTab === 'profile' && (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Mon profil
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Mon profil
+              </h2>
+              {!isEditingProfile && (
+                <button
+                  onClick={startEditingProfile}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                >
+                  <span>✏️</span> Modifier
+                </button>
+              )}
+            </div>
             
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-2xl">
-                  👤
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
-                    {profile?.full_name || 'Non renseigné'}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
-                </div>
-              </div>
+              {!isEditingProfile ? (
+                // Mode lecture
+                <>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-2xl">
+                      👤
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+                        {profile?.full_name || 'Non renseigné'}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
+                    </div>
+                  </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    Email
-                  </label>
-                  <p className="text-gray-900 dark:text-white">{user.email}</p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        Email
+                      </label>
+                      <p className="text-gray-900 dark:text-white">{user.email}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        Téléphone
+                      </label>
+                      <p className="text-gray-900 dark:text-white">{profile?.phone || 'Non renseigné'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        Profession actuelle
+                      </label>
+                      <p className="text-gray-900 dark:text-white">{profile?.profession || 'Non renseigné'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        Adresse
+                      </label>
+                      <p className="text-gray-900 dark:text-white">{profile?.address || 'Non renseigné'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        Date de naissance
+                      </label>
+                      <p className="text-gray-900 dark:text-white">
+                        {profile?.birth_date ? formatDate(profile.birth_date) : 'Non renseigné'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
+                        Membre depuis
+                      </label>
+                      <p className="text-gray-900 dark:text-white">
+                        {formatDate(user.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Mode édition
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Nom complet *
+                      </label>
+                      <input
+                        type="text"
+                        value={editedProfile.full_name}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, full_name: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="Votre nom complet"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Téléphone
+                      </label>
+                      <input
+                        type="tel"
+                        value={editedProfile.phone}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="06 12 34 56 78"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Profession actuelle
+                      </label>
+                      <input
+                        type="text"
+                        value={editedProfile.profession}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, profession: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="Votre profession"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Date de naissance
+                      </label>
+                      <input
+                        type="date"
+                        value={editedProfile.birth_date}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, birth_date: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Adresse
+                      </label>
+                      <input
+                        type="text"
+                        value={editedProfile.address}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, address: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="Votre adresse complète"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={cancelEditingProfile}
+                      className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={saveProfile}
+                      disabled={savingProfile}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {savingProfile ? (
+                        <>
+                          <span className="animate-spin">⏳</span> Enregistrement...
+                        </>
+                      ) : (
+                        <>
+                          <span>✔️</span> Enregistrer
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    Membre depuis
-                  </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {formatDate(user.created_at)}
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
