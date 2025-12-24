@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardData } from '../types';
 import WordCloud from './WordCloud';
-import SkillsRadar from './SkillsRadar';
-import { RadarChart, HorizontalBarChart, CompetenceScoreCard } from './CompetenceCharts';
+import { RadarChart, HorizontalBarChart } from './CompetenceCharts';
 
 interface EnhancedDashboardProps {
   data: DashboardData | null;
@@ -12,29 +11,41 @@ interface EnhancedDashboardProps {
   questionsAnswered?: number;
   totalQuestions?: number;
   timeSpent?: number;
+  lastQuestion?: string; // Pour le GIF contextuel
 }
 
-type ViewMode = 'themes' | 'skills' | 'progress';
+type ViewMode = 'themes' | 'skills';
+
+// Mots-clés pour les GIFs contextuels
+const GIF_KEYWORDS: Record<string, string[]> = {
+  carrière: ['career', 'success', 'professional'],
+  compétences: ['skills', 'learning', 'growth'],
+  motivation: ['motivation', 'energy', 'passion'],
+  projet: ['project', 'planning', 'future'],
+  réussite: ['achievement', 'celebration', 'win'],
+  défi: ['challenge', 'determination', 'strength'],
+  équipe: ['team', 'collaboration', 'teamwork'],
+  créativité: ['creative', 'innovation', 'ideas'],
+  leadership: ['leader', 'boss', 'management'],
+  communication: ['communication', 'talking', 'conversation'],
+  valeurs: ['values', 'heart', 'meaningful'],
+  objectifs: ['goals', 'target', 'aim'],
+  changement: ['change', 'transformation', 'new beginning'],
+  stress: ['relax', 'calm', 'peace'],
+  formation: ['learning', 'study', 'education'],
+  default: ['thinking', 'working', 'professional']
+};
 
 const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
   data,
   isLoading,
-  userName,
-  currentPhase,
-  questionsAnswered = 0,
-  totalQuestions = 0,
-  timeSpent = 0,
+  lastQuestion,
 }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('themes');
+  const [gifUrl, setGifUrl] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Convertir les données pour les graphiques
-  const competenceData = data?.skills?.map((skill, index) => ({
-    category: skill.name,
-    score: skill.score,
-    maxScore: 10,
-    color: `hsl(${240 - index * 30}, 70%, 60%)`,
-  })) || [];
-
   const radarData = data?.skills?.map(skill => ({
     label: skill.name.length > 12 ? skill.name.substring(0, 12) + '...' : skill.name,
     value: skill.score,
@@ -47,50 +58,101 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
     color: `hsl(${240 - index * 20}, 70%, 60%)`,
   })) || [];
 
-  return (
-    <div className="space-y-6">
-      {/* En-tête avec statistiques */}
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm text-indigo-100">Bonjour {userName || 'Utilisateur'}</p>
-            <p className="font-semibold">{currentPhase || 'Phase d\'investigation'}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold">{questionsAnswered}</p>
-            <p className="text-xs text-indigo-100">questions</p>
-          </div>
-        </div>
-        
-        {/* Barre de progression */}
-        <div className="space-y-1">
-          <div className="flex justify-between text-xs text-indigo-100">
-            <span>Progression</span>
-            <span>{totalQuestions > 0 ? Math.round((questionsAnswered / totalQuestions) * 100) : 0}%</span>
-          </div>
-          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-white rounded-full transition-all duration-500"
-              style={{ width: `${totalQuestions > 0 ? (questionsAnswered / totalQuestions) * 100 : 0}%` }}
-            />
-          </div>
-        </div>
+  // Charger un GIF contextuel basé sur la dernière question
+  useEffect(() => {
+    const fetchGif = async () => {
+      if (!lastQuestion) {
+        setGifUrl(null);
+        return;
+      }
 
-        {/* Temps passé */}
-        <div className="mt-3 flex items-center gap-2 text-sm text-indigo-100">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      // Trouver le mot-clé correspondant dans la question
+      const questionLower = lastQuestion.toLowerCase();
+      let searchTerm = 'professional';
+      
+      for (const [keyword, terms] of Object.entries(GIF_KEYWORDS)) {
+        if (keyword !== 'default' && questionLower.includes(keyword)) {
+          searchTerm = terms[Math.floor(Math.random() * terms.length)];
+          break;
+        }
+      }
+
+      // Si aucun mot-clé trouvé, utiliser les thèmes émergents
+      if (searchTerm === 'professional' && data?.themes && data.themes.length > 0) {
+        const topTheme = data.themes[0].text.toLowerCase();
+        for (const [keyword, terms] of Object.entries(GIF_KEYWORDS)) {
+          if (keyword !== 'default' && topTheme.includes(keyword)) {
+            searchTerm = terms[Math.floor(Math.random() * terms.length)];
+            break;
+          }
+        }
+      }
+
+      try {
+        // Utiliser l'API GIPHY (clé publique pour démo)
+        const response = await fetch(
+          `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${searchTerm}&limit=10&rating=g`
+        );
+        const result = await response.json();
+        if (result.data && result.data.length > 0) {
+          const randomIndex = Math.floor(Math.random() * Math.min(result.data.length, 5));
+          setGifUrl(result.data[randomIndex].images.fixed_height.url);
+        }
+      } catch (error) {
+        console.error('Erreur chargement GIF:', error);
+        setGifUrl(null);
+      }
+    };
+
+    fetchGif();
+  }, [lastQuestion, data?.themes]);
+
+  if (isCollapsed) {
+    return (
+      <div className="fixed right-4 top-1/2 -translate-y-1/2 z-40">
+        <button
+          onClick={() => setIsCollapsed(false)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all"
+          title="Afficher le panneau"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
           </svg>
-          <span>{timeSpent} min passées</span>
-        </div>
+        </button>
       </div>
+    );
+  }
 
-      {/* Onglets de navigation */}
+  return (
+    <div className="space-y-4 relative">
+      {/* Bouton pour replier le panneau */}
+      <button
+        onClick={() => setIsCollapsed(true)}
+        className="absolute -left-3 top-0 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 p-1.5 rounded-full shadow transition-all z-10"
+        title="Masquer le panneau"
+      >
+        <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      {/* GIF contextuel */}
+      {gifUrl && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
+          <img 
+            src={gifUrl} 
+            alt="GIF contextuel" 
+            className="w-full h-32 object-cover"
+            loading="lazy"
+          />
+        </div>
+      )}
+
+      {/* Onglets de navigation simplifiés */}
       <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
         {[
           { id: 'themes', label: 'Thèmes', icon: '🏷️' },
           { id: 'skills', label: 'Compétences', icon: '📊' },
-          { id: 'progress', label: 'Détails', icon: '📈' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -108,51 +170,51 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
       </div>
 
       {/* Contenu selon l'onglet */}
-      <div className="min-h-[300px]">
+      <div className="min-h-[200px]">
         {viewMode === 'themes' && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <div className="space-y-3">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span>🏷️</span> Thèmes Émergents
             </h3>
             {isLoading && !data ? (
-              <LoadingState message="Analyse des thèmes en cours..." />
+              <LoadingState message="Analyse des thèmes..." />
             ) : data?.themes && data.themes.length > 0 ? (
               <WordCloud data={data.themes} />
             ) : (
               <EmptyState
                 icon="🏷️"
                 title="Thèmes en construction"
-                description="Répondez à quelques questions pour voir apparaître les thèmes clés de votre profil."
+                description="Répondez à quelques questions pour voir apparaître les thèmes clés."
               />
             )}
           </div>
         )}
 
         {viewMode === 'skills' && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span>📊</span> Analyse des Compétences
+          <div className="space-y-3">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <span>📊</span> Compétences
             </h3>
             {isLoading && !data ? (
-              <LoadingState message="Analyse des compétences en cours..." />
+              <LoadingState message="Analyse des compétences..." />
             ) : data?.skills && data.skills.length > 0 ? (
-              <div className="space-y-6">
-                {/* Radar Chart */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+              <div className="space-y-4">
+                {/* Radar Chart compact */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-100 dark:border-gray-700">
                   <RadarChart
                     data={radarData}
-                    size={250}
+                    size={180}
                     showLabels={true}
                     showValues={false}
                   />
                 </div>
                 
-                {/* Barres horizontales */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
+                {/* Barres horizontales compactes */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-100 dark:border-gray-700">
                   <HorizontalBarChart
-                    data={barData}
+                    data={barData.slice(0, 5)} // Limiter à 5 compétences
                     maxValue={10}
-                    height={24}
+                    height={20}
                     showValues={true}
                   />
                 </div>
@@ -161,87 +223,9 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
               <EmptyState
                 icon="📊"
                 title="Analyse en préparation"
-                description="Votre radar de compétences se construira progressivement au fil de vos réponses."
+                description="Votre radar de compétences apparaîtra progressivement."
               />
             )}
-          </div>
-        )}
-
-        {viewMode === 'progress' && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span>📈</span> Détails du parcours
-            </h3>
-            
-            {/* Statistiques détaillées */}
-            <div className="grid grid-cols-2 gap-3">
-              <StatCard
-                label="Questions"
-                value={questionsAnswered}
-                total={totalQuestions}
-                icon="❓"
-                color="blue"
-              />
-              <StatCard
-                label="Temps"
-                value={timeSpent}
-                unit="min"
-                icon="⏱️"
-                color="green"
-              />
-              <StatCard
-                label="Thèmes"
-                value={data?.themes?.length || 0}
-                icon="🏷️"
-                color="purple"
-              />
-              <StatCard
-                label="Compétences"
-                value={data?.skills?.length || 0}
-                icon="💪"
-                color="orange"
-              />
-            </div>
-
-            {/* Score global si disponible */}
-            {data?.skills && data.skills.length > 0 && (
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Score global de compétences
-                  </span>
-                  <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                    {Math.round(
-                      (data.skills.reduce((sum, s) => sum + s.score, 0) / (data.skills.length * 10)) * 100
-                    )}%
-                  </span>
-                </div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
-                    style={{
-                      width: `${
-                        (data.skills.reduce((sum, s) => sum + s.score, 0) / (data.skills.length * 10)) * 100
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Conseils */}
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <span className="text-xl">💡</span>
-                <div>
-                  <p className="font-medium text-amber-800 dark:text-amber-200">Conseil</p>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    Prenez le temps de répondre de manière détaillée. Plus vos réponses sont complètes, 
-                    plus l'analyse sera précise et personnalisée.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>
@@ -251,9 +235,9 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
 
 // Composants utilitaires
 const LoadingState: React.FC<{ message: string }> = ({ message }) => (
-  <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
-    <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent mx-auto mb-3" />
-    <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+  <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+    <div className="animate-spin rounded-full h-6 w-6 border-2 border-indigo-600 border-t-transparent mx-auto mb-2" />
+    <p className="text-xs text-gray-500 dark:text-gray-400">{message}</p>
   </div>
 );
 
@@ -262,45 +246,11 @@ const EmptyState: React.FC<{ icon: string; title: string; description: string }>
   title,
   description,
 }) => (
-  <div className="text-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
-    <span className="text-4xl mb-3 block">{icon}</span>
-    <p className="font-medium text-gray-700 dark:text-gray-300">{title}</p>
-    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+  <div className="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+    <span className="text-3xl mb-2 block">{icon}</span>
+    <p className="font-medium text-gray-700 dark:text-gray-300 text-sm">{title}</p>
+    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
   </div>
 );
-
-const StatCard: React.FC<{
-  label: string;
-  value: number;
-  total?: number;
-  unit?: string;
-  icon: string;
-  color: 'blue' | 'green' | 'purple' | 'orange';
-}> = ({ label, value, total, unit, icon, color }) => {
-  const colors = {
-    blue: 'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
-    purple: 'from-purple-500 to-purple-600',
-    orange: 'from-orange-500 to-orange-600',
-  };
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colors[color]} flex items-center justify-center text-white`}>
-          {icon}
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-          <p className="text-lg font-bold text-gray-900 dark:text-white">
-            {value}
-            {total && <span className="text-sm font-normal text-gray-400">/{total}</span>}
-            {unit && <span className="text-sm font-normal text-gray-400 ml-1">{unit}</span>}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default EnhancedDashboard;

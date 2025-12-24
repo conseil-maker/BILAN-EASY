@@ -24,6 +24,7 @@ export interface SessionData {
   coaching_style: CoachingStyle;
   current_answers: Answer[];
   current_questions: QuestionData[];
+  last_ai_message?: string; // Dernière question posée par l'IA (pour reprise exacte)
   current_phase: string;
   progress: number;
   start_date: string;
@@ -51,6 +52,7 @@ export const saveSession = async (
         coaching_style: sessionData.coaching_style,
         current_answers: sessionData.current_answers || [],
         current_questions: sessionData.current_questions || [],
+        last_ai_message: sessionData.last_ai_message || null,
         current_phase: sessionData.current_phase || 'preliminary',
         progress: sessionData.progress || 0,
         start_date: sessionData.start_date,
@@ -140,19 +142,27 @@ export const updateSessionProgress = async (
   answers: Answer[],
   progress: number,
   timeSpent: number,
-  currentPhase: string
+  currentPhase: string,
+  lastAiMessage?: string
 ): Promise<void> => {
   try {
+    const updateData: any = {
+      current_questions: questions,
+      current_answers: answers,
+      progress: progress,
+      time_spent: timeSpent,
+      current_phase: currentPhase,
+      updated_at: new Date().toISOString()
+    };
+    
+    // Ajouter last_ai_message seulement s'il est fourni
+    if (lastAiMessage !== undefined) {
+      updateData.last_ai_message = lastAiMessage;
+    }
+    
     const { error } = await supabase
       .from('user_sessions')
-      .update({
-        current_questions: questions,
-        current_answers: answers,
-        progress: progress,
-        time_spent: timeSpent,
-        current_phase: currentPhase,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('user_id', userId);
 
     if (error && !error.message.includes('does not exist') && !error.message.includes('column')) {

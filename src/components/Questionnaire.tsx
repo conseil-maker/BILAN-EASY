@@ -126,10 +126,12 @@ interface QuestionnaireProps {
   onComplete: (answers: Answer[], summary: Summary) => void;
   onDashboard: () => void;
   onAnswersUpdate?: (answers: Answer[]) => void;
+  onLastAiMessageUpdate?: (message: string) => void; // Pour sauvegarder la dernière question IA
   initialAnswers?: Answer[]; // Pour restaurer une session en cours
+  initialLastAiMessage?: string; // Dernière question IA pour reprise exacte
 }
 
-const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete, onDashboard, onAnswersUpdate, initialAnswers }) => {
+const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete, onDashboard, onAnswersUpdate, onLastAiMessageUpdate, initialAnswers, initialLastAiMessage }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [answers, setAnswers] = useState<Answer[]>(initialAnswers || []);
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -348,14 +350,21 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             // Créer le message AI avant de l'ajouter aux messages (avec nettoyage)
             const cleanTitle = cleanTechnicalPhrases(question.title || '');
             const cleanDescription = question.description ? cleanTechnicalPhrases(question.description) : '';
-            const aiMessage: Message = { sender: 'ai', text: `${cleanTitle}${cleanDescription ? `\n\n${cleanDescription}` : ''}`, question }; 
+            const aiMessageText = `${cleanTitle}${cleanDescription ? `\n\n${cleanDescription}` : ''}`;
+            const aiMessage: Message = { sender: 'ai', text: aiMessageText, question }; 
             // Supprimer le message de chargement et ajouter la vraie question
             setMessages(prev => {
                 const filtered = prev.filter(m => !m.isLoading);
                 return [...filtered, aiMessage];
             });
+            
+            // Sauvegarder la dernière question IA pour la reprise de session
+            if (onLastAiMessageUpdate) {
+                onLastAiMessageUpdate(aiMessageText);
+            }
+            
             // La voix est maintenant contrôlée par settings.enabled dans le hook
-            if (speechSynthSupported && settings.enabled) speak(aiMessage.text as string);
+            if (speechSynthSupported && settings.enabled) speak(aiMessageText);
         } catch (error) {
             console.error(`[fetchNextQuestion] Error on attempt ${currentRetry + 1}:`, error);
             
@@ -542,11 +551,33 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         text: answer.value
                     });
                 });
-                setMessages(restoredMessages);
+                
+                // Si on a la dernière question IA sauvegardée, la restaurer au lieu de regénérer
+                if (initialLastAiMessage) {
+                    restoredMessages.push({
+                        sender: 'ai',
+                        text: initialLastAiMessage
+                    });
+                    setMessages(restoredMessages);
+                    setIsLoading(false);
+                    // Créer une question factice pour permettre de répondre
+                    const info = getPhaseInfo(initialAnswers);
+                    setCurrentPhaseInfo(info);
+                    setCurrentQuestion({
+                        id: `restored-${Date.now()}`,
+                        text: initialLastAiMessage,
+                        type: 'text' as QuestionType,
+                        category: 'general',
+                        phase: info.phase
+                    });
+                } else {
+                    setMessages(restoredMessages);
+                    // Pas de dernière question sauvegardée, générer une nouvelle
+                    await fetchNextQuestion({}, 0, initialAnswers);
+                }
+                
                 // Mettre à jour le dashboard avec les réponses restaurées
                 updateDashboard(initialAnswers);
-                // Continuer avec la prochaine question
-                await fetchNextQuestion({}, 0, initialAnswers);
             } else {
                 // Démarrer normalement avec la première question
                 await fetchNextQuestion({}, 0, []);
@@ -1180,18 +1211,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         </div>
                     </div>
                     <aside 
-                        className="hidden lg:block h-full overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-6 transition-colors duration-300"
+                        className="hidden lg:block h-full overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-4 transition-colors duration-300 w-80"
                         role="complementary"
                         aria-label="Tableau de bord avec thèmes émergents et analyse des compétences"
                     >
                         <EnhancedDashboard 
                             data={dashboardData} 
                             isLoading={isDashboardLoading}
-                            userName={userName}
-                            currentPhase={currentPhaseInfo?.name}
-                            questionsAnswered={answers.length}
-                            totalQuestions={pkg.questions}
-                            timeSpent={Math.floor((Date.now() - bilanStartTime) / 60000)}
+                            lastQuestion={currentQuestion?.text || ''}
                         />
                     </aside>
                 </main>

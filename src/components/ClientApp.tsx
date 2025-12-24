@@ -39,6 +39,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const [timeSpent, setTimeSpent] = useState(0);
   const [showWelcomeBack, setShowWelcomeBack] = useState(false);
   const [resumeInfo, setResumeInfo] = useState<{ answersCount: number; lastUpdate: string } | null>(null);
+  const [lastAiMessage, setLastAiMessage] = useState<string | undefined>(undefined);
   const { showSuccess, showInfo, showError } = useToast();
 
   // Charger la session depuis Supabase au démarrage
@@ -57,6 +58,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
           setCurrentAnswers(session.current_answers || []);
           setStartDate(session.start_date || '');
           setTimeSpent(session.time_spent || 0);
+          setLastAiMessage(session.last_ai_message || undefined);
           
           // Si en état completion, récupérer le dernier bilan pour avoir le summary
           if (session.app_state === 'completion') {
@@ -120,6 +122,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         coaching_style: coachingStyle,
         current_answers: currentAnswers,
         current_questions: [], // Les questions seront ajoutées si nécessaire
+        last_ai_message: lastAiMessage, // Dernière question IA pour reprise exacte
         current_phase: appState === 'questionnaire' ? 'investigation' : 'preliminary',
         progress: progress,
         start_date: startDate,
@@ -131,7 +134,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     } catch (error) {
       console.error('[ClientApp] Erreur sauvegarde session:', error);
     }
-  }, [appState, userName, selectedPackage, coachingStyle, currentAnswers, startDate, timeSpent, user.id, progress, consentData, userProfile]);
+  }, [appState, userName, selectedPackage, coachingStyle, currentAnswers, startDate, timeSpent, user.id, progress, consentData, userProfile, lastAiMessage]);
 
   // Sauvegarder immédiatement après chaque nouvelle réponse
   useEffect(() => {
@@ -364,7 +367,9 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             onComplete={handleQuestionnaireComplete}
             onDashboard={handleDashboard}
             onAnswersUpdate={setCurrentAnswers}
+            onLastAiMessageUpdate={setLastAiMessage}
             initialAnswers={currentAnswers.length > 0 ? currentAnswers : undefined}
+            initialLastAiMessage={lastAiMessage}
           />
         );
       
