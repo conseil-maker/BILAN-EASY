@@ -1118,8 +1118,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     </div>
                 )}
 
-                <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-                    <div className="lg:col-span-2 flex flex-col h-full bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 transition-colors duration-300">
+                <main className="flex-1 min-h-0 flex gap-6 p-6">
+                    {/* Zone de conversation - prend tout l'espace disponible */}
+                    <div className="flex-1 min-w-0 flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 transition-colors duration-300">
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             {messages.map((msg, index) => (
                                 <div key={index} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`} style={{animationDelay: `${index * 0.05}s`}}>
@@ -1216,7 +1217,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     {/* Panneau latéral - masquable complètement */}
                     {showSidePanel ? (
                         <aside 
-                            className="hidden lg:flex lg:flex-col h-full bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-4 transition-all duration-300 w-80"
+                            className="hidden lg:flex flex-col flex-shrink-0 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-4 transition-all duration-300 overflow-hidden"
                             role="complementary"
                             aria-label="Tableau de bord avec thèmes émergents et analyse des compétences"
                         >
