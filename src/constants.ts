@@ -17,6 +17,15 @@ export const QUESTION_COMPLEXITY_TIME: Record<QuestionComplexity, { min: number;
 // CONFIGURATION DES 4 FORFAITS
 // ============================================
 
+// ============================================
+// SEUILS DE PASSAGE DE PHASE
+// ============================================
+export const PHASE_THRESHOLDS = {
+  minimum: 0.90,   // 90% - L'IA peut proposer de passer à la phase suivante
+  optimal: 1.00,   // 100% - Proposition de passage recommandée
+  maximum: 1.30    // 130% - Clôture automatique de la phase
+};
+
 export const PACKAGES: Package[] = [
   {
     id: 'test',
@@ -28,7 +37,7 @@ export const PACKAGES: Package[] = [
       "Parcours complet condensé",
       "Toutes les phases en version courte",
       "Idéal pour tester l'application",
-      "Environ 10-15 questions"
+      "Environ 30-40 questions"
     ],
     phases: {
       phase1: { questionnaires: 1, duration_min: 30, name: "Phase Préliminaire" },
@@ -40,6 +49,13 @@ export const PACKAGES: Package[] = [
       phase1: 30,      // 25%
       phase2: 60,      // 50%
       phase3: 30       // 25%
+    },
+    // Estimation du nombre de questions par phase
+    questionEstimates: {
+      phase1: { min: 8, target: 9, max: 10 },      // Phase Préliminaire
+      phase2: { min: 15, target: 17, max: 20 },   // Phase d'Investigation
+      phase3: { min: 7, target: 8, max: 10 },      // Phase de Conclusion
+      total: { min: 30, target: 34, max: 40 }
     }
   },
   {
@@ -53,7 +69,7 @@ export const PACKAGES: Package[] = [
       "Identification de vos motivations",
       "Exploration de pistes professionnelles",
       "Plan d'action personnalisé",
-      "Environ 30-40 questions"
+      "Environ 75-100 questions"
     ],
     phases: {
       phase1: { questionnaires: 1, duration_min: 120, name: "Phase Préliminaire" },
@@ -65,6 +81,12 @@ export const PACKAGES: Package[] = [
       phase1: 120,     // ~17%
       phase2: 360,     // ~50%
       phase3: 120      // ~17%
+    },
+    questionEstimates: {
+      phase1: { min: 15, target: 17, max: 20 },
+      phase2: { min: 45, target: 52, max: 60 },
+      phase3: { min: 15, target: 17, max: 20 },
+      total: { min: 75, target: 86, max: 100 }
     }
   },
   {
@@ -79,7 +101,7 @@ export const PACKAGES: Package[] = [
       "Analyse du marché du travail",
       "Stratégie de recherche d'emploi",
       "Développement du réseau professionnel",
-      "Environ 45-60 questions"
+      "Environ 110-140 questions"
     ],
     phases: {
       phase1: { questionnaires: 2, duration_min: 180, name: "Phase Préliminaire" },
@@ -91,6 +113,12 @@ export const PACKAGES: Package[] = [
       phase1: 180,     // ~17%
       phase2: 540,     // ~50%
       phase3: 180      // ~17%
+    },
+    questionEstimates: {
+      phase1: { min: 20, target: 22, max: 25 },
+      phase2: { min: 70, target: 80, max: 90 },
+      phase3: { min: 20, target: 22, max: 25 },
+      total: { min: 110, target: 124, max: 140 }
     }
   },
   {
@@ -106,7 +134,7 @@ export const PACKAGES: Package[] = [
       "Stratégie de personal branding",
       "Préparation aux entretiens de haut niveau",
       "Accompagnement sur la durée",
-      "Environ 60-80 questions"
+      "Environ 150-190 questions"
     ],
     phases: {
       phase1: { questionnaires: 2, duration_min: 240, name: "Phase Préliminaire" },
@@ -118,6 +146,12 @@ export const PACKAGES: Package[] = [
       phase1: 240,     // ~17%
       phase2: 720,     // ~50%
       phase3: 240      // ~17%
+    },
+    questionEstimates: {
+      phase1: { min: 25, target: 27, max: 30 },
+      phase2: { min: 100, target: 115, max: 130 },
+      phase3: { min: 25, target: 27, max: 30 },
+      total: { min: 150, target: 169, max: 190 }
     }
   }
 ];

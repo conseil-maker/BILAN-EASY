@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
+import { calculateProgression } from '../services/progressionService';
+import { PACKAGES } from '../constants';
 import { HistoryItem } from '../types-ai-studio';
 import { downloadPDF } from '../utils/pdfGenerator';
 
@@ -132,16 +134,16 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
       // Si pas de bilan en cours dans assessments mais une session active
       if (!inProgressBilan && sessionData && sessionData.current_answers?.length > 0) {
-        // Récupérer le nom du forfait depuis les constantes
-        const packageNames: Record<string, string> = {
-          'essential': 'Forfait Essentiel',
-          'professional': 'Forfait Professionnel',
-          'premium': 'Forfait Premium',
-          'test': 'Forfait Test'
-        };
-        const packageName = sessionData.selected_package_id ? 
-          packageNames[sessionData.selected_package_id] || 'Bilan en cours' : 
-          'Bilan en cours';
+        // Récupérer le package depuis les constantes
+        const pkg = PACKAGES.find(p => p.id === sessionData.selected_package_id);
+        const packageName = pkg?.name || 'Bilan en cours';
+        
+        // Calculer la progression réelle basée sur le nombre de questions
+        const progressionInfo = calculateProgression(
+          sessionData.current_answers || [],
+          sessionData.selected_package_id || 'test',
+          sessionData.user_profile || null
+        );
         
         setCurrentBilan({
           id: 'session-' + (sessionData.id || user.id),
@@ -149,7 +151,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           created_at: sessionData.created_at || sessionData.updated_at || new Date().toISOString(),
           status: 'in_progress',
           answers_count: sessionData.current_answers?.length || 0,
-          progress: sessionData.progress || 0,
+          progress: progressionInfo.globalProgress,
+          questions_target: progressionInfo.questionsTarget,
+          current_phase: progressionInfo.currentPhase,
           from_session: true
         });
       }
@@ -605,16 +609,16 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                       </p>
                       {/* Progression */}
                       <div className="mt-3 space-y-2">
-                        <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center flex-wrap gap-4 text-sm">
                           {currentBilan.answers_count > 0 && (
                             <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                               </svg>
-                              {currentBilan.answers_count} réponse{currentBilan.answers_count > 1 ? 's' : ''}
+                              {currentBilan.answers_count}{currentBilan.questions_target ? ` / ${currentBilan.questions_target}` : ''} question{currentBilan.answers_count > 1 ? 's' : ''}
                             </span>
                           )}
-                          {currentBilan.progress > 0 && (
+                          {currentBilan.progress >= 0 && (
                             <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -622,16 +626,24 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                               {Math.round(currentBilan.progress)}% complété
                             </span>
                           )}
+                          {currentBilan.current_phase && (
+                            <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                              {currentBilan.current_phase === 'phase1' ? 'Phase Préliminaire' : 
+                               currentBilan.current_phase === 'phase2' ? "Phase d'Investigation" : 
+                               'Phase de Conclusion'}
+                            </span>
+                          )}
                         </div>
                         {/* Barre de progression */}
-                        {currentBilan.progress > 0 && (
-                          <div className="h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
-                              style={{ width: `${Math.min(currentBilan.progress, 100)}%` }}
-                            />
-                          </div>
-                        )}
+                        <div className="h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(currentBilan.progress || 0, 100)}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
                     <a

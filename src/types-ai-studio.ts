@@ -40,6 +40,12 @@ export interface CategoryProgress {
   timeSpent: number;
 }
 
+export interface QuestionEstimate {
+  min: number;
+  target: number;
+  max: number;
+}
+
 export interface Package {
   id: string;
   name: string;
@@ -57,6 +63,12 @@ export interface Package {
     phase1: number;
     phase2: number;
     phase3: number;
+  };
+  questionEstimates?: {
+    phase1: QuestionEstimate;
+    phase2: QuestionEstimate;
+    phase3: QuestionEstimate;
+    total: QuestionEstimate;
   };
 }
 

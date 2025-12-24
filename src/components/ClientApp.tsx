@@ -13,6 +13,7 @@ import { PACKAGES } from '../constants';
 import { Package, Answer, Summary, HistoryItem, UserProfile, CoachingStyle } from '../types-ai-studio';
 import { saveAssessmentToHistory, getLatestCompletedAssessment } from '../services/historyService';
 import { saveSession, loadSession, clearSession } from '../services/sessionService';
+import { calculateProgression, ProgressionInfo } from '../services/progressionService';
 import { useToast } from './ToastProvider';
 
 type AppState = 'welcome' | 'package-selection' | 'preliminary-phase' | 'personalization-step' | 'questionnaire' | 'completion' | 'summary' | 'history' | 'view-history-record';
@@ -166,21 +167,32 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     return () => clearInterval(interval);
   }, [appState]);
 
-  // Calculer la progression globale
+  // Calculer la progression globale basée sur le nombre de questions
   useEffect(() => {
-    const stateProgress: Record<AppState, number> = {
-      'welcome': 0,
-      'package-selection': 10,
-      'preliminary-phase': 20,
-      'personalization-step': 30,
-      'questionnaire': 50,
-      'completion': 90,
-      'summary': 100,
-      'history': 0,
-      'view-history-record': 0,
-    };
-    setProgress(stateProgress[appState] || 0);
-  }, [appState]);
+    if (appState === 'questionnaire' && selectedPackage) {
+      // Utiliser le nouveau service de progression
+      const progressionInfo = calculateProgression(
+        currentAnswers,
+        selectedPackage.id,
+        userProfile
+      );
+      setProgress(progressionInfo.globalProgress);
+    } else {
+      // Pour les étapes hors questionnaire, utiliser une progression fixe
+      const stateProgress: Record<AppState, number> = {
+        'welcome': 0,
+        'package-selection': 5,
+        'preliminary-phase': 10,
+        'personalization-step': 15,
+        'questionnaire': 20, // Sera remplacé par le calcul dynamique
+        'completion': 95,
+        'summary': 100,
+        'history': 0,
+        'view-history-record': 0,
+      };
+      setProgress(stateProgress[appState] || 0);
+    }
+  }, [appState, currentAnswers.length, selectedPackage, userProfile]);
 
   const handleStart = (name: string) => {
     setUserName(name);
