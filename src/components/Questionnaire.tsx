@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Package, Answer, Question, QuestionType, Message, CurrentPhaseInfo, Summary, UserProfile, DashboardData, CoachingStyle } from '../types';
-import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule } from '../services/geminiService';
+import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule, detectCareerExplorationNeed, CareerPath, ExplorationNeedResult } from '../services/geminiService';
+import { CareerExploration } from './CareerExploration';
 import { QUESTION_CATEGORIES, getTimeBudget, getCurrentPhase, isJourneyComplete, determineQuestionComplexity, shouldDeepenCategory, QUESTION_COMPLEXITY_TIME } from '../constants';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
@@ -156,6 +157,13 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [categoryProgress, setCategoryProgress] = useState<Map<string, number>>(new Map());
     const [currentCategoryId, setCurrentCategoryId] = useState<string | null>(null);
     const [bilanStartTime] = useState<number>(Date.now());
+    
+    // États pour l'exploration de métiers
+    const [showCareerExploration, setShowCareerExploration] = useState(false);
+    const [careerExplorationOffered, setCareerExplorationOffered] = useState(false);
+    const [showCareerExplorationProposal, setShowCareerExplorationProposal] = useState(false);
+    const [explorationNeedResult, setExplorationNeedResult] = useState<ExplorationNeedResult | null>(null);
+    const [validatedCareerPaths, setValidatedCareerPaths] = useState<CareerPath[]>([]);
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -479,6 +487,24 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 // IMPORTANT: Après le changement de phase, continuer vers la prochaine question
                 // console.log('[runNextStep] Transition de phase terminée, passage à la prochaine question');
             }
+            
+            // Vérifier si on doit proposer l'exploration de métiers (en phase 2, après 10 réponses)
+            if (info.phase === 2 && currentAnswers.length >= 10 && !careerExplorationOffered) {
+                try {
+                    const explorationNeed = await detectCareerExplorationNeed(currentAnswers);
+                    if (explorationNeed.needsExploration && explorationNeed.confidence >= 60) {
+                        setExplorationNeedResult(explorationNeed);
+                        setShowCareerExplorationProposal(true);
+                        setCareerExplorationOffered(true);
+                        return; // Attendre la réponse de l'utilisateur
+                    } else {
+                        setCareerExplorationOffered(true); // Ne pas reproposer
+                    }
+                } catch (error) {
+                    console.error('[runNextStep] Erreur lors de la détection d\'exploration:', error);
+                    setCareerExplorationOffered(true); // Ne pas bloquer le bilan
+                }
+            }
         }
 
         // DÉSACTIVÉ : La synthèse intermédiaire génère des questions de validation interdites
@@ -491,7 +517,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         // Générer la prochaine question avec les réponses à jour
         // console.log('[runNextStep] Appel de fetchNextQuestion avec', currentAnswers.length, 'réponses');
         await fetchNextQuestion({}, 0, currentAnswers);
-    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases]);
+    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases, careerExplorationOffered]);
 
     useEffect(() => {
         // La session est gérée par Supabase dans ClientApp
@@ -606,6 +632,53 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         fetchNextQuestion({}, 0, answers); // Utiliser fetchNextQuestion au lieu de runNextStep pour éviter la boucle
     };
     const handleJoker = () => { if (!isLoading) { fetchNextQuestion({ useJoker: true }, 0, answers); } };
+    
+    // Handlers pour l'exploration de métiers
+    const handleCareerExplorationAccept = () => {
+        setShowCareerExplorationProposal(false);
+        setShowCareerExploration(true);
+    };
+    
+    const handleCareerExplorationDecline = () => {
+        setShowCareerExplorationProposal(false);
+        fetchNextQuestion({}, 0, answers);
+    };
+    
+    const handleCareerExplorationClose = () => {
+        setShowCareerExploration(false);
+        // Ajouter un message récapitulatif si des pistes ont été validées
+        if (validatedCareerPaths.length > 0) {
+            const pathNames = validatedCareerPaths.map(p => p.title).join(', ');
+            setMessages(prev => [...prev, {
+                sender: 'ai',
+                text: `🎯 Excellent ! Vous avez identifié ${validatedCareerPaths.length} piste(s) intéressante(s) : ${pathNames}. Ces pistes seront intégrées à votre document de synthèse. Continuons le bilan pour affiner votre projet.`
+            }]);
+        }
+        fetchNextQuestion({}, 0, answers);
+    };
+    
+    const handleCareerPathSelect = (path: CareerPath, reaction: 'interested' | 'not_interested' | 'need_more_info') => {
+        if (reaction === 'interested') {
+            setValidatedCareerPaths(prev => [...prev.filter(p => p.title !== path.title), path]);
+        } else if (reaction === 'not_interested') {
+            setValidatedCareerPaths(prev => prev.filter(p => p.title !== path.title));
+        }
+    };
+    
+    const handleCareerFollowUpAnswer = (question: string, answer: string) => {
+        // Ajouter la réponse aux answers pour enrichir le profil
+        const newAnswer: Answer = {
+            questionId: `career_exploration_${Date.now()}`,
+            questionTitle: question,
+            value: answer,
+            categoryId: 'exploration_possibilites',
+            timestamp: Date.now()
+        };
+        const newAnswers = [...answers, newAnswer];
+        setAnswers(newAnswers);
+        if (onAnswersUpdate) onAnswersUpdate(newAnswers);
+    };
+    
     const handleLogout = () => {
         setShowLogoutModal(true);
     };
@@ -675,6 +748,61 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             {unlockedBadge && <BadgeNotification phaseName={unlockedBadge} onClose={() => setUnlockedBadge(null)} />}
             {showSatisfactionModal && satisfactionPhaseInfo && <SatisfactionModal phaseName={satisfactionPhaseInfo.name} onSubmit={handleSatisfactionSubmit} />}
             {suggestedModule && <ModuleModal reason={suggestedModule.reason} onAccept={handleModuleAccept} onDecline={handleModuleDecline} />}
+            
+            {/* Modal de proposition d'exploration de métiers */}
+            {showCareerExplorationProposal && explorationNeedResult && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-lg w-full">
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold font-display text-primary-800 dark:text-white mb-2">
+                                Exploration de pistes professionnelles
+                            </h2>
+                        </div>
+                        <p className="text-slate-600 dark:text-slate-300 mb-4">
+                            {explorationNeedResult.reason}
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
+                            💡 L'IA peut analyser votre profil et vous proposer des pistes de métiers personnalisées, 
+                            basées sur vos compétences et les tendances actuelles du marché du travail.
+                        </p>
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={handleCareerExplorationAccept} 
+                                className="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                                Oui, explorer des pistes
+                            </button>
+                            <button 
+                                onClick={handleCareerExplorationDecline} 
+                                className="w-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                            >
+                                Non, continuer le bilan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Composant d'exploration de métiers */}
+            {showCareerExploration && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="w-full max-w-4xl my-8">
+                        <CareerExploration
+                            answers={answers}
+                            userName={userName}
+                            onClose={handleCareerExplorationClose}
+                            onSelectPath={handleCareerPathSelect}
+                            onFollowUpAnswer={handleCareerFollowUpAnswer}
+                        />
+                    </div>
+                </div>
+            )}
+            
             {showLogoutModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowLogoutModal(false)}>
                     <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
