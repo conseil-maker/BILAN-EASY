@@ -305,7 +305,8 @@ const App: React.FC = () => {
           <Suspense fallback={<LoadingSpinner message="Chargement du tableau de bord..." />}>
             <ClientDashboard
               user={user}
-              onStartBilan={() => window.location.hash = '#/'}
+              onStartNewBilan={() => window.location.hash = '#/'}
+              onViewHistory={(record) => console.log('View history:', record)}
             />
           </Suspense>
         </div>
