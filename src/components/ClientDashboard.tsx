@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { Link } from 'react-router-dom';
 import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
 import { HistoryItem } from '../types-ai-studio';
@@ -290,12 +289,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   Continuer mon bilan
                 </button>
               )}
-              <Link
-                to="/bilan"
+              <a
+                href="#/bilan"
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition-colors"
               >
                 {stats.totalBilans === 0 ? 'Commencer mon bilan' : 'Nouveau bilan'}
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -437,12 +436,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Commencez votre premier bilan de compétences pour voir votre historique ici.
                 </p>
-                <Link
-                  to="/bilan"
+                <a
+                  href="#/bilan"
                   className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors inline-block"
                 >
                   Commencer mon bilan
-                </Link>
+                </a>
               </div>
             ) : (
               <div className="space-y-4">
@@ -600,12 +599,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Terminez votre premier bilan pour obtenir votre synthèse PDF et l'historique de vos échanges.
                 </p>
-                <Link
-                  to="/bilan"
+                <a
+                  href="#/bilan"
                   className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   Commencer mon bilan
-                </Link>
+                </a>
               </div>
             )}
           </div>
