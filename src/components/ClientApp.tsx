@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
+import { FixedHeader } from './FixedHeader';
 import WelcomeScreen from './WelcomeScreen';
 import PackageSelector from './PackageSelector';
 import PhasePreliminaireQualiopi, { ConsentData } from './PhasePreliminaireQualiopi';
@@ -382,6 +383,12 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   return (
     <div className="App min-h-screen flex flex-col">
+      {/* Header fixe global */}
+      <FixedHeader userName={userName} />
+      
+      {/* Spacer pour compenser le header fixe */}
+      <div className="h-14" />
+      
       {/* Navigation améliorée avec fil d'Ariane */}
       <EnhancedNavigation
         currentPhase={mapStateToBilanPhase(appState)}
