@@ -82,7 +82,7 @@ export interface OrganizationConfig {
 /**
  * Configuration NETZ INFORMATIQUE - Données officielles
  */
-export const organizationConfig: OrganizationConfig = {
+export const organizationConfig: OrganizationConfig & { qualiopiValidity: string; certificateur: string } = {
   // Informations légales officielles
   name: 'NETZ INFORMATIQUE',
   legalName: 'NETZ INFORMATIQUE',
@@ -92,8 +92,10 @@ export const organizationConfig: OrganizationConfig = {
   qualiopi: 'FP 2022/0076-4',
   qualiopiValidFrom: '10/02/2025',
   qualiopiValidTo: '09/02/2028',
+  qualiopiValidity: '10/02/2025 - 09/02/2028',
   qualiopiCategories: ['Actions de Formation', 'Bilans de compétences'],
   certificationBody: 'QUALIBAT',
+  certificateur: 'QUALIBAT',
   codeNaf: '8559B',
   urssaf: '427 320834682',
   

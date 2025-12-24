@@ -53,13 +53,17 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   // États pour l'édition du profil
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
-    full_name: '',
+    first_name: '',
+    last_name: '',
     phone: '',
     address: '',
     birth_date: '',
     profession: '',
   });
   const [savingProfile, setSavingProfile] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -107,9 +111,40 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           lastActivity: assessments[0]?.updated_at || null,
         });
 
-        // Vérifier s'il y a un bilan en cours
+        // Vérifier s'il y a un bilan en cours dans assessments
         const inProgressBilan = assessments.find(a => a.status === 'in_progress');
         setCurrentBilan(inProgressBilan);
+      }
+
+      // Charger aussi la session en cours depuis user_sessions
+      const { data: sessionData } = await supabase
+        .from('user_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      // Si pas de bilan en cours dans assessments mais une session active
+      if (!inProgressBilan && sessionData && sessionData.app_state === 'questionnaire' && sessionData.current_answers?.length > 0) {
+        // Récupérer le nom du forfait depuis les constantes
+        const packageNames: Record<string, string> = {
+          'essential': 'Forfait Essentiel',
+          'professional': 'Forfait Professionnel',
+          'premium': 'Forfait Premium',
+          'test': 'Forfait Test'
+        };
+        const packageName = sessionData.selected_package_id ? 
+          packageNames[sessionData.selected_package_id] || 'Bilan en cours' : 
+          'Bilan en cours';
+        
+        setCurrentBilan({
+          id: 'session-' + (sessionData.id || user.id),
+          package_name: packageName,
+          created_at: sessionData.created_at || sessionData.updated_at || new Date().toISOString(),
+          status: 'in_progress',
+          answers_count: sessionData.current_answers?.length || 0,
+          progress: sessionData.progress || 0,
+          from_session: true
+        });
       }
 
       // Charger les documents récents
@@ -138,7 +173,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   // Fonctions pour l'édition du profil
   const startEditingProfile = () => {
     setEditedProfile({
-      full_name: profile?.full_name || '',
+      first_name: profile?.first_name || '',
+      last_name: profile?.last_name || '',
       phone: profile?.phone || '',
       address: profile?.address || '',
       birth_date: profile?.birth_date || '',
@@ -154,17 +190,21 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const saveProfile = async () => {
     setSavingProfile(true);
     try {
+      // Construire le full_name à partir de first_name et last_name
+      const fullName = [editedProfile.first_name, editedProfile.last_name].filter(Boolean).join(' ');
+      
       const { error } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
           ...editedProfile,
+          full_name: fullName,
           updated_at: new Date().toISOString(),
         });
 
       if (error) throw error;
 
-      setProfile({ ...profile, ...editedProfile });
+      setProfile({ ...profile, ...editedProfile, full_name: fullName });
       setIsEditingProfile(false);
       showSuccess('Profil mis à jour avec succès');
     } catch (err) {
@@ -172,6 +212,35 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       showError('Erreur lors de la sauvegarde du profil');
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordData.new !== passwordData.confirm) {
+      showError('Les mots de passe ne correspondent pas');
+      return;
+    }
+    if (passwordData.new.length < 6) {
+      showError('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+    
+    setChangingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.new
+      });
+
+      if (error) throw error;
+
+      showSuccess('Mot de passe modifié avec succès');
+      setShowPasswordModal(false);
+      setPasswordData({ current: '', new: '', confirm: '' });
+    } catch (err: any) {
+      console.error('Erreur changement mot de passe:', err);
+      showError(err.message || 'Erreur lors du changement de mot de passe');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -396,16 +465,46 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           <div className="space-y-6">
             {/* Bilan en cours */}
             {currentBilan && (
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-amber-800 dark:text-amber-200 flex items-center">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-amber-800 dark:text-amber-200 flex items-center text-lg">
                       <span className="mr-2">⏳</span>
                       Bilan en cours
                     </h3>
                     <p className="text-amber-700 dark:text-amber-300 mt-1">
-                      {currentBilan.package_name} - Commencé le {formatDate(currentBilan.created_at)}
+                      {currentBilan.package_name || 'Bilan de compétences'} - Commencé le {formatDate(currentBilan.created_at)}
                     </p>
+                    {/* Afficher la progression si disponible */}
+                    {(currentBilan.answers_count || currentBilan.progress) && (
+                      <div className="mt-3">
+                        <div className="flex items-center gap-4 text-sm text-amber-600 dark:text-amber-400">
+                          {currentBilan.answers_count && (
+                            <span className="flex items-center gap-1">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                              </svg>
+                              {currentBilan.answers_count} réponses
+                            </span>
+                          )}
+                          {currentBilan.progress > 0 && (
+                            <span className="flex items-center gap-1">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                              {Math.round(currentBilan.progress)}% complété
+                            </span>
+                          )}
+                        </div>
+                        {/* Barre de progression */}
+                        <div className="mt-2 h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300"
+                            style={{ width: `${Math.max(5, currentBilan.progress || 0)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {onContinueBilan && (
                     <button
@@ -741,14 +840,26 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Nom complet *
+                        Prénom *
                       </label>
                       <input
                         type="text"
-                        value={editedProfile.full_name}
-                        onChange={(e) => setEditedProfile({ ...editedProfile, full_name: e.target.value })}
+                        value={editedProfile.first_name}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, first_name: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Votre nom complet"
+                        placeholder="Votre prénom"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Nom *
+                      </label>
+                      <input
+                        type="text"
+                        value={editedProfile.last_name}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, last_name: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="Votre nom"
                       />
                     </div>
                     <div>
@@ -827,11 +938,85 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               )}
             </div>
 
+            {/* Section Sécurité */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <span>🔒</span> Sécurité
+              </h3>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-900 dark:text-white font-medium">Mot de passe</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Modifiez votre mot de passe de connexion</p>
+                </div>
+                <button
+                  onClick={() => setShowPasswordModal(true)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Modifier
+                </button>
+              </div>
+            </div>
+
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
               <p className="text-blue-800 dark:text-blue-200 text-sm">
                 <strong>RGPD :</strong> Vous pouvez demander l'accès, la rectification ou la suppression 
                 de vos données personnelles en nous contactant à rgpd@bilan-easy.fr
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* Modal changement de mot de passe */}
+        {showPasswordModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Changer le mot de passe
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Nouveau mot de passe
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.new}
+                    onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                    placeholder="Minimum 6 caractères"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Confirmer le mot de passe
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.confirm}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                    placeholder="Confirmez le mot de passe"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setPasswordData({ current: '', new: '', confirm: '' });
+                  }}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleChangePassword}
+                  disabled={changingPassword || !passwordData.new || !passwordData.confirm}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                >
+                  {changingPassword ? 'Modification...' : 'Modifier'}
+                </button>
+              </div>
             </div>
           </div>
         )}

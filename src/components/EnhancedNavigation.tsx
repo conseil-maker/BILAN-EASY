@@ -94,15 +94,20 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
     return null;
   }
 
+  // Ne pas afficher la barre de progression ici si on est dans le questionnaire (elle est déjà dans le header)
+  const showProgressBar = currentPhase !== 'questionnaire';
+
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-      {/* Barre de progression globale */}
-      <div className="h-1 bg-gray-200 dark:bg-gray-700">
-        <div
-          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
-          style={{ width: `${Math.max(5, progress)}%` }}
-        />
-      </div>
+      {/* Barre de progression globale - masquée dans le questionnaire */}
+      {showProgressBar && (
+        <div className="h-1 bg-gray-200 dark:bg-gray-700">
+          <div
+            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+            style={{ width: `${Math.max(5, progress)}%` }}
+          />
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
@@ -152,8 +157,8 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
               </span>
             )}
 
-            {/* Timer - Affiché uniquement après le choix du forfait */}
-            {currentPhase !== 'package-selection' && packageName && (
+            {/* Timer - Affiché uniquement après le choix du forfait et PAS dans le questionnaire */}
+            {currentPhase !== 'package-selection' && currentPhase !== 'questionnaire' && packageName && (
               <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -162,8 +167,8 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
               </span>
             )}
 
-            {/* Progression - Affichée uniquement après le choix du forfait */}
-            {currentPhase !== 'package-selection' && packageName && (
+            {/* Progression - Affichée uniquement après le choix du forfait et PAS dans le questionnaire */}
+            {currentPhase !== 'package-selection' && currentPhase !== 'questionnaire' && packageName && (
               <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
                 {Math.round(progress)}%
               </span>

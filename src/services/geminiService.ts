@@ -339,8 +339,17 @@ export const generateQuestion = async (
             significantPhrases.push(...sentences.slice(0, 2));
         }
         
+        // Ajouter le contexte du profil utilisateur si disponible
+        const profileContext = userProfile ? `
+💼 PROFIL DU CANDIDAT (issu du CV):
+- Rôle actuel: ${userProfile.currentRole}
+- Compétences clés: ${userProfile.keySkills.join(', ')}
+- Expériences: ${userProfile.pastExperiences.join(', ')}
+
+Utilise ces informations pour personnaliser tes questions et faire des liens avec son parcours.` : '';
+        
         conversationContext = `
-=== ATTENTION: PERSONNALISATION OBLIGATOIRE ===
+=== ATTENTION: PERSONNALISATION OBLIGATOIRE ===${profileContext}
 
 Voici ce que ${userName} vient de te confier. Tu DOIS rebondir dessus:
 

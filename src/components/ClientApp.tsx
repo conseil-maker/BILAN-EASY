@@ -118,21 +118,35 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         selected_package_id: selectedPackage?.id || null,
         coaching_style: coachingStyle,
         current_answers: currentAnswers,
+        current_questions: [], // Les questions seront ajoutées si nécessaire
+        current_phase: appState === 'questionnaire' ? 'investigation' : 'preliminary',
+        progress: progress,
         start_date: startDate,
-        time_spent: timeSpent
+        time_spent: timeSpent,
+        consent_data: consentData,
+        user_profile: userProfile
       });
+      console.log('[ClientApp] Session sauvegardée:', currentAnswers.length, 'réponses');
     } catch (error) {
       console.error('[ClientApp] Erreur sauvegarde session:', error);
     }
-  }, [appState, userName, selectedPackage, coachingStyle, currentAnswers, startDate, timeSpent, user.id]);
+  }, [appState, userName, selectedPackage, coachingStyle, currentAnswers, startDate, timeSpent, user.id, progress, consentData, userProfile]);
 
-  // Sauvegarder automatiquement toutes les 30 secondes si en questionnaire
+  // Sauvegarder immédiatement après chaque nouvelle réponse
   useEffect(() => {
     if (appState === 'questionnaire' && currentAnswers.length > 0) {
-      const interval = setInterval(saveCurrentSession, 30000);
+      // Sauvegarde immédiate à chaque nouvelle réponse
+      saveCurrentSession();
+    }
+  }, [currentAnswers.length]); // Déclenché uniquement quand le nombre de réponses change
+
+  // Sauvegarde périodique toutes les 60 secondes comme backup
+  useEffect(() => {
+    if (appState === 'questionnaire' && currentAnswers.length > 0) {
+      const interval = setInterval(saveCurrentSession, 60000);
       return () => clearInterval(interval);
     }
-  }, [appState, currentAnswers.length, saveCurrentSession]);
+  }, [appState, saveCurrentSession]);
 
   // Sauvegarder à chaque changement d'état
   useEffect(() => {

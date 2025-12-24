@@ -415,7 +415,7 @@ export const AboutPage: React.FC = () => {
                   🎯 Catégories d'actions certifiées
                 </h3>
                 <div className="space-y-4">
-                  {organizationConfig.categories.map((category, i) => (
+                  {organizationConfig.qualiopiCategories.map((category, i) => (
                     <div 
                       key={i}
                       className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl"
