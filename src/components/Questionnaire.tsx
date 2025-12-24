@@ -1119,9 +1119,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     <div className="lg:col-span-2 flex flex-col h-full bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 transition-colors duration-300">
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             {messages.map((msg, index) => (
-                                <div key={index} className={`flex items-end gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`} style={{animationDelay: `${index * 0.05}s`}}>
-                                    {msg.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center flex-shrink-0 animate-scale-in">IA</div>}
-                                    <div className={`max-w-xl p-4 rounded-2xl transition-all duration-300 hover:shadow-lg ${msg.sender === 'user' ? 'bg-primary-600 dark:bg-primary-500 text-white rounded-br-none' : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-none'}`}>
+                                <div key={index} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`} style={{animationDelay: `${index * 0.05}s`}}>
+                                    {msg.sender === 'ai' && <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center flex-shrink-0 animate-scale-in mt-1">IA</div>}
+                                    <div className={`max-w-[85%] p-4 rounded-2xl transition-all duration-300 hover:shadow-lg break-words ${msg.sender === 'user' ? 'bg-primary-600 dark:bg-primary-500 text-white rounded-br-none' : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-none'}`}>
                                         <p>{msg.text}</p>
                                         {msg.isSynthesis && (
                                             <div className="mt-4 flex gap-2" role="group" aria-label="Confirmation de la synthèse">

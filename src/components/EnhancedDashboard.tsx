@@ -89,17 +89,28 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
       }
 
       try {
-        // Utiliser l'API GIPHY (clé publique pour démo)
+        // Utiliser l'API GIPHY avec la clé publique officielle pour les développeurs
+        // Clé publique de démo GIPHY: https://developers.giphy.com/docs/api#quick-start-guide
+        const GIPHY_API_KEY = 'GlVGYHkr3WSBnllca54iNt0yFbjz7L65'; // Clé publique GIPHY
         const response = await fetch(
-          `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${searchTerm}&limit=10&rating=g`
+          `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(searchTerm)}&limit=10&rating=g&lang=fr`
         );
+        
+        if (!response.ok) {
+          throw new Error('Erreur API GIPHY');
+        }
+        
         const result = await response.json();
         if (result.data && result.data.length > 0) {
           const randomIndex = Math.floor(Math.random() * Math.min(result.data.length, 5));
-          setGifUrl(result.data[randomIndex].images.fixed_height.url);
+          setGifUrl(result.data[randomIndex].images.fixed_height_small.url);
+        } else {
+          // Fallback: utiliser un GIF par défaut
+          setGifUrl(null);
         }
       } catch (error) {
         console.error('Erreur chargement GIF:', error);
+        // Pas de GIF en cas d'erreur
         setGifUrl(null);
       }
     };

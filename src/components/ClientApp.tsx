@@ -144,6 +144,14 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     }
   }, [currentAnswers.length]); // Déclenché uniquement quand le nombre de réponses change
 
+  // Sauvegarder immédiatement quand la dernière question IA change
+  useEffect(() => {
+    if (appState === 'questionnaire' && lastAiMessage) {
+      // Sauvegarde immédiate de la dernière question IA
+      saveCurrentSession();
+    }
+  }, [lastAiMessage]); // Déclenché uniquement quand la dernière question change
+
   // Sauvegarde périodique toutes les 60 secondes comme backup
   useEffect(() => {
     if (appState === 'questionnaire' && currentAnswers.length > 0) {
