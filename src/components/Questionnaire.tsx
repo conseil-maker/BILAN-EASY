@@ -488,12 +488,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 // console.log('[runNextStep] Transition de phase terminée, passage à la prochaine question');
             }
             
-            // Vérifier si on doit proposer l'exploration de métiers (après 10 réponses en phase d'investigation)
-            // Note: On vérifie le nombre de réponses plutôt que la phase temporelle pour une meilleure UX
-            const isInInvestigationContent = currentAnswers.some(a => 
-                ['competences', 'motivations', 'exploration_possibilites', 'projets_professionnels'].includes(a.categoryId || '')
-            );
-            if (currentAnswers.length >= 10 && !careerExplorationOffered && isInInvestigationContent) {
+            // Vérifier si on doit proposer l'exploration de métiers (après 10 réponses)
+            // Déclenché après suffisamment de réponses pour avoir un profil clair
+            if (currentAnswers.length >= 10 && !careerExplorationOffered) {
                 try {
                     const explorationNeed = await detectCareerExplorationNeed(currentAnswers);
                     if (explorationNeed.needsExploration && explorationNeed.confidence >= 60) {
