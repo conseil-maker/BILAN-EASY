@@ -570,28 +570,106 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
         {/* Historique */}
         {activeTab === 'history' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               Historique de mes bilans
             </h2>
-            
-            {history.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
-                <span className="text-4xl mb-4 block">📋</span>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                  Aucun bilan terminé
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Commencez votre premier bilan de compétences pour voir votre historique ici.
-                </p>
-                <a
-                  href="#/bilan"
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors inline-block"
-                >
-                  Commencer mon bilan
-                </a>
+
+            {/* Section Bilan en cours */}
+            {currentBilan && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">⏳</span>
+                  <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200">
+                    Bilan en cours
+                  </h3>
+                  <span className="px-2 py-1 bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 text-xs font-medium rounded-full">
+                    Actif
+                  </span>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">
+                        {currentBilan.package_name || 'Bilan de compétences'}
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Commencé le {formatDate(currentBilan.created_at)}
+                      </p>
+                      {/* Progression */}
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center gap-4 text-sm">
+                          {currentBilan.answers_count > 0 && (
+                            <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                              </svg>
+                              {currentBilan.answers_count} réponse{currentBilan.answers_count > 1 ? 's' : ''}
+                            </span>
+                          )}
+                          {currentBilan.progress > 0 && (
+                            <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                              {Math.round(currentBilan.progress)}% complété
+                            </span>
+                          )}
+                        </div>
+                        {/* Barre de progression */}
+                        {currentBilan.progress > 0 && (
+                          <div className="h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
+                              style={{ width: `${Math.min(currentBilan.progress, 100)}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <a
+                      href="#/bilan"
+                      className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Reprendre
+                    </a>
+                  </div>
+                </div>
               </div>
-            ) : (
+            )}
+
+            {/* Section Bilans terminés */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <span>✅</span> Bilans terminés
+              </h3>
+              
+              {history.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
+                  <span className="text-4xl mb-4 block">📋</span>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                    Aucun bilan terminé
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    {currentBilan 
+                      ? "Terminez votre bilan en cours pour le voir apparaître ici."
+                      : "Commencez votre premier bilan de compétences pour voir votre historique ici."
+                    }
+                  </p>
+                  {!currentBilan && (
+                    <a
+                      href="#/bilan"
+                      className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors inline-block"
+                    >
+                      Commencer mon bilan
+                    </a>
+                  )}
+                </div>
+              ) : (
               <div className="space-y-4">
                 {history.map((item) => (
                   <div
@@ -623,6 +701,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 ))}
               </div>
             )}
+            </div>
           </div>
         )}
 
