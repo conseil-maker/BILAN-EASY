@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DashboardData } from '../types';
 import WordCloud from './WordCloud';
 import { RadarChart, HorizontalBarChart } from './CompetenceCharts';
@@ -12,6 +12,7 @@ interface EnhancedDashboardProps {
   totalQuestions?: number;
   timeSpent?: number;
   lastQuestion?: string; // Pour le GIF contextuel
+  onCollapse?: () => void; // Callback pour masquer le panneau depuis le parent
 }
 
 type ViewMode = 'themes' | 'skills';
@@ -33,6 +34,11 @@ const GIF_KEYWORDS: Record<string, string[]> = {
   changement: ['change', 'transformation', 'new beginning'],
   stress: ['relax', 'calm', 'peace'],
   formation: ['learning', 'study', 'education'],
+  parcours: ['journey', 'path', 'road'],
+  expérience: ['experience', 'work', 'professional'],
+  émotion: ['emotion', 'feeling', 'heart'],
+  fierté: ['proud', 'achievement', 'success'],
+  startup: ['startup', 'entrepreneur', 'business'],
   default: ['thinking', 'working', 'professional']
 };
 
@@ -40,10 +46,12 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
   data,
   isLoading,
   lastQuestion,
+  onCollapse,
 }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('themes');
   const [gifUrl, setGifUrl] = useState<string | null>(null);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [gifLoading, setGifLoading] = useState(false);
+  const lastQuestionRef = useRef<string | null>(null);
 
   // Convertir les données pour les graphiques
   const radarData = data?.skills?.map(skill => ({
@@ -61,37 +69,47 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
   // Charger un GIF contextuel basé sur la dernière question
   useEffect(() => {
     const fetchGif = async () => {
-      if (!lastQuestion) {
-        setGifUrl(null);
+      // Ne pas recharger si la question n'a pas changé
+      if (!lastQuestion || lastQuestion === lastQuestionRef.current) {
         return;
       }
+      
+      lastQuestionRef.current = lastQuestion;
+      setGifLoading(true);
 
       // Trouver le mot-clé correspondant dans la question
       const questionLower = lastQuestion.toLowerCase();
       let searchTerm = 'professional';
+      let foundKeyword = false;
       
       for (const [keyword, terms] of Object.entries(GIF_KEYWORDS)) {
         if (keyword !== 'default' && questionLower.includes(keyword)) {
           searchTerm = terms[Math.floor(Math.random() * terms.length)];
+          foundKeyword = true;
           break;
         }
       }
 
-      // Si aucun mot-clé trouvé, utiliser les thèmes émergents
-      if (searchTerm === 'professional' && data?.themes && data.themes.length > 0) {
-        const topTheme = data.themes[0].text.toLowerCase();
-        for (const [keyword, terms] of Object.entries(GIF_KEYWORDS)) {
-          if (keyword !== 'default' && topTheme.includes(keyword)) {
-            searchTerm = terms[Math.floor(Math.random() * terms.length)];
-            break;
+      // Si aucun mot-clé trouvé, utiliser les thèmes émergents ou un terme par défaut
+      if (!foundKeyword) {
+        if (data?.themes && data.themes.length > 0) {
+          const topTheme = data.themes[0].text.toLowerCase();
+          for (const [keyword, terms] of Object.entries(GIF_KEYWORDS)) {
+            if (keyword !== 'default' && topTheme.includes(keyword)) {
+              searchTerm = terms[Math.floor(Math.random() * terms.length)];
+              break;
+            }
           }
+        } else {
+          // Utiliser un terme par défaut aléatoire
+          const defaultTerms = GIF_KEYWORDS.default;
+          searchTerm = defaultTerms[Math.floor(Math.random() * defaultTerms.length)];
         }
       }
 
       try {
         // Utiliser l'API GIPHY avec la clé publique officielle pour les développeurs
-        // Clé publique de démo GIPHY: https://developers.giphy.com/docs/api#quick-start-guide
-        const GIPHY_API_KEY = 'GlVGYHkr3WSBnllca54iNt0yFbjz7L65'; // Clé publique GIPHY
+        const GIPHY_API_KEY = 'GlVGYHkr3WSBnllca54iNt0yFbjz7L65';
         const response = await fetch(
           `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(searchTerm)}&limit=10&rating=g&lang=fr`
         );
@@ -103,64 +121,62 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
         const result = await response.json();
         if (result.data && result.data.length > 0) {
           const randomIndex = Math.floor(Math.random() * Math.min(result.data.length, 5));
-          setGifUrl(result.data[randomIndex].images.fixed_height_small.url);
+          // Utiliser fixed_height au lieu de fixed_height_small pour une meilleure qualité
+          setGifUrl(result.data[randomIndex].images.fixed_height.url);
         } else {
-          // Fallback: utiliser un GIF par défaut
-          setGifUrl(null);
+          // Fallback: garder le GIF précédent
+          console.log('Aucun GIF trouvé pour:', searchTerm);
         }
       } catch (error) {
         console.error('Erreur chargement GIF:', error);
-        // Pas de GIF en cas d'erreur
-        setGifUrl(null);
+        // Garder le GIF précédent en cas d'erreur
+      } finally {
+        setGifLoading(false);
       }
     };
 
     fetchGif();
   }, [lastQuestion, data?.themes]);
 
-  if (isCollapsed) {
-    return (
-      <div className="fixed right-4 top-1/2 -translate-y-1/2 z-40">
-        <button
-          onClick={() => setIsCollapsed(false)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all"
-          title="Afficher le panneau"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-          </svg>
-        </button>
-      </div>
-    );
-  }
+  // Le masquage complet est géré par le parent via onCollapse
 
   return (
-    <div className="space-y-4 relative">
-      {/* Bouton pour replier le panneau */}
-      <button
-        onClick={() => setIsCollapsed(true)}
-        className="absolute -left-3 top-0 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 p-1.5 rounded-full shadow transition-all z-10"
-        title="Masquer le panneau"
-      >
-        <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-        </svg>
-      </button>
+    <div className="space-y-4 relative h-full flex flex-col">
+      {/* Bouton pour replier le panneau - masque TOUT le volet */}
+      {onCollapse && (
+        <button
+          onClick={onCollapse}
+          className="absolute -left-3 top-0 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 p-1.5 rounded-full shadow transition-all z-10"
+          title="Masquer le panneau"
+        >
+          <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
 
-      {/* GIF contextuel */}
-      {gifUrl && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
+      {/* GIF contextuel - hauteur fixe et bien visible */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm flex-shrink-0">
+        {gifLoading ? (
+          <div className="w-full h-40 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent" />
+          </div>
+        ) : gifUrl ? (
           <img 
             src={gifUrl} 
             alt="GIF contextuel" 
-            className="w-full h-32 object-cover"
+            className="w-full h-40 object-cover"
             loading="lazy"
           />
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-40 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
+            <span className="text-4xl">🎯</span>
+          </div>
+        )}
+      </div>
 
       {/* Onglets de navigation simplifiés */}
-      <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
+      <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg flex-shrink-0">
         {[
           { id: 'themes', label: 'Thèmes', icon: '🏷️' },
           { id: 'skills', label: 'Compétences', icon: '📊' },
@@ -180,11 +196,11 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
         ))}
       </div>
 
-      {/* Contenu selon l'onglet */}
-      <div className="min-h-[200px]">
+      {/* Contenu selon l'onglet - avec overflow pour éviter le glissement */}
+      <div className="flex-1 overflow-y-auto min-h-0">
         {viewMode === 'themes' && (
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2 sticky top-0 bg-white dark:bg-gray-900 py-1 z-10">
               <span>🏷️</span> Thèmes Émergents
             </h3>
             {isLoading && !data ? (
@@ -203,7 +219,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
 
         {viewMode === 'skills' && (
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2 sticky top-0 bg-white dark:bg-gray-900 py-1 z-10">
               <span>📊</span> Compétences
             </h3>
             {isLoading && !data ? (

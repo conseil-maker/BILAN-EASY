@@ -156,6 +156,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [satisfactionSubmittedPhases, setSatisfactionSubmittedPhases] = useState<Set<number>>(new Set());
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false);
+    const [showSidePanel, setShowSidePanel] = useState(true);
     const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
     const [categoryProgress, setCategoryProgress] = useState<Map<string, number>>(new Map());
     const [currentCategoryId, setCurrentCategoryId] = useState<string | null>(null);
@@ -1212,17 +1213,33 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             </button>
                         </div>
                     </div>
-                    <aside 
-                        className="hidden lg:block h-full overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-4 transition-colors duration-300 w-80"
-                        role="complementary"
-                        aria-label="Tableau de bord avec thèmes émergents et analyse des compétences"
-                    >
-                        <EnhancedDashboard 
-                            data={dashboardData} 
-                            isLoading={isDashboardLoading}
-                            lastQuestion={currentQuestion?.text || ''}
-                        />
-                    </aside>
+                    {/* Panneau latéral - masquable complètement */}
+                    {showSidePanel ? (
+                        <aside 
+                            className="hidden lg:flex lg:flex-col h-full bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-4 transition-all duration-300 w-80"
+                            role="complementary"
+                            aria-label="Tableau de bord avec thèmes émergents et analyse des compétences"
+                        >
+                            <EnhancedDashboard 
+                                data={dashboardData} 
+                                isLoading={isDashboardLoading}
+                                lastQuestion={currentQuestion?.text || ''}
+                                onCollapse={() => setShowSidePanel(false)}
+                            />
+                        </aside>
+                    ) : (
+                        <div className="hidden lg:flex fixed right-4 top-1/2 -translate-y-1/2 z-40">
+                            <button
+                                onClick={() => setShowSidePanel(true)}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all"
+                                title="Afficher le panneau"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
                 </main>
             </div>
         </>
