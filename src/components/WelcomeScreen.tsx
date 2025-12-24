@@ -140,12 +140,17 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
           <p className="text-sm text-slate-500 mb-4">Accès rapides</p>
           <div className="flex flex-wrap justify-center gap-3">
             <a
+              href="#/dashboard"
+              className="px-4 py-2 bg-primary-100 hover:bg-primary-200 rounded-lg text-sm text-primary-700 transition-colors font-medium"
+            >
+              🏠 Mon Dashboard
+            </a>
+            <a
               href="#/mes-documents"
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
             >
               📁 Mes documents
             </a>
-
             <a
               href="#/satisfaction"
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
