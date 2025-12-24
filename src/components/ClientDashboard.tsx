@@ -384,13 +384,13 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               </a>
               
               <a
-                href="#/metiers"
+                href="#/rendez-vous"
                 className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
               >
-                <span className="text-3xl mb-3 block">💼</span>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Explorer les métiers</h3>
+                <span className="text-3xl mb-3 block">📅</span>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Mes Rendez-vous</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Découvrez les métiers et formations
+                  Planifiez vos entretiens
                 </p>
               </a>
               

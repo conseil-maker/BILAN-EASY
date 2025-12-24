@@ -44,9 +44,7 @@ const DocumentsQualiopi = lazy(() =>
 const DocumentLibrary = lazy(() => 
   import('./components/DocumentLibrary').then(m => ({ default: m.DocumentLibrary }))
 );
-const MetiersFormationsExplorer = lazy(() => 
-  import('./components/MetiersFormationsExplorer').then(m => ({ default: m.MetiersFormationsExplorer }))
-);
+
 const MyDocuments = lazy(() => 
   import('./components/MyDocuments').then(m => ({ default: m.MyDocuments }))
 );
@@ -267,18 +265,6 @@ const App: React.FC = () => {
       );
     }
 
-    if (route === '/metiers') {
-      return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Métiers & Formations" />
-          <Suspense fallback={<LoadingSpinner message="Chargement de l'explorateur..." />}>
-            <MetiersFormationsExplorer
-              userCompetences={['Management', 'Communication', 'Gestion de projet']}
-            />
-          </Suspense>
-        </div>
-      );
-    }
 
     if (route === '/mes-documents') {
       return (

@@ -63,12 +63,7 @@ export const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
             >
               Documents
             </a>
-            <a
-              href="#/metiers"
-              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              Métiers
-            </a>
+
             <a
               href="#/rendez-vous"
               className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"

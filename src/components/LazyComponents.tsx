@@ -79,9 +79,6 @@ export const LazyMyDocuments = lazy(() =>
 // COMPOSANTS LAZY - Fonctionnalités avancées
 // ============================================
 
-export const LazyMetiersFormationsExplorer = lazy(() => 
-  import('./MetiersFormationsExplorer').then(module => ({ default: module.MetiersFormationsExplorer }))
-);
 
 export const LazySatisfactionSurvey = lazy(() => 
   import('./SatisfactionSurvey').then(module => ({ default: module.SatisfactionSurvey }))
@@ -138,7 +135,6 @@ export const ConsultantDashboardProLazy = withSuspense(LazyConsultantDashboardPr
 export const DocumentsQualiopiLazy = withSuspense(LazyDocumentsQualiopi, <LoadingSpinner message="Chargement des documents..." />);
 export const DocumentLibraryLazy = withSuspense(LazyDocumentLibrary, <LoadingSpinner message="Chargement de la bibliothèque..." />);
 export const MyDocumentsLazy = withSuspense(LazyMyDocuments, <LoadingSpinner message="Chargement de vos documents..." />);
-export const MetiersFormationsExplorerLazy = withSuspense(LazyMetiersFormationsExplorer, <LoadingSpinner message="Chargement de l'explorateur..." />);
 export const SatisfactionSurveyLazy = withSuspense(LazySatisfactionSurvey, <LoadingSpinner message="Chargement du questionnaire..." />);
 export const AppointmentSystemLazy = withSuspense(LazyAppointmentSystem, <LoadingSpinner message="Chargement des rendez-vous..." />);
 export const CGULazy = withSuspense(LazyCGU, <LoadingSpinner message="Chargement..." />);
