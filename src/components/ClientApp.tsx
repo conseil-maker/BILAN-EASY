@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
-import { FixedHeader } from './FixedHeader';
 import WelcomeScreen from './WelcomeScreen';
 import PackageSelector from './PackageSelector';
 import PhasePreliminaireQualiopi, { ConsentData } from './PhasePreliminaireQualiopi';
@@ -24,7 +23,8 @@ interface ClientAppProps {
 
 const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [appState, setAppState] = useState<AppState>('welcome');
+  // Démarrer directement sur la sélection de forfait (on arrive depuis le Dashboard)
+  const [appState, setAppState] = useState<AppState>('package-selection');
   const [userName, setUserName] = useState(user.email?.split('@')[0] || 'Utilisateur');
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [coachingStyle, setCoachingStyle] = useState<CoachingStyle>('collaborative');
@@ -68,14 +68,20 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
               setAppState('welcome');
             }
           } else {
-            setAppState(session.app_state as AppState || 'welcome');
+            // Si la session est en welcome, aller directement à package-selection
+            const targetState = session.app_state === 'welcome' ? 'package-selection' : session.app_state;
+            setAppState(targetState as AppState || 'package-selection');
             if (session.current_answers?.length > 0) {
               showInfo(`Session reprise avec ${session.current_answers.length} réponse(s)`);
             }
           }
+        } else {
+          // Pas de session existante, démarrer sur package-selection
+          setAppState('package-selection');
         }
       } catch (error) {
         console.error('[ClientApp] Erreur chargement session:', error);
+        setAppState('package-selection');
       } finally {
         setIsLoading(false);
       }
@@ -222,7 +228,8 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     setUserProfile(null);
     setCoachingStyle('collaborative');
     setTimeSpent(0);
-    setAppState('welcome');
+    // Rediriger vers le dashboard
+    window.location.hash = '#/dashboard';
   };
 
   const handleShowHistory = () => {
@@ -230,7 +237,8 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   };
 
   const handleDashboard = () => {
-    setAppState('welcome');
+    // Rediriger vers le dashboard
+    window.location.hash = '#/dashboard';
   };
 
   const handleViewRecord = (record: HistoryItem) => {
@@ -383,12 +391,6 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   return (
     <div className="App min-h-screen flex flex-col">
-      {/* Header fixe global */}
-      <FixedHeader userName={userName} />
-      
-      {/* Spacer pour compenser le header fixe */}
-      <div className="h-14" />
-      
       {/* Navigation améliorée avec fil d'Ariane */}
       <EnhancedNavigation
         currentPhase={mapStateToBilanPhase(appState)}
