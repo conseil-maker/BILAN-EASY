@@ -24,7 +24,6 @@ const RoleBasedRouter: React.FC<RoleBasedRouterProps> = ({ user, userRole }) => 
     '#/legal/privacy',
     '#/legal/cookies',
     '#/about',
-    '#/metiers',
   ];
   
   // Si c'est une route publique, laisser App.tsx gérer

@@ -145,12 +145,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
             >
               📁 Mes documents
             </a>
-            <a
-              href="#/metiers"
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
-            >
-              💼 Métiers
-            </a>
+
             <a
               href="#/satisfaction"
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
