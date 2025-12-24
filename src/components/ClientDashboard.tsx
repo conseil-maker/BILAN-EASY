@@ -87,6 +87,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         .eq('client_id', user.id)
         .order('created_at', { ascending: false });
 
+      // Variable pour suivre le bilan en cours depuis assessments
+      let inProgressBilan: any = null;
+
       if (assessments) {
         const historyItems: HistoryItem[] = assessments.map(a => ({
           id: a.id,
@@ -112,19 +115,23 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         });
 
         // Vérifier s'il y a un bilan en cours dans assessments
-        const inProgressBilan = assessments.find(a => a.status === 'in_progress');
-        setCurrentBilan(inProgressBilan);
+        inProgressBilan = assessments.find(a => a.status === 'in_progress');
+        if (inProgressBilan) {
+          setCurrentBilan(inProgressBilan);
+        }
       }
 
       // Charger aussi la session en cours depuis user_sessions
-      const { data: sessionData } = await supabase
+      const { data: sessionData, error: sessionError } = await supabase
         .from('user_sessions')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
+      console.log('[Dashboard] Session data:', sessionData, 'Error:', sessionError);
+
       // Si pas de bilan en cours dans assessments mais une session active
-      if (!inProgressBilan && sessionData && sessionData.app_state === 'questionnaire' && sessionData.current_answers?.length > 0) {
+      if (!inProgressBilan && sessionData && sessionData.current_answers?.length > 0) {
         // Récupérer le nom du forfait depuis les constantes
         const packageNames: Record<string, string> = {
           'essential': 'Forfait Essentiel',
