@@ -45,7 +45,7 @@ export const FixedHeader: React.FC<FixedHeaderProps> = ({
               </span>
             )}
 
-            {/* Lien Dashboard */}
+            {/* Lien Accueil */}
             {showDashboardLink && (
               <a
                 href="#/dashboard"

@@ -287,15 +287,24 @@ const App: React.FC = () => {
     if (route === '/dashboard') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mon Tableau de Bord" />
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={false} title="Mon Tableau de Bord" />
           <Suspense fallback={<LoadingSpinner message="Chargement du tableau de bord..." />}>
             <ClientDashboard
               user={user}
-              onStartNewBilan={() => window.location.hash = '#/'}
+              onStartNewBilan={() => window.location.hash = '#/bilan'}
               onViewHistory={(record) => console.log('View history:', record)}
             />
           </Suspense>
         </div>
+      );
+    }
+
+    // Route pour démarrer un nouveau bilan
+    if (route === '/bilan') {
+      return (
+        <Suspense fallback={<FullPageLoader message="Chargement du bilan..." />}>
+          <ClientApp user={user} />
+        </Suspense>
       );
     }
 
@@ -368,6 +377,11 @@ const App: React.FC = () => {
         );
       case 'client':
       default:
+        // Rediriger vers le dashboard si on est sur la route racine
+        if (route === '/' || route === '') {
+          window.location.hash = '#/dashboard';
+          return <FullPageLoader message="Redirection vers votre tableau de bord..." />;
+        }
         return (
           <Suspense fallback={<FullPageLoader message="Chargement de l'application..." />}>
             <ClientApp user={user} />
