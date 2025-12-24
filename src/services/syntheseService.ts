@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { Summary, Answer } from '../types-ai-studio';
 import { organizationConfig, getFullAddress } from '../config/organization';
+import { CareerPath } from './geminiService';
 
 export interface SyntheseData {
   userName: string;
@@ -16,6 +17,7 @@ export interface SyntheseData {
   planAction?: PlanActionItem[];
   metiersVises?: string[];
   formationsRecommandees?: string[];
+  careerPaths?: CareerPath[]; // Pistes métiers explorées avec l'IA
 }
 
 export interface PlanActionItem {
@@ -196,6 +198,64 @@ export const syntheseService = {
       addSubSection('Métiers visés');
       data.metiersVises.forEach((metier, i) => {
         addText(`• ${metier}`);
+      });
+    }
+
+    // 5bis. PISTES MÉTIERS EXPLORÉES (si exploration IA réalisée)
+    if (data.careerPaths && data.careerPaths.length > 0) {
+      addSection('5bis. PISTES MÉTIERS EXPLORÉES');
+      addText('Les pistes suivantes ont été identifiées lors de l\'exploration personnalisée basée sur le profil du bénéficiaire et les tendances du marché du travail :');
+      y += 5;
+      
+      data.careerPaths.forEach((path, index) => {
+        // Vérifier si on a besoin d'une nouvelle page
+        if (y > 230) {
+          doc.addPage();
+          y = 20;
+        }
+        
+        // Titre du métier avec score
+        addSubSection(`${index + 1}. ${path.title}`);
+        
+        // Description
+        addText(path.description);
+        
+        // Score de correspondance et tendance
+        const trendLabel = path.marketTrend === 'en_croissance' ? '↑ En croissance' : 
+                          path.marketTrend === 'en_declin' ? '↓ En déclin' : '→ Stable';
+        addText(`Correspondance : ${path.matchScore}% | Tendance marché : ${trendLabel} | Salaire : ${path.salaryRange}`, 10, false, [100, 100, 100]);
+        
+        // Raisons de correspondance
+        if (path.matchReasons && path.matchReasons.length > 0) {
+          addText('Pourquoi cette piste correspond :', 10, true);
+          path.matchReasons.forEach(reason => {
+            addText(`  • ${reason}`, 10);
+          });
+        }
+        
+        // Compétences à développer
+        if (path.skillsToAcquire && path.skillsToAcquire.length > 0) {
+          addText('Compétences à développer :', 10, true);
+          addText(path.skillsToAcquire.join(', '), 10);
+        }
+        
+        // Formations recommandées
+        if (path.trainingPath && path.trainingPath.length > 0) {
+          addText('Formations recommandées :', 10, true);
+          path.trainingPath.forEach(training => {
+            addText(`  • ${training}`, 10);
+          });
+        }
+        
+        // Prochaines étapes
+        if (path.nextSteps && path.nextSteps.length > 0) {
+          addText('Prochaines étapes :', 10, true);
+          path.nextSteps.forEach((step, i) => {
+            addText(`  ${i + 1}. ${step}`, 10);
+          });
+        }
+        
+        y += 8; // Espacement entre les pistes
       });
     }
 
