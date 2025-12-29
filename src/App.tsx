@@ -292,6 +292,7 @@ const App: React.FC = () => {
             <ClientDashboard
               user={user}
               onStartNewBilan={() => window.location.hash = '#/bilan'}
+              onContinueBilan={() => window.location.hash = '#/bilan'}
               onViewHistory={(record) => console.log('View history:', record)}
             />
           </Suspense>
