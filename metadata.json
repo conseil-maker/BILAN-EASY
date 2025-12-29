@@ -1,7 +1,0 @@
-{
-  "name": "Bilan de Compétences IA",
-  "description": "Une application interactive pour réaliser votre bilan de compétences avec l'aide de l'intelligence artificielle.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
-}
