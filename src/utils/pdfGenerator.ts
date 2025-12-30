@@ -171,9 +171,17 @@ export const downloadPDF = async (
   userName: string,
   packageName: string,
   answers: Answer[],
-  dashboardData: DashboardData
+  dashboardData: DashboardData | null
 ) => {
-  const blob = await generatePDF(userName, packageName, answers, dashboardData);
+  // Créer un dashboardData par défaut si null
+  const data: DashboardData = dashboardData || {
+    themes: [],
+    skills: [],
+    summary: null,
+    wordCloud: [],
+    radarData: []
+  };
+  const blob = await generatePDF(userName, packageName, answers, data);
   
   // Créer un lien de téléchargement
   const url = URL.createObjectURL(blob);

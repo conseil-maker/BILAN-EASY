@@ -307,14 +307,14 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       ];
       
       history.forEach(item => {
-        if (item.answers) {
+        if (item.answers && item.answers.length > 0) {
           item.answers.forEach(answer => {
             data.push([
               formatDate(item.date),
               item.packageName,
-              answer.question,
-              answer.answer,
-              answer.category || ''
+              answer.questionTitle || answer.questionId || '',
+              answer.value || '',
+              answer.categoryId || ''
             ]);
           });
         }
@@ -350,14 +350,14 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       ];
       
       history.forEach(item => {
-        if (item.answers) {
+        if (item.answers && item.answers.length > 0) {
           item.answers.forEach(answer => {
             data.push([
               formatDate(item.date),
               item.packageName,
-              answer.question,
-              answer.answer,
-              answer.category || ''
+              answer.questionTitle || answer.questionId || '',
+              answer.value || '',
+              answer.categoryId || ''
             ]);
           });
         }
@@ -587,8 +587,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               Historique de mes bilans
             </h2>
 
-            {/* Section Bilan en cours */}
-            {currentBilan && (
+            {/* Section Bilan en cours - Ne pas afficher si 100% complété */}
+            {currentBilan && currentBilan.progress < 100 && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl">⏳</span>
