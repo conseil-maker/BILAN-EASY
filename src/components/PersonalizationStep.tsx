@@ -149,6 +149,10 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
           <p className="text-slate-600 text-lg">
             Pour un bilan encore plus pertinent, partagez votre CV ou profil.
           </p>
+          {/* Phrase d'adaptation pédagogique pour Qualiopi */}
+          <p className="text-sm text-primary-600 mt-2 font-medium">
+            🎯 Ces informations serviront à adapter les outils, exercices et échanges de la phase d'investigation.
+          </p>
           <p className="text-sm text-slate-500 mt-1">(C'est optionnel, vous pouvez passer cette étape)</p>
         </header>
         

@@ -107,9 +107,17 @@ export interface Summary {
   keyStrengths: SummaryPoint[];
   areasForDevelopment: SummaryPoint[];
   recommendations: string[];
+  // Champs enrichis pour la synthèse Qualiopi
+  strengths?: string[]; // Liste simple des forces
+  skills?: string[]; // Compétences professionnelles
+  motivations?: string[]; // Motivations principales
+  values?: string[]; // Valeurs professionnelles
+  areasToImprove?: string[]; // Axes de développement (liste simple)
+  projectProfessionnel?: string; // Description du projet professionnel
   actionPlan: {
     shortTerm: ActionPlanItem[];
     mediumTerm: ActionPlanItem[];
+    longTerm?: ActionPlanItem[]; // Actions à long terme (optionnel)
   };
 }
 

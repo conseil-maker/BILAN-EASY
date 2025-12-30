@@ -410,7 +410,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               </p>
             </div>
             <div className="flex gap-3">
-              {currentBilan && onContinueBilan && (
+              {/* Afficher "Continuer" seulement si le bilan n'est pas terminé (< 100%) */}
+              {currentBilan && currentBilan.progress < 100 && onContinueBilan && (
                 <button
                   onClick={onContinueBilan}
                   className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-medium transition-colors"
@@ -474,8 +475,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         {/* Vue d'ensemble */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* Bilan en cours */}
-            {currentBilan && (
+            {/* Bilan en cours - Ne pas afficher si 100% complété */}
+            {currentBilan && currentBilan.progress < 100 && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

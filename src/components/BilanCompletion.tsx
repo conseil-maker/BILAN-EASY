@@ -71,6 +71,7 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
   const [satisfactionCompleted, setSatisfactionCompleted] = useState(false);
   const [assessmentId, setAssessmentId] = useState<string>('');
   const [isAssessmentSaving, setIsAssessmentSaving] = useState(true);
+  const [syntheseDownloadConfirmed, setSyntheseDownloadConfirmed] = useState(false); // Confirmation de réception
 
   // Générer u  // Générer un ID d'évaluation unique (UUID v4 valide) et sauvegarder
   useEffect(() => {
@@ -127,13 +128,13 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
         return arr.map(mapper).filter(Boolean);
       };
 
-      // Extraire les forces (keyStrengths ou strengths selon la structure)
-      const strengths = summary.keyStrengths || (summary as any).strengths || [];
-      const strengthTexts = safeMap(strengths, (s) => typeof s === 'string' ? s : s?.text || '');
-      
-      // Extraire les axes de développement (areasForDevelopment ou developmentAreas)
-      const devAreas = summary.areasForDevelopment || (summary as any).developmentAreas || [];
-      const devAreaTexts = safeMap(devAreas, (d) => typeof d === 'string' ? d : d?.text || '');
+      // Utiliser les nouveaux champs enrichis si disponibles, sinon fallback
+      const strengthTexts = summary.strengths || safeMap(summary.keyStrengths, (s) => typeof s === 'string' ? s : s?.text || '');
+      const skillTexts = summary.skills || [];
+      const motivationTexts = summary.motivations || [];
+      const valueTexts = summary.values || [];
+      const devAreaTexts = summary.areasToImprove || safeMap(summary.areasForDevelopment, (d) => typeof d === 'string' ? d : d?.text || '');
+      const projectPro = summary.projectProfessionnel || summary.profileType || 'Projet en cours de définition';
       
       // Extraire les recommandations (peut être string[] ou objet[])
       const recommendations = summary.recommendations || [];
@@ -151,12 +152,13 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
         mediumTermActions = safeSlice(actionPlan, 2, 4).map((a: any) => typeof a === 'string' ? a : a?.text || '');
         longTermActions = safeSlice(actionPlan, 4).map((a: any) => typeof a === 'string' ? a : a?.text || '');
       } else if (actionPlan.shortTerm || actionPlan.mediumTerm) {
-        // Nouveau format: objet avec shortTerm/mediumTerm
+        // Nouveau format: objet avec shortTerm/mediumTerm/longTerm
         shortTermActions = safeMap(actionPlan.shortTerm, (a) => typeof a === 'string' ? a : a?.text || '');
         mediumTermActions = safeMap(actionPlan.mediumTerm, (a) => typeof a === 'string' ? a : a?.text || '');
+        longTermActions = safeMap(actionPlan.longTerm, (a) => typeof a === 'string' ? a : a?.text || '');
       }
 
-      // Préparer les données pour la synthèse
+      // Préparer les données pour la synthèse avec les champs enrichis
       const data: SyntheseData = {
         beneficiaire: {
           nom: userName,
@@ -172,26 +174,26 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
           consultant: 'Consultant Bilan-Easy',
         },
         parcoursProfessionnel: {
-          resume: strengthTexts.join('. ') || '',
+          resume: projectPro,
           experiencesCles: answers
             .filter(a => (a as any).category === 'parcours')
             .map(a => (a as any).text || a.value || '')
             .slice(0, 5),
         },
         competences: {
-          techniques: strengthTexts.slice(0, 3),
-          transversales: devAreaTexts.slice(0, 3),
-          personnelles: [],
+          techniques: skillTexts.length > 0 ? skillTexts.slice(0, 3) : strengthTexts.slice(0, 3),
+          transversales: skillTexts.length > 3 ? skillTexts.slice(3, 6) : devAreaTexts.slice(0, 3),
+          personnelles: strengthTexts.slice(0, 3),
         },
         interetsMotivations: {
-          valeurs: [],
+          valeurs: valueTexts,
           interetsProfessionnels: recommendationTexts.slice(0, 3),
-          facteursMotivation: [],
+          facteursMotivation: motivationTexts,
         },
         projetProfessionnel: {
-          projetPrincipal: summary.profileType || 'Projet en cours de définition',
+          projetPrincipal: projectPro,
           projetAlternatif: '',
-          coherenceAnalysis: recommendationTexts[0] || '',
+          coherenceAnalysis: summary.maturityLevel || recommendationTexts[0] || '',
         },
         planAction: {
           courtTerme: shortTermActions,
@@ -199,7 +201,7 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
           longTerme: longTermActions,
         },
         conclusion: {
-          syntheseGlobale: `${userName} a complété son bilan de compétences avec succès. Les résultats montrent un profil ${summary.profileType || 'riche et diversifié'}.`,
+          syntheseGlobale: `${userName} a complété son bilan de compétences avec succès. ${summary.maturityLevel || `Les résultats montrent un profil ${summary.profileType || 'riche et diversifié'}.`}`,
           recommandationsFinales: recommendationTexts,
         },
       };
@@ -419,12 +421,39 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
               startDate={startDate}
               isCompleted={true}
             />
+            
+            {/* Confirmation de réception des documents (obligatoire avant satisfaction) */}
+            <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    id="confirm-documents"
+                    checked={syntheseDownloadConfirmed}
+                    onChange={(e) => setSyntheseDownloadConfirmed(e.target.checked)}
+                    className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                </div>
+                <label htmlFor="confirm-documents" className="text-sm text-amber-800 dark:text-amber-200">
+                  <strong>Je confirme avoir reçu et téléchargé ma synthèse de bilan de compétences</strong>
+                  <p className="text-amber-700 dark:text-amber-300 mt-1">
+                    Conformément à l'article R.6313-8 du Code du travail, ce document vous appartient et ne peut être communiqué à un tiers qu'avec votre accord écrit.
+                  </p>
+                </label>
+              </div>
+            </div>
+            
             <div className="mt-6 text-center">
               <button
                 onClick={() => setCurrentStep('satisfaction')}
-                className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
+                disabled={!syntheseDownloadConfirmed}
+                className={`px-8 py-4 rounded-xl font-semibold transition-colors ${
+                  syntheseDownloadConfirmed
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
-                Donner mon avis →
+                {syntheseDownloadConfirmed ? 'Donner mon avis →' : 'Veuillez confirmer la réception de vos documents'}
               </button>
             </div>
           </div>

@@ -55,19 +55,27 @@ const summarySchema = {
         profileType: { type: Type.STRING, description: "A descriptive title for the user's professional profile in French (e.g., 'Le Spécialiste en Transition', 'Le Leader Créatif')." },
         priorityThemes: { type: Type.ARRAY, items: { type: Type.STRING }, description: "An array of 3-5 main themes that emerged during the assessment." },
         maturityLevel: { type: Type.STRING, description: "A sentence describing the user's level of clarity regarding their career project in French." },
-        keyStrengths: { type: Type.ARRAY, items: summaryPointSchema, description: "A list of key strengths identified." },
-        areasForDevelopment: { type: Type.ARRAY, items: summaryPointSchema, description: "A list of areas for development." },
+        keyStrengths: { type: Type.ARRAY, items: summaryPointSchema, description: "A list of 3-5 key strengths identified with sources." },
+        areasForDevelopment: { type: Type.ARRAY, items: summaryPointSchema, description: "A list of 2-4 areas for development with sources." },
         recommendations: { type: Type.ARRAY, items: { type: Type.STRING }, description: "A list of 3-4 general recommendations in French." },
+        // Champs enrichis pour la synthèse Qualiopi
+        strengths: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Simple list of 3-5 key strengths as strings for PDF synthesis." },
+        skills: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of 4-6 professional skills identified during the assessment." },
+        motivations: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of 3-5 main professional motivations identified." },
+        values: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of 3-5 professional values important to the user." },
+        areasToImprove: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Simple list of 2-4 areas to improve as strings for PDF synthesis." },
+        projectProfessionnel: { type: Type.STRING, description: "A 2-3 sentence description of the user's professional project based on the assessment." },
         actionPlan: {
             type: Type.OBJECT,
             properties: {
-                shortTerm: { type: Type.ARRAY, items: actionPlanItemSchema, description: "Action items for the next 1-3 months." },
-                mediumTerm: { type: Type.ARRAY, items: actionPlanItemSchema, description: "Action items for the next 3-6 months." }
+                shortTerm: { type: Type.ARRAY, items: actionPlanItemSchema, description: "2-3 concrete action items for the next 1-3 months." },
+                mediumTerm: { type: Type.ARRAY, items: actionPlanItemSchema, description: "2-3 action items for the next 3-6 months." },
+                longTerm: { type: Type.ARRAY, items: actionPlanItemSchema, description: "1-2 action items for 6+ months." }
             },
             required: ["shortTerm", "mediumTerm"]
         }
     },
-    required: ["profileType", "priorityThemes", "maturityLevel", "keyStrengths", "areasForDevelopment", "recommendations", "actionPlan"]
+    required: ["profileType", "priorityThemes", "maturityLevel", "keyStrengths", "areasForDevelopment", "recommendations", "actionPlan", "strengths", "skills", "motivations", "values", "areasToImprove", "projectProfessionnel"]
 };
 
 const userProfileSchema = {
@@ -707,7 +715,39 @@ export const generateSynthesis = async (lastAnswers: Answer[], userName: string,
 export const generateSummary = async (answers: Answer[], pkg: Package, userName: string, coachingStyle: CoachingStyle): Promise<Summary> => {
     const systemInstruction = getSystemInstruction(coachingStyle);
     const fullTranscript = answers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
-    const prompt = `Context: User Name: ${userName}, Package: ${pkg.name}, Transcript: ${fullTranscript}. Task: Analyze the transcript and generate a comprehensive summary in French. The response MUST be a valid JSON object conforming to the schema. For 'keyStrengths' and 'areasForDevelopment', each point MUST include a 'sources' array with 1-3 direct quotes from the user's answers that justify this point. For 'actionPlan', each item must have a unique 'id' and 'text'.`;
+    
+    const prompt = `Tu es un consultant expert en bilan de compétences certifié Qualiopi.
+
+Contexte:
+- Bénéficiaire: ${userName}
+- Parcours: ${pkg.name}
+- Nombre de réponses: ${answers.length}
+
+Transcription complète du bilan:
+${fullTranscript}
+
+MISSION: Génère une synthèse complète et professionnelle conforme aux exigences Qualiopi.
+
+INSTRUCTIONS IMPORTANTES:
+1. Pour 'keyStrengths' et 'areasForDevelopment': Chaque point DOIT inclure un tableau 'sources' avec 1-3 citations directes des réponses du bénéficiaire.
+
+2. Pour 'strengths' et 'skills': Liste simple de chaînes de caractères (3-5 éléments chacun) - ce sont les compétences PROFESSIONNELLES identifiées.
+
+3. Pour 'motivations' et 'values': Identifie les motivations intrinsèques et les valeurs professionnelles (3-5 éléments chacun).
+
+4. Pour 'areasToImprove': Liste simple des axes de développement (2-4 éléments).
+
+5. Pour 'projectProfessionnel': Rédige un paragraphe de 2-3 phrases décrivant le projet professionnel identifié, en lien avec les compétences et motivations.
+
+6. Pour 'actionPlan': Crée un plan d'action CONCRET et RÉALISTE:
+   - shortTerm (1-3 mois): 2-3 actions immédiates et spécifiques
+   - mediumTerm (3-6 mois): 2-3 actions de développement
+   - longTerm (6+ mois): 1-2 objectifs à long terme (optionnel)
+
+7. Pour 'recommendations': 3-4 recommandations personnalisées et actionables.
+
+La réponse DOIT être un objet JSON valide en français, conforme au schéma fourni.`;
+    
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } });
     return parseJsonResponse<Summary>(response.text, 'generateSummary');
 };

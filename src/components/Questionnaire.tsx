@@ -168,6 +168,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [showCareerExplorationProposal, setShowCareerExplorationProposal] = useState(false);
     const [explorationNeedResult, setExplorationNeedResult] = useState<ExplorationNeedResult | null>(null);
     const [validatedCareerPaths, setValidatedCareerPaths] = useState<CareerPath[]>([]);
+    
+    // États pour la transition de fin du bilan (amélioration UX)
+    const [showEndWarning, setShowEndWarning] = useState(false); // Avertissement à 80%
+    const [endWarningShown, setEndWarningShown] = useState(false); // Pour ne pas réafficher
+    const [showEndConfirmation, setShowEndConfirmation] = useState(false); // Confirmation avant synthèse
+    const [userWantsToDeepen, setUserWantsToDeepen] = useState(false); // Si l'utilisateur veut approfondir
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -420,10 +426,37 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
 
     const runNextStep = useCallback(async (currentAnswers: Answer[]) => {
         // console.log('[runNextStep] Called with', currentAnswers.length, 'answers');
+        
+        // Calculer la progression pour l'avertissement de fin
+        const timeBudget = getTimeBudget(pkg.id, currentAnswers);
+        const progressPercentage = timeBudget.percentage;
+        
+        // Avertissement à 80% du parcours (une seule fois)
+        if (progressPercentage >= 80 && progressPercentage < 90 && !endWarningShown) {
+            setEndWarningShown(true);
+            setShowEndWarning(true);
+            // L'avertissement est juste informatif, on continue après
+        }
+        
         // Vérifier si le parcours est terminé basé sur le budget temps
         const journeyComplete = isJourneyComplete(pkg.id, currentAnswers);
         // console.log('[runNextStep] Journey complete?', journeyComplete);
+        
         if (journeyComplete) {
+            // Si l'utilisateur a demandé à approfondir, on lui pose encore quelques questions
+            if (userWantsToDeepen) {
+                setUserWantsToDeepen(false); // Reset pour la prochaine fois
+                // Continuer avec quelques questions supplémentaires
+                await fetchNextQuestion({}, 0, currentAnswers);
+                return;
+            }
+            
+            // Afficher la confirmation avant de générer la synthèse
+            if (!showEndConfirmation) {
+                setShowEndConfirmation(true);
+                return; // Attendre la réponse de l'utilisateur
+            }
+            
             setIsSummarizing(true);
             try {
                 const finalSummary = await generateSummary(currentAnswers, pkg, userName, coachingStyle);
@@ -531,7 +564,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         // Générer la prochaine question avec les réponses à jour
         // console.log('[runNextStep] Appel de fetchNextQuestion avec', currentAnswers.length, 'réponses');
         await fetchNextQuestion({}, 0, currentAnswers);
-    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases, careerExplorationOffered]);
+    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases, careerExplorationOffered, endWarningShown, showEndConfirmation, userWantsToDeepen, answers]);
 
     useEffect(() => {
         // La session est gérée par Supabase dans ClientApp
@@ -672,7 +705,23 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         setSuggestedModule(null); 
         fetchNextQuestion({}, 0, answers); // Utiliser fetchNextQuestion au lieu de runNextStep pour éviter la boucle
     };
-    const handleJoker = () => { if (!isLoading) { fetchNextQuestion({ useJoker: true }, 0, answers); } };
+    // Traçabilité des demandes d'aide pour Qualiopi
+    const [helpRequests, setHelpRequests] = useState<Array<{ timestamp: Date; questionId: string; questionTitle: string }>>([]);
+    
+    const handleJoker = () => { 
+        if (!isLoading) { 
+            // Tracer la demande d'aide pour Qualiopi
+            const helpRequest = {
+                timestamp: new Date(),
+                questionId: currentQuestion?.id || 'unknown',
+                questionTitle: currentQuestion?.title || 'Question en cours'
+            };
+            setHelpRequests(prev => [...prev, helpRequest]);
+            console.log('[Qualiopi] Demande d\'aide tracée:', helpRequest);
+            
+            fetchNextQuestion({ useJoker: true }, 0, answers); 
+        } 
+    };
     
     // Handlers pour l'exploration de métiers
     const handleCareerExplorationAccept = () => {
@@ -789,6 +838,84 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             {unlockedBadge && <BadgeNotification phaseName={unlockedBadge} onClose={() => setUnlockedBadge(null)} />}
             {showSatisfactionModal && satisfactionPhaseInfo && <SatisfactionModal phaseName={satisfactionPhaseInfo.name} onSubmit={handleSatisfactionSubmit} />}
             {suggestedModule && <ModuleModal reason={suggestedModule.reason} onAccept={handleModuleAccept} onDecline={handleModuleDecline} />}
+            
+            {/* Modal d'avertissement de fin de bilan (à 80%) */}
+            {showEndWarning && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-lg w-full">
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span className="text-3xl">🎯</span>
+                            </div>
+                            <h2 className="text-2xl font-bold font-display text-amber-800 dark:text-amber-200 mb-2">
+                                Nous approchons de la fin !
+                            </h2>
+                        </div>
+                        <p className="text-slate-600 dark:text-slate-300 mb-4 text-center">
+                            Vous avez parcouru environ <strong>80%</strong> de votre bilan de compétences.
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+                            💡 <strong>Encore quelques questions</strong> pour finaliser l'analyse de votre projet professionnel et préparer votre synthèse personnalisée.
+                        </p>
+                        <button 
+                            onClick={() => setShowEndWarning(false)} 
+                            className="w-full bg-amber-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-700 transition-colors"
+                        >
+                            Compris, continuons !
+                        </button>
+                    </div>
+                </div>
+            )}
+            
+            {/* Modal de confirmation avant génération de synthèse */}
+            {showEndConfirmation && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 max-w-lg w-full">
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span className="text-3xl">✅</span>
+                            </div>
+                            <h2 className="text-2xl font-bold font-display text-green-800 dark:text-green-200 mb-2">
+                                Votre bilan est presque terminé !
+                            </h2>
+                        </div>
+                        <p className="text-slate-600 dark:text-slate-300 mb-4 text-center">
+                            Vous avez répondu à <strong>{answers.length} questions</strong>. Nous avons suffisamment d'éléments pour générer votre synthèse personnalisée.
+                        </p>
+                        <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg mb-6">
+                            <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
+                                <strong>📝 Avant de continuer :</strong>
+                            </p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Souhaitez-vous ajouter quelque chose ou approfondir un point particulier de votre réflexion ?
+                            </p>
+                        </div>
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={() => {
+                                    setShowEndConfirmation(false);
+                                    // Continuer vers la synthèse
+                                    runNextStep(answers);
+                                }} 
+                                className="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors"
+                            >
+                                ✅ Générer ma synthèse
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setShowEndConfirmation(false);
+                                    setUserWantsToDeepen(true);
+                                    // Continuer avec quelques questions supplémentaires
+                                    fetchNextQuestion({}, 0, answers);
+                                }} 
+                                className="w-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                            >
+                                🔍 Approfondir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             {/* Modal de proposition d'exploration de métiers */}
             {showCareerExplorationProposal && explorationNeedResult && (
@@ -1170,18 +1297,32 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
 
                         <div className="p-4 border-t bg-white dark:bg-slate-800 rounded-b-xl transition-colors duration-300">
                             {currentQuestion && currentQuestion.type !== QuestionType.MULTIPLE_CHOICE && (
-                                <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-center gap-2" role="form" aria-label="Formulaire de réponse">
+                                <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-end gap-2" role="form" aria-label="Formulaire de réponse">
                                     <label htmlFor="answer-input" className="sr-only">Écrivez votre réponse</label>
-                                    <input 
+                                    <textarea 
                                         id="answer-input"
-                                        type="text" 
                                         value={textInput} 
-                                        onChange={e => setTextInput(e.target.value)} 
-                                        placeholder="Écrivez votre réponse..." 
-                                        className="flex-1 w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300" 
+                                        onChange={e => {
+                                            setTextInput(e.target.value);
+                                            // Auto-resize textarea
+                                            e.target.style.height = 'auto';
+                                            e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+                                        }}
+                                        onKeyDown={e => {
+                                            // Envoyer avec Enter (sans Shift)
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                if (textInput.trim() && !isLoading && !isAwaitingSynthesisConfirmation) {
+                                                    handleAnswerSubmit(textInput);
+                                                }
+                                            }
+                                        }}
+                                        placeholder="Écrivez votre réponse... (Entrée pour envoyer, Shift+Entrée pour nouvelle ligne)" 
+                                        className="flex-1 w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300 resize-none min-h-[48px] max-h-[200px] overflow-y-auto" 
                                         disabled={isLoading || isAwaitingSynthesisConfirmation}
                                         aria-label="Champ de saisie de votre réponse"
                                         aria-required="true"
+                                        rows={1}
                                     />
                                     {speechRecSupported && (
                                         <button 
@@ -1209,9 +1350,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 className="mt-2 text-xs text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center justify-center w-full disabled:opacity-50 focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-2 transition-colors" 
                                 disabled={isLoading || isAwaitingSynthesisConfirmation}
                                 aria-label="Demander de l'aide pour répondre à la question"
+                                title="Les aides proposées sont des aides méthodologiques à la réflexion. Elles ne constituent ni une analyse, ni une interprétation, ni une conclusion."
                             >
                                 <JokerIcon/> J'ai besoin d'aide pour répondre
                             </button>
+                            {/* Cadrage IA pour Qualiopi */}
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center mt-1 italic">
+                                Aide méthodologique à la réflexion • Ne constitue pas une réponse
+                            </p>
                         </div>
                     </div>
                     {/* Panneau latéral - masquable complètement */}
@@ -1224,7 +1370,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <EnhancedDashboard 
                                 data={dashboardData} 
                                 isLoading={isDashboardLoading}
-                                lastQuestion={currentQuestion?.text || ''}
+                                lastQuestion={currentQuestion?.title || currentQuestion?.text || ''}
                                 onCollapse={() => setShowSidePanel(false)}
                             />
                         </aside>
