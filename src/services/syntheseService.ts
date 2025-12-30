@@ -137,20 +137,44 @@ export const syntheseService = {
     addText(`Ce bilan de compétences a été réalisé à la demande de ${data.userName} dans le cadre d'une démarche volontaire d'évolution professionnelle.`);
     addText(`Le bilan s'est déroulé du ${data.startDate} au ${data.endDate}, selon le parcours "${data.packageName}".`);
     addText('Il a respecté les trois phases réglementaires : phase préliminaire, phase d\'investigation et phase de conclusion.');
+    
+    // Profil identifié
+    if (data.summary.profileType) {
+      addSubSection('Profil identifié');
+      addText(`Type de profil : ${data.summary.profileType}`, 12, true, [79, 70, 229]);
+    }
+    
+    // Niveau de maturité du projet
+    if (data.summary.maturityLevel) {
+      addSubSection('Maturité du projet');
+      addText(data.summary.maturityLevel);
+    }
+    
+    // Thèmes prioritaires
+    if (data.summary.priorityThemes && data.summary.priorityThemes.length > 0) {
+      addSubSection('Thèmes prioritaires identifiés');
+      data.summary.priorityThemes.forEach((theme) => {
+        addText(`• ${theme}`);
+      });
+    }
 
     // 2. COMPÉTENCES IDENTIFIÉES
     addSection('2. COMPÉTENCES IDENTIFIÉES');
     
-    if (data.summary.strengths && data.summary.strengths.length > 0) {
+    // Utiliser strengths si disponible, sinon extraire de keyStrengths
+    const strengths = data.summary.strengths || 
+      (data.summary.keyStrengths?.map(s => typeof s === 'string' ? s : s.text) || []);
+    
+    if (strengths.length > 0) {
       addSubSection('Points forts');
-      data.summary.strengths.forEach((strength, i) => {
+      strengths.forEach((strength) => {
         addText(`• ${strength}`);
       });
     }
 
     if (data.summary.skills && data.summary.skills.length > 0) {
       addSubSection('Compétences clés');
-      data.summary.skills.forEach((skill, i) => {
+      data.summary.skills.forEach((skill) => {
         addText(`• ${skill}`);
       });
     }
@@ -175,9 +199,13 @@ export const syntheseService = {
     // 4. AXES DE DÉVELOPPEMENT
     addSection('4. AXES DE DÉVELOPPEMENT');
     
-    if (data.summary.areasToImprove && data.summary.areasToImprove.length > 0) {
+    // Utiliser areasToImprove si disponible, sinon extraire de areasForDevelopment
+    const areasToImprove = data.summary.areasToImprove || 
+      (data.summary.areasForDevelopment?.map(a => typeof a === 'string' ? a : a.text) || []);
+    
+    if (areasToImprove.length > 0) {
       addSubSection('Points à développer');
-      data.summary.areasToImprove.forEach((area, i) => {
+      areasToImprove.forEach((area) => {
         addText(`• ${area}`);
       });
     }
@@ -185,11 +213,15 @@ export const syntheseService = {
     // 5. PROJET PROFESSIONNEL
     addSection('5. PROJET PROFESSIONNEL');
     
-    if (data.projectProfessionnel) {
-      addText(data.projectProfessionnel);
-    } else if (data.summary.recommendations && data.summary.recommendations.length > 0) {
+    // Projet professionnel détaillé
+    if (data.projectProfessionnel || data.summary.projectProfessionnel) {
+      addText(data.projectProfessionnel || data.summary.projectProfessionnel || '');
+    }
+    
+    // Recommandations
+    if (data.summary.recommendations && data.summary.recommendations.length > 0) {
       addSubSection('Recommandations');
-      data.summary.recommendations.forEach((rec, i) => {
+      data.summary.recommendations.forEach((rec) => {
         addText(`• ${rec}`);
       });
     }
@@ -270,7 +302,36 @@ export const syntheseService = {
     // 7. PLAN D'ACTION
     addSection('7. PLAN D\'ACTION');
     
-    if (data.planAction && data.planAction.length > 0) {
+    // Utiliser le plan d'action du summary si disponible
+    const hasActionPlanFromSummary = data.summary.actionPlan && 
+      (data.summary.actionPlan.shortTerm?.length > 0 || data.summary.actionPlan.mediumTerm?.length > 0);
+    
+    if (hasActionPlanFromSummary) {
+      // Afficher le plan d'action structuré du summary
+      if (data.summary.actionPlan.shortTerm && data.summary.actionPlan.shortTerm.length > 0) {
+        addSubSection('Actions à court terme');
+        data.summary.actionPlan.shortTerm.forEach((item, i) => {
+          const text = typeof item === 'string' ? item : item.text;
+          addText(`${i + 1}. ${text}`);
+        });
+      }
+      
+      if (data.summary.actionPlan.mediumTerm && data.summary.actionPlan.mediumTerm.length > 0) {
+        addSubSection('Actions à moyen terme');
+        data.summary.actionPlan.mediumTerm.forEach((item, i) => {
+          const text = typeof item === 'string' ? item : item.text;
+          addText(`${i + 1}. ${text}`);
+        });
+      }
+      
+      if (data.summary.actionPlan.longTerm && data.summary.actionPlan.longTerm.length > 0) {
+        addSubSection('Actions à long terme');
+        data.summary.actionPlan.longTerm.forEach((item, i) => {
+          const text = typeof item === 'string' ? item : item.text;
+          addText(`${i + 1}. ${text}`);
+        });
+      }
+    } else if (data.planAction && data.planAction.length > 0) {
       // Tableau du plan d'action
       const tableTop = y;
       const colWidths = [80, 40, 30, 30];

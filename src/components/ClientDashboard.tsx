@@ -5,7 +5,8 @@ import { supabase } from '../lib/supabaseClient';
 import { calculateProgression } from '../services/progressionService';
 import { PACKAGES } from '../constants';
 import { HistoryItem } from '../types-ai-studio';
-import { downloadPDF } from '../utils/pdfGenerator';
+import { syntheseService, SyntheseData } from '../services/syntheseService';
+import { organizationConfig } from '../config/organization';
 
 interface ClientDashboardProps {
   user: User;
@@ -283,15 +284,41 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     return formatDate(dateString);
   };
 
-  // Télécharger la synthèse PDF d'un bilan
+  // Télécharger la synthèse PDF d'un bilan (utilise syntheseService pour un vrai PDF Qualiopi)
   const handleDownloadPDF = async (item: HistoryItem) => {
     try {
-      await downloadPDF(
-        item.userName,
-        item.packageName,
-        item.answers || [],
-        null // dashboardData sera généré à partir des réponses
-      );
+      // Préparer les données pour la synthèse
+      const syntheseData: SyntheseData = {
+        userName: item.userName,
+        userEmail: user.email || '',
+        packageName: item.packageName,
+        startDate: formatDate(item.date),
+        endDate: new Date().toLocaleDateString('fr-FR'),
+        consultantName: organizationConfig.defaultConsultant.name,
+        organizationName: organizationConfig.name,
+        summary: item.summary || {
+          profileType: '',
+          themes: [],
+          recommendations: [],
+          actionPlan: []
+        },
+        answers: item.answers || [],
+      };
+
+      // Générer le PDF avec syntheseService
+      const blob = syntheseService.generateSynthese(syntheseData);
+      
+      // Télécharger le fichier
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `synthese-${item.userName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      showSuccess('Synthèse PDF téléchargée avec succès !');
     } catch (error) {
       console.error('Erreur lors du téléchargement PDF:', error);
       showError('Une erreur est survenue lors du téléchargement du PDF.');
@@ -420,7 +447,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 </button>
               )}
               <a
-                href="#/bilan"
+                href="#/bilan?new=true"
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition-colors"
               >
                 {stats.totalBilans === 0 ? 'Commencer mon bilan' : 'Nouveau bilan'}

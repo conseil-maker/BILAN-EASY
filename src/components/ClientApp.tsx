@@ -46,6 +46,20 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   useEffect(() => {
     const initSession = async () => {
       try {
+        // Vérifier si on demande un nouveau bilan via le paramètre ?new=true
+        const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+        const forceNewBilan = urlParams.get('new') === 'true';
+        
+        if (forceNewBilan) {
+          // Effacer la session existante et démarrer un nouveau bilan
+          await clearSession(user.id);
+          setAppState('package-selection');
+          setIsLoading(false);
+          // Nettoyer l'URL
+          window.location.hash = '#/bilan';
+          return;
+        }
+        
         const session = await loadSession(user.id);
         if (session) {
           const pkg = session.selected_package_id 
@@ -266,7 +280,9 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     setAppState('completion');
   };
 
-  const handleCompletionFinish = () => {
+  const handleCompletionFinish = async () => {
+    // Effacer la session car le bilan est terminé
+    await clearSession(user.id);
     setAppState('summary');
   };
 
