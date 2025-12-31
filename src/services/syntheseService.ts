@@ -27,6 +27,35 @@ export interface PlanActionItem {
   statut: 'a_faire' | 'en_cours' | 'termine';
 }
 
+// Helper pour extraire des exemples pertinents des réponses
+const extractExamplesFromAnswers = (answers: Answer[], keywords: string[]): string[] => {
+  const examples: string[] = [];
+  
+  answers.forEach(answer => {
+    if (answer.value && typeof answer.value === 'string') {
+      const lowerValue = answer.value.toLowerCase();
+      const hasKeyword = keywords.some(kw => lowerValue.includes(kw.toLowerCase()));
+      
+      if (hasKeyword && answer.value.length > 50 && answer.value.length < 500) {
+        examples.push(answer.value);
+      }
+    }
+  });
+  
+  return examples.slice(0, 3); // Max 3 exemples
+};
+
+// Helper pour extraire le parcours professionnel
+const extractCareerPath = (answers: Answer[]): string => {
+  const careerKeywords = ['parcours', 'expérience', 'poste', 'mission', 'responsabilité', 'commencé', 'premier'];
+  const careerAnswers = answers.filter(a => 
+    a.value && typeof a.value === 'string' && 
+    careerKeywords.some(kw => a.value.toLowerCase().includes(kw))
+  ).slice(0, 3);
+  
+  return careerAnswers.map(a => a.value).join('\n\n');
+};
+
 export const syntheseService = {
   /**
    * Génère le document de synthèse complet conforme Qualiopi
@@ -158,6 +187,14 @@ export const syntheseService = {
       });
     }
 
+    // 1.5 PARCOURS PROFESSIONNEL
+    const careerPath = extractCareerPath(data.answers);
+    if (careerPath) {
+      addSection('1.5. PARCOURS PROFESSIONNEL');
+      addSubSection('Synthèse du parcours');
+      addText(careerPath);
+    }
+
     // 2. COMPÉTENCES IDENTIFIÉES
     addSection('2. COMPÉTENCES IDENTIFIÉES');
     
@@ -170,6 +207,16 @@ export const syntheseService = {
       strengths.forEach((strength) => {
         addText(`• ${strength}`);
       });
+      
+      // Ajouter des exemples concrets
+      const examples = extractExamplesFromAnswers(data.answers, ['structur', 'organis', 'coordin', 'facilit']);
+      if (examples.length > 0) {
+        addSubSection('Exemples concrets tirés du bilan');
+        examples.forEach((example, i) => {
+          addText(`Exemple ${i + 1} :`, 11, true);
+          addText(`« ${example.substring(0, 300)}${example.length > 300 ? '...' : ''} »`, 10, false, [60, 60, 60]);
+        });
+      }
     }
 
     if (data.summary.skills && data.summary.skills.length > 0) {
@@ -182,17 +229,46 @@ export const syntheseService = {
     // 3. APTITUDES ET MOTIVATIONS
     addSection('3. APTITUDES ET MOTIVATIONS');
     
+    // Motivations
     if (data.summary.motivations && data.summary.motivations.length > 0) {
       addSubSection('Motivations principales');
-      data.summary.motivations.forEach((motivation, i) => {
+      data.summary.motivations.forEach((motivation) => {
         addText(`• ${motivation}`);
       });
+    } else {
+      // Extraire des motivations depuis les réponses
+      const motivationExamples = extractExamplesFromAnswers(data.answers, ['motiv', 'stimul', 'satisf', 'appréci', 'aim']);
+      if (motivationExamples.length > 0) {
+        addSubSection('Motivations identifiées');
+        motivationExamples.forEach((example) => {
+          addText(`• ${example.substring(0, 200)}${example.length > 200 ? '...' : ''}`);
+        });
+      }
     }
 
+    // Valeurs
     if (data.summary.values && data.summary.values.length > 0) {
       addSubSection('Valeurs professionnelles');
-      data.summary.values.forEach((value, i) => {
+      data.summary.values.forEach((value) => {
         addText(`• ${value}`);
+      });
+    } else {
+      // Extraire des valeurs depuis les réponses
+      const valueExamples = extractExamplesFromAnswers(data.answers, ['valeur', 'important', 'priorité', 'essentiel', 'respect']);
+      if (valueExamples.length > 0) {
+        addSubSection('Valeurs professionnelles identifiées');
+        valueExamples.forEach((example) => {
+          addText(`• ${example.substring(0, 200)}${example.length > 200 ? '...' : ''}`);
+        });
+      }
+    }
+    
+    // Environnement de travail recherché
+    const environmentExamples = extractExamplesFromAnswers(data.answers, ['environnement', 'ambiance', 'autonomie', 'collabor', 'équipe']);
+    if (environmentExamples.length > 0) {
+      addSubSection('Environnement de travail recherché');
+      environmentExamples.forEach((example) => {
+        addText(`• ${example.substring(0, 200)}${example.length > 200 ? '...' : ''}`);
       });
     }
 
@@ -226,11 +302,45 @@ export const syntheseService = {
       });
     }
 
+    // Métiers visés
     if (data.metiersVises && data.metiersVises.length > 0) {
       addSubSection('Métiers visés');
-      data.metiersVises.forEach((metier, i) => {
+      data.metiersVises.forEach((metier) => {
         addText(`• ${metier}`);
       });
+    } else if (data.careerPaths && data.careerPaths.length > 0) {
+      addSubSection('Métiers visés');
+      data.careerPaths.slice(0, 5).forEach((path) => {
+        addText(`• ${path.title} (correspondance : ${path.matchScore}%)`);
+      });
+    }
+    
+    // Secteurs d'activité
+    if (data.careerPaths && data.careerPaths.length > 0) {
+      const sectors = [...new Set(data.careerPaths.map(p => p.sector).filter(Boolean))];
+      if (sectors.length > 0) {
+        addSubSection('Secteurs d\'activité privilégiés');
+        sectors.forEach((sector) => {
+          addText(`• ${sector}`);
+        });
+      }
+    }
+    
+    // Formations recommandées
+    if (data.formationsRecommandees && data.formationsRecommandees.length > 0) {
+      addSubSection('Formations recommandées');
+      data.formationsRecommandees.forEach((formation) => {
+        addText(`• ${formation}`);
+      });
+    } else if (data.careerPaths && data.careerPaths.length > 0) {
+      const allFormations = data.careerPaths.flatMap(p => p.requiredSkills || []);
+      const uniqueFormations = [...new Set(allFormations)].slice(0, 5);
+      if (uniqueFormations.length > 0) {
+        addSubSection('Compétences à développer');
+        uniqueFormations.forEach((skill) => {
+          addText(`• ${skill}`);
+        });
+      }
     }
 
     // 5bis. PISTES MÉTIERS EXPLORÉES (si exploration IA réalisée)
@@ -309,26 +419,29 @@ export const syntheseService = {
     if (hasActionPlanFromSummary) {
       // Afficher le plan d'action structuré du summary
       if (data.summary.actionPlan.shortTerm && data.summary.actionPlan.shortTerm.length > 0) {
-        addSubSection('Actions à court terme');
+        addSubSection('Actions à court terme (1-3 mois)');
         data.summary.actionPlan.shortTerm.forEach((item, i) => {
           const text = typeof item === 'string' ? item : item.text;
-          addText(`${i + 1}. ${text}`);
+          addText(`${i + 1}. ${text}`, 11, false);
+          addText('   Priorité : Haute | Échéance : 1-3 mois', 9, false, [100, 100, 100]);
         });
       }
       
       if (data.summary.actionPlan.mediumTerm && data.summary.actionPlan.mediumTerm.length > 0) {
-        addSubSection('Actions à moyen terme');
+        addSubSection('Actions à moyen terme (3-6 mois)');
         data.summary.actionPlan.mediumTerm.forEach((item, i) => {
           const text = typeof item === 'string' ? item : item.text;
-          addText(`${i + 1}. ${text}`);
+          addText(`${i + 1}. ${text}`, 11, false);
+          addText('   Priorité : Moyenne | Échéance : 3-6 mois', 9, false, [100, 100, 100]);
         });
       }
       
       if (data.summary.actionPlan.longTerm && data.summary.actionPlan.longTerm.length > 0) {
-        addSubSection('Actions à long terme');
+        addSubSection('Actions à long terme (6-12 mois)');
         data.summary.actionPlan.longTerm.forEach((item, i) => {
           const text = typeof item === 'string' ? item : item.text;
-          addText(`${i + 1}. ${text}`);
+          addText(`${i + 1}. ${text}`, 11, false);
+          addText('   Priorité : Basse | Échéance : 6-12 mois', 9, false, [100, 100, 100]);
         });
       }
     } else if (data.planAction && data.planAction.length > 0) {
