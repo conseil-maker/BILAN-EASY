@@ -396,9 +396,9 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
                 <AlertCircle className="text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0 mt-0.5" size={20} />
                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
                   En validant ces conditions, vous confirmez avoir lu et compris les informations ci-dessus. 
-                  Vous pouvez consulter nos <button type="button" onClick={() => window.open(window.location.origin + '/#/legal/cgu', '_blank')} className="underline hover:text-yellow-600 cursor-pointer">CGU</button>, 
-                  <button type="button" onClick={() => window.open(window.location.origin + '/#/legal/cgv', '_blank')} className="underline ml-1 hover:text-yellow-600 cursor-pointer">CGV</button> et 
-                  <button type="button" onClick={() => window.open(window.location.origin + '/#/legal/privacy', '_blank')} className="underline ml-1 hover:text-yellow-600 cursor-pointer">Politique de confidentialité</button>.
+                  Vous pouvez consulter nos <a href="https://bilan-easy.vercel.app/#/legal/cgu" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-600">CGU</a>, 
+                  <a href="https://bilan-easy.vercel.app/#/legal/cgv" target="_blank" rel="noopener noreferrer" className="underline ml-1 hover:text-yellow-600">CGV</a> et 
+                  <a href="https://bilan-easy.vercel.app/#/legal/privacy" target="_blank" rel="noopener noreferrer" className="underline ml-1 hover:text-yellow-600">Politique de confidentialité</a>.
                 </p>
               </div>
             </div>
