@@ -396,9 +396,9 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
                 <AlertCircle className="text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0 mt-0.5" size={20} />
                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
                   En validant ces conditions, vous confirmez avoir lu et compris les informations ci-dessus. 
-                  Vous pouvez consulter nos <a href="#/legal/cgu" className="underline">CGU</a>, 
-                  <a href="#/legal/cgv" className="underline ml-1">CGV</a> et 
-                  <a href="#/legal/privacy" className="underline ml-1">Politique de confidentialité</a>.
+                  Vous pouvez consulter nos <a href="#/legal/cgu" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-600">CGU</a>, 
+                  <a href="#/legal/cgv" target="_blank" rel="noopener noreferrer" className="underline ml-1 hover:text-yellow-600">CGV</a> et 
+                  <a href="#/legal/privacy" target="_blank" rel="noopener noreferrer" className="underline ml-1 hover:text-yellow-600">Politique de confidentialité</a>.
                 </p>
               </div>
             </div>

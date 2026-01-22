@@ -60,6 +60,9 @@ const AboutPage = lazy(() =>
 const UserProfile = lazy(() => 
   import('./components/UserProfile').then(m => ({ default: m.UserProfile }))
 );
+const SummaryDashboard = lazy(() => 
+  import('./components/SummaryDashboard')
+);
 
 // ============================================
 // ROUTER
@@ -293,7 +296,37 @@ const App: React.FC = () => {
               user={user}
               onStartNewBilan={() => window.location.hash = '#/bilan'}
               onContinueBilan={() => window.location.hash = '#/bilan'}
-              onViewHistory={(record) => console.log('View history:', record)}
+              onViewHistory={(record) => {
+                // Stocker le record dans sessionStorage pour le récupérer dans la page de résultats
+                sessionStorage.setItem('viewingHistoryRecord', JSON.stringify(record));
+                window.location.hash = '#/bilan/results';
+              }}
+            />
+          </Suspense>
+        </div>
+      );
+    }
+
+    // Route pour afficher les résultats d'un bilan historique
+    if (route === '/bilan/results') {
+      const storedRecord = sessionStorage.getItem('viewingHistoryRecord');
+      if (!storedRecord) {
+        window.location.hash = '#/dashboard';
+        return null;
+      }
+      const record = JSON.parse(storedRecord);
+      return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Résultats du bilan" />
+          <Suspense fallback={<LoadingSpinner message="Chargement des résultats..." />}>
+            <SummaryDashboard
+              summary={record.summary}
+              answers={record.answers || []}
+              userName={record.userName}
+              packageName={record.packageName}
+              onRestart={() => window.location.hash = '#/dashboard'}
+              onViewHistory={() => window.location.hash = '#/dashboard'}
+              isHistoryView={true}
             />
           </Suspense>
         </div>

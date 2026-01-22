@@ -47,16 +47,32 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     const initSession = async () => {
       try {
         // Vérifier si on demande un nouveau bilan via le paramètre ?new=true
-        const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+        const hashParts = window.location.hash.split('?');
+        const urlParams = new URLSearchParams(hashParts[1] || '');
         const forceNewBilan = urlParams.get('new') === 'true';
         
         if (forceNewBilan) {
+          console.log('[ClientApp] Nouveau bilan demandé, effacement de la session...');
           // Effacer la session existante et démarrer un nouveau bilan
-          await clearSession(user.id);
+          try {
+            await clearSession(user.id);
+          } catch (e) {
+            console.warn('[ClientApp] Erreur lors de l\'effacement de la session:', e);
+          }
+          // Réinitialiser tous les états
+          setSelectedPackage(null);
+          setCurrentAnswers([]);
+          setCurrentSummary(null);
+          setConsentData(null);
+          setUserProfile(null);
+          setStartDate('');
+          setTimeSpent(0);
+          setProgress(0);
+          setLastAiMessage(undefined);
           setAppState('package-selection');
           setIsLoading(false);
-          // Nettoyer l'URL
-          window.location.hash = '#/bilan';
+          // Nettoyer l'URL sans déclencher de rechargement
+          window.history.replaceState(null, '', '#/bilan');
           return;
         }
         
