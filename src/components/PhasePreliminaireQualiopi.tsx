@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Package, CoachingStyle } from '../types-ai-studio';
 import { QUESTION_CATEGORIES } from '../constants';
 import { CheckCircle, AlertCircle, FileText, Clock, Target, Shield, ChevronRight, ChevronDown } from 'lucide-react';
+import LegalModal, { LegalDocumentType } from './LegalModal';
 
 interface PhasePreliminaireQualiopiProps {
   pkg: Package;
@@ -97,6 +98,7 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [expandedSection, setExpandedSection] = useState<string | null>('objectives');
+  const [legalModalType, setLegalModalType] = useState<LegalDocumentType>(null);
   const [consent, setConsent] = useState<ConsentData>({
     informedConsent: false,
     voluntaryParticipation: false,
@@ -396,9 +398,9 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
                 <AlertCircle className="text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0 mt-0.5" size={20} />
                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
                   En validant ces conditions, vous confirmez avoir lu et compris les informations ci-dessus. 
-                  Vous pouvez consulter nos <a href="https://bilan-easy.vercel.app/#/legal/cgu" onClick={(e) => { e.preventDefault(); window.open('https://bilan-easy.vercel.app/#/legal/cgu', '_blank', 'noopener,noreferrer'); }} className="underline hover:text-yellow-600 cursor-pointer">CGU</a>, 
-                  <a href="https://bilan-easy.vercel.app/#/legal/cgv" onClick={(e) => { e.preventDefault(); window.open('https://bilan-easy.vercel.app/#/legal/cgv', '_blank', 'noopener,noreferrer'); }} className="underline ml-1 hover:text-yellow-600 cursor-pointer">CGV</a> et 
-                  <a href="https://bilan-easy.vercel.app/#/legal/privacy" onClick={(e) => { e.preventDefault(); window.open('https://bilan-easy.vercel.app/#/legal/privacy', '_blank', 'noopener,noreferrer'); }} className="underline ml-1 hover:text-yellow-600 cursor-pointer">Politique de confidentialité</a>.
+                  Vous pouvez consulter nos <button onClick={() => setLegalModalType('cgu')} className="underline hover:text-yellow-600 cursor-pointer font-medium">CGU</button>, 
+                  <button onClick={() => setLegalModalType('cgv')} className="underline ml-1 hover:text-yellow-600 cursor-pointer font-medium">CGV</button> et 
+                  <button onClick={() => setLegalModalType('privacy')} className="underline ml-1 hover:text-yellow-600 cursor-pointer font-medium">Politique de confidentialité</button>.
                 </p>
               </div>
             </div>
@@ -508,13 +510,31 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
 
             {currentStep < totalSteps - 1 ? (
               <button
-                onClick={handleNext}
+                onClick={(e) => {
+                  // Double vérification de la validation avant navigation
+                  const isCurrentStepValid = 
+                    (currentStep === 0 && isStep1Valid) ||
+                    (currentStep === 1 && isStep2Valid) ||
+                    (currentStep === 2 && isStep3Valid);
+                  
+                  if (!isCurrentStepValid) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleNext();
+                }}
                 disabled={
                   (currentStep === 0 && !isStep1Valid) ||
                   (currentStep === 1 && !isStep2Valid) ||
                   (currentStep === 2 && !isStep3Valid)
                 }
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+                className={`px-6 py-3 rounded-lg transition-colors flex items-center ${
+                  (currentStep === 0 && !isStep1Valid) ||
+                  (currentStep === 1 && !isStep2Valid) ||
+                  (currentStep === 2 && !isStep3Valid)
+                    ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                }`}
               >
                 Suivant
                 <ChevronRight size={20} className="ml-2" />
@@ -531,6 +551,12 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Modal pour les documents légaux */}
+      <LegalModal 
+        documentType={legalModalType} 
+        onClose={() => setLegalModalType(null)} 
+      />
     </div>
   );
 };
