@@ -2,6 +2,7 @@ import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { User } from '@supabase/supabase-js';
 import AuthWrapper from './components/AuthWrapper';
 import { ToastProvider } from './components/ToastProvider';
+import { ErrorBoundary, QuestionnaireErrorBoundary, DashboardErrorBoundary } from './components/ErrorBoundary';
 // OfflineIndicator supprimé - application 100% online
 import { CookieConsent } from './components/CookieConsent';
 import { GlobalNavbar } from './components/GlobalNavbar';
@@ -291,18 +292,20 @@ const App: React.FC = () => {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={false} title="Mon Tableau de Bord" />
-          <Suspense fallback={<LoadingSpinner message="Chargement du tableau de bord..." />}>
-            <ClientDashboard
-              user={user}
-              onStartNewBilan={() => window.location.hash = '#/bilan'}
-              onContinueBilan={() => window.location.hash = '#/bilan'}
-              onViewHistory={(record) => {
-                // Stocker le record dans sessionStorage pour le récupérer dans la page de résultats
-                sessionStorage.setItem('viewingHistoryRecord', JSON.stringify(record));
-                window.location.hash = '#/bilan/results';
-              }}
-            />
-          </Suspense>
+          <DashboardErrorBoundary>
+            <Suspense fallback={<LoadingSpinner message="Chargement du tableau de bord..." />}>
+              <ClientDashboard
+                user={user}
+                onStartNewBilan={() => window.location.hash = '#/bilan'}
+                onContinueBilan={() => window.location.hash = '#/bilan'}
+                onViewHistory={(record) => {
+                  // Stocker le record dans sessionStorage pour le récupérer dans la page de résultats
+                  sessionStorage.setItem('viewingHistoryRecord', JSON.stringify(record));
+                  window.location.hash = '#/bilan/results';
+                }}
+              />
+            </Suspense>
+          </DashboardErrorBoundary>
         </div>
       );
     }
@@ -336,9 +339,11 @@ const App: React.FC = () => {
     // Route pour démarrer un nouveau bilan
     if (route === '/bilan') {
       return (
-        <Suspense fallback={<FullPageLoader message="Chargement du bilan..." />}>
-          <ClientApp user={user} />
-        </Suspense>
+        <QuestionnaireErrorBoundary>
+          <Suspense fallback={<FullPageLoader message="Chargement du bilan..." />}>
+            <ClientApp user={user} />
+          </Suspense>
+        </QuestionnaireErrorBoundary>
       );
     }
 
@@ -425,21 +430,23 @@ const App: React.FC = () => {
   };
 
   return (
-    <ToastProvider>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-        <AuthWrapper>
-          {(user, userRole) => (
-            <>
-              <div className="flex-grow">
-                {renderByRole(user, userRole)}
-              </div>
-              {/* Footer supprimé pour les clients - le Questionnaire a son propre footer intégré */}
-            </>
-          )}
-        </AuthWrapper>
-        <CookieConsent />
-      </div>
-    </ToastProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+          <AuthWrapper>
+            {(user, userRole) => (
+              <>
+                <div className="flex-grow">
+                  {renderByRole(user, userRole)}
+                </div>
+                {/* Footer supprimé pour les clients - le Questionnaire a son propre footer intégré */}
+              </>
+            )}
+          </AuthWrapper>
+          <CookieConsent />
+        </div>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 };
 

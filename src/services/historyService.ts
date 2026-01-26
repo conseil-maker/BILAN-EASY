@@ -1,5 +1,6 @@
 import { HistoryItem } from "../types";
 import { supabase, Assessment } from "../lib/supabaseClient";
+import { handleError, handleNetworkError, ErrorCategory } from './errorService';
 
 /**
  * Service de gestion de l'historique des bilans - 100% Supabase
@@ -74,13 +75,20 @@ export const saveAssessmentToHistory = async (item: HistoryItem, userId?: string
       .single();
 
     if (error) {
-      console.error("[HistoryService] Erreur Supabase:", error.message);
+      handleError(error, 'HistoryService.saveAssessmentToHistory', {
+        category: 'storage' as ErrorCategory,
+        showToast: true,
+        userMessage: 'Erreur lors de la sauvegarde de votre bilan'
+      });
       throw error;
     }
     
     // Bilan sauvegardé avec succès
   } catch (error) {
-    console.error("[HistoryService] Erreur lors de la sauvegarde:", error);
+    handleNetworkError(error, 'HistoryService.saveAssessmentToHistory', {
+      showToast: true,
+      userMessage: 'Erreur de connexion lors de la sauvegarde'
+    });
     throw error;
   }
 };
@@ -102,13 +110,16 @@ export const getAssessmentHistory = async (userId?: string): Promise<HistoryItem
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("[HistoryService] Erreur récupération Supabase:", error);
+      handleError(error, 'HistoryService.getAssessmentHistory', {
+        category: 'storage' as ErrorCategory,
+        showToast: false
+      });
       throw error;
     }
 
     return (data || []).map(assessmentToHistoryItem);
   } catch (error) {
-    console.error("[HistoryService] Erreur récupération:", error);
+    handleNetworkError(error, 'HistoryService.getAssessmentHistory', { showToast: false });
     return [];
   }
 };
@@ -129,14 +140,18 @@ export const deleteAssessmentFromSupabase = async (assessmentId: string): Promis
       .eq('id', assessmentId);
 
     if (error) {
-      console.error("[HistoryService] Erreur suppression:", error);
+      handleError(error, 'HistoryService.deleteAssessmentFromSupabase', {
+        category: 'storage' as ErrorCategory,
+        showToast: true,
+        userMessage: 'Erreur lors de la suppression du bilan'
+      });
       return false;
     }
     
     // Bilan supprimé avec succès
     return true;
   } catch (error) {
-    console.error("[HistoryService] Erreur suppression:", error);
+    handleNetworkError(error, 'HistoryService.deleteAssessmentFromSupabase', { showToast: true });
     return false;
   }
 };
@@ -179,11 +194,14 @@ export const saveInProgressAssessment = async (
       });
 
     if (error) {
-      console.error("[HistoryService] Erreur sauvegarde en cours:", error.message);
+      handleError(error, 'HistoryService.saveInProgressAssessment', {
+        category: 'storage' as ErrorCategory,
+        showToast: false
+      });
       throw error;
     }
   } catch (error) {
-    console.error("[HistoryService] Erreur sauvegarde en cours:", error);
+    handleNetworkError(error, 'HistoryService.saveInProgressAssessment', { showToast: false });
   }
 };
 
@@ -224,7 +242,7 @@ export const getInProgressAssessment = async (userId: string): Promise<{
       updatedAt: data.updated_at,
     };
   } catch (error) {
-    console.error("[HistoryService] Erreur récupération bilan en cours:", error);
+    handleNetworkError(error, 'HistoryService.getInProgressAssessment', { showToast: false });
     return null;
   }
 };
@@ -249,7 +267,7 @@ export const getLatestCompletedAssessment = async (userId: string): Promise<Hist
 
     return assessmentToHistoryItem(data);
   } catch (error) {
-    console.error("[HistoryService] Erreur récupération dernier bilan:", error);
+    handleNetworkError(error, 'HistoryService.getLatestCompletedAssessment', { showToast: false });
     return null;
   }
 };

@@ -283,4 +283,5 @@ export const DashboardErrorBoundary: React.FC<{ children: ReactNode }> = ({ chil
   );
 };
 
+export { ErrorBoundary };
 export default ErrorBoundary;

@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import { Answer, CoachingStyle } from '../types';
+import { handleError, handleNetworkError, ErrorCategory } from './errorService';
 
 /**
  * Service de gestion des sessions de bilan - 100% Supabase
@@ -67,11 +68,14 @@ export const saveSession = async (
     if (error) {
       // Si la table n'existe pas ou colonnes manquantes, on ignore silencieusement
       if (!error.message.includes('does not exist') && !error.message.includes('column')) {
-        console.error('[SessionService] Erreur sauvegarde:', error.message);
+        handleError(error, 'SessionService.saveSession', {
+          category: 'storage' as ErrorCategory,
+          showToast: false // Ne pas afficher de toast pour les erreurs de sauvegarde silencieuses
+        });
       }
     }
   } catch (error) {
-    console.error('[SessionService] Erreur:', error);
+    handleNetworkError(error, 'SessionService.saveSession', { showToast: false });
   }
 };
 
@@ -110,7 +114,7 @@ export const loadSession = async (userId: string): Promise<SessionData | null> =
       current_questions: data.current_questions || [],
     } as SessionData;
   } catch (error) {
-    console.error('[SessionService] Erreur chargement:', error);
+    handleNetworkError(error, 'SessionService.loadSession', { showToast: false });
     return null;
   }
 };
@@ -126,10 +130,13 @@ export const clearSession = async (userId: string): Promise<void> => {
       .eq('user_id', userId);
 
     if (error && !error.message.includes('does not exist')) {
-      console.error('[SessionService] Erreur suppression:', error.message);
+      handleError(error, 'SessionService.clearSession', {
+        category: 'storage' as ErrorCategory,
+        showToast: false
+      });
     }
   } catch (error) {
-    console.error('[SessionService] Erreur:', error);
+    handleNetworkError(error, 'SessionService.clearSession', { showToast: false });
   }
 };
 
@@ -166,9 +173,12 @@ export const updateSessionProgress = async (
       .eq('user_id', userId);
 
     if (error && !error.message.includes('does not exist') && !error.message.includes('column')) {
-      console.error('[SessionService] Erreur mise à jour progression:', error.message);
+      handleError(error, 'SessionService.updateSessionProgress', {
+        category: 'storage' as ErrorCategory,
+        showToast: false
+      });
     }
   } catch (error) {
-    console.error('[SessionService] Erreur:', error);
+    handleNetworkError(error, 'SessionService.updateSessionProgress', { showToast: false });
   }
 };
