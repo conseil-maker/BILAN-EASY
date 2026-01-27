@@ -14,6 +14,7 @@ import { LoadingSpinner, FullPageLoader } from './components/LazyComponents';
 
 // Composants principaux
 const ClientApp = lazy(() => import('./components/ClientApp'));
+const ClientAppWithSession = lazy(() => import('./components/ClientAppWithSession'));
 
 // Dashboards Admin/Consultant
 const AdminDashboard = lazy(() => 
@@ -423,7 +424,7 @@ const App: React.FC = () => {
         }
         return (
           <Suspense fallback={<FullPageLoader message="Chargement de l'application..." />}>
-            <ClientApp user={user} />
+            <ClientAppWithSession user={user} />
           </Suspense>
         );
     }

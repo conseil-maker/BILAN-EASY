@@ -24,6 +24,9 @@ import {
   scheduleNotification 
 } from '../services/pushNotificationService';
 
+// Import des sous-composants du questionnaire
+import { BadgeNotification, SatisfactionModal, ModuleModal, ChatMessage, ChatInput, ThemesPanel } from './questionnaire';
+
 const SendIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>;
 const MicIcon = ({ active }: { active: boolean }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${active ? 'text-red-500 animate-pulse' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-14 0m7 10v4M5 8v4a7 7 0 0014 0V8M12 15a3 3 0 003-3V5a3 3 0 00-6 0v7a3 3 0 003 3z" /></svg>;
 const SpeakerIcon = ({ active }: { active: boolean }) => <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${active ? 'text-blue-500' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.858 17.142a5 5 0 010-7.072m2.828 9.9a9 9 0 010-12.728M12 12h.01" /></svg>;
@@ -32,92 +35,7 @@ const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 
 // DownloadIcon supprimé - Déplacé vers ClientDashboard
 const JokerIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-5 5a1 1 0 01-1-1v-2a1 1 0 112 0v2a1 1 0 01-1 1zm2-3a1 1 0 00-1.414 1.414L8.586 18l-1.293 1.293a1 1 0 101.414 1.414L10 19.414l1.293 1.293a1 1 0 001.414-1.414L11.414 18l1.293-1.293a1 1 0 00-1.414-1.414L10 16.586 8.707 15.293zM5 11a1 1 0 100 2h.01a1 1 0 100-2H5zm14-1a1 1 0 11-2 0v-2a1 1 0 112 0v2zM15 9a1 1 0 100-2h-.01a1 1 0 100 2H15z" clipRule="evenodd" /></svg>;
 
-const BadgeNotification: React.FC<{ phaseName: string; onClose: () => void }> = ({ phaseName, onClose }) => {
-    const [showConfetti, setShowConfetti] = useState(true);
-    
-    useEffect(() => {
-        const confettiTimer = setTimeout(() => setShowConfetti(false), 3000);
-        const badgeTimer = setTimeout(onClose, 4000);
-        return () => {
-            clearTimeout(confettiTimer);
-            clearTimeout(badgeTimer);
-        };
-    }, [onClose]);
-
-    return (
-        <>
-            {showConfetti && <Confetti duration={3000} />}
-            <div className="fixed top-5 right-5 bg-gradient-to-r from-secondary to-primary-600 text-white p-6 rounded-xl shadow-2xl animate-fade-in-down z-50 border-2 border-white/30">
-                <p className="font-bold text-xl mb-1">🎉 Badge débloqué !</p>
-                <p className="text-white/90">Vous avez terminé : {phaseName}</p>
-            </div>
-        </>
-    );
-};
-
-const SatisfactionModal: React.FC<{ phaseName: string; onSubmit: (rating: number, comment: string) => void; }> = ({ phaseName, onSubmit }) => {
-    const [rating, setRating] = useState(0);
-    const [comment, setComment] = useState('');
-    
-    useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onSubmit(rating || 3, comment);
-            }
-        };
-        window.addEventListener('keydown', handleEscape);
-        return () => window.removeEventListener('keydown', handleEscape);
-    }, [rating, comment, onSubmit]);
-    
-    const handleStarClick = (star: number) => {
-        // console.log('Rating set to:', star);
-        setRating(star);
-    };
-    
-    const handleSubmit = () => {
-        // console.log('Submitting rating:', rating, 'comment:', comment);
-        onSubmit(rating, comment);
-    };
-    
-    const handleBackdropClick = (e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) {
-            onSubmit(rating || 3, comment);
-        }
-    };
-    
-    return (
-        <div onClick={handleBackdropClick} className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full relative">
-                <button onClick={() => onSubmit(rating || 3, comment)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
-                <h2 className="text-2xl font-bold font-display text-primary-800 mb-2">Votre avis sur la phase terminée</h2>
-                <p className="text-slate-600 mb-4">"{phaseName}"</p>
-                <div className="mb-4">
-                    <p className="mb-2 text-slate-700">Cette phase vous a-t-elle semblé pertinente ?</p>
-                    <div className="flex justify-center text-3xl gap-2">{[1, 2, 3, 4, 5].map(star => <span key={star} onClick={() => handleStarClick(star)} className={`cursor-pointer transition-all hover:scale-110 ${star <= rating ? 'text-yellow-400' : 'text-slate-300'}`}>★</span>)}</div>
-                </div>
-                <textarea value={comment} onChange={e => setComment(e.target.value)} placeholder="Un commentaire ? (optionnel)" rows={3} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
-                <div className="flex gap-3 mt-4">
-                    <button onClick={handleSubmit} disabled={rating === 0} className="flex-1 bg-primary-600 text-white font-bold py-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors">Valider</button>
-                    <button onClick={() => onSubmit(3, comment)} className="px-6 bg-slate-200 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-300 transition-colors">Passer</button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const ModuleModal: React.FC<{ reason: string; onAccept: () => void; onDecline: () => void; }> = ({ reason, onAccept, onDecline }) => (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-            <h2 className="text-2xl font-bold font-display text-primary-800 mb-2">Approfondissement proposé</h2>
-            <p className="text-slate-600 mb-4">{reason}</p>
-            <p className="text-sm text-slate-500 mb-6">Souhaitez-vous explorer ce sujet avec quelques questions supplémentaires ? C'est entièrement optionnel.</p>
-            <div className="flex gap-4">
-                <button onClick={onAccept} className="w-full bg-primary-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-primary-700">Oui, je suis intéressé(e)</button>
-                <button onClick={onDecline} className="w-full bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-300">Non, merci</button>
-            </div>
-        </div>
-    </div>
-);
+// BadgeNotification, SatisfactionModal et ModuleModal sont maintenant importés depuis ./questionnaire/
 
 interface QuestionnaireProps {
   pkg: Package;
