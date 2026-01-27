@@ -4,6 +4,7 @@ import { SatisfactionSurvey } from './SatisfactionSurvey';
 import { DocumentsQualiopi } from './DocumentsQualiopi';
 import { supabase } from '../lib/supabaseClient';
 import { syntheseService, SyntheseData } from '../services/syntheseService';
+import { syntheseServiceEnriched } from '../services/syntheseServiceEnriched';
 
 interface BilanCompletionProps {
   userId: string;
@@ -208,8 +209,8 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
 
       setSyntheseData(data);
       
-      // Générer le PDF
-      const blob = syntheseService.generateSynthese({
+      // Préparer les données pour le PDF
+      const syntheseParams = {
         userName: data.beneficiaire.nom,
         userEmail: data.beneficiaire.email,
         packageName: data.bilan.forfait,
@@ -220,15 +221,21 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
         summary: summary,
         answers: answers,
         projectProfessionnel: data.projetProfessionnel.projetPrincipal,
-        metiersVises: [],
-        formationsRecommandees: [],
+        metiersVises: [] as string[],
+        formationsRecommandees: [] as string[],
         planAction: data.planAction.courtTerme.map((a, i) => ({
           action: a,
           echeance: 'Court terme',
           priorite: 'haute' as const,
           statut: 'a_faire' as const,
         })),
-      });
+      };
+      
+      // Utiliser le service enrichi pour les forfaits complets (12h+), sinon le service standard
+      const isFullPackage = packageDuration >= 12;
+      const blob = isFullPackage 
+        ? syntheseServiceEnriched.generateEnrichedSynthese(syntheseParams)
+        : syntheseService.generateSynthese(syntheseParams);
       
       // Télécharger le PDF
       const url = URL.createObjectURL(blob);
