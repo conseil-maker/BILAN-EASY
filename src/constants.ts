@@ -469,11 +469,36 @@ export const getCurrentPhase = (
   const pkg = PACKAGES.find(p => p.id === packageId);
   if (!pkg) return { phase: 'phase1', questionnaire: 1, name: 'Phase Préliminaire' };
   
-  const timeSpent = calculateTimeSpent(answers);
   const { phase1, phase2, phase3 } = pkg.phases;
+  const answersCount = answers.length;
+  
+  // Utiliser les estimations de questions par phase si disponibles
+  if (pkg.questionEstimates) {
+    const phase1Target = pkg.questionEstimates.phase1.target;
+    const phase2Target = pkg.questionEstimates.phase2.target;
+    
+    // Déterminer la phase basée sur le nombre de questions répondues
+    if (answersCount < phase1Target) {
+      const questionnaire = Math.floor((answersCount / phase1Target) * phase1.questionnaires) + 1;
+      return { phase: 'phase1', questionnaire: Math.min(questionnaire, phase1.questionnaires), name: phase1.name };
+    }
+    
+    if (answersCount < phase1Target + phase2Target) {
+      const answersInPhase2 = answersCount - phase1Target;
+      const questionnaire = Math.floor((answersInPhase2 / phase2Target) * phase2.questionnaires) + 1;
+      return { phase: 'phase2', questionnaire: Math.min(questionnaire, phase2.questionnaires), name: phase2.name };
+    }
+    
+    const answersInPhase3 = answersCount - phase1Target - phase2Target;
+    const phase3Target = pkg.questionEstimates.phase3.target;
+    const questionnaire = Math.floor((answersInPhase3 / phase3Target) * phase3.questionnaires) + 1;
+    return { phase: 'phase3', questionnaire: Math.min(questionnaire, phase3.questionnaires), name: phase3.name };
+  }
+  
+  // Fallback: utiliser le temps si pas d'estimations de questions
+  const timeSpent = calculateTimeSpent(answers);
   const { timeBudget } = pkg;
   
-  // Déterminer la phase basée sur le temps consommé
   if (timeSpent < timeBudget.phase1) {
     const questionnaire = Math.floor((timeSpent / timeBudget.phase1) * phase1.questionnaires) + 1;
     return { phase: 'phase1', questionnaire: Math.min(questionnaire, phase1.questionnaires), name: phase1.name };
@@ -500,10 +525,15 @@ export const isJourneyComplete = (
   const pkg = PACKAGES.find(p => p.id === packageId);
   if (!pkg) return false;
   
+  // Utiliser les estimations de questions si disponibles
+  if (pkg.questionEstimates) {
+    const totalTarget = pkg.questionEstimates.total.target;
+    // Le parcours est terminé si on a répondu à au moins 90% des questions cibles
+    return answers.length >= totalTarget * 0.9;
+  }
+  
+  // Fallback: utiliser le temps
   const timeSpent = calculateTimeSpent(answers);
   const totalTime = pkg.timeBudget.total;
-  
-  // Le parcours est terminé si on a consommé au moins 90% du temps
-  // (on laisse une marge pour éviter de dépasser)
   return timeSpent >= totalTime * 0.9;
 };
