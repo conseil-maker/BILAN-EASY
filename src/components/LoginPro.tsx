@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, clearInvalidTokens } from '../lib/supabaseClient';
 import organizationConfig from '../config/organization';
 
 const ORGANIZATION = organizationConfig;
@@ -23,11 +23,16 @@ export default function LoginPro({ onToggle }: LoginProProps) {
 
     try {
       // Nettoyer les anciens tokens avant la connexion pour éviter les conflits
-      const supabaseKey = Object.keys(localStorage).find(key => key.includes('supabase') && key.includes('auth'));
-      if (supabaseKey) {
-        console.log('[LoginPro] Nettoyage de l\'ancien token:', supabaseKey);
-        localStorage.removeItem(supabaseKey);
-      }
+      console.log('[LoginPro] Nettoyage des tokens invalides...');
+      clearInvalidTokens();
+      
+      // Supprimer aussi tous les tokens Supabase potentiellement corrompus
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('supabase') && key.includes('auth')) {
+          console.log('[LoginPro] Suppression du token:', key);
+          localStorage.removeItem(key);
+        }
+      });
       
       // Se déconnecter d'abord pour nettoyer l'état
       await supabase.auth.signOut();

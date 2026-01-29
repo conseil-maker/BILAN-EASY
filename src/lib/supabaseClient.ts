@@ -8,33 +8,99 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('[Supabase] Variables d\'environnement manquantes. Vérifiez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY');
 }
 
-// Configuration avec autoRefreshToken désactivé pour éviter les déconnexions automatiques
-// Le rafraîchissement sera géré manuellement si nécessaire
+// Clé de stockage pour les tokens Supabase
+const STORAGE_KEY = 'sb-pkhhxouuavfqzccahihe-auth-token';
+
+/**
+ * Nettoyer les tokens invalides du localStorage
+ * Appelé avant la connexion pour éviter les conflits de tokens
+ */
+export const clearInvalidTokens = () => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const storedSession = localStorage.getItem(STORAGE_KEY);
+    if (storedSession) {
+      const session = JSON.parse(storedSession);
+      // Vérifier si le token est expiré
+      if (session.expires_at) {
+        const now = Math.floor(Date.now() / 1000);
+        if (session.expires_at < now) {
+          console.log('[Supabase] Token expiré détecté, nettoyage...');
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[Supabase] Erreur lors du nettoyage des tokens:', error);
+    // En cas d'erreur de parsing, supprimer le token corrompu
+    localStorage.removeItem(STORAGE_KEY);
+  }
+};
+
+// Nettoyer les tokens invalides au chargement du module
+if (typeof window !== 'undefined') {
+  clearInvalidTokens();
+}
+
+// Configuration Supabase avec autoRefreshToken ACTIVÉ
+// La gestion des erreurs de refresh est faite dans AuthWrapper
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     // Activer la persistance de session dans localStorage
     persistSession: true,
-    // DÉSACTIVÉ pour éviter les déconnexions automatiques lors d'erreurs de refresh
-    autoRefreshToken: false,
+    // ACTIVÉ - Le SDK gère le rafraîchissement automatique
+    // Les erreurs sont gérées par le listener onAuthStateChange
+    autoRefreshToken: true,
     // Détecter automatiquement les changements de session dans d'autres onglets
     detectSessionInUrl: true,
     // Utiliser le stockage local pour la persistance
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     // Clé de stockage personnalisée
-    storageKey: 'sb-pkhhxouuavfqzccahihe-auth-token',
+    storageKey: STORAGE_KEY,
+    // Désactiver le flux PKCE pour simplifier (optionnel)
+    flowType: 'implicit',
   },
 });
 
-// Fonction utilitaire pour vérifier et rafraîchir la session manuellement
+/**
+ * Fonction utilitaire pour vérifier et rafraîchir la session manuellement
+ * Utilisée uniquement si nécessaire (ex: avant une opération critique)
+ */
 export const refreshSession = async () => {
   try {
-    const { data, error } = await supabase.auth.refreshSession();
-    if (error) {
-      console.error('[Supabase] Erreur lors du rafraîchissement de la session:', error);
-      // Ne pas retourner null immédiatement, vérifier si la session actuelle est encore valide
-      const { data: { session } } = await supabase.auth.getSession();
-      return session;
+    // D'abord vérifier si on a une session valide
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    
+    if (!currentSession) {
+      console.log('[Supabase] Pas de session à rafraîchir');
+      return null;
     }
+    
+    // Vérifier si le token expire bientôt (moins de 5 minutes)
+    const now = Math.floor(Date.now() / 1000);
+    const fiveMinutes = 5 * 60;
+    
+    if (currentSession.expires_at && currentSession.expires_at - now > fiveMinutes) {
+      // Le token est encore valide, pas besoin de rafraîchir
+      return currentSession;
+    }
+    
+    // Tenter le rafraîchissement
+    const { data, error } = await supabase.auth.refreshSession();
+    
+    if (error) {
+      console.warn('[Supabase] Erreur lors du rafraîchissement:', error.message);
+      // Si l'erreur est "refresh_token_not_found", nettoyer et retourner null
+      if (error.message.includes('refresh_token') || error.message.includes('Refresh Token')) {
+        console.log('[Supabase] Token de rafraîchissement invalide, nettoyage...');
+        clearInvalidTokens();
+        return null;
+      }
+      // Pour d'autres erreurs, retourner la session actuelle si elle est encore valide
+      return currentSession;
+    }
+    
     return data.session;
   } catch (err) {
     console.error('[Supabase] Exception lors du rafraîchissement:', err);
@@ -42,28 +108,47 @@ export const refreshSession = async () => {
   }
 };
 
-// Fonction pour vérifier si la session est valide
+/**
+ * Fonction pour vérifier si la session est valide
+ */
 export const isSessionValid = async () => {
   try {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session) {
       return false;
     }
-    // Vérifier si le token expire dans moins de 5 minutes
+    
+    // Vérifier si le token est expiré
     const expiresAt = session.expires_at;
     if (expiresAt) {
       const now = Math.floor(Date.now() / 1000);
-      const fiveMinutes = 5 * 60;
-      if (expiresAt - now < fiveMinutes) {
-        // Rafraîchir la session si elle expire bientôt
-        const refreshedSession = await refreshSession();
-        return !!refreshedSession;
+      if (expiresAt < now) {
+        return false;
       }
     }
+    
     return true;
   } catch (err) {
     console.error('[Supabase] Erreur de vérification de session:', err);
     return false;
+  }
+};
+
+/**
+ * Fonction pour se déconnecter proprement
+ * Nettoie les tokens locaux avant la déconnexion
+ */
+export const signOutClean = async () => {
+  try {
+    // Nettoyer le localStorage d'abord
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+    // Puis appeler signOut
+    await supabase.auth.signOut();
+    console.log('[Supabase] Déconnexion propre effectuée');
+  } catch (error) {
+    console.error('[Supabase] Erreur lors de la déconnexion:', error);
   }
 };
 
