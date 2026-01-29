@@ -37,7 +37,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
           .from('profiles')
           .select('full_name')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
         
         if (profile?.full_name) {
           setUserName(profile.full_name);

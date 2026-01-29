@@ -75,12 +75,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // Charger le profil
+      // Charger le profil (utiliser maybeSingle pour éviter les erreurs si le profil n'existe pas)
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       setProfile(profileData);
 
       // Charger l'historique des bilans
@@ -125,11 +125,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       }
 
       // Charger aussi la session en cours depuis user_sessions
+      // Utiliser maybeSingle() au lieu de single() pour éviter l'erreur PGRST116 si aucune session n'existe
       const { data: sessionData, error: sessionError } = await supabase
         .from('user_sessions')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       console.log('[Dashboard] Session data:', sessionData, 'Error:', sessionError);
 
