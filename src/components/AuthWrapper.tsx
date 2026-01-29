@@ -14,22 +14,50 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [showSignup, setShowSignup] = useState(false);
 
-  // Fonction pour récupérer le rôle utilisateur
-  const fetchUserRole = useCallback(async (userId: string): Promise<string> => {
+  // Fonction pour récupérer ou créer le profil utilisateur
+  const fetchOrCreateUserProfile = useCallback(async (userId: string, userEmail: string): Promise<string> => {
     try {
+      // Essayer de récupérer le profil existant
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Utiliser maybeSingle au lieu de single pour éviter l'erreur si pas de résultat
 
-      if (error) {
-        console.error('[AuthWrapper] Erreur récupération rôle:', error);
+      if (error && error.code !== 'PGRST116') {
+        console.error('[AuthWrapper] Erreur récupération profil:', error);
         return 'client';
       }
-      return data?.role || 'client';
+
+      // Si le profil existe, retourner le rôle
+      if (data?.role) {
+        console.log('[AuthWrapper] Profil existant trouvé, rôle:', data.role);
+        return data.role;
+      }
+
+      // Si le profil n'existe pas, le créer
+      console.log('[AuthWrapper] Profil non trouvé, création...');
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          email: userEmail,
+          role: 'client',
+          full_name: userEmail.split('@')[0],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        console.error('[AuthWrapper] Erreur création profil:', insertError);
+        // Même si l'insertion échoue, on continue avec le rôle client
+      } else {
+        console.log('[AuthWrapper] Profil créé avec succès');
+      }
+
+      return 'client';
     } catch (error) {
-      console.error('[AuthWrapper] Exception récupération rôle:', error);
+      console.error('[AuthWrapper] Exception récupération/création profil:', error);
       return 'client';
     }
   }, []);
@@ -53,7 +81,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         console.log('[AuthWrapper] Session récupérée:', !!session);
 
         if (session?.user && mounted) {
-          const role = await fetchUserRole(session.user.id);
+          const role = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
           console.log('[AuthWrapper] Rôle utilisateur:', role);
           if (mounted) {
             setUser(session.user);
@@ -81,7 +109,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           case 'SIGNED_IN':
             if (session?.user) {
               console.log('[AuthWrapper] SIGNED_IN - Utilisateur connecté:', session.user.email);
-              const role = await fetchUserRole(session.user.id);
+              const role = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
               if (mounted) {
                 setUser(session.user);
                 setUserRole(role);
@@ -117,7 +145,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             if (session?.user && mounted) {
               setUser(session.user);
               if (!userRole) {
-                const role = await fetchUserRole(session.user.id);
+                const role = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
                 if (mounted) setUserRole(role);
               }
             }
@@ -142,7 +170,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, [fetchUserRole]); // Ajouter fetchUserRole comme dépendance
+  }, [fetchOrCreateUserProfile]); // Ajouter fetchOrCreateUserProfile comme dépendance
 
   // Affichage du loader
   if (loading) {
