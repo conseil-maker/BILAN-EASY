@@ -829,10 +829,10 @@ Langue: Français.`;
     };
 
     try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-pro',
+const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
             contents: prompt,
-            config: { responseMimeType: "application/json", responseSchema: schema },
+            config: { responseMimeType: "application/json", responseSchema: followUpSchema },
         });
         return parseJsonResponse<{ resources: string[], actions: string[] }>(response.text, 'findResourceLeads');
     } catch (error) {
@@ -984,7 +984,7 @@ Réponds en JSON. Langue: Français.`;
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-pro',
+            model: 'gemini-2.5-flash',
             contents: prompt,
             config: { responseMimeType: "application/json", responseSchema: explorationNeedSchema },
         });
@@ -1038,7 +1038,7 @@ Réponds en JSON. Langue: Français.`;
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-pro',
+            model: 'gemini-2.5-flash',
             contents: prompt,
             config: { responseMimeType: "application/json", responseSchema: careerExplorationSchema },
         });
