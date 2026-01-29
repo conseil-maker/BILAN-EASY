@@ -15,6 +15,7 @@ import { saveAssessmentToHistory, getLatestCompletedAssessment } from '../servic
 import { saveSession, loadSession, clearSession } from '../services/sessionService';
 import { calculateProgression, ProgressionInfo } from '../services/progressionService';
 import { useToast } from './ToastProvider';
+import { supabase } from '../lib/supabaseClient';
 
 type AppState = 'welcome' | 'package-selection' | 'preliminary-phase' | 'personalization-step' | 'questionnaire' | 'completion' | 'summary' | 'history' | 'view-history-record';
 
@@ -27,6 +28,26 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   // Démarrer directement sur la sélection de forfait (on arrive depuis le Dashboard)
   const [appState, setAppState] = useState<AppState>('package-selection');
   const [userName, setUserName] = useState(user.email?.split('@')[0] || 'Utilisateur');
+
+  // Récupérer le nom complet depuis la table profiles
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.full_name) {
+          setUserName(profile.full_name);
+        }
+      } catch (error) {
+        console.warn('[ClientApp] Impossible de récupérer le nom complet:', error);
+      }
+    };
+    fetchUserName();
+  }, [user.id]);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [coachingStyle, setCoachingStyle] = useState<CoachingStyle>('collaborative');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);

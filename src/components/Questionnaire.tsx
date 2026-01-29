@@ -995,7 +995,20 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 {outOfScopeAnalysis.message}
                             </p>
                             
-                            {outOfScopeAnalysis.issueType === 'age_inappropriate' && (
+                            {/* Ressources alternatives dynamiques */}
+                            {outOfScopeAnalysis.alternativeResources && outOfScopeAnalysis.alternativeResources.length > 0 && (
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6 text-left">
+                                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">📚 Ressources adaptées :</h4>
+                                    <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                                        {outOfScopeAnalysis.alternativeResources.map((resource, idx) => (
+                                            <li key={idx}>• {resource}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            
+                            {/* Ressources par défaut pour les mineurs si pas de ressources dynamiques */}
+                            {outOfScopeAnalysis.issueType === 'age_inappropriate' && (!outOfScopeAnalysis.alternativeResources || outOfScopeAnalysis.alternativeResources.length === 0) && (
                                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6 text-left">
                                     <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">📚 Ressources adaptées :</h4>
                                     <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
@@ -1011,8 +1024,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 <button
                                     onClick={() => {
                                         setShowOutOfScopeModal(false);
-                                        // Rediriger vers la page d'accueil ou le dashboard
-                                        onDashboard();
+                                        setTextInput(''); // Vider la barre de saisie
+                                        clearTranscript(); // Vider aussi la transcription vocale
+                                        // Rediriger vers le tableau de bord
+                                        window.location.hash = '#/dashboard';
                                     }}
                                     className="flex-1 px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                                 >
@@ -1022,6 +1037,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <button
                                         onClick={() => {
                                             setShowOutOfScopeModal(false);
+                                            setTextInput(''); // Vider la barre de saisie
+                                            clearTranscript(); // Vider aussi la transcription vocale
                                             fetchNextQuestion({}, 0, answers);
                                         }}
                                         className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors"

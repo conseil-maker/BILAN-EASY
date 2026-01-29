@@ -7,6 +7,7 @@ import { ErrorBoundary, QuestionnaireErrorBoundary, DashboardErrorBoundary } fro
 import { CookieConsent } from './components/CookieConsent';
 import { GlobalNavbar } from './components/GlobalNavbar';
 import { LoadingSpinner, FullPageLoader } from './components/LazyComponents';
+import { useUserPackage } from './hooks/useUserPackage';
 
 // ============================================
 // LAZY IMPORTS - Chargement à la demande
@@ -51,6 +52,9 @@ const DocumentLibrary = lazy(() =>
 
 const MyDocuments = lazy(() => 
   import('./components/MyDocuments').then(m => ({ default: m.MyDocuments }))
+);
+const DocumentsWithPackage = lazy(() => 
+  import('./components/DocumentsWithPackage').then(m => ({ default: m.DocumentsWithPackage }))
 );
 const ClientDashboard = lazy(() => 
   import('./components/ClientDashboard').then(m => ({ default: m.ClientDashboard }))
@@ -232,62 +236,28 @@ const App: React.FC = () => {
       );
     }
 
+    // Routes documents avec récupération dynamique du forfait
     if (route === '/documents') {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Documents" />
-          <div className="p-6">
-            <Suspense fallback={<LoadingSpinner message="Chargement des documents..." />}>
-              <DocumentsQualiopi
-                userId={user.id}
-                packageName="Essentiel"
-                packageDuration={12}
-                packagePrice={1200}
-                startDate={new Date().toLocaleDateString('fr-FR')}
-                isCompleted={false}
-              />
-            </Suspense>
-          </div>
-        </div>
+        <Suspense fallback={<LoadingSpinner message="Chargement des documents..." />}>
+          <DocumentsWithPackage user={user} userRole={userRole} pageType="documents" />
+        </Suspense>
       );
     }
 
     if (route === '/library') {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Bibliothèque" />
-          <Suspense fallback={<LoadingSpinner message="Chargement de la bibliothèque..." />}>
-            <DocumentLibrary
-              userId={user.id}
-              userName={user.email?.split('@')[0] || 'Utilisateur'}
-              userEmail={user.email || ''}
-              packageName="Essentiel"
-              packageDuration={12}
-              packagePrice={1200}
-              startDate={new Date().toLocaleDateString('fr-FR')}
-              isCompleted={false}
-            />
-          </Suspense>
-        </div>
+        <Suspense fallback={<LoadingSpinner message="Chargement de la bibliothèque..." />}>
+          <DocumentsWithPackage user={user} userRole={userRole} pageType="library" />
+        </Suspense>
       );
     }
 
-
     if (route === '/mes-documents') {
       return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mes Documents" />
-          <Suspense fallback={<LoadingSpinner message="Chargement de vos documents..." />}>
-            <MyDocuments
-              user={user}
-              packageName="Essentiel"
-              packageDuration={12}
-              packagePrice={1200}
-              startDate={new Date().toLocaleDateString('fr-FR')}
-              isCompleted={false}
-            />
-          </Suspense>
-        </div>
+        <Suspense fallback={<LoadingSpinner message="Chargement de vos documents..." />}>
+          <DocumentsWithPackage user={user} userRole={userRole} pageType="mes-documents" />
+        </Suspense>
       );
     }
 
