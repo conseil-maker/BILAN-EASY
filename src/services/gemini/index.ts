@@ -11,6 +11,12 @@ export * from './schemas';
 // Utilitaires et helpers
 export * from './utils';
 
+// Module de génération de questions
+export * from './questionGeneration';
+
+// Module de génération de synthèse
+export * from './summaryGeneration';
+
 // Module d'exploration de carrière
 export * from './careerExploration';
 
