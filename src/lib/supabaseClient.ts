@@ -8,25 +8,32 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('[Supabase] Variables d\'environnement manquantes. Vérifiez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY');
 }
 
-// Configuration simplifiée pour la persistance de session
+// Configuration avec autoRefreshToken désactivé pour éviter les déconnexions automatiques
+// Le rafraîchissement sera géré manuellement si nécessaire
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     // Activer la persistance de session dans localStorage
     persistSession: true,
-    // Rafraîchir automatiquement le token avant expiration
-    autoRefreshToken: true,
+    // DÉSACTIVÉ pour éviter les déconnexions automatiques lors d'erreurs de refresh
+    autoRefreshToken: false,
     // Détecter automatiquement les changements de session dans d'autres onglets
     detectSessionInUrl: true,
+    // Utiliser le stockage local pour la persistance
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    // Clé de stockage personnalisée
+    storageKey: 'sb-pkhhxouuavfqzccahihe-auth-token',
   },
 });
 
-// Fonction utilitaire pour vérifier et rafraîchir la session
+// Fonction utilitaire pour vérifier et rafraîchir la session manuellement
 export const refreshSession = async () => {
   try {
     const { data, error } = await supabase.auth.refreshSession();
     if (error) {
       console.error('[Supabase] Erreur lors du rafraîchissement de la session:', error);
-      return null;
+      // Ne pas retourner null immédiatement, vérifier si la session actuelle est encore valide
+      const { data: { session } } = await supabase.auth.getSession();
+      return session;
     }
     return data.session;
   } catch (err) {
