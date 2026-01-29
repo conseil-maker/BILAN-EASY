@@ -1,10 +1,18 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import { Type } from '@google/genai';
+import { geminiProxy } from './geminiServiceProxy';
 import { Answer, Package, Question, QuestionType, Summary, UserProfile, DashboardData, ActionPlanItem, CoachingStyle } from '../types';
 import { QUESTION_CATEGORIES } from "../constants";
 import { selectFallbackQuestion } from '../data/fallbackQuestions';
 import { generateSmartQuestion, generateOpeningQuestion } from './smartQuestionGenerator';
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY! });
+// Configuration API Gemini - Mode sécurisé via Edge Functions
+// La clé API est stockée dans les secrets Supabase, jamais exposée côté client
+// VITE_GEMINI_API_KEY n'est plus utilisé en production
+const USE_PROXY = true; // Toujours utiliser le proxy sécurisé
+
+// Utilisation exclusive du proxy pour la sécurité
+console.log("[GeminiService] Mode proxy sécurisé - clé API côté serveur");
+const ai = geminiProxy;
 
 // --- SCHEMAS ---
 
