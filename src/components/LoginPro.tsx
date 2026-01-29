@@ -22,15 +22,20 @@ export default function LoginPro({ onToggle }: LoginProProps) {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+      
+      // Connexion réussie - forcer un rafraîchissement de la page
+      if (data.session) {
+        console.log('[LoginPro] Connexion réussie, rafraîchissement...');
+        window.location.reload();
+      }
     } catch (error: any) {
       setError(error.message || 'Erreur lors de la connexion');
-    } finally {
       setLoading(false);
     }
   };
