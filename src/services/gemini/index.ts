@@ -11,6 +11,11 @@ export * from './schemas';
 // Utilitaires et helpers
 export * from './utils';
 
-// Note: Les fonctions principales restent dans geminiService.ts
-// pour le moment, mais seront progressivement migrées ici
-// lors des prochaines itérations de refactoring.
+// Module d'exploration de carrière
+export * from './careerExploration';
+
+// Module d'analyse de réponse (détection hors-cadre)
+export * from './responseAnalysis';
+
+// Module d'exploration du marché de l'emploi
+export * from './marketExploration';
