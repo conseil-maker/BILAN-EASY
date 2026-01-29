@@ -128,16 +128,14 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           case 'SIGNED_OUT':
             console.log('[AuthWrapper] SIGNED_OUT - Vérification...');
             
-            // Ignorer les SIGNED_OUT qui arrivent dans les 5 secondes après un SIGNED_IN
+            // Ignorer les SIGNED_OUT qui arrivent dans les 10 secondes après un SIGNED_IN
+            // C'est souvent dû à des erreurs de refresh token qui ne sont pas critiques
             const timeSinceSignIn = Date.now() - signedInTimestampRef.current;
-            if (justSignedInRef.current && timeSinceSignIn < 5000) {
+            if (justSignedInRef.current && timeSinceSignIn < 10000) {
               console.log('[AuthWrapper] SIGNED_OUT ignoré (trop proche du SIGNED_IN, delta:', timeSinceSignIn, 'ms)');
-              // Vérifier si on a toujours une session valide
-              const { data: { session: currentSession } } = await supabase.auth.getSession();
-              if (currentSession?.user) {
-                console.log('[AuthWrapper] Session toujours valide, ignoré');
-                return;
-              }
+              // Ne PAS appeler getSession() ici car cela peut déclencher d'autres erreurs
+              // Faire confiance au fait que la session est valide si on vient de se connecter
+              return;
             }
             
             console.log('[AuthWrapper] SIGNED_OUT - Utilisateur déconnecté');
