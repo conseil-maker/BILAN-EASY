@@ -1,0 +1,99 @@
+# =============================================================================
+# BILAN-EASY CI/CD Pipeline
+# =============================================================================
+# Ce workflow s'exécute sur chaque push et pull request vers main
+# Il vérifie la qualité du code avant le déploiement sur Vercel
+# =============================================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ===========================================================================
+  # JOB 1: Vérification du code (lint, types, build)
+  # ===========================================================================
+  quality:
+    name: 🔍 Quality Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 🔧 TypeScript Check
+        run: npm run build
+        # Le build Vite inclut la vérification TypeScript
+
+      - name: 📊 Check bundle size
+        run: |
+          echo "📊 Bundle size analysis:"
+          du -sh dist/
+          echo ""
+          echo "📁 Largest chunks:"
+          ls -lhS dist/assets/*.js | head -10
+
+  # ===========================================================================
+  # JOB 2: Tests (quand ils seront implémentés)
+  # ===========================================================================
+  # test:
+  #   name: 🧪 Tests
+  #   runs-on: ubuntu-latest
+  #   needs: quality
+  #   
+  #   steps:
+  #     - name: 📥 Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: 📦 Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: 'npm'
+  #
+  #     - name: 📚 Install dependencies
+  #       run: npm ci
+  #
+  #     - name: 🧪 Run tests
+  #       run: npm test
+  #
+  #     - name: 📈 Upload coverage
+  #       uses: codecov/codecov-action@v3
+  #       with:
+  #         fail_ci_if_error: false
+
+  # ===========================================================================
+  # JOB 3: Notification de succès
+  # ===========================================================================
+  notify:
+    name: ✅ Pipeline Complete
+    runs-on: ubuntu-latest
+    needs: [quality]
+    if: success()
+    
+    steps:
+      - name: 🎉 Success notification
+        run: |
+          echo "✅ CI/CD Pipeline completed successfully!"
+          echo ""
+          echo "📋 Summary:"
+          echo "  - Quality checks: ✅ Passed"
+          echo "  - Build: ✅ Successful"
+          echo ""
+          echo "🚀 Ready for deployment via Vercel"
