@@ -14,3 +14,13 @@ export { default as ChatMessage } from './ChatMessage';
 export { default as ChatInput } from './ChatInput';
 export { default as QuestionnaireHeader } from './QuestionnaireHeader';
 export { default as ThemesPanel } from './ThemesPanel';
+
+// Modales
+export { 
+  Modal,
+  LogoutModal, 
+  HelpModal, 
+  EndConfirmationModal, 
+  EndWarningModal,
+  OutOfScopeModal 
+} from './Modals';
