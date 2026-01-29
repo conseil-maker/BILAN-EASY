@@ -8,27 +8,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('[Supabase] Variables d\'environnement manquantes. Vérifiez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY');
 }
 
-// Configuration améliorée pour la persistance de session
+// Configuration simplifiée pour la persistance de session
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     // Activer la persistance de session dans localStorage
     persistSession: true,
-    // Stocker la session dans localStorage (par défaut)
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    // Clé de stockage personnalisée pour éviter les conflits
-    storageKey: 'bilan-easy-auth',
     // Rafraîchir automatiquement le token avant expiration
     autoRefreshToken: true,
     // Détecter automatiquement les changements de session dans d'autres onglets
     detectSessionInUrl: true,
-    // Durée de vie du token de rafraîchissement (en secondes) - 7 jours
-    flowType: 'pkce',
-  },
-  // Configuration globale
-  global: {
-    headers: {
-      'x-application-name': 'bilan-easy',
-    },
   },
 });
 
