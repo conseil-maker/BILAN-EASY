@@ -14,7 +14,9 @@ import { LoadingSpinner, FullPageLoader } from './components/LazyComponents';
 
 // Composants principaux
 const ClientApp = lazy(() => import('./components/ClientApp'));
+const ClientAppRefactored = lazy(() => import('./components/ClientAppRefactored'));
 const ClientAppWithSession = lazy(() => import('./components/ClientAppWithSession'));
+const ClientAppRefactoredWithSession = lazy(() => import('./components/ClientAppRefactoredWithSession'));
 
 // Dashboards Admin/Consultant
 const AdminDashboard = lazy(() => 
@@ -338,11 +340,12 @@ const App: React.FC = () => {
     }
 
     // Route pour démarrer un nouveau bilan
+    // Utilise ClientAppRefactoredWithSession pour tester la version refactorisée
     if (route === '/bilan') {
       return (
         <QuestionnaireErrorBoundary>
           <Suspense fallback={<FullPageLoader message="Chargement du bilan..." />}>
-            <ClientApp user={user} />
+            <ClientAppRefactoredWithSession user={user} />
           </Suspense>
         </QuestionnaireErrorBoundary>
       );
