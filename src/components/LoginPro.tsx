@@ -29,10 +29,11 @@ export default function LoginPro({ onToggle }: LoginProProps) {
 
       if (error) throw error;
       
-      // Connexion réussie - forcer un rafraîchissement de la page
+      // Connexion réussie - l'événement SIGNED_IN sera automatiquement capté par AuthWrapper
+      // via onAuthStateChange, pas besoin de reload
       if (data.session) {
-        console.log('[LoginPro] Connexion réussie, rafraîchissement...');
-        window.location.reload();
+        console.log('[LoginPro] Connexion réussie, session établie');
+        // Ne rien faire de plus - AuthWrapper va détecter le changement via onAuthStateChange
       }
     } catch (error: any) {
       setError(error.message || 'Erreur lors de la connexion');

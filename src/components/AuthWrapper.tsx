@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import LoginPro from './LoginPro';
@@ -13,7 +13,6 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSignup, setShowSignup] = useState(false);
-  const initRef = useRef(false);
 
   // Fonction pour récupérer le rôle utilisateur
   const fetchUserRole = useCallback(async (userId: string): Promise<string> => {
@@ -37,13 +36,10 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
 
   // Effet principal - s'exécute une seule fois au montage
   useEffect(() => {
-    // Éviter les doubles initialisations en mode strict
-    if (initRef.current) return;
-    initRef.current = true;
-
     let mounted = true;
 
     const initializeAuth = async () => {
+      console.log('[AuthWrapper] Initialisation de l\'authentification...');
       try {
         // Récupérer la session actuelle
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -54,14 +50,18 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           return;
         }
 
+        console.log('[AuthWrapper] Session récupérée:', !!session);
+
         if (session?.user && mounted) {
           const role = await fetchUserRole(session.user.id);
+          console.log('[AuthWrapper] Rôle utilisateur:', role);
           if (mounted) {
             setUser(session.user);
             setUserRole(role);
             setLoading(false);
           }
         } else if (mounted) {
+          console.log('[AuthWrapper] Pas de session, affichage du login');
           setLoading(false);
         }
       } catch (error) {
@@ -80,6 +80,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         switch (event) {
           case 'SIGNED_IN':
             if (session?.user) {
+              console.log('[AuthWrapper] SIGNED_IN - Utilisateur connecté:', session.user.email);
               const role = await fetchUserRole(session.user.id);
               if (mounted) {
                 setUser(session.user);
@@ -90,6 +91,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             break;
           
           case 'SIGNED_OUT':
+            console.log('[AuthWrapper] SIGNED_OUT - Utilisateur déconnecté');
             if (mounted) {
               setUser(null);
               setUserRole(null);
@@ -98,16 +100,19 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             break;
           
           case 'TOKEN_REFRESHED':
+            console.log('[AuthWrapper] TOKEN_REFRESHED');
             if (session?.user && mounted) {
               setUser(session.user);
             }
             break;
           
           case 'INITIAL_SESSION':
+            console.log('[AuthWrapper] INITIAL_SESSION');
             // Géré par initializeAuth
             break;
           
           default:
+            console.log('[AuthWrapper] Autre événement:', event);
             // Pour les autres événements, mettre à jour si session valide
             if (session?.user && mounted) {
               setUser(session.user);
@@ -137,7 +142,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, []); // Dépendances vides pour n'exécuter qu'une fois
+  }, [fetchUserRole]); // Ajouter fetchUserRole comme dépendance
 
   // Affichage du loader
   if (loading) {
