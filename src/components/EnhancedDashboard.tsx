@@ -18,29 +18,29 @@ interface EnhancedDashboardProps {
 
 // L'onglet Compétences a été retiré - les compétences sont affichées dans la synthèse finale
 
-// Mots-clés pour les GIFs contextuels
+// Mots-clés pour les GIFs contextuels - termes en français pour GIPHY
 const GIF_KEYWORDS: Record<string, string[]> = {
-  carrière: ['career', 'success', 'professional'],
-  compétences: ['skills', 'learning', 'growth'],
-  motivation: ['motivation', 'energy', 'passion'],
-  projet: ['project', 'planning', 'future'],
-  réussite: ['achievement', 'celebration', 'win'],
-  défi: ['challenge', 'determination', 'strength'],
-  équipe: ['team', 'collaboration', 'teamwork'],
-  créativité: ['creative', 'innovation', 'ideas'],
-  leadership: ['leader', 'boss', 'management'],
-  communication: ['communication', 'talking', 'conversation'],
-  valeurs: ['values', 'heart', 'meaningful'],
-  objectifs: ['goals', 'target', 'aim'],
-  changement: ['change', 'transformation', 'new beginning'],
-  stress: ['relax', 'calm', 'peace'],
-  formation: ['learning', 'study', 'education'],
-  parcours: ['journey', 'path', 'road'],
-  expérience: ['experience', 'work', 'professional'],
-  émotion: ['emotion', 'feeling', 'heart'],
-  fierté: ['proud', 'achievement', 'success'],
-  startup: ['startup', 'entrepreneur', 'business'],
-  default: ['thinking', 'working', 'professional']
+  carrière: ['carrière', 'succès professionnel', 'travail'],
+  compétences: ['apprentissage', 'formation', 'compétence'],
+  motivation: ['motivation', 'énergie', 'enthousiasme'],
+  projet: ['projet', 'planification', 'avenir'],
+  réussite: ['réussite', 'félicitations', 'bravo'],
+  défi: ['défi', 'détermination', 'courage'],
+  équipe: ['équipe', 'collaboration', 'ensemble'],
+  créativité: ['créatif', 'innovation', 'idée'],
+  leadership: ['leader', 'manager', 'direction'],
+  communication: ['communication', 'discussion', 'dialogue'],
+  valeurs: ['valeurs', 'cœur', 'sens'],
+  objectifs: ['objectif', 'but', 'cible'],
+  changement: ['changement', 'transformation', 'nouveau départ'],
+  stress: ['zen', 'calme', 'détente'],
+  formation: ['formation', 'étude', 'éducation'],
+  parcours: ['parcours', 'chemin', 'voyage'],
+  expérience: ['expérience', 'travail', 'professionnel'],
+  émotion: ['émotion', 'sentiment', 'cœur'],
+  fierté: ['fier', 'réussite', 'bravo'],
+  startup: ['entrepreneur', 'entreprise', 'business'],
+  default: ['réflexion', 'travail', 'professionnel']
 };
 
 const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
@@ -168,18 +168,18 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
       {/* GIF contextuel - hauteur fixe et bien visible */}
       <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm flex-shrink-0">
         {gifLoading ? (
-          <div className="w-full h-40 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
+          <div className="w-full h-56 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent" />
           </div>
         ) : gifUrl ? (
           <img 
             src={gifUrl} 
             alt="GIF contextuel" 
-            className="w-full h-40 object-cover"
+            className="w-full h-56 object-contain bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-40 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
+          <div className="w-full h-56 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
             <span className="text-4xl">🎯</span>
           </div>
         )}
