@@ -267,6 +267,53 @@ EXEMPLE STYLE COLLABORATIF:
 };
 
 /**
+ * Génère des instructions de transition douce pour les premières questions d'une nouvelle phase
+ * Permet d'éviter les transitions brusques entre les phases du bilan
+ */
+const getPhaseTransitionGuidance = (phase: 'phase1' | 'phase2' | 'phase3', questionCount: number, userName: string): string => {
+    // Phase 2 - Premières questions après la phase préliminaire
+    if (phase === 'phase2' && questionCount < 15) {
+        if (questionCount < 10) {
+            return `
+=== TRANSITION DOUCE VERS L'INVESTIGATION ===
+Nous venons de terminer la phase préliminaire avec ${userName}.
+Pour cette première question d'investigation :
+- Commence par une phrase qui fait le LIEN avec ce qui a été partagé précédemment
+- Pose une question SEMI-OUVERTE (pas trop structurée, pas trop vague)
+- Garde un ton conversationnel et bienveillant
+- Évite les questions trop catégoriques ou analytiques pour l'instant
+
+Exemple de bonne transition :
+"Merci pour ce partage ${userName}. Vous avez mentionné [X]. J'aimerais maintenant explorer un peu plus vos compétences. Parmi toutes les choses que vous faites au quotidien, qu'est-ce qui vous vient le plus naturellement ?"
+===================================`;
+        }
+        return `
+=== PHASE D'INVESTIGATION EN COURS ===
+Nous sommes dans la phase d'investigation. ${userName} est maintenant à l'aise.
+Tu peux poser des questions plus structurées et analytiques, mais toujours avec bienveillance.
+===================================`;
+    }
+    
+    // Phase 3 - Premières questions de conclusion
+    if (phase === 'phase3' && questionCount < 5) {
+        return `
+=== TRANSITION VERS LA CONCLUSION ===
+Nous entrons dans la phase de conclusion avec ${userName}.
+Pour cette transition :
+- Valorise le travail accompli ("Nous avons bien avancé...")
+- Introduis progressivement les questions de projection
+- Maintiens l'élan positif et encourageant
+- Commence à orienter vers l'action concrète
+
+Exemple de bonne transition :
+"${userName}, nous avons exploré beaucoup de choses ensemble. Avant de construire votre plan d'action, j'aimerais savoir : parmi tout ce que nous avons abordé, qu'est-ce qui vous a le plus marqué ou surpris ?"
+===================================`;
+    }
+    
+    return ''; // Pas d'instruction spéciale pour les autres cas
+};
+
+/**
  * Extrait les éléments clés d'une réponse pour personnaliser la question suivante
  */
 const extractKeyElements = (answer: string): string[] => {
@@ -372,7 +419,11 @@ ${significantPhrases.length > 0 ? `💬 PHRASES IMPORTANTES À REPRENDRE:
 ${significantPhrases.map(p => `"${p.trim()}"`).join('\n')}` : ''}
 
 ${previousAnswers.length > 1 ? `📝 QUESTIONS DÉJÀ POSÉES (NE PAS RÉPÉTER NI REFORMULER):
-${previousAnswers.slice(0, -1).map((a, i) => `${i + 1}. "${a.questionTitle || a.questionId}"`).join('\n')}` : ''}
+${previousAnswers.slice(-10, -1).map((a, i) => `${i + 1}. "${a.questionTitle || a.questionId}"`).join('\n')}
+${previousAnswers.length > 10 ? `... et ${previousAnswers.length - 10} autres questions précédentes` : ''}` : ''}
+
+${previousAnswers.length > 5 ? `🎯 THÈMES DÉJÀ ABORDÉS (pour éviter les répétitions):
+${[...new Set(previousAnswers.map(a => a.categoryId).filter(Boolean))].join(', ')}` : ''}
 
 🚨 ALERTE ANTI-RÉPÉTITION 🚨
 Nombre de questions déjà posées: ${previousAnswers.length}
@@ -529,6 +580,8 @@ Utilise les résultats de recherche pour poser une question enrichie qui connect
 ${specialInstruction}
 
 TÂCHE: ${taskDescription}
+
+${getPhaseTransitionGuidance(phaseKey, previousAnswers.length, userName)}
 
 RAPPEL: La question doit être en FRANÇAIS, personnalisée pour ${userName}, et créer un vrai dialogue engageant.
 Le champ "description" peut contenir une phrase d'accroche ou de transition qui valorise la réponse précédente.

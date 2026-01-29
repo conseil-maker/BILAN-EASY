@@ -240,7 +240,7 @@ export function generateSmartQuestion(
   const question: Question = {
     id: `smart_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
     title: finalQuestion,
-    description: "Question générée en fonction de votre réponse précédente.",
+    description: undefined,
     type: QuestionType.PARAGRAPH,
     theme: selectedTheme,
     required: true

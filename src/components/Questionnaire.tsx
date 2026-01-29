@@ -1248,7 +1248,41 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             </svg>
                             Dashboard
                         </button>
-                        {speechSynthSupported && <button onClick={() => isSpeaking ? cancel() : speak(messages[messages.length - 1]?.text as string)} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="Lecture vocale"><SpeakerIcon active={isSpeaking} /></button>}
+                        {speechSynthSupported && (
+                            <div className="relative group">
+                                <button 
+                                    onClick={() => {
+                                        if (isSpeaking) {
+                                            cancel();
+                                        } else {
+                                            // Activer automatiquement la lecture si désactivée
+                                            if (!settings.enabled) {
+                                                onSettingsChange({ enabled: true });
+                                            }
+                                            const lastMessage = messages[messages.length - 1]?.text;
+                                            if (lastMessage) speak(lastMessage as string);
+                                        }
+                                    }} 
+                                    className={`relative p-1.5 rounded-lg transition-all duration-200 ${
+                                        settings.enabled 
+                                            ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30' 
+                                            : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
+                                    } ${isSpeaking ? 'animate-pulse' : ''}`}
+                                    title={settings.enabled ? (isSpeaking ? 'Arrêter la lecture' : 'Lire le message') : 'Activer et lire'}
+                                    aria-label={settings.enabled ? (isSpeaking ? 'Arrêter la lecture vocale' : 'Lire le dernier message') : 'Activer la lecture vocale'}
+                                >
+                                    <SpeakerIcon active={isSpeaking} />
+                                    {/* Indicateur d'état */}
+                                    {settings.enabled && (
+                                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white dark:border-slate-800"></span>
+                                    )}
+                                </button>
+                                {/* Tooltip au survol */}
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                                    {settings.enabled ? (isSpeaking ? 'Cliquez pour arrêter' : 'Cliquez pour lire') : 'Cliquez pour activer'}
+                                </div>
+                            </div>
+                        )}
                         <button onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300" title={isDarkMode ? 'Mode clair' : 'Mode sombre'} aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}>
                             {isDarkMode ? (
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1271,14 +1305,17 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </button>
-                        <button 
-                            onClick={() => setShowSettings(!showSettings)} 
-                            className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-1" 
-                            title="Paramètres"
-                            aria-label="Ouvrir les paramètres de lecture vocale"
-                        >
-                            <SettingsIcon />
-                        </button>
+                        {/* Bouton paramètres vocaux avancés - affiché uniquement si la lecture est activée */}
+                        {speechSynthSupported && settings.enabled && (
+                            <button 
+                                onClick={() => setShowSettings(!showSettings)} 
+                                className={`text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-1 ${showSettings ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : ''}`}
+                                title="Paramètres vocaux (voix, vitesse, tonalité)"
+                                aria-label="Ouvrir les paramètres avancés de lecture vocale"
+                            >
+                                <SettingsIcon />
+                            </button>
+                        )}
                         <button 
                             onClick={handleLogout} 
                             className="text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none rounded-lg p-1" 
