@@ -22,6 +22,19 @@ export default function LoginPro({ onToggle }: LoginProProps) {
     setError(null);
 
     try {
+      // Nettoyer les anciens tokens avant la connexion pour éviter les conflits
+      const supabaseKey = Object.keys(localStorage).find(key => key.includes('supabase') && key.includes('auth'));
+      if (supabaseKey) {
+        console.log('[LoginPro] Nettoyage de l\'ancien token:', supabaseKey);
+        localStorage.removeItem(supabaseKey);
+      }
+      
+      // Se déconnecter d'abord pour nettoyer l'état
+      await supabase.auth.signOut();
+      
+      // Attendre un court instant pour que le signOut soit traité
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
