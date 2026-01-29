@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardData } from '../types';
 import WordCloud from './WordCloud';
-// Note: RadarChart et HorizontalBarChart sont réservés pour la synthèse finale
-// import { RadarChart, HorizontalBarChart } from './CompetenceCharts';
 
 interface EnhancedDashboardProps {
   data: DashboardData | null;
@@ -12,35 +10,131 @@ interface EnhancedDashboardProps {
   questionsAnswered?: number;
   totalQuestions?: number;
   timeSpent?: number;
-  lastQuestion?: string; // Pour le GIF contextuel
-  onCollapse?: () => void; // Callback pour masquer le panneau depuis le parent
+  lastQuestion?: string;
+  onCollapse?: () => void;
 }
 
-// L'onglet Compétences a été retiré - les compétences sont affichées dans la synthèse finale
+// Citations inspirantes pour le développement professionnel
+const INSPIRATIONAL_QUOTES = [
+  {
+    text: "Le succès n'est pas la clé du bonheur. Le bonheur est la clé du succès.",
+    author: "Albert Schweitzer",
+    theme: "motivation"
+  },
+  {
+    text: "Choisissez un travail que vous aimez et vous n'aurez pas à travailler un seul jour de votre vie.",
+    author: "Confucius",
+    theme: "carrière"
+  },
+  {
+    text: "La seule façon de faire du bon travail est d'aimer ce que vous faites.",
+    author: "Steve Jobs",
+    theme: "passion"
+  },
+  {
+    text: "Votre temps est limité, ne le gâchez pas en vivant la vie de quelqu'un d'autre.",
+    author: "Steve Jobs",
+    theme: "authenticité"
+  },
+  {
+    text: "Le talent gagne des matchs, mais le travail d'équipe gagne des championnats.",
+    author: "Michael Jordan",
+    theme: "équipe"
+  },
+  {
+    text: "La créativité, c'est l'intelligence qui s'amuse.",
+    author: "Albert Einstein",
+    theme: "créativité"
+  },
+  {
+    text: "N'ayez pas peur de renoncer au bon pour aller vers le meilleur.",
+    author: "John D. Rockefeller",
+    theme: "changement"
+  },
+  {
+    text: "Le leadership, c'est l'art de donner aux gens une plateforme pour répandre des idées qui fonctionnent.",
+    author: "Seth Godin",
+    theme: "leadership"
+  },
+  {
+    text: "La connaissance s'acquiert par l'expérience, tout le reste n'est que de l'information.",
+    author: "Albert Einstein",
+    theme: "expérience"
+  },
+  {
+    text: "Ce n'est pas parce que les choses sont difficiles que nous n'osons pas, c'est parce que nous n'osons pas qu'elles sont difficiles.",
+    author: "Sénèque",
+    theme: "courage"
+  },
+  {
+    text: "Le meilleur moment pour planter un arbre était il y a 20 ans. Le deuxième meilleur moment est maintenant.",
+    author: "Proverbe chinois",
+    theme: "action"
+  },
+  {
+    text: "Vos compétences vous ouvrent des portes, mais c'est votre caractère qui vous y maintient.",
+    author: "Anonyme",
+    theme: "compétences"
+  },
+  {
+    text: "L'échec est simplement l'opportunité de recommencer, cette fois plus intelligemment.",
+    author: "Henry Ford",
+    theme: "résilience"
+  },
+  {
+    text: "La communication est une compétence que vous pouvez apprendre. C'est comme faire du vélo.",
+    author: "Brian Tracy",
+    theme: "communication"
+  },
+  {
+    text: "Les grandes choses ne sont jamais faites par une seule personne. Elles sont faites par une équipe.",
+    author: "Steve Jobs",
+    theme: "collaboration"
+  }
+];
 
-// Mots-clés pour les GIFs contextuels - termes en français pour GIPHY
-const GIF_KEYWORDS: Record<string, string[]> = {
-  carrière: ['carrière', 'succès professionnel', 'travail'],
-  compétences: ['apprentissage', 'formation', 'compétence'],
-  motivation: ['motivation', 'énergie', 'enthousiasme'],
-  projet: ['projet', 'planification', 'avenir'],
-  réussite: ['réussite', 'félicitations', 'bravo'],
-  défi: ['défi', 'détermination', 'courage'],
-  équipe: ['équipe', 'collaboration', 'ensemble'],
-  créativité: ['créatif', 'innovation', 'idée'],
-  leadership: ['leader', 'manager', 'direction'],
-  communication: ['communication', 'discussion', 'dialogue'],
-  valeurs: ['valeurs', 'cœur', 'sens'],
-  objectifs: ['objectif', 'but', 'cible'],
-  changement: ['changement', 'transformation', 'nouveau départ'],
-  stress: ['zen', 'calme', 'détente'],
-  formation: ['formation', 'étude', 'éducation'],
-  parcours: ['parcours', 'chemin', 'voyage'],
-  expérience: ['expérience', 'travail', 'professionnel'],
-  émotion: ['émotion', 'sentiment', 'cœur'],
-  fierté: ['fier', 'réussite', 'bravo'],
-  startup: ['entrepreneur', 'entreprise', 'business'],
-  default: ['réflexion', 'travail', 'professionnel']
+// Conseils contextuels basés sur les mots-clés
+const CONTEXTUAL_TIPS: Record<string, { icon: string; tip: string }> = {
+  compétences: {
+    icon: "💡",
+    tip: "Pensez à des situations concrètes où vous avez utilisé cette compétence avec succès."
+  },
+  valeurs: {
+    icon: "❤️",
+    tip: "Vos valeurs sont le socle de votre épanouissement professionnel. Prenez le temps d'y réfléchir."
+  },
+  motivation: {
+    icon: "🔥",
+    tip: "Ce qui vous motive révèle souvent vos talents naturels et vos aspirations profondes."
+  },
+  projet: {
+    icon: "🎯",
+    tip: "Un projet professionnel réussi aligne vos compétences, vos valeurs et vos aspirations."
+  },
+  parcours: {
+    icon: "🛤️",
+    tip: "Chaque expérience de votre parcours vous a apporté des compétences uniques."
+  },
+  changement: {
+    icon: "🌱",
+    tip: "Le changement est une opportunité de croissance. Accueillez-le avec curiosité."
+  },
+  équipe: {
+    icon: "🤝",
+    tip: "Réfléchissez à votre rôle naturel dans une équipe : leader, médiateur, créatif, organisateur ?"
+  },
+  formation: {
+    icon: "📚",
+    tip: "L'apprentissage continu est la clé de l'adaptabilité professionnelle."
+  },
+  stress: {
+    icon: "🧘",
+    tip: "Identifier vos sources de stress permet de mieux les gérer et de préserver votre énergie."
+  },
+  default: {
+    icon: "💭",
+    tip: "Prenez le temps de réfléchir. Il n'y a pas de mauvaise réponse, seulement votre vérité."
+  }
 };
 
 const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
@@ -49,110 +143,45 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
   lastQuestion,
   onCollapse,
 }) => {
-  // viewMode retiré - affichage uniquement des thèmes
-  const [gifUrl, setGifUrl] = useState<string | null>(null);
-  const [gifLoading, setGifLoading] = useState(false);
-  const lastQuestionRef = useRef<string | null>(null);
+  const [currentQuote, setCurrentQuote] = useState(INSPIRATIONAL_QUOTES[0]);
+  const [contextualTip, setContextualTip] = useState(CONTEXTUAL_TIPS.default);
 
-  // Note: Les graphiques de compétences (radarData, barData) sont réservés pour la synthèse finale
-
-  // Charger un GIF contextuel basé sur la dernière question
+  // Changer la citation et le conseil en fonction de la question
   useEffect(() => {
-    const fetchGif = async () => {
-      // Ne pas recharger si la question n'a pas changé
-      if (!lastQuestion || lastQuestion === lastQuestionRef.current) {
-        return;
-      }
-      
-      lastQuestionRef.current = lastQuestion;
-      setGifLoading(true);
-
-      // Trouver le mot-clé correspondant dans la question
+    if (lastQuestion) {
       const questionLower = lastQuestion.toLowerCase();
-      let searchTerm = 'professional';
-      let foundKeyword = false;
       
-      for (const [keyword, terms] of Object.entries(GIF_KEYWORDS)) {
+      // Trouver une citation pertinente
+      const relevantQuotes = INSPIRATIONAL_QUOTES.filter(q => 
+        questionLower.includes(q.theme) || 
+        q.text.toLowerCase().includes(questionLower.split(' ').find(w => w.length > 5) || '')
+      );
+      
+      if (relevantQuotes.length > 0) {
+        setCurrentQuote(relevantQuotes[Math.floor(Math.random() * relevantQuotes.length)]);
+      } else {
+        // Citation aléatoire si aucune correspondance
+        setCurrentQuote(INSPIRATIONAL_QUOTES[Math.floor(Math.random() * INSPIRATIONAL_QUOTES.length)]);
+      }
+
+      // Trouver un conseil contextuel
+      let foundTip = false;
+      for (const [keyword, tip] of Object.entries(CONTEXTUAL_TIPS)) {
         if (keyword !== 'default' && questionLower.includes(keyword)) {
-          searchTerm = terms[Math.floor(Math.random() * terms.length)];
-          foundKeyword = true;
+          setContextualTip(tip);
+          foundTip = true;
           break;
         }
       }
-
-      // Si aucun mot-clé trouvé, utiliser les thèmes émergents ou un terme par défaut
-      if (!foundKeyword) {
-        if (data?.themes && data.themes.length > 0) {
-          const topTheme = data.themes[0].text.toLowerCase();
-          for (const [keyword, terms] of Object.entries(GIF_KEYWORDS)) {
-            if (keyword !== 'default' && topTheme.includes(keyword)) {
-              searchTerm = terms[Math.floor(Math.random() * terms.length)];
-              break;
-            }
-          }
-        } else {
-          // Utiliser un terme par défaut aléatoire
-          const defaultTerms = GIF_KEYWORDS.default;
-          searchTerm = defaultTerms[Math.floor(Math.random() * defaultTerms.length)];
-        }
+      if (!foundTip) {
+        setContextualTip(CONTEXTUAL_TIPS.default);
       }
-
-      try {
-        // Utiliser l'API GIPHY avec la clé publique officielle pour les développeurs
-        const GIPHY_API_KEY = 'GlVGYHkr3WSBnllca54iNt0yFbjz7L65';
-        const response = await fetch(
-          `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(searchTerm)}&limit=10&rating=g&lang=fr`,
-          { signal: AbortSignal.timeout(5000) } // Timeout de 5 secondes
-        );
-        
-        if (!response.ok) {
-          throw new Error(`Erreur API GIPHY: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        if (result.data && result.data.length > 0) {
-          const randomIndex = Math.floor(Math.random() * Math.min(result.data.length, 5));
-          // Utiliser fixed_height au lieu de fixed_height_small pour une meilleure qualité
-          const newGifUrl = result.data[randomIndex].images?.fixed_height?.url;
-          if (newGifUrl) {
-            setGifUrl(newGifUrl);
-          } else {
-            console.log('URL GIF invalide pour:', searchTerm);
-          }
-        } else {
-          // Fallback: garder le GIF précédent ou utiliser un terme générique
-          console.log('Aucun GIF trouvé pour:', searchTerm, '- essai avec terme générique');
-          // Essayer avec un terme générique
-          const fallbackResponse = await fetch(
-            `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=professional+success&limit=5&rating=g`,
-            { signal: AbortSignal.timeout(3000) }
-          );
-          if (fallbackResponse.ok) {
-            const fallbackResult = await fallbackResponse.json();
-            if (fallbackResult.data?.[0]?.images?.fixed_height?.url) {
-              setGifUrl(fallbackResult.data[0].images.fixed_height.url);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Erreur chargement GIF:', error);
-        // Garder le GIF précédent en cas d'erreur, ou mettre null pour afficher l'émoji
-        if (!gifUrl) {
-          setGifUrl(null);
-        }
-      } finally {
-        setGifLoading(false);
-      }
-    };
-
-    fetchGif();
-  }, [lastQuestion, data?.themes]);
-
-  // Le masquage complet est géré par le parent via onCollapse
+    }
+  }, [lastQuestion]);
 
   return (
     <div className="space-y-4 relative h-full flex flex-col">
-      {/* Bouton pour replier le panneau - masque TOUT le volet */}
+      {/* Bouton pour replier le panneau */}
       {onCollapse && (
         <button
           onClick={onCollapse}
@@ -165,34 +194,39 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
         </button>
       )}
 
-      {/* GIF contextuel - hauteur fixe et bien visible */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm flex-shrink-0">
-        {gifLoading ? (
-          <div className="w-full h-56 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent" />
+      {/* Citation inspirante */}
+      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800 shadow-sm flex-shrink-0">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl flex-shrink-0">💬</span>
+          <div className="flex-1">
+            <p className="text-sm text-gray-700 dark:text-gray-200 italic leading-relaxed">
+              "{currentQuote.text}"
+            </p>
+            <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-2 font-medium">
+              — {currentQuote.author}
+            </p>
           </div>
-        ) : gifUrl ? (
-          <img 
-            src={gifUrl} 
-            alt="GIF contextuel" 
-            className="w-full h-56 object-contain bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-56 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
-            <span className="text-4xl">🎯</span>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* Titre du panneau - Thèmes Émergents uniquement */}
+      {/* Conseil contextuel */}
+      <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 border border-amber-100 dark:border-amber-800 flex-shrink-0">
+        <div className="flex items-start gap-2">
+          <span className="text-xl flex-shrink-0">{contextualTip.icon}</span>
+          <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+            <strong>Conseil :</strong> {contextualTip.tip}
+          </p>
+        </div>
+      </div>
+
+      {/* Titre du panneau - Thèmes Émergents */}
       <div className="flex items-center justify-center p-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-lg flex-shrink-0">
         <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-2">
           <span>🏷️</span> Thèmes Émergents
         </span>
       </div>
 
-      {/* Contenu - Thèmes émergents uniquement */}
+      {/* Contenu - Thèmes émergents */}
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="space-y-3">
           {isLoading && !data ? (
