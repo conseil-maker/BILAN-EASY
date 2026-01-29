@@ -1049,3 +1049,190 @@ Langue: Français.`;
         return "Qu'est-ce qui vous attire ou vous freine dans cette direction ?";
     }
 };
+
+
+// ============================================
+// DÉTECTION DES RÉPONSES HORS-CADRE
+// ============================================
+
+/**
+ * Interface pour le résultat de l'analyse de réponse
+ */
+export interface ResponseAnalysisResult {
+    isInScope: boolean;           // La réponse est-elle dans le cadre du bilan de compétences ?
+    issueType: 'none' | 'age_inappropriate' | 'context_mismatch' | 'nonsense' | 'inappropriate_content' | 'off_topic';
+    severity: 'none' | 'low' | 'medium' | 'high' | 'critical';
+    message: string;              // Message à afficher au bénéficiaire
+    shouldContinue: boolean;      // Peut-on continuer le bilan ?
+    suggestedAction: 'continue' | 'redirect' | 'clarify' | 'stop';
+}
+
+// Schéma pour l'analyse de réponse
+const responseAnalysisSchema = {
+    type: Type.OBJECT,
+    properties: {
+        isInScope: { 
+            type: Type.BOOLEAN, 
+            description: "True si la réponse est cohérente avec un bilan de compétences pour adulte en activité ou en recherche d'emploi" 
+        },
+        issueType: { 
+            type: Type.STRING, 
+            enum: ["none", "age_inappropriate", "context_mismatch", "nonsense", "inappropriate_content", "off_topic"],
+            description: "Type de problème détecté: none (aucun), age_inappropriate (mineur/étudiant), context_mismatch (situation hors cadre), nonsense (réponse incohérente), inappropriate_content (contenu inapproprié), off_topic (hors sujet)"
+        },
+        severity: { 
+            type: Type.STRING, 
+            enum: ["none", "low", "medium", "high", "critical"],
+            description: "Gravité: none (ok), low (léger recadrage), medium (clarification nécessaire), high (situation problématique), critical (arrêt recommandé)"
+        },
+        message: { 
+            type: Type.STRING, 
+            description: "Message bienveillant et professionnel à afficher au bénéficiaire en français" 
+        },
+        shouldContinue: { 
+            type: Type.BOOLEAN, 
+            description: "True si le bilan peut continuer, False si arrêt recommandé" 
+        },
+        suggestedAction: { 
+            type: Type.STRING, 
+            enum: ["continue", "redirect", "clarify", "stop"],
+            description: "Action suggérée: continue (poursuivre normalement), redirect (recentrer la conversation), clarify (demander des précisions), stop (proposer d'arrêter)"
+        }
+    },
+    required: ["isInScope", "issueType", "severity", "message", "shouldContinue", "suggestedAction"]
+};
+
+/**
+ * Analyse une réponse pour détecter si elle est hors-cadre du bilan de compétences
+ * 
+ * Cas détectés :
+ * - Mineur/collégien/lycéen (le bilan de compétences est réservé aux adultes)
+ * - Situation ne correspondant pas au cadre (ex: demande d'aide aux devoirs)
+ * - Réponses incohérentes ou non-sens
+ * - Contenu inapproprié
+ * - Digressions importantes hors sujet
+ */
+export const analyzeResponseScope = async (
+    currentAnswer: string,
+    previousAnswers: Answer[],
+    currentQuestion: string,
+    userName: string
+): Promise<ResponseAnalysisResult> => {
+    // Construire le contexte des réponses précédentes
+    const recentHistory = previousAnswers.slice(-5).map(a => 
+        `Q: ${a.questionTitle || a.questionId}\nR: ${a.value}`
+    ).join('\n\n');
+    
+    const prompt = `Tu es un expert en bilan de compétences. Analyse la réponse suivante pour vérifier si elle est cohérente avec le cadre d'un bilan de compétences.
+
+=== CADRE DU BILAN DE COMPÉTENCES ===
+Le bilan de compétences est un dispositif réservé aux :
+- Adultes (18 ans minimum, généralement salariés ou demandeurs d'emploi)
+- Personnes ayant une expérience professionnelle ou en reconversion
+- Personnes cherchant à faire le point sur leur carrière, compétences, projet professionnel
+
+Le bilan de compétences N'EST PAS adapté pour :
+- Les mineurs (collégiens, lycéens)
+- Les étudiants sans expérience professionnelle significative
+- L'orientation scolaire (choix de filière au collège/lycée)
+- Les demandes hors contexte professionnel
+
+=== CONTEXTE ACTUEL ===
+Bénéficiaire: ${userName}
+
+Historique récent:
+${recentHistory || 'Début du bilan'}
+
+Question posée:
+${currentQuestion}
+
+Réponse du bénéficiaire:
+${currentAnswer}
+
+=== TÂCHE ===
+Analyse cette réponse et détermine :
+1. Est-elle cohérente avec le cadre d'un bilan de compétences ?
+2. Y a-t-il un problème (âge, contexte, cohérence) ?
+3. Quelle action recommander ?
+
+IMPORTANT :
+- Sois bienveillant et professionnel dans le message
+- Si la personne est mineure ou étudiante, explique gentiment que le bilan de compétences n'est pas adapté à sa situation
+- Si la réponse est hors sujet mais pas critique, propose de recentrer la conversation
+- Ne sois pas trop strict : une digression légère est acceptable
+
+Réponds en JSON. Langue: Français.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',  // Utiliser le modèle rapide pour cette analyse
+            contents: prompt,
+            config: { responseMimeType: "application/json", responseSchema: responseAnalysisSchema },
+        });
+        return parseJsonResponse<ResponseAnalysisResult>(response.text, 'analyzeResponseScope');
+    } catch (error) {
+        console.error('[analyzeResponseScope] Error:', error);
+        // En cas d'erreur, continuer normalement
+        return {
+            isInScope: true,
+            issueType: 'none',
+            severity: 'none',
+            message: '',
+            shouldContinue: true,
+            suggestedAction: 'continue'
+        };
+    }
+};
+
+/**
+ * Génère un message de recadrage bienveillant
+ */
+export const generateRedirectMessage = async (
+    issueType: string,
+    userName: string,
+    context: string
+): Promise<string> => {
+    const issueDescriptions: Record<string, string> = {
+        'age_inappropriate': "Le bénéficiaire semble être mineur ou étudiant sans expérience professionnelle",
+        'context_mismatch': "La demande ne correspond pas au cadre d'un bilan de compétences",
+        'nonsense': "La réponse est incohérente ou ne fait pas sens",
+        'inappropriate_content': "Le contenu est inapproprié",
+        'off_topic': "La réponse est hors sujet par rapport à la question"
+    };
+
+    const prompt = `Tu es un conseiller en bilan de compétences bienveillant et professionnel.
+
+SITUATION:
+${issueDescriptions[issueType] || "Un problème a été détecté dans la réponse"}
+
+CONTEXTE:
+${context}
+
+TÂCHE:
+Génère un message bienveillant et professionnel pour ${userName} qui :
+1. Reconnaît ce qu'il/elle a partagé
+2. Explique gentiment pourquoi le bilan de compétences n'est peut-être pas adapté à sa situation actuelle OU recentre la conversation
+3. Propose une alternative ou une suite appropriée
+
+${issueType === 'age_inappropriate' ? `
+IMPORTANT pour les mineurs/étudiants :
+- Expliquer que le bilan de compétences est un dispositif pour les adultes ayant une expérience professionnelle
+- Suggérer des alternatives : conseiller d'orientation scolaire, CIO (Centre d'Information et d'Orientation), Parcoursup
+- Rester encourageant sur leur démarche de réflexion sur l'avenir
+` : ''}
+
+Le message doit être chaleureux, pas condescendant, et aider la personne à comprendre la situation.
+Réponds uniquement avec le message, sans introduction.
+Langue: Français.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        });
+        return response.text?.trim() || "Je vous remercie pour votre partage. Pourriez-vous me donner plus de détails sur votre situation professionnelle actuelle ?";
+    } catch (error) {
+        console.error('[generateRedirectMessage] Error:', error);
+        return "Je vous remercie pour votre partage. Pourriez-vous me donner plus de détails sur votre situation professionnelle actuelle ?";
+    }
+};

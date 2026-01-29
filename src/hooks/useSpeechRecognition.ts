@@ -99,5 +99,11 @@ export const useSpeechRecognition = (options: SpeechRecognitionOptions = {}) => 
     }
   }, [isListening]);
 
-  return { isListening, isSupported, interimTranscript, finalTranscript, startListening, stopListening };
+  // Fonction pour réinitialiser les transcripts (utile après envoi d'un message)
+  const clearTranscript = useCallback(() => {
+    setInterimTranscript('');
+    setFinalTranscript('');
+  }, []);
+
+  return { isListening, isSupported, interimTranscript, finalTranscript, startListening, stopListening, clearTranscript };
 };

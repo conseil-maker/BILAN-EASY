@@ -340,12 +340,11 @@ const App: React.FC = () => {
     }
 
     // Route pour démarrer un nouveau bilan
-    // Utilise ClientAppRefactoredWithSession pour tester la version refactorisée
     if (route === '/bilan') {
       return (
         <QuestionnaireErrorBoundary>
           <Suspense fallback={<FullPageLoader message="Chargement du bilan..." />}>
-            <ClientAppRefactoredWithSession user={user} />
+            <ClientApp user={user} />
           </Suspense>
         </QuestionnaireErrorBoundary>
       );

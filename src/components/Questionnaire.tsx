@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Package, Answer, Question, QuestionType, Message, CurrentPhaseInfo, Summary, UserProfile, DashboardData, CoachingStyle } from '../types';
-import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule, detectCareerExplorationNeed, CareerPath, ExplorationNeedResult } from '../services/geminiService';
+import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule, detectCareerExplorationNeed, CareerPath, ExplorationNeedResult, analyzeResponseScope, ResponseAnalysisResult } from '../services/geminiService';
 import { CareerExploration } from './CareerExploration';
 import { QUESTION_CATEGORIES, getTimeBudget, getCurrentPhase, isJourneyComplete, determineQuestionComplexity, shouldDeepenCategory, QUESTION_COMPLEXITY_TIME } from '../constants';
 import { calculateProgression, ProgressionInfo } from '../services/progressionService';
@@ -92,11 +92,16 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [endWarningShown, setEndWarningShown] = useState(false); // Pour ne pas réafficher
     const [showEndConfirmation, setShowEndConfirmation] = useState(false); // Confirmation avant synthèse
     const [userWantsToDeepen, setUserWantsToDeepen] = useState(false); // Si l'utilisateur veut approfondir
+    
+    // États pour la détection des réponses hors-cadre
+    const [showOutOfScopeModal, setShowOutOfScopeModal] = useState(false);
+    const [outOfScopeAnalysis, setOutOfScopeAnalysis] = useState<ResponseAnalysisResult | null>(null);
+    const [outOfScopeWarningCount, setOutOfScopeWarningCount] = useState(0); // Compteur d'avertissements
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
     const { isSpeaking, isSupported: speechSynthSupported, voices, settings, speak, cancel, onSettingsChange } = useSpeechSynthesis();
-    const { isListening, isSupported: speechRecSupported, interimTranscript, finalTranscript, startListening, stopListening } = useSpeechRecognition({ lang: 'fr-FR' });
+    const { isListening, isSupported: speechRecSupported, interimTranscript, finalTranscript, startListening, stopListening, clearTranscript } = useSpeechRecognition({ lang: 'fr-FR' });
     const { isDarkMode, toggleDarkMode } = useDarkMode();
     const { showSuccess, showError, showInfo } = useToast();
     const [userId, setUserId] = useState<string | undefined>(undefined);
@@ -112,7 +117,13 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
 
     // Auto-save géré par Supabase dans ClientApp
 
-    useEffect(() => { setTextInput(interimTranscript || finalTranscript); }, [interimTranscript, finalTranscript]);
+    // Synchroniser la dictée vocale avec le champ de saisie
+    // Ne pas écraser si les deux sont vides (pour éviter de réinjecter après envoi)
+    useEffect(() => {
+      if (interimTranscript || finalTranscript) {
+        setTextInput(interimTranscript || finalTranscript);
+      }
+    }, [interimTranscript, finalTranscript]);
     const scrollToBottom = () => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); };
     useEffect(scrollToBottom, [messages]);
 
@@ -426,6 +437,38 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 // console.log(`[runNextStep] Transition de phase: ${prevInfo.phase} -> ${info.phase}`);
                 setUnlockedBadge(`Phase ${prevInfo.phase} : ${prevInfo.name}`);
                 
+                // === MESSAGE DE TRANSITION DE PHASE ===
+                // Ajouter un message explicite pour annoncer le passage à la nouvelle phase
+                const transitionMessages: Record<string, { recap: string; intro: string }> = {
+                    '1_to_2': {
+                        recap: `🌟 Excellent travail ${userName} ! Nous avons terminé la **Phase Préliminaire**. J'ai maintenant une bonne compréhension de votre situation actuelle, de vos motivations pour ce bilan et de vos attentes.`,
+                        intro: `Nous passons maintenant à la **Phase d'Investigation** - le cœur du bilan. Nous allons explorer en profondeur vos compétences (techniques et transversales), vos valeurs professionnelles, vos motivations profondes et les possibilités d'évolution qui s'offrent à vous. Cette phase est plus approfondie, prenez le temps de réfléchir à chaque question. 💪`
+                    },
+                    '2_to_3': {
+                        recap: `🎯 Bravo ${userName} ! La **Phase d'Investigation** est terminée. Nous avons identifié vos compétences clés, vos valeurs, vos motivations et exploré plusieurs pistes professionnelles.`,
+                        intro: `Nous entrons maintenant dans la **Phase de Conclusion**. C'est le moment de valider votre projet professionnel, de construire un plan d'action concret et de vous projeter dans l'avenir. Nous allons transformer toute cette réflexion en actions concrètes ! 🚀`
+                    }
+                };
+                
+                const transitionKey = `${prevInfo.phase}_to_${info.phase}`;
+                const transition = transitionMessages[transitionKey];
+                
+                if (transition) {
+                    // Ajouter le message de récapitulatif
+                    setMessages(prev => [...prev, {
+                        sender: 'ai',
+                        text: transition.recap
+                    }]);
+                    
+                    // Ajouter le message d'introduction de la nouvelle phase après un court délai
+                    setTimeout(() => {
+                        setMessages(prev => [...prev, {
+                            sender: 'ai',
+                            text: transition.intro
+                        }]);
+                    }, 1500);
+                }
+                
                 // Vérifier si un module optionnel est suggéré (seulement si pas déjà refusé)
                 try {
                     const moduleSuggestion = await suggestOptionalModule(currentAnswers);
@@ -546,13 +589,60 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         }
     }, [synthesisConfirmed, answers, runNextStep]);
 
-    const handleAnswerSubmit = (value: string) => {
+    const handleAnswerSubmit = async (value: string) => {
         if (isLoading || !currentQuestion || isAwaitingSynthesisConfirmation) return;
         cancel();
         
         // Désactiver le micro automatiquement après l'envoi du message
         if (isListening) {
             stopListening();
+        }
+        
+        // === DÉTECTION DES RÉPONSES HORS-CADRE ===
+        // Analyser la réponse pour détecter les situations problématiques
+        // (mineur, hors contexte, non-sens, etc.)
+        // Activer uniquement pour les premières réponses ou si déjà averti
+        if (answers.length < 5 || outOfScopeWarningCount > 0) {
+            try {
+                const scopeAnalysis = await analyzeResponseScope(
+                    value,
+                    answers,
+                    currentQuestion.title || currentQuestion.text || '',
+                    userName
+                );
+                
+                // Si la réponse est hors-cadre avec une sévérité moyenne ou plus
+                if (!scopeAnalysis.isInScope && ['medium', 'high', 'critical'].includes(scopeAnalysis.severity)) {
+                    setOutOfScopeAnalysis(scopeAnalysis);
+                    setOutOfScopeWarningCount(prev => prev + 1);
+                    
+                    // Ajouter le message de l'utilisateur quand même
+                    setMessages(prev => [...prev, { sender: 'user', text: value }]);
+                    
+                    // Afficher le message de recadrage de l'IA
+                    setMessages(prev => [...prev, { 
+                        sender: 'ai', 
+                        text: scopeAnalysis.message,
+                        isRedirect: true
+                    }]);
+                    
+                    // Si arrêt recommandé (cas critique), afficher le modal
+                    if (scopeAnalysis.suggestedAction === 'stop' || scopeAnalysis.severity === 'critical') {
+                        setShowOutOfScopeModal(true);
+                        return;
+                    }
+                    
+                    // Sinon, continuer mais ne pas enregistrer cette réponse
+                    // et reposer une question pour recentrer
+                    setTextInput('');
+                    clearTranscript();
+                    await fetchNextQuestion({}, 0, answers);
+                    return;
+                }
+            } catch (error) {
+                console.error('[handleAnswerSubmit] Erreur analyse hors-cadre:', error);
+                // En cas d'erreur, continuer normalement
+            }
         }
         
         // Déterminer la complexité de la question (estimée par la longueur de la réponse et le contexte)
@@ -574,6 +664,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         setAnswers(newAnswers);
         onAnswersUpdate?.(newAnswers); // Synchroniser avec ClientApp pour sauvegarde Supabase
         setTextInput('');
+        clearTranscript(); // Réinitialiser la dictée vocale pour éviter la réinjection
         
         // Mettre à jour le progrès de la catégorie
         if (currentCategoryId) {
@@ -885,6 +976,61 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             onSelectPath={handleCareerPathSelect}
                             onFollowUpAnswer={handleCareerFollowUpAnswer}
                         />
+                    </div>
+                </div>
+            )}
+            
+            {/* Modal pour les situations hors-cadre critiques */}
+            {showOutOfScopeModal && outOfScopeAnalysis && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-lg mx-4 shadow-2xl">
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Information importante</h3>
+                            <p className="text-slate-600 dark:text-slate-300 mb-6 text-left">
+                                {outOfScopeAnalysis.message}
+                            </p>
+                            
+                            {outOfScopeAnalysis.issueType === 'age_inappropriate' && (
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6 text-left">
+                                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">📚 Ressources adaptées :</h4>
+                                    <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                                        <li>• <strong>CIO</strong> (Centre d'Information et d'Orientation) - Gratuit</li>
+                                        <li>• <strong>Conseiller d'orientation scolaire</strong> de votre établissement</li>
+                                        <li>• <strong>Parcoursup</strong> pour l'orientation post-bac</li>
+                                        <li>• <strong>ONISEP</strong> - onisep.fr pour explorer les métiers</li>
+                                    </ul>
+                                </div>
+                            )}
+                            
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        setShowOutOfScopeModal(false);
+                                        // Rediriger vers la page d'accueil ou le dashboard
+                                        onDashboard();
+                                    }}
+                                    className="flex-1 px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                                >
+                                    Retour au tableau de bord
+                                </button>
+                                {outOfScopeAnalysis.severity !== 'critical' && (
+                                    <button
+                                        onClick={() => {
+                                            setShowOutOfScopeModal(false);
+                                            fetchNextQuestion({}, 0, answers);
+                                        }}
+                                        className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors"
+                                    >
+                                        Continuer quand même
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
