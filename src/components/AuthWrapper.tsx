@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import LoginPro from './LoginPro';
@@ -13,6 +13,10 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSignup, setShowSignup] = useState(false);
+  
+  // Ref pour suivre si on vient de se connecter (pour ignorer les SIGNED_OUT intempestifs)
+  const justSignedInRef = useRef(false);
+  const signedInTimestampRef = useRef<number>(0);
 
   // Fonction pour récupérer ou créer le profil utilisateur
   const fetchOrCreateUserProfile = useCallback(async (userId: string, userEmail: string): Promise<string> => {
@@ -22,7 +26,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         .from('profiles')
         .select('role')
         .eq('id', userId)
-        .maybeSingle(); // Utiliser maybeSingle au lieu de single pour éviter l'erreur si pas de résultat
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('[AuthWrapper] Erreur récupération profil:', error);
@@ -50,7 +54,6 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
 
       if (insertError) {
         console.error('[AuthWrapper] Erreur création profil:', insertError);
-        // Même si l'insertion échoue, on continue avec le rôle client
       } else {
         console.log('[AuthWrapper] Profil créé avec succès');
       }
@@ -109,6 +112,10 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           case 'SIGNED_IN':
             if (session?.user) {
               console.log('[AuthWrapper] SIGNED_IN - Utilisateur connecté:', session.user.email);
+              // Marquer qu'on vient de se connecter
+              justSignedInRef.current = true;
+              signedInTimestampRef.current = Date.now();
+              
               const role = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
               if (mounted) {
                 setUser(session.user);
@@ -119,7 +126,22 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             break;
           
           case 'SIGNED_OUT':
+            console.log('[AuthWrapper] SIGNED_OUT - Vérification...');
+            
+            // Ignorer les SIGNED_OUT qui arrivent dans les 5 secondes après un SIGNED_IN
+            const timeSinceSignIn = Date.now() - signedInTimestampRef.current;
+            if (justSignedInRef.current && timeSinceSignIn < 5000) {
+              console.log('[AuthWrapper] SIGNED_OUT ignoré (trop proche du SIGNED_IN, delta:', timeSinceSignIn, 'ms)');
+              // Vérifier si on a toujours une session valide
+              const { data: { session: currentSession } } = await supabase.auth.getSession();
+              if (currentSession?.user) {
+                console.log('[AuthWrapper] Session toujours valide, ignoré');
+                return;
+              }
+            }
+            
             console.log('[AuthWrapper] SIGNED_OUT - Utilisateur déconnecté');
+            justSignedInRef.current = false;
             if (mounted) {
               setUser(null);
               setUserRole(null);
@@ -141,7 +163,6 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           
           default:
             console.log('[AuthWrapper] Autre événement:', event);
-            // Pour les autres événements, mettre à jour si session valide
             if (session?.user && mounted) {
               setUser(session.user);
               if (!userRole) {
@@ -170,7 +191,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, [fetchOrCreateUserProfile]); // Ajouter fetchOrCreateUserProfile comme dépendance
+  }, [fetchOrCreateUserProfile]);
 
   // Affichage du loader
   if (loading) {
