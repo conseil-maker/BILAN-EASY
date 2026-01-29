@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Package, Answer, Question, QuestionType, Message, CurrentPhaseInfo, Summary, UserProfile, DashboardData, CoachingStyle } from '../types';
-import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule, detectCareerExplorationNeed, CareerPath, ExplorationNeedResult, analyzeResponseScope, ResponseAnalysisResult } from '../services/geminiService';
+import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule, detectCareerExplorationNeed, CareerPath, ExplorationNeedResult, analyzeResponseScope, ResponseAnalysisResult, exploreJobMarket, MarketExplorationResult, JobInterviewResult } from '../services/geminiService';
 import { CareerExploration } from './CareerExploration';
+import { MarketExploration } from './MarketExploration';
+import { JobInterview } from './JobInterview';
 import { QUESTION_CATEGORIES, getTimeBudget, getCurrentPhase, isJourneyComplete, determineQuestionComplexity, shouldDeepenCategory, QUESTION_COMPLEXITY_TIME } from '../constants';
 import { calculateProgression, ProgressionInfo } from '../services/progressionService';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
@@ -97,6 +99,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const [showOutOfScopeModal, setShowOutOfScopeModal] = useState(false);
     const [outOfScopeAnalysis, setOutOfScopeAnalysis] = useState<ResponseAnalysisResult | null>(null);
     const [outOfScopeWarningCount, setOutOfScopeWarningCount] = useState(0); // Compteur d'avertissements
+    
+    // États pour l'exploration du marché et les enquêtes métiers
+    const [showMarketExploration, setShowMarketExploration] = useState(false);
+    const [showJobInterview, setShowJobInterview] = useState(false);
+    const [selectedJobForInterview, setSelectedJobForInterview] = useState<string>('');
+    const [marketExplorationData, setMarketExplorationData] = useState<MarketExplorationResult | null>(null);
+    const [jobInterviewData, setJobInterviewData] = useState<JobInterviewResult | null>(null);
+    const [marketExplorationOffered, setMarketExplorationOffered] = useState(false);
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
@@ -778,6 +788,47 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         if (onAnswersUpdate) onAnswersUpdate(newAnswers);
     };
     
+    // Handlers pour l'exploration du marché
+    const handleMarketExplorationOpen = (jobTitle: string) => {
+        setSelectedJobForInterview(jobTitle);
+        setShowMarketExploration(true);
+    };
+    
+    const handleMarketExplorationClose = (result?: MarketExplorationResult) => {
+        setShowMarketExploration(false);
+        if (result) {
+            setMarketExplorationData(result);
+            // Ajouter un message récapitulatif
+            setMessages(prev => [...prev, {
+                sender: 'ai',
+                text: `\ud83d\udcca J'ai analysé le marché pour le métier de ${selectedJobForInterview}. Score de faisabilité : ${result.feasibilityAnalysis.overallScore}/10. ${result.feasibilityAnalysis.feasibilityComment.substring(0, 150)}... Ces informations seront intégrées à votre synthèse.`
+            }]);
+        }
+        fetchNextQuestion({}, 0, answers);
+    };
+    
+    const handleStartJobInterview = (jobTitle: string) => {
+        setSelectedJobForInterview(jobTitle);
+        setShowMarketExploration(false);
+        setShowJobInterview(true);
+    };
+    
+    const handleJobInterviewClose = () => {
+        setShowJobInterview(false);
+        fetchNextQuestion({}, 0, answers);
+    };
+    
+    const handleJobInterviewComplete = (result: JobInterviewResult, conversationHistory: any[]) => {
+        setJobInterviewData(result);
+        setShowJobInterview(false);
+        // Ajouter un message récapitulatif
+        setMessages(prev => [...prev, {
+            sender: 'ai',
+            text: `\ud83d\udcac Merci pour cet échange avec ${result.professionalPersona.name} ! Vous avez découvert les réalités du métier de ${selectedJobForInterview}. Les insights de cette enquête seront intégrés à votre document de synthèse.`
+        }]);
+        fetchNextQuestion({}, 0, answers);
+    };
+    
     const handleLogout = () => {
         setShowLogoutModal(true);
     };
@@ -978,6 +1029,29 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         />
                     </div>
                 </div>
+            )}
+            
+            {/* Composant d'exploration du marché de l'emploi */}
+            {showMarketExploration && selectedJobForInterview && (
+                <MarketExploration
+                    answers={answers}
+                    targetJobTitle={selectedJobForInterview}
+                    userName={userName}
+                    onClose={() => handleMarketExplorationClose()}
+                    onExplorationComplete={handleMarketExplorationClose}
+                    onStartJobInterview={handleStartJobInterview}
+                />
+            )}
+            
+            {/* Composant d'enquête métier simulée */}
+            {showJobInterview && selectedJobForInterview && (
+                <JobInterview
+                    answers={answers}
+                    targetJobTitle={selectedJobForInterview}
+                    userName={userName}
+                    onClose={handleJobInterviewClose}
+                    onInterviewComplete={handleJobInterviewComplete}
+                />
             )}
             
             {/* Modal pour les situations hors-cadre critiques */}

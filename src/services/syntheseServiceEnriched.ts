@@ -16,7 +16,7 @@
 import jsPDF from 'jspdf';
 import { Summary, Answer } from '../types-ai-studio';
 import { organizationConfig, getFullAddress } from '../config/organization';
-import { CareerPath } from './geminiService';
+import { CareerPath, MarketExplorationResult, JobInterviewResult } from './geminiService';
 import { SyntheseData, PlanActionItem } from './syntheseService';
 
 // Types pour les analyses enrichies
@@ -40,6 +40,20 @@ interface ValueAnalysis {
   value: string;
   importance: 'haute' | 'moyenne' | 'basse';
   manifestation: string;
+}
+
+// Interface pour l'analyse de faisabilité du projet
+interface FeasibilityData {
+  marketExploration?: MarketExplorationResult;
+  jobInterview?: JobInterviewResult;
+  feasibilityReport?: {
+    summary: string;
+    feasibilityScore: number;
+    keyFindings: string[];
+    actionItems: string[];
+    risks: string[];
+    opportunities: string[];
+  };
 }
 
 // Helper pour extraire le profil RIASEC des réponses
@@ -183,7 +197,7 @@ export const syntheseServiceEnriched = {
   /**
    * Génère le document de synthèse enrichi (10-15 pages)
    */
-  generateEnrichedSynthese(data: SyntheseData): Blob {
+  generateEnrichedSynthese(data: SyntheseData, feasibilityData?: FeasibilityData): Blob {
     const doc = new jsPDF();
     let y = 20;
     const margin = 20;
@@ -738,6 +752,232 @@ export const syntheseServiceEnriched = {
         
         y += 5;
       });
+    }
+
+    // ========== SECTION 9bis: ANALYSE DE FAISABILITÉ ET CONFRONTATION AU MARCHÉ ==========
+    if (feasibilityData && (feasibilityData.marketExploration || feasibilityData.feasibilityReport)) {
+      doc.addPage();
+      y = 20;
+      
+      addSection('ANALYSE DE FAISABILITÉ DU PROJET', '9bis');
+      
+      // Score de faisabilité
+      if (feasibilityData.marketExploration?.feasibilityAnalysis) {
+        const fa = feasibilityData.marketExploration.feasibilityAnalysis;
+        
+        addSubSection('Score de faisabilité global');
+        
+        // Dessiner un indicateur visuel du score
+        const score = fa.overallScore;
+        const scoreColor = score >= 8 ? [34, 197, 94] : score >= 6 ? [234, 179, 8] : score >= 4 ? [249, 115, 22] : [239, 68, 68];
+        
+        doc.setFillColor(scoreColor[0], scoreColor[1], scoreColor[2]);
+        doc.roundedRect(margin, y, 30, 20, 3, 3, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${score}/10`, margin + 15, y + 13, { align: 'center' });
+        
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        const scoreLabel = score >= 8 ? 'Excellent - Projet très réalisable' : 
+                          score >= 6 ? 'Bon - Projet réalisable avec quelques ajustements' : 
+                          score >= 4 ? 'Modéré - Projet nécessitant des efforts significatifs' : 
+                          'Difficile - Projet ambitieux nécessitant une réorientation';
+        doc.text(scoreLabel, margin + 35, y + 13);
+        y += 30;
+        
+        addText(fa.feasibilityComment, 10);
+        y += 5;
+      }
+      
+      // Analyse du marché
+      if (feasibilityData.marketExploration?.marketAnalysis) {
+        const ma = feasibilityData.marketExploration.marketAnalysis;
+        
+        addSubSection('Analyse du marché de l\'emploi');
+        
+        // Tableau des indicateurs marché
+        const demandColor = ma.demandLevel === 'très_forte' || ma.demandLevel === 'forte' ? [34, 197, 94] : 
+                           ma.demandLevel === 'moyenne' ? [234, 179, 8] : [239, 68, 68];
+        
+        doc.setFillColor(240, 240, 240);
+        doc.rect(margin, y, maxWidth, 35, 'F');
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Niveau de demande', margin + 5, y + 8);
+        doc.text('Tendance', margin + 50, y + 8);
+        doc.text('Salaire', margin + 90, y + 8);
+        doc.text('Régions', margin + 130, y + 8);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(demandColor[0], demandColor[1], demandColor[2]);
+        doc.text(ma.demandLevel.replace('_', ' '), margin + 5, y + 18);
+        doc.setTextColor(0, 0, 0);
+        doc.text(ma.demandTrend, margin + 50, y + 18);
+        doc.text(ma.salaryRange, margin + 90, y + 18);
+        const regions = ma.geographicOpportunities.slice(0, 2).join(', ');
+        doc.text(regions.substring(0, 25), margin + 130, y + 18);
+        
+        y += 40;
+        
+        addText('Secteurs qui recrutent : ' + ma.sectors.join(', '), 10);
+        addText(ma.marketInsights, 10);
+        y += 5;
+      }
+      
+      // Compétences correspondantes vs à développer
+      if (feasibilityData.marketExploration?.feasibilityAnalysis) {
+        const fa = feasibilityData.marketExploration.feasibilityAnalysis;
+        
+        addSubSection('Analyse des compétences');
+        
+        // Deux colonnes
+        const colWidth = (maxWidth - 10) / 2;
+        
+        // Colonne gauche - Compétences correspondantes
+        doc.setFillColor(220, 252, 231);
+        doc.rect(margin, y, colWidth, 8, 'F');
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(22, 101, 52);
+        doc.text('\u2713 Compétences correspondantes', margin + 3, y + 6);
+        
+        // Colonne droite - Compétences à développer
+        doc.setFillColor(254, 243, 199);
+        doc.rect(margin + colWidth + 10, y, colWidth, 8, 'F');
+        doc.setTextColor(146, 64, 14);
+        doc.text('\u26A0 Compétences à développer', margin + colWidth + 13, y + 6);
+        
+        y += 12;
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        
+        const maxItems = Math.max(fa.matchingSkills.length, fa.skillGaps.length);
+        for (let i = 0; i < Math.min(maxItems, 5); i++) {
+          if (fa.matchingSkills[i]) {
+            doc.text('\u2022 ' + fa.matchingSkills[i].substring(0, 35), margin + 3, y);
+          }
+          if (fa.skillGaps[i]) {
+            doc.text('\u2022 ' + fa.skillGaps[i].substring(0, 35), margin + colWidth + 13, y);
+          }
+          y += 5;
+        }
+        y += 5;
+      }
+      
+      // Formations recommandées
+      if (feasibilityData.marketExploration?.trainingRecommendations && 
+          feasibilityData.marketExploration.trainingRecommendations.length > 0) {
+        
+        addSubSection('Formations recommandées');
+        
+        feasibilityData.marketExploration.trainingRecommendations.slice(0, 4).forEach((training, i) => {
+          const priorityColor = training.priority === 'essentielle' ? [239, 68, 68] : 
+                               training.priority === 'recommandée' ? [234, 179, 8] : [156, 163, 175];
+          
+          doc.setFillColor(priorityColor[0], priorityColor[1], priorityColor[2]);
+          doc.circle(margin + 3, y - 1, 2, 'F');
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text(training.title, margin + 8, y);
+          
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.setTextColor(100, 100, 100);
+          doc.text(`${training.type} | ${training.duration} | ${training.priority}`, margin + 8, y + 5);
+          doc.setTextColor(0, 0, 0);
+          
+          y += 12;
+        });
+        y += 5;
+      }
+      
+      // Insights de l'enquête métier
+      if (feasibilityData.jobInterview) {
+        const ji = feasibilityData.jobInterview;
+        
+        if (y > 200) {
+          doc.addPage();
+          y = 20;
+        }
+        
+        addSubSection(`Insights de l'enquête métier (${ji.professionalPersona.name})`);
+        
+        addText(`Témoignage de ${ji.professionalPersona.name}, ${ji.professionalPersona.currentRole} depuis ${ji.professionalPersona.yearsExperience} ans.`, 10, true);
+        
+        // Avantages et inconvénients en deux colonnes
+        const colWidth2 = (maxWidth - 10) / 2;
+        
+        doc.setFillColor(220, 252, 231);
+        doc.rect(margin, y, colWidth2, 8, 'F');
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(22, 101, 52);
+        doc.text('Avantages du métier', margin + 3, y + 6);
+        
+        doc.setFillColor(254, 226, 226);
+        doc.rect(margin + colWidth2 + 10, y, colWidth2, 8, 'F');
+        doc.setTextColor(153, 27, 27);
+        doc.text('Points de vigilance', margin + colWidth2 + 13, y + 6);
+        
+        y += 12;
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        
+        const maxPros = Math.max(ji.honestOpinion.prosOfJob.length, ji.honestOpinion.consOfJob.length);
+        for (let i = 0; i < Math.min(maxPros, 4); i++) {
+          if (ji.honestOpinion.prosOfJob[i]) {
+            const proText = ji.honestOpinion.prosOfJob[i].substring(0, 35);
+            doc.text('\u2022 ' + proText, margin + 3, y);
+          }
+          if (ji.honestOpinion.consOfJob[i]) {
+            const conText = ji.honestOpinion.consOfJob[i].substring(0, 35);
+            doc.text('\u2022 ' + conText, margin + colWidth2 + 13, y);
+          }
+          y += 5;
+        }
+        y += 8;
+        
+        // Conseils clés
+        addText('Conseils pour réussir :', 10, true);
+        addText(ji.careerAdvice.entryTips, 9);
+        y += 5;
+      }
+      
+      // Métiers alternatifs
+      if (feasibilityData.marketExploration?.alternativePaths && 
+          feasibilityData.marketExploration.alternativePaths.length > 0) {
+        
+        addSubSection('Pistes alternatives à considérer');
+        
+        feasibilityData.marketExploration.alternativePaths.forEach((alt, i) => {
+          const easeColor = alt.transitionEase === 'facile' ? [34, 197, 94] : 
+                           alt.transitionEase === 'modérée' ? [234, 179, 8] : [239, 68, 68];
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${i + 1}. ${alt.jobTitle}`, margin, y);
+          
+          doc.setFillColor(easeColor[0], easeColor[1], easeColor[2]);
+          doc.setTextColor(255, 255, 255);
+          doc.roundedRect(margin + 100, y - 4, 25, 6, 1, 1, 'F');
+          doc.setFontSize(7);
+          doc.text(alt.transitionEase, margin + 112, y, { align: 'center' });
+          
+          doc.setTextColor(0, 0, 0);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          y += 6;
+          doc.text(alt.relevance.substring(0, 80), margin + 5, y);
+          y += 8;
+        });
+      }
     }
 
     // ========== SECTION 10: PLAN D'ACTION ==========
