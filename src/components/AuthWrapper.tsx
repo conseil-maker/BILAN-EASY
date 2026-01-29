@@ -128,10 +128,11 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           case 'SIGNED_OUT':
             console.log('[AuthWrapper] SIGNED_OUT - Vérification...');
             
-            // Ignorer les SIGNED_OUT qui arrivent dans les 10 secondes après un SIGNED_IN
+            // Ignorer les SIGNED_OUT qui arrivent dans les 60 secondes après un SIGNED_IN
             // C'est souvent dû à des erreurs de refresh token qui ne sont pas critiques
+            // ou à des requêtes qui échouent et déclenchent une déconnexion intempestive
             const timeSinceSignIn = Date.now() - signedInTimestampRef.current;
-            if (justSignedInRef.current && timeSinceSignIn < 10000) {
+            if (justSignedInRef.current && timeSinceSignIn < 60000) {
               console.log('[AuthWrapper] SIGNED_OUT ignoré (trop proche du SIGNED_IN, delta:', timeSinceSignIn, 'ms)');
               // Ne PAS appeler getSession() ici car cela peut déclencher d'autres erreurs
               // Faire confiance au fait que la session est valide si on vient de se connecter
