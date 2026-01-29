@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase, refreshSession, isSessionValid } from '../lib/supabaseClient';
-import { User, AuthChangeEvent } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import LoginPro from './LoginPro';
 import Signup from './Signup';
 
@@ -13,11 +13,10 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSignup, setShowSignup] = useState(false);
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitializedRef = useRef(false);
+  const initRef = useRef(false);
 
   // Fonction pour récupérer le rôle utilisateur
-  const fetchUserRole = useCallback(async (userId: string) => {
+  const fetchUserRole = useCallback(async (userId: string): Promise<string> => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -27,160 +26,118 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
 
       if (error) {
         console.error('[AuthWrapper] Erreur récupération rôle:', error);
-        // En cas d'erreur, on garde le rôle par défaut
-        setUserRole('client');
-      } else {
-        setUserRole(data?.role || 'client');
+        return 'client';
       }
+      return data?.role || 'client';
     } catch (error) {
       console.error('[AuthWrapper] Exception récupération rôle:', error);
-      setUserRole('client');
-    } finally {
-      setLoading(false);
+      return 'client';
     }
   }, []);
 
-  // Fonction pour initialiser la session
-  const initializeSession = useCallback(async () => {
-    if (isInitializedRef.current) return;
-    isInitializedRef.current = true;
-
-    try {
-      // Vérifier d'abord si une session existe dans le localStorage
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('[AuthWrapper] Erreur getSession:', error);
-        setLoading(false);
-        return;
-      }
-
-      if (session?.user) {
-        // Session existante trouvée
-        setUser(session.user);
-        await fetchUserRole(session.user.id);
-        
-        // Vérifier si le token doit être rafraîchi
-        const valid = await isSessionValid();
-        if (!valid) {
-          console.log('[AuthWrapper] Session expirée, tentative de rafraîchissement...');
-          const newSession = await refreshSession();
-          if (newSession) {
-            setUser(newSession.user);
-          } else {
-            // Session invalide et non rafraîchissable
-            setUser(null);
-            setUserRole(null);
-          }
-        }
-      } else {
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('[AuthWrapper] Exception initialisation:', error);
-      setLoading(false);
-    }
-  }, [fetchUserRole]);
-
-  // Effet principal pour l'initialisation et l'écoute des changements d'auth
+  // Effet principal - s'exécute une seule fois au montage
   useEffect(() => {
-    // Timeout de sécurité de 15 secondes
-    const timeout = setTimeout(() => {
-      if (loading) {
-        console.warn('[AuthWrapper] Timeout atteint, arrêt du chargement');
-        setLoading(false);
-      }
-    }, 15000);
+    // Éviter les doubles initialisations en mode strict
+    if (initRef.current) return;
+    initRef.current = true;
 
-    // Initialiser la session
-    initializeSession();
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // Récupérer la session actuelle
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('[AuthWrapper] Erreur getSession:', error);
+          if (mounted) setLoading(false);
+          return;
+        }
+
+        if (session?.user && mounted) {
+          const role = await fetchUserRole(session.user.id);
+          if (mounted) {
+            setUser(session.user);
+            setUserRole(role);
+            setLoading(false);
+          }
+        } else if (mounted) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('[AuthWrapper] Exception initialisation:', error);
+        if (mounted) setLoading(false);
+      }
+    };
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session) => {
-        console.log('[AuthWrapper] Auth event:', event);
+      async (event: AuthChangeEvent, session: Session | null) => {
+        console.log('[AuthWrapper] Auth event:', event, 'Session:', !!session);
+
+        if (!mounted) return;
 
         switch (event) {
           case 'SIGNED_IN':
-          case 'TOKEN_REFRESHED':
             if (session?.user) {
-              setUser(session.user);
-              await fetchUserRole(session.user.id);
+              const role = await fetchUserRole(session.user.id);
+              if (mounted) {
+                setUser(session.user);
+                setUserRole(role);
+                setLoading(false);
+              }
             }
             break;
           
           case 'SIGNED_OUT':
-            setUser(null);
-            setUserRole(null);
-            setLoading(false);
-            // Nettoyer le localStorage
-            localStorage.removeItem('bilan-easy-auth');
+            if (mounted) {
+              setUser(null);
+              setUserRole(null);
+              setLoading(false);
+            }
             break;
           
-          case 'USER_UPDATED':
-            if (session?.user) {
+          case 'TOKEN_REFRESHED':
+            if (session?.user && mounted) {
               setUser(session.user);
             }
             break;
           
           case 'INITIAL_SESSION':
-            // Session initiale déjà gérée par initializeSession
+            // Géré par initializeAuth
             break;
           
           default:
-            // Pour les autres événements, mettre à jour l'état si nécessaire
-            if (session?.user) {
+            // Pour les autres événements, mettre à jour si session valide
+            if (session?.user && mounted) {
               setUser(session.user);
               if (!userRole) {
-                await fetchUserRole(session.user.id);
+                const role = await fetchUserRole(session.user.id);
+                if (mounted) setUserRole(role);
               }
             }
         }
       }
     );
 
-    // Configurer un intervalle de rafraîchissement toutes les 10 minutes
-    refreshIntervalRef.current = setInterval(async () => {
-      if (user) {
-        const valid = await isSessionValid();
-        if (!valid) {
-          console.log('[AuthWrapper] Rafraîchissement périodique de la session...');
-          const newSession = await refreshSession();
-          if (!newSession) {
-            console.warn('[AuthWrapper] Échec du rafraîchissement, déconnexion...');
-            setUser(null);
-            setUserRole(null);
-          }
-        }
-      }
-    }, 10 * 60 * 1000); // 10 minutes
+    // Initialiser l'auth
+    initializeAuth();
 
-    // Écouter les événements de visibilité de la page
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && user) {
-        // Quand l'utilisateur revient sur l'onglet, vérifier la session
-        const valid = await isSessionValid();
-        if (!valid) {
-          const newSession = await refreshSession();
-          if (!newSession) {
-            setUser(null);
-            setUserRole(null);
-          }
-        }
+    // Timeout de sécurité de 10 secondes
+    const timeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn('[AuthWrapper] Timeout atteint');
+        setLoading(false);
       }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    }, 10000);
 
     // Cleanup
     return () => {
+      mounted = false;
       clearTimeout(timeout);
       subscription.unsubscribe();
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
-      }
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [initializeSession, fetchUserRole, user, userRole]);
+  }, []); // Dépendances vides pour n'exécuter qu'une fois
 
   // Affichage du loader
   if (loading) {
