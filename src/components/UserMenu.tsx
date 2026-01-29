@@ -25,11 +25,22 @@ export const UserMenu: React.FC<UserMenuProps> = ({ user, userRole }) => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      // Nettoyer le localStorage avant la déconnexion
+      localStorage.removeItem('bilan-easy-auth');
+      // Se déconnecter de Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+      }
+      // Rediriger vers la page d'accueil
       window.location.hash = '#/';
+      // Recharger la page pour réinitialiser l'état
       window.location.reload();
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
+      console.error('Exception lors de la déconnexion:', error);
+      // Forcer le rechargement même en cas d'erreur
+      window.location.hash = '#/';
+      window.location.reload();
     }
   };
 

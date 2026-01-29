@@ -8,7 +8,69 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('[Supabase] Variables d\'environnement manquantes. Vérifiez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Configuration améliorée pour la persistance de session
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Activer la persistance de session dans localStorage
+    persistSession: true,
+    // Stocker la session dans localStorage (par défaut)
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    // Clé de stockage personnalisée pour éviter les conflits
+    storageKey: 'bilan-easy-auth',
+    // Rafraîchir automatiquement le token avant expiration
+    autoRefreshToken: true,
+    // Détecter automatiquement les changements de session dans d'autres onglets
+    detectSessionInUrl: true,
+    // Durée de vie du token de rafraîchissement (en secondes) - 7 jours
+    flowType: 'pkce',
+  },
+  // Configuration globale
+  global: {
+    headers: {
+      'x-application-name': 'bilan-easy',
+    },
+  },
+});
+
+// Fonction utilitaire pour vérifier et rafraîchir la session
+export const refreshSession = async () => {
+  try {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error) {
+      console.error('[Supabase] Erreur lors du rafraîchissement de la session:', error);
+      return null;
+    }
+    return data.session;
+  } catch (err) {
+    console.error('[Supabase] Exception lors du rafraîchissement:', err);
+    return null;
+  }
+};
+
+// Fonction pour vérifier si la session est valide
+export const isSessionValid = async () => {
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) {
+      return false;
+    }
+    // Vérifier si le token expire dans moins de 5 minutes
+    const expiresAt = session.expires_at;
+    if (expiresAt) {
+      const now = Math.floor(Date.now() / 1000);
+      const fiveMinutes = 5 * 60;
+      if (expiresAt - now < fiveMinutes) {
+        // Rafraîchir la session si elle expire bientôt
+        const refreshedSession = await refreshSession();
+        return !!refreshedSession;
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('[Supabase] Erreur de vérification de session:', err);
+    return false;
+  }
+};
 
 // Types pour les tables Supabase
 export interface Assessment {
