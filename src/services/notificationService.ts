@@ -235,15 +235,29 @@ class NotificationService {
     }
   }
 
-  // Envoyer une notification par email (placeholder)
+  /**
+   * Envoyer une notification par email via l'Edge Function email-proxy
+   * Note: Nécessite la configuration de RESEND_API_KEY dans Supabase
+   */
   async sendEmailNotification(
     email: string,
     subject: string,
     body: string
   ): Promise<boolean> {
-    // TODO: Intégrer avec un service d'email (SendGrid, Resend, etc.)
-    console.log(`Email envoyé à ${email}: ${subject}`);
-    return true;
+    try {
+      const { callEmailProxy } = await import('./edgeFunctionClient');
+      const result = await callEmailProxy({
+        to: email,
+        subject,
+        html: body,
+      });
+      return result.success;
+    } catch (error) {
+      console.error('[NotificationService] Erreur envoi email:', error);
+      // Fallback: logger l'email (pour le développement)
+      console.log(`[DEV] Email à ${email}: ${subject}`);
+      return false;
+    }
   }
 
   // Notifications prédéfinies

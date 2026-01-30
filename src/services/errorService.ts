@@ -260,10 +260,20 @@ export const handleError = (
     toastCallback(finalUserMessage, toastType);
   }
   
-  // TODO: Envoyer à un service de monitoring (Sentry, etc.) en production
-  // if (process.env.NODE_ENV === 'production' && severity === 'critical') {
-  //   sendToSentry(processedError);
-  // }
+  // Envoyer à Sentry en production pour les erreurs critiques (async)
+  if (import.meta.env.PROD && (severity === 'critical' || severity === 'error')) {
+    import('../lib/sentry').then(({ captureError }) => {
+      captureError(processedError.originalError as Error, {
+        context,
+        severity,
+        category,
+        userMessage: finalUserMessage,
+      });
+    }).catch(() => {
+      // Sentry non disponible, ignorer silencieusement
+      console.debug('[ErrorService] Sentry non disponible');
+    });
+  }
   
   return processedError;
 };

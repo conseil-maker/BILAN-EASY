@@ -1,5 +1,8 @@
 /**
  * Tests du service historyService
+ * 
+ * Ce service utilise Supabase pour la persistance des données.
+ * Les fonctions localStorage ont été supprimées au profit de Supabase.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -12,7 +15,9 @@ vi.mock('../lib/supabaseClient', () => ({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           order: vi.fn().mockResolvedValue({ data: [], error: null }),
+          single: vi.fn().mockResolvedValue({ data: null, error: null }),
         })),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
       })),
       delete: vi.fn(() => ({
         eq: vi.fn().mockResolvedValue({ error: null }),
@@ -21,16 +26,9 @@ vi.mock('../lib/supabaseClient', () => ({
   },
 }));
 
-// Mock localStorage
-let store: Record<string, string> = {};
-vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key) => store[key] || null);
-vi.spyOn(Storage.prototype, 'setItem').mockImplementation((key, value) => { store[key] = value; });
-vi.spyOn(Storage.prototype, 'removeItem').mockImplementation((key) => { delete store[key]; });
-
 describe('historyService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    store = {};
   });
 
   describe('module import', () => {
@@ -42,7 +40,6 @@ describe('historyService', () => {
     it('devrait exporter les fonctions principales', async () => {
       const module = await import('./historyService');
       expect(module.saveAssessmentToHistory).toBeDefined();
-      expect(module.getAssessmentHistoryLocal).toBeDefined();
       expect(module.getAssessmentHistoryFromSupabase).toBeDefined();
       expect(module.getAssessmentHistory).toBeDefined();
       expect(module.clearAssessmentHistory).toBeDefined();
@@ -52,31 +49,6 @@ describe('historyService', () => {
     it('devrait exporter saveAssessmentToHistory comme fonction', async () => {
       const { saveAssessmentToHistory } = await import('./historyService');
       expect(typeof saveAssessmentToHistory).toBe('function');
-    });
-
-    it('devrait exporter getAssessmentHistoryLocal comme fonction', async () => {
-      const { getAssessmentHistoryLocal } = await import('./historyService');
-      expect(typeof getAssessmentHistoryLocal).toBe('function');
-    });
-  });
-
-  describe('getAssessmentHistoryLocal', () => {
-    it('devrait retourner un tableau', async () => {
-      const { getAssessmentHistoryLocal } = await import('./historyService');
-      const history = getAssessmentHistoryLocal();
-      expect(Array.isArray(history)).toBe(true);
-    });
-
-    it('devrait retourner un tableau vide par défaut', async () => {
-      const { getAssessmentHistoryLocal } = await import('./historyService');
-      const history = getAssessmentHistoryLocal();
-      expect(history).toHaveLength(0);
-    });
-
-    it('devrait lire depuis localStorage', async () => {
-      const { getAssessmentHistoryLocal } = await import('./historyService');
-      getAssessmentHistoryLocal();
-      expect(localStorage.getItem).toHaveBeenCalled();
     });
   });
 
@@ -89,12 +61,6 @@ describe('historyService', () => {
     it('devrait s\'exécuter sans erreur', async () => {
       const { clearAssessmentHistory } = await import('./historyService');
       expect(() => clearAssessmentHistory()).not.toThrow();
-    });
-
-    it('devrait vider localStorage', async () => {
-      const { clearAssessmentHistory } = await import('./historyService');
-      clearAssessmentHistory();
-      expect(localStorage.removeItem).toHaveBeenCalled();
     });
   });
 
@@ -116,7 +82,7 @@ describe('historyService', () => {
       await expect(saveAssessmentToHistory(assessment)).resolves.not.toThrow();
     });
 
-    it('devrait sauvegarder dans localStorage', async () => {
+    it('devrait être une fonction async qui retourne une Promise', async () => {
       const { saveAssessmentToHistory } = await import('./historyService');
       const assessment = {
         id: 'test-2',
@@ -125,8 +91,8 @@ describe('historyService', () => {
         answers: [],
       };
       
-      await saveAssessmentToHistory(assessment);
-      expect(localStorage.setItem).toHaveBeenCalled();
+      const result = saveAssessmentToHistory(assessment);
+      expect(result).toBeInstanceOf(Promise);
     });
   });
 
