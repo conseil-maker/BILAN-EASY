@@ -34,7 +34,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
-    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^27.3.0",
     "prettier": "^3.8.1",
