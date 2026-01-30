@@ -608,6 +608,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             stopListening();
         }
         
+        // Ajouter le message utilisateur immédiatement (une seule fois)
+        setMessages(prev => [...prev, { sender: 'user', text: value }]);
+        
         // === DÉTECTION DES RÉPONSES HORS-CADRE ===
         // Analyser la réponse pour détecter les situations problématiques
         // (mineur, hors contexte, non-sens, etc.)
@@ -625,9 +628,6 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 if (!scopeAnalysis.isInScope && ['medium', 'high', 'critical'].includes(scopeAnalysis.severity)) {
                     setOutOfScopeAnalysis(scopeAnalysis);
                     setOutOfScopeWarningCount(prev => prev + 1);
-                    
-                    // Ajouter le message de l'utilisateur quand même
-                    setMessages(prev => [...prev, { sender: 'user', text: value }]);
                     
                     // Afficher le message de recadrage de l'IA
                     setMessages(prev => [...prev, { 
@@ -670,7 +670,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             timestamp: Date.now()
         };
         const newAnswers = [...answers, newAnswer];
-        setMessages(prev => [...prev, { sender: 'user', text: value }]);
+        // Message déjà ajouté au début de la fonction
         setAnswers(newAnswers);
         onAnswersUpdate?.(newAnswers); // Synchroniser avec ClientApp pour sauvegarde Supabase
         setTextInput('');
