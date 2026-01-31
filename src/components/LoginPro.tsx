@@ -55,6 +55,8 @@ export default function LoginPro({ onToggle }: LoginProProps) {
       }
     } catch (error: any) {
       setError(error.message || 'Erreur lors de la connexion');
+    } finally {
+      // Toujours réinitialiser le loading, même en cas de succès
       setLoading(false);
     }
   };
