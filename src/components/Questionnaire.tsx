@@ -300,8 +300,18 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             const aiMessageText = `${cleanTitle}${cleanDescription ? `\n\n${cleanDescription}` : ''}`;
             const aiMessage: Message = { sender: 'ai', text: aiMessageText, question }; 
             // Supprimer le message de chargement et ajouter la vraie question
+            // Vérifier qu'on n'ajoute pas un doublon (même texte déjà présent)
             setMessages(prev => {
                 const filtered = prev.filter(m => !m.isLoading);
+                // Vérifier si le message existe déjà pour éviter les doublons
+                const isDuplicate = filtered.some(m => 
+                    m.sender === 'ai' && 
+                    m.text === aiMessageText
+                );
+                if (isDuplicate) {
+                    console.warn('[fetchNextQuestion] Message AI en doublon détecté, ignoré:', aiMessageText.substring(0, 50));
+                    return filtered;
+                }
                 return [...filtered, aiMessage];
             });
             
