@@ -49,6 +49,9 @@ const DocumentsQualiopi = lazy(() =>
 const DocumentLibrary = lazy(() => 
   import('./components/DocumentLibrary').then(m => ({ default: m.DocumentLibrary }))
 );
+const SupabaseTest = lazy(() => 
+  import('./pages/SupabaseTest').then(m => ({ default: m.default }))
+);
 
 const MyDocuments = lazy(() => 
   import('./components/MyDocuments').then(m => ({ default: m.MyDocuments }))
@@ -197,6 +200,17 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
         {renderLegalPage()}
         <CookieConsent />
+      </div>
+    );
+  }
+
+  // Page de test Supabase
+  if (route === '/supabase-test') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+        <Suspense fallback={<LoadingSpinner />}>
+          <SupabaseTest />
+        </Suspense>
       </div>
     );
   }
