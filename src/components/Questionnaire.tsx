@@ -1512,11 +1512,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                         }}
                                         onKeyDown={e => {
                                             // Envoyer avec Enter (sans Shift)
+                                            // Note: Le form onSubmit gère déjà l'envoi, pas besoin de doublon ici
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 e.preventDefault();
-                                                if (textInput.trim() && !isLoading && !isAwaitingSynthesisConfirmation) {
-                                                    handleAnswerSubmit(textInput);
-                                                }
+                                                // Le form onSubmit sera déclenché automatiquement
                                             }
                                         }}
                                         placeholder="Écrivez votre réponse... (Entrée pour envoyer, Shift+Entrée pour nouvelle ligne)" 
