@@ -58,8 +58,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     // Clé de stockage personnalisée
     storageKey: STORAGE_KEY,
-    // Désactiver le flux PKCE pour simplifier (optionnel)
-    flowType: 'implicit',
+    // Utiliser le flux PKCE pour une meilleure sécurité et compatibilité
+    flowType: 'pkce',
   },
 });
 
