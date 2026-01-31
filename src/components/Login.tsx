@@ -17,14 +17,48 @@ export default function Login({ onToggle }: LoginProps) {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // Créer une promesse de timeout de 15 secondes
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('TIMEOUT'));
+        }, 15000);
+      });
+
+      // Créer la promesse de connexion
+      const loginPromise = supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      // Course entre le login et le timeout
+      const { error: authError } = await Promise.race([
+        loginPromise,
+        timeoutPromise
+      ]);
+
+      if (authError) throw authError;
+      
+      // Succès - l'utilisateur sera redirigé par AuthWrapper
+      console.log('Connexion réussie');
+      
     } catch (error: any) {
-      setError(error.message || 'Erreur lors de la connexion');
+      console.error('Erreur de connexion:', error);
+      
+      if (error.message === 'TIMEOUT') {
+        setError(
+          'La connexion prend trop de temps. Vérifiez votre connexion internet et réessayez. ' +
+          'Si le problème persiste, contactez le support.'
+        );
+      } else if (error.message?.includes('Invalid login credentials')) {
+        setError('Email ou mot de passe incorrect. Veuillez réessayer.');
+      } else if (error.message?.includes('Email not confirmed')) {
+        setError('Veuillez confirmer votre email avant de vous connecter.');
+      } else {
+        setError(
+          error.message || 
+          'Erreur lors de la connexion. Veuillez réessayer dans quelques instants.'
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -60,7 +94,8 @@ export default function Login({ onToggle }: LoginProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="votre@email.com"
               />
             </div>
@@ -75,7 +110,8 @@ export default function Login({ onToggle }: LoginProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="••••••••"
               />
             </div>
@@ -83,9 +119,19 @@ export default function Login({ onToggle }: LoginProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Connexion en cours...
+                </>
+              ) : (
+                'Se connecter'
+              )}
             </button>
           </form>
 
@@ -94,7 +140,8 @@ export default function Login({ onToggle }: LoginProps) {
               Pas encore de compte ?{' '}
               <button
                 onClick={onToggle}
-                className="text-indigo-600 hover:text-indigo-700 font-medium"
+                disabled={loading}
+                className="text-indigo-600 hover:text-indigo-700 font-medium disabled:opacity-50"
               >
                 S'inscrire
               </button>
