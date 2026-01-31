@@ -1,8 +1,11 @@
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  return {
   base: '/',  // IMPORTANT pour Vercel
   server: {
     port: 3000,
@@ -14,6 +17,10 @@ export default defineConfig({
     allowedHosts: 'all',
   },
   plugins: [react()],
+  define: {
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
+    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY),
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,
@@ -69,4 +76,5 @@ export default defineConfig({
     include: ['react', 'react-dom', '@supabase/supabase-js', 'lucide-react'],
     exclude: ['jspdf', 'html2canvas'],
   },
+  }
 });

@@ -4,8 +4,20 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// 🔍 DEBUG ENV (recommandé par Claude Sonnet 4.5)
+console.log('🔍 DEBUG ENV:', {
+  SUPABASE_URL: supabaseUrl,
+  ANON_KEY_EXISTS: !!supabaseAnonKey,
+  ANON_KEY_LENGTH: supabaseAnonKey?.length,
+  ALL_ENV: import.meta.env
+});
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('[Supabase] Variables d\'environnement manquantes. Vérifiez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY');
+  throw new Error(
+    '❌ Variables Supabase manquantes!\n' +
+    `URL: ${supabaseUrl ? '✅' : '❌'}\n` +
+    `KEY: ${supabaseAnonKey ? '✅' : '❌'}`
+  );
 }
 
 // Clé de stockage pour les tokens Supabase
