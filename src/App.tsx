@@ -52,6 +52,9 @@ const DocumentLibrary = lazy(() =>
 const SupabaseTest = lazy(() => 
   import('./pages/SupabaseTest').then(m => ({ default: m.default }))
 );
+const RawFetchTest = lazy(() => 
+  import('./pages/RawFetchTest').then(m => ({ default: m.default }))
+);
 
 const MyDocuments = lazy(() => 
   import('./components/MyDocuments').then(m => ({ default: m.MyDocuments }))
@@ -207,9 +210,20 @@ const App: React.FC = () => {
   // Page de test Supabase
   if (route === '/supabase-test') {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
         <Suspense fallback={<LoadingSpinner />}>
           <SupabaseTest />
+        </Suspense>
+      </div>
+    );
+  }
+
+  // Page de test Raw Fetch (Claude Sonnet 4.5 recommendation)
+  if (route === '/raw-fetch-test') {
+    return (
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        <Suspense fallback={<LoadingSpinner />}>
+          <RawFetchTest />
         </Suspense>
       </div>
     );
