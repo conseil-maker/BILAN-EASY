@@ -40,10 +40,18 @@ export default function LoginPro({ onToggle }: LoginProProps) {
       // Attendre un court instant pour que le signOut soit traité
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Ajouter un timeout de 10 secondes pour éviter l'attente infinie
+      const TIMEOUT_MS = 10000;
+      const loginPromise = supabase.auth.signInWithPassword({
         email,
         password,
       });
+      
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('timeout')), TIMEOUT_MS)
+      );
+      
+      const { data, error } = await Promise.race([loginPromise, timeoutPromise]);
 
       if (error) throw error;
       
@@ -54,7 +62,16 @@ export default function LoginPro({ onToggle }: LoginProProps) {
         // Ne rien faire de plus - AuthWrapper va détecter le changement via onAuthStateChange
       }
     } catch (error: any) {
-      setError(error.message || 'Erreur lors de la connexion');
+      // Messages d'erreur plus informatifs
+      if (error.message === 'timeout') {
+        setError('La connexion a pris trop de temps. Vérifiez votre connexion internet et réessayez.');
+      } else if (error.message.includes('Invalid login credentials')) {
+        setError('Email ou mot de passe incorrect.');
+      } else if (error.message.includes('Email not confirmed')) {
+        setError('Veuillez confirmer votre email avant de vous connecter.');
+      } else {
+        setError(error.message || 'Erreur lors de la connexion');
+      }
     } finally {
       // Toujours réinitialiser le loading, même en cas de succès
       setLoading(false);
@@ -267,11 +284,16 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                   disabled={loading}
                   className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading 
-                    ? 'Chargement...' 
-                    : showForgotPassword 
-                      ? 'Envoyer le lien de réinitialisation'
-                      : 'Se connecter'}
+                  {loading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                      <span>Connexion en cours...</span>
+                    </div>
+                  ) : showForgotPassword ? (
+                    'Envoyer le lien de réinitialisation'
+                  ) : (
+                    'Se connecter'
+                  )}
                 </button>
 
                 {showForgotPassword && (
