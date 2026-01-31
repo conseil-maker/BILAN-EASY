@@ -65,6 +65,13 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   // Charger la session depuis Supabase au démarrage
   useEffect(() => {
+    // Timeout de sécurité : forcer le déchargement après 5 secondes
+    const safetyTimeout = setTimeout(() => {
+      console.warn('[ClientApp] Timeout de chargement de session, déchargement forcé');
+      setIsLoading(false);
+      setAppState('package-selection');
+    }, 5000);
+
     const initSession = async () => {
       try {
         // Vérifier si on demande un nouveau bilan via le paramètre ?new=true
@@ -152,11 +159,14 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         console.error('[ClientApp] Erreur chargement session:', error);
         setAppState('package-selection');
       } finally {
+        clearTimeout(safetyTimeout);
         setIsLoading(false);
       }
     };
     
     initSession();
+
+    return () => clearTimeout(safetyTimeout);
   }, [user.id]);
 
   // Sauvegarder la session dans Supabase à chaque changement important
