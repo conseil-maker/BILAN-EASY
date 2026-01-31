@@ -43,23 +43,34 @@ export default function LoginPro({ onToggle }: LoginProProps) {
       // Ajouter un timeout de 15 secondes pour les comptes gratuits Supabase
       const TIMEOUT_MS = 15000;
       
+      let loginCompleted = false;
       let timeoutId: NodeJS.Timeout;
-      const timeoutPromise = new Promise<never>((_, reject) => {
+      
+      // Créer une Promise qui force l'arrêt après le timeout
+      const timeoutPromise = new Promise<void>((resolve) => {
         timeoutId = setTimeout(() => {
-          console.log('[LoginPro] Timeout de connexion atteint');
-          reject(new Error('timeout'));
+          if (!loginCompleted) {
+            console.log('[LoginPro] Timeout de connexion atteint - forçage de l\'arrêt');
+            setLoading(false);
+            setError('⏱️ La connexion a pris trop de temps (>15s). Cela peut être dû aux limitations du compte gratuit Supabase. Veuillez réessayer ou contactez le support.');
+            resolve();
+          }
         }, TIMEOUT_MS);
       });
       
-      const loginPromise = supabase.auth.signInWithPassword({
+      // Lancer le timeout en arrière-plan
+      timeoutPromise;
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      }).then(result => {
-        clearTimeout(timeoutId);
-        return result;
       });
       
-      const { data, error } = await Promise.race([loginPromise, timeoutPromise]);
+      loginCompleted = true;
+      clearTimeout(timeoutId);
+      
+      // Si le timeout a déjà été déclenché, ne rien faire
+      if (!loading) return;
 
       if (error) throw error;
       
