@@ -40,16 +40,24 @@ export default function LoginPro({ onToggle }: LoginProProps) {
       // Attendre un court instant pour que le signOut soit traité
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Ajouter un timeout de 10 secondes pour éviter l'attente infinie
-      const TIMEOUT_MS = 10000;
+      // Ajouter un timeout de 15 secondes pour les comptes gratuits Supabase
+      const TIMEOUT_MS = 15000;
+      
+      let timeoutId: NodeJS.Timeout;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          console.log('[LoginPro] Timeout de connexion atteint');
+          reject(new Error('timeout'));
+        }, TIMEOUT_MS);
+      });
+      
       const loginPromise = supabase.auth.signInWithPassword({
         email,
         password,
+      }).then(result => {
+        clearTimeout(timeoutId);
+        return result;
       });
-      
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('timeout')), TIMEOUT_MS)
-      );
       
       const { data, error } = await Promise.race([loginPromise, timeoutPromise]);
 
@@ -64,7 +72,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
     } catch (error: any) {
       // Messages d'erreur plus informatifs
       if (error.message === 'timeout') {
-        setError('La connexion a pris trop de temps. Vérifiez votre connexion internet et réessayez.');
+        setError('⏱️ La connexion a pris trop de temps (>15s). Cela peut être dû aux limitations du compte gratuit Supabase. Veuillez réessayer ou contactez le support.');
       } else if (error.message.includes('Invalid login credentials')) {
         setError('Email ou mot de passe incorrect.');
       } else if (error.message.includes('Email not confirmed')) {
