@@ -17,11 +17,12 @@ export default function Login({ onToggle }: LoginProps) {
     setError(null);
 
     try {
-      // Créer une promesse de timeout de 15 secondes
+      // Créer une promesse de timeout de 180 secondes (3 minutes)
+      // Note: Supabase gratuit peut prendre 100-160s pour répondre
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
           reject(new Error('TIMEOUT'));
-        }, 15000);
+        }, 180000);
       });
 
       // Créer la promesse de connexion
@@ -46,8 +47,8 @@ export default function Login({ onToggle }: LoginProps) {
       
       if (error.message === 'TIMEOUT') {
         setError(
-          'La connexion prend trop de temps. Vérifiez votre connexion internet et réessayez. ' +
-          'Si le problème persiste, contactez le support.'
+          'La connexion a pris plus de 3 minutes. Cela peut être dû à une surcharge du serveur. ' +
+          'Veuillez réessayer dans quelques instants. Si le problème persiste, contactez le support.'
         );
       } else if (error.message?.includes('Invalid login credentials')) {
         setError('Email ou mot de passe incorrect. Veuillez réessayer.');
@@ -127,7 +128,10 @@ export default function Login({ onToggle }: LoginProps) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Connexion en cours...
+                  <span className="flex flex-col items-center">
+                    <span>Connexion en cours...</span>
+                    <span className="text-xs mt-1 opacity-75">(peut prendre jusqu'à 2 minutes)</span>
+                  </span>
                 </>
               ) : (
                 'Se connecter'
