@@ -19,7 +19,8 @@ export default function Signup({ onToggle }: SignupProps) {
     setError(null);
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // Créer une promise avec timeout de 30 secondes
+      const signupPromise = supabase.auth.signUp({
         email,
         password,
         options: {
@@ -29,6 +30,15 @@ export default function Signup({ onToggle }: SignupProps) {
         },
       });
 
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout: L\'inscription prend trop de temps. Veuillez réessayer.')), 30000)
+      );
+
+      const { data, error: signUpError } = await Promise.race([
+        signupPromise,
+        timeoutPromise
+      ]) as any;
+
       if (signUpError) throw signUpError;
 
       // Le profil est créé automatiquement par un trigger Postgres
@@ -36,7 +46,7 @@ export default function Signup({ onToggle }: SignupProps) {
       
       // Si la confirmation d'email est activée, data.session sera null
       // Sinon, l'utilisateur est automatiquement connecté
-      console.log('Signup response:', { session: data.session, user: data.user });
+      console.log('Signup response:', { session: data?.session, user: data?.user });
       
       setSuccess(true);
     } catch (error: any) {
