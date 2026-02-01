@@ -34,6 +34,10 @@ export default function Signup({ onToggle }: SignupProps) {
       // Le profil est créé automatiquement par un trigger Postgres
       // après l'inscription dans auth.users
       
+      // Si la confirmation d'email est activée, data.session sera null
+      // Sinon, l'utilisateur est automatiquement connecté
+      console.log('Signup response:', { session: data.session, user: data.user });
+      
       setSuccess(true);
     } catch (error: any) {
       setError(error.message || 'Erreur lors de l\'inscription');
