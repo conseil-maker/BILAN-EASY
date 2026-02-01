@@ -31,22 +31,9 @@ export default function Signup({ onToggle }: SignupProps) {
 
       if (signUpError) throw signUpError;
 
-      if (data.user) {
-        // Create profile with default client role
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: data.user.id,
-              email: email,
-              full_name: fullName,
-              role: 'client',
-            },
-          ]);
-
-        if (profileError) throw profileError;
-      }
-
+      // Le profil est créé automatiquement par un trigger Postgres
+      // après l'inscription dans auth.users
+      
       setSuccess(true);
     } catch (error: any) {
       setError(error.message || 'Erreur lors de l\'inscription');
