@@ -607,7 +607,7 @@ Génère la question au format JSON.`;
     }
 
     // Timeout et retry pour éviter les blocages
-    const generateWithTimeout = async (timeoutMs: number = 30000) => {
+    const generateWithTimeout = async (timeoutMs: number = 60000) => {
         return Promise.race([
             ai.models.generateContent({
                 model: 'gemini-2.5-pro',
@@ -622,13 +622,13 @@ Génère la question au format JSON.`;
 
     let response;
     try {
-        // console.log('[generateQuestion] Tentative 1: gemini-2.5-pro 30s');
-        response = await generateWithTimeout(30000);
+        // console.log('[generateQuestion] Tentative 1: gemini-2.5-pro 60s');
+        response = await generateWithTimeout(60000);
     } catch (error) {
         console.warn('[generateQuestion] Échec tentative 1:', error);
         try {
-            // console.log('[generateQuestion] Tentative 2: gemini-2.5-pro 20s');
-            response = await generateWithTimeout(20000);
+            // console.log('[generateQuestion] Tentative 2: gemini-2.5-pro 45s');
+            response = await generateWithTimeout(45000);
         } catch (error2) {
             console.error('[generateQuestion] Échec tentative 2:', error2);
             console.warn('[generateQuestion] Fallback: utilisation de questions pré-générées');
