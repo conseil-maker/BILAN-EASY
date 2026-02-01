@@ -47,22 +47,37 @@ export async function generateContentViaProxy(
     },
   };
 
-  const response = await fetch(`${FUNCTIONS_URL}/gemini-proxy`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-      'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-    },
-    body: JSON.stringify(payload),
-  });
+  // Créer un AbortController avec timeout de 60s pour les appels IA longs
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || `Gemini proxy error: ${response.status}`);
+  try {
+    const response = await fetch(`${FUNCTIONS_URL}/gemini-proxy`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || `Gemini proxy error: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Timeout de 60s dépassé pour la génération de question');
+    }
+    throw error;
   }
-
-  return response.json();
 }
 
 /**
