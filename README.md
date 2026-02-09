@@ -27,7 +27,7 @@ Bilan Easy est une application web complète pour la réalisation de bilans de c
 
 2. Installer les dépendances :
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. Configurer les variables d'environnement dans `.env.local` :
@@ -39,7 +39,7 @@ Bilan Easy est une application web complète pour la réalisation de bilans de c
 
 4. Lancer l'application :
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 ## 🔑 Configuration des clés API
@@ -72,6 +72,17 @@ src/
 - **Backend** : Supabase (Auth + PostgreSQL)
 - **IA** : API Gemini (Google)
 - **Déploiement** : Vercel
+
+
+## 📚 Documentation
+
+| Document | Description |
+|---|---|
+| [CAHIER_DES_CHARGES.md](./CAHIER_DES_CHARGES.md) | Spécifications fonctionnelles et techniques |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Architecture technique détaillée |
+| [docs/QUALIOPI.md](./docs/QUALIOPI.md) | Conformité Qualiopi et exigences réglementaires |
+| [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md) | Documentation technique complète |
+| [docs/ROADMAP.md](./docs/ROADMAP.md) | Feuille de route du projet |
 
 ## 📄 Licence
 
