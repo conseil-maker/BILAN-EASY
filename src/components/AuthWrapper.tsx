@@ -10,7 +10,7 @@ interface AuthWrapperProps {
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>('client'); // Default to 'client'
   const [loading, setLoading] = useState(true);
   const [showSignup, setShowSignup] = useState(false);
   
@@ -20,15 +20,22 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   // Ref pour éviter le problème de stale closure dans le timeout
   const loadingResolvedRef = useRef(false);
 
-  // Fonction pour récupérer ou créer le profil utilisateur
+  // Fonction pour récupérer ou créer le profil utilisateur (NON-BLOQUANTE)
   const fetchOrCreateUserProfile = useCallback(async (userId: string, userEmail: string): Promise<string> => {
     try {
+      // Timeout de 5 secondes pour l'appel profil
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      
       // Essayer de récupérer le profil existant
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userId)
-        .maybeSingle();
+        .maybeSingle()
+        .abortSignal(controller.signal);
+
+      clearTimeout(timeout);
 
       if (error && error.code !== 'PGRST116') {
         console.error('[AuthWrapper] Erreur récupération profil:', error);
@@ -41,9 +48,9 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         return data.role;
       }
 
-      // Si le profil n'existe pas, le créer
+      // Si le profil n'existe pas, le créer (en arrière-plan, non-bloquant)
       console.log('[AuthWrapper] Profil non trouvé, création...');
-      const { error: insertError } = await supabase
+      supabase
         .from('profiles')
         .insert({
           id: userId,
@@ -52,19 +59,33 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           full_name: userEmail.split('@')[0],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
+        })
+        .then(({ error: insertError }) => {
+          if (insertError) {
+            console.error('[AuthWrapper] Erreur création profil:', insertError);
+          } else {
+            console.log('[AuthWrapper] Profil créé avec succès');
+          }
         });
 
-      if (insertError) {
-        console.error('[AuthWrapper] Erreur création profil:', insertError);
-      } else {
-        console.log('[AuthWrapper] Profil créé avec succès');
-      }
-
       return 'client';
-    } catch (error) {
-      console.error('[AuthWrapper] Exception récupération/création profil:', error);
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        console.warn('[AuthWrapper] Timeout récupération profil (5s), utilisation du rôle par défaut');
+      } else {
+        console.error('[AuthWrapper] Exception récupération/création profil:', error);
+      }
       return 'client';
     }
+  }, []);
+
+  // Fonction helper pour résoudre l'authentification
+  const resolveAuth = useCallback((authUser: User, role: string) => {
+    setUser(authUser);
+    setUserRole(role);
+    loadingResolvedRef.current = true;
+    setLoading(false);
+    console.log('[AuthWrapper] Auth résolue pour:', authUser.email, 'rôle:', role);
   }, []);
 
   // Effet principal - s'exécute une seule fois au montage
@@ -74,26 +95,37 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     const initializeAuth = async () => {
       console.log('[AuthWrapper] Initialisation de l\'authentification...');
       try {
-        // Récupérer la session actuelle
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('[AuthWrapper] Erreur getSession:', error);
-          if (mounted) setLoading(false);
-          return;
+        // Récupérer la session actuelle avec timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('getSession timeout')), 5000)
+        );
+
+        let session: Session | null = null;
+        try {
+          const result = await Promise.race([sessionPromise, timeoutPromise]);
+          session = result.data?.session || null;
+          if (result.error) {
+            console.error('[AuthWrapper] Erreur getSession:', result.error);
+          }
+        } catch (e: any) {
+          console.warn('[AuthWrapper] getSession timeout ou erreur:', e.message);
         }
 
         console.log('[AuthWrapper] Session récupérée:', !!session);
 
         if (session?.user && mounted) {
-          const role = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
-          console.log('[AuthWrapper] Rôle utilisateur:', role);
-          if (mounted) {
-            setUser(session.user);
-            setUserRole(role);
-            loadingResolvedRef.current = true;
-            setLoading(false);
-          }
+          // D'abord résoudre avec le rôle par défaut pour débloquer l'UI
+          resolveAuth(session.user, 'client');
+          
+          // Puis charger le vrai rôle en arrière-plan
+          fetchOrCreateUserProfile(session.user.id, session.user.email || '')
+            .then(role => {
+              if (mounted && role !== 'client') {
+                console.log('[AuthWrapper] Mise à jour du rôle:', role);
+                setUserRole(role);
+              }
+            });
         } else if (mounted) {
           console.log('[AuthWrapper] Pas de session, affichage du login');
           loadingResolvedRef.current = true;
@@ -101,7 +133,10 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         }
       } catch (error) {
         console.error('[AuthWrapper] Exception initialisation:', error);
-        if (mounted) setLoading(false);
+        if (mounted) {
+          loadingResolvedRef.current = true;
+          setLoading(false);
+        }
       }
     };
 
@@ -120,13 +155,17 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
               justSignedInRef.current = true;
               signedInTimestampRef.current = Date.now();
               
-              const role = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
-              if (mounted) {
-                setUser(session.user);
-                setUserRole(role);
-                loadingResolvedRef.current = true;
-                setLoading(false);
-              }
+              // Résoudre IMMÉDIATEMENT avec le rôle par défaut
+              resolveAuth(session.user, 'client');
+              
+              // Charger le vrai rôle en arrière-plan
+              fetchOrCreateUserProfile(session.user.id, session.user.email || '')
+                .then(role => {
+                  if (mounted && role !== 'client') {
+                    console.log('[AuthWrapper] Mise à jour du rôle après SIGNED_IN:', role);
+                    setUserRole(role);
+                  }
+                });
             }
             break;
           
@@ -134,13 +173,9 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             console.log('[AuthWrapper] SIGNED_OUT - Vérification...');
             
             // Ignorer les SIGNED_OUT qui arrivent dans les 60 secondes après un SIGNED_IN
-            // C'est souvent dû à des erreurs de refresh token qui ne sont pas critiques
-            // ou à des requêtes qui échouent et déclenchent une déconnexion intempestive
             const timeSinceSignIn = Date.now() - signedInTimestampRef.current;
             if (justSignedInRef.current && timeSinceSignIn < 60000) {
               console.log('[AuthWrapper] SIGNED_OUT ignoré (trop proche du SIGNED_IN, delta:', timeSinceSignIn, 'ms)');
-              // Ne PAS appeler getSession() ici car cela peut déclencher d'autres erreurs
-              // Faire confiance au fait que la session est valide si on vient de se connecter
               return;
             }
             
@@ -148,7 +183,8 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             justSignedInRef.current = false;
             if (mounted) {
               setUser(null);
-              setUserRole(null);
+              setUserRole('client');
+              loadingResolvedRef.current = true;
               setLoading(false);
             }
             break;
@@ -161,17 +197,28 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             break;
           
           case 'INITIAL_SESSION':
-            console.log('[AuthWrapper] INITIAL_SESSION');
-            // Géré par initializeAuth
+            console.log('[AuthWrapper] INITIAL_SESSION:', !!session);
+            // Géré par initializeAuth, mais si initializeAuth n'a pas encore résolu...
+            if (session?.user && mounted && !loadingResolvedRef.current) {
+              resolveAuth(session.user, 'client');
+              fetchOrCreateUserProfile(session.user.id, session.user.email || '')
+                .then(role => {
+                  if (mounted && role !== 'client') {
+                    setUserRole(role);
+                  }
+                });
+            }
             break;
           
           default:
             console.log('[AuthWrapper] Autre événement:', event);
             if (session?.user && mounted) {
               setUser(session.user);
-              if (!userRole) {
-                const role = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
-                if (mounted) setUserRole(role);
+              if (!userRole || userRole === 'client') {
+                fetchOrCreateUserProfile(session.user.id, session.user.email || '')
+                  .then(role => {
+                    if (mounted) setUserRole(role);
+                  });
               }
             }
         }
@@ -181,13 +228,14 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     // Initialiser l'auth
     initializeAuth();
 
-    // Timeout de sécurité de 15 secondes (utilise ref pour éviter stale closure)
+    // Timeout de sécurité de 8 secondes (utilise ref pour éviter stale closure)
     const timeout = setTimeout(() => {
       if (mounted && !loadingResolvedRef.current) {
-        console.warn('[AuthWrapper] Timeout atteint (15s) - forcer l\'affichage');
+        console.warn('[AuthWrapper] Timeout atteint (8s) - forcer l\'affichage');
+        loadingResolvedRef.current = true;
         setLoading(false);
       }
-    }, 15000);
+    }, 8000);
 
     // Cleanup
     return () => {
@@ -195,7 +243,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, [fetchOrCreateUserProfile]);
+  }, [fetchOrCreateUserProfile, resolveAuth]);
 
   // Affichage du loader
   if (loading) {
@@ -210,7 +258,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   }
 
   // Affichage de la page de connexion/inscription
-  if (!user || !userRole) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
         {showSignup ? (
