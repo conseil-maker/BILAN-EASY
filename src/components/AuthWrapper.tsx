@@ -17,6 +17,8 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   // Ref pour suivre si on vient de se connecter (pour ignorer les SIGNED_OUT intempestifs)
   const justSignedInRef = useRef(false);
   const signedInTimestampRef = useRef<number>(0);
+  // Ref pour éviter le problème de stale closure dans le timeout
+  const loadingResolvedRef = useRef(false);
 
   // Fonction pour récupérer ou créer le profil utilisateur
   const fetchOrCreateUserProfile = useCallback(async (userId: string, userEmail: string): Promise<string> => {
@@ -89,10 +91,12 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
           if (mounted) {
             setUser(session.user);
             setUserRole(role);
+            loadingResolvedRef.current = true;
             setLoading(false);
           }
         } else if (mounted) {
           console.log('[AuthWrapper] Pas de session, affichage du login');
+          loadingResolvedRef.current = true;
           setLoading(false);
         }
       } catch (error) {
@@ -120,6 +124,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
               if (mounted) {
                 setUser(session.user);
                 setUserRole(role);
+                loadingResolvedRef.current = true;
                 setLoading(false);
               }
             }
@@ -176,13 +181,13 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     // Initialiser l'auth
     initializeAuth();
 
-    // Timeout de sécurité de 10 secondes
+    // Timeout de sécurité de 15 secondes (utilise ref pour éviter stale closure)
     const timeout = setTimeout(() => {
-      if (mounted && loading) {
-        console.warn('[AuthWrapper] Timeout atteint');
+      if (mounted && !loadingResolvedRef.current) {
+        console.warn('[AuthWrapper] Timeout atteint (15s) - forcer l\'affichage');
         setLoading(false);
       }
-    }, 10000);
+    }, 15000);
 
     // Cleanup
     return () => {
