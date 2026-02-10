@@ -25,6 +25,7 @@ interface ClientAppProps {
 
 const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionRestored, setSessionRestored] = useState(false);
   // Démarrer directement sur la sélection de forfait (on arrive depuis le Dashboard)
   const [appState, setAppState] = useState<AppState>('package-selection');
   const [userName, setUserName] = useState(user.email?.split('@')[0] || 'Utilisateur');
@@ -69,6 +70,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     const safetyTimeout = setTimeout(() => {
       console.warn('[ClientApp] Timeout de chargement de session, déchargement forcé');
       setIsLoading(false);
+      setSessionRestored(true); // Permettre la sauvegarde après timeout
       setAppState('package-selection');
     }, 5000);
 
@@ -99,6 +101,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
           setLastAiMessage(undefined);
           setAppState('package-selection');
           setIsLoading(false);
+          setSessionRestored(true); // Nouveau bilan = pas de restauration à protéger
           // Nettoyer l'URL sans déclencher de rechargement
           window.history.replaceState(null, '', '#/bilan');
           return;
@@ -110,13 +113,25 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             ? PACKAGES.find(p => p.id === session.selected_package_id) 
             : null;
           
+          console.log('[ClientApp] Session trouvée:', {
+            app_state: session.app_state,
+            selected_package_id: session.selected_package_id,
+            answers_count: session.current_answers?.length || 0,
+            has_consent: !!session.consent_data,
+            has_profile: !!session.user_profile,
+            has_last_ai_message: !!session.last_ai_message,
+            pkg_found: !!pkg
+          });
+          
           setUserName(session.user_name || user.email?.split('@')[0] || 'Utilisateur');
-          setSelectedPackage(pkg);
+          setSelectedPackage(pkg || null);
           setCoachingStyle(session.coaching_style || 'collaborative');
           setCurrentAnswers(session.current_answers || []);
           setStartDate(session.start_date || '');
           setTimeSpent(session.time_spent || 0);
           setLastAiMessage(session.last_ai_message || undefined);
+          setConsentData(session.consent_data || null);
+          setUserProfile(session.user_profile || null);
           
           // Si en état completion, récupérer le dernier bilan pour avoir le summary
           if (session.app_state === 'completion') {
@@ -161,6 +176,8 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
       } finally {
         clearTimeout(safetyTimeout);
         setIsLoading(false);
+        // Marquer la session comme restaurée APRÈS que tous les états soient mis à jour
+        setTimeout(() => setSessionRestored(true), 500);
       }
     };
     
@@ -199,34 +216,34 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   // Sauvegarder immédiatement après chaque nouvelle réponse
   useEffect(() => {
-    if (appState === 'questionnaire' && currentAnswers.length > 0) {
+    if (sessionRestored && appState === 'questionnaire' && currentAnswers.length > 0) {
       // Sauvegarde immédiate à chaque nouvelle réponse
       saveCurrentSession();
     }
-  }, [currentAnswers.length]); // Déclenché uniquement quand le nombre de réponses change
+  }, [currentAnswers.length, sessionRestored]); // Déclenché uniquement quand le nombre de réponses change
 
   // Sauvegarder immédiatement quand la dernière question IA change
   useEffect(() => {
-    if (appState === 'questionnaire' && lastAiMessage) {
+    if (sessionRestored && appState === 'questionnaire' && lastAiMessage) {
       // Sauvegarde immédiate de la dernière question IA
       saveCurrentSession();
     }
-  }, [lastAiMessage]); // Déclenché uniquement quand la dernière question change
+  }, [lastAiMessage, sessionRestored]); // Déclenché uniquement quand la dernière question change
 
   // Sauvegarde périodique toutes les 60 secondes comme backup
   useEffect(() => {
-    if (appState === 'questionnaire' && currentAnswers.length > 0) {
+    if (sessionRestored && appState === 'questionnaire' && currentAnswers.length > 0) {
       const interval = setInterval(saveCurrentSession, 60000);
       return () => clearInterval(interval);
     }
-  }, [appState, saveCurrentSession]);
+  }, [appState, saveCurrentSession, sessionRestored]);
 
-  // Sauvegarder à chaque changement d'état
+  // Sauvegarder à chaque changement d'état (seulement après restauration complète)
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && sessionRestored) {
       saveCurrentSession();
     }
-  }, [appState, currentAnswers, isLoading, saveCurrentSession]);
+  }, [appState, currentAnswers, isLoading, sessionRestored, saveCurrentSession]);
 
   // Timer pour suivre le temps passé
   useEffect(() => {
@@ -403,7 +420,8 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
       
       case 'preliminary-phase':
         if (!selectedPackage || !userName) {
-          handleRestart();
+          console.warn('[ClientApp] selectedPackage ou userName manquant pour preliminary-phase, retour à package-selection');
+          setAppState('package-selection');
           return null;
         }
         return (
@@ -419,14 +437,16 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
       
       case 'personalization-step':
         if (!selectedPackage || !userName) {
-          handleRestart();
+          console.warn('[ClientApp] selectedPackage ou userName manquant pour personalization-step, retour à package-selection');
+          setAppState('package-selection');
           return null;
         }
         return <PersonalizationStep onComplete={handlePersonalizationComplete} />;
       
       case 'questionnaire':
         if (!selectedPackage || !userName) {
-          handleRestart();
+          console.warn('[ClientApp] selectedPackage ou userName manquant pour questionnaire, retour à package-selection');
+          setAppState('package-selection');
           return null;
         }
         return (
