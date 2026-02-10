@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase, clearInvalidTokens } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import organizationConfig from '../config/organization';
 
 const ORGANIZATION = organizationConfig;
@@ -22,77 +22,42 @@ export default function LoginPro({ onToggle }: LoginProProps) {
     setError(null);
 
     try {
-      // Nettoyer les anciens tokens avant la connexion pour éviter les conflits
-      console.log('[LoginPro] Nettoyage des tokens invalides...');
-      clearInvalidTokens();
-      
-      // Supprimer aussi tous les tokens Supabase potentiellement corrompus
-      Object.keys(localStorage).forEach(key => {
-        if (key.includes('supabase') && key.includes('auth')) {
-          console.log('[LoginPro] Suppression du token:', key);
-          localStorage.removeItem(key);
-        }
-      });
-      
-      // Se déconnecter d'abord pour nettoyer l'état
-      await supabase.auth.signOut();
-      
-      // Attendre un court instant pour que le signOut soit traité
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Ajouter un timeout de 15 secondes pour les comptes gratuits Supabase
+      // Timeout de 15 secondes avec Promise.race
       const TIMEOUT_MS = 15000;
-      
-      let loginCompleted = false;
-      let timeoutId: NodeJS.Timeout;
-      
-      // Créer une Promise qui force l'arrêt après le timeout
-      const timeoutPromise = new Promise<void>((resolve) => {
-        timeoutId = setTimeout(() => {
-          if (!loginCompleted) {
-            console.log('[LoginPro] Timeout de connexion atteint - forçage de l\'arrêt');
-            setLoading(false);
-            setError('⏱️ La connexion a pris trop de temps (>15s). Cela peut être dû aux limitations du compte gratuit Supabase. Veuillez réessayer ou contactez le support.');
-            resolve();
-          }
+
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error('timeout'));
         }, TIMEOUT_MS);
       });
-      
-      // Lancer le timeout en arrière-plan
-      timeoutPromise;
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      loginCompleted = true;
-      clearTimeout(timeoutId);
-      
-      // Si le timeout a déjà été déclenché, ne rien faire
-      if (!loading) return;
 
-      if (error) throw error;
-      
-      // Connexion réussie - l'événement SIGNED_IN sera automatiquement capté par AuthWrapper
-      // via onAuthStateChange, pas besoin de reload
-      if (data.session) {
+      // Course entre le login et le timeout
+      const { data, error: authError } = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeoutPromise,
+      ]);
+
+      if (authError) throw authError;
+
+      // Connexion réussie - AuthWrapper détecte le changement via onAuthStateChange
+      if (data?.session) {
         console.log('[LoginPro] Connexion réussie, session établie');
-        // Ne rien faire de plus - AuthWrapper va détecter le changement via onAuthStateChange
       }
     } catch (error: any) {
-      // Messages d'erreur plus informatifs
+      console.error('[LoginPro] Erreur de connexion:', error);
+
       if (error.message === 'timeout') {
-        setError('⏱️ La connexion a pris trop de temps (>15s). Cela peut être dû aux limitations du compte gratuit Supabase. Veuillez réessayer ou contactez le support.');
-      } else if (error.message.includes('Invalid login credentials')) {
+        setError(
+          'La connexion a pris trop de temps (>15s). Veuillez réessayer.'
+        );
+      } else if (error.message?.includes('Invalid login credentials')) {
         setError('Email ou mot de passe incorrect.');
-      } else if (error.message.includes('Email not confirmed')) {
+      } else if (error.message?.includes('Email not confirmed')) {
         setError('Veuillez confirmer votre email avant de vous connecter.');
       } else {
         setError(error.message || 'Erreur lors de la connexion');
       }
     } finally {
-      // Toujours réinitialiser le loading, même en cas de succès
       setLoading(false);
     }
   };
@@ -115,7 +80,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
       if (error) throw error;
       setResetEmailSent(true);
     } catch (error: any) {
-      setError(error.message || 'Erreur lors de l\'envoi de l\'email');
+      setError(error.message || "Erreur lors de l'envoi de l'email");
     } finally {
       setLoading(false);
     }

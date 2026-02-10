@@ -4,19 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// 🔍 DEBUG ENV (recommandé par Claude Sonnet 4.5)
-console.log('🔍 DEBUG ENV:', {
-  SUPABASE_URL: supabaseUrl,
-  ANON_KEY_EXISTS: !!supabaseAnonKey,
-  ANON_KEY_LENGTH: supabaseAnonKey?.length,
-  ALL_ENV: import.meta.env
-});
-
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    '❌ Variables Supabase manquantes!\n' +
-    `URL: ${supabaseUrl ? '✅' : '❌'}\n` +
-    `KEY: ${supabaseAnonKey ? '✅' : '❌'}`
+    'Variables Supabase manquantes. Vérifiez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.'
   );
 }
 
@@ -55,23 +45,21 @@ if (typeof window !== 'undefined') {
   clearInvalidTokens();
 }
 
-// Configuration Supabase avec autoRefreshToken ACTIVÉ
-// La gestion des erreurs de refresh est faite dans AuthWrapper
+// Configuration Supabase optimisée pour la connexion par mot de passe
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     // Activer la persistance de session dans localStorage
     persistSession: true,
-    // ACTIVÉ - Le SDK gère le rafraîchissement automatique
-    // Les erreurs sont gérées par le listener onAuthStateChange
+    // Le SDK gère le rafraîchissement automatique des tokens
     autoRefreshToken: true,
-    // Détecter automatiquement les changements de session dans d'autres onglets
+    // Détecter les sessions dans l'URL (pour les redirections OAuth)
     detectSessionInUrl: true,
     // Utiliser le stockage local pour la persistance
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     // Clé de stockage personnalisée
     storageKey: STORAGE_KEY,
-    // Utiliser le flux PKCE pour une meilleure sécurité et compatibilité
-    flowType: 'pkce',
+    // Flux implicit : plus simple et fiable pour signInWithPassword
+    flowType: 'implicit',
   },
 });
 
