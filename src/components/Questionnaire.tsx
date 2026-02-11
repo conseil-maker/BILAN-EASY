@@ -377,11 +377,13 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         // console.log('[runNextStep] Called with', currentAnswers.length, 'answers');
         
         // Calculer la progression pour l'avertissement de fin
-        const timeBudget = getTimeBudget(pkg.id, currentAnswers);
-        const progressPercentage = timeBudget.percentage;
+        // IMPORTANT: Utiliser calculateProgression (basé sur le nombre de questions)
+        // et NON getTimeBudget (basé sur le temps écoulé) pour éviter les incohérences
+        const progressionForWarning = calculateProgression(currentAnswers, pkg.id, userProfile);
+        const progressPercentage = progressionForWarning.globalProgress;
         
         // Avertissement à 80% du parcours (une seule fois)
-        if (progressPercentage >= 80 && progressPercentage < 90 && !endWarningShown) {
+        if (progressPercentage >= 80 && progressPercentage < 95 && !endWarningShown) {
             setEndWarningShown(true);
             setShowEndWarning(true);
             // L'avertissement est juste informatif, on continue après
@@ -545,7 +547,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         // Générer la prochaine question avec les réponses à jour
         // console.log('[runNextStep] Appel de fetchNextQuestion avec', currentAnswers.length, 'réponses');
         await fetchNextQuestion({}, 0, currentAnswers);
-    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases, careerExplorationOffered, endWarningShown, showEndConfirmation, userWantsToDeepen, answers]);
+    }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases, careerExplorationOffered, endWarningShown, showEndConfirmation, userWantsToDeepen, answers, userProfile]);
 
     useEffect(() => {
         // La session est gérée par Supabase dans ClientApp
@@ -922,7 +924,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             </h2>
                         </div>
                         <p className="text-slate-600 dark:text-slate-300 mb-4 text-center">
-                            Vous avez parcouru environ <strong>80%</strong> de votre bilan de compétences.
+                            Vous avez parcouru environ <strong>{calculateProgression(answers, pkg.id, userProfile).globalProgress}%</strong> de votre bilan de compétences.
                         </p>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
                             💡 <strong>Encore quelques questions</strong> pour finaliser l'analyse de votre projet professionnel et préparer votre synthèse personnalisée.
