@@ -339,6 +339,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         selected_package_id: selectedPackage!.id,
         coaching_style: coachingStyle,
         current_answers: answers,
+        current_summary: summary,
         start_date: startDate,
         time_spent: timeSpent
       });

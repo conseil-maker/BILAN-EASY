@@ -63,9 +63,9 @@ export const exportToExcel = (data: ExportData): void => {
   
   answers.forEach((answer, index) => {
     csvContent += `${index + 1},`;
-    csvContent += `${escapeCSV(answer.question || answer.content || '')},`;
-    csvContent += `${escapeCSV(answer.answer || answer.response || '')},`;
-    csvContent += `${escapeCSV(answer.theme || answer.category || '')},`;
+    csvContent += `${escapeCSV(answer.questionTitle || answer.question || answer.content || '')},`;
+    csvContent += `${escapeCSV(answer.value || answer.answer || answer.response || '')},`;
+    csvContent += `${escapeCSV(answer.categoryId || answer.theme || answer.category || '')},`;
     csvContent += `${escapeCSV(answer.timestamp ? new Date(answer.timestamp).toLocaleString('fr-FR') : '')}\n`;
   });
   csvContent += '\n';

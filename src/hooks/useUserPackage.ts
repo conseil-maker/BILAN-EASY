@@ -73,7 +73,7 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
         // 2. Chercher aussi la session active (pour le forfait en cours et les answers)
         const { data: sessionData, error: sessionError } = await supabase
           .from('user_sessions')
-          .select('selected_package_id, start_date, updated_at, current_answers, app_state, current_phase, progress')
+          .select('selected_package_id, start_date, updated_at, current_answers, current_summary, app_state, current_phase, progress')
           .eq('user_id', userId)
           .maybeSingle();
 
@@ -138,7 +138,10 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
             sessionAnswers = sessionData.current_answers;
           }
 
-          console.log('[useUserPackage] → Session en état completion/summary, isCompleted=true (fallback), answers:', sessionAnswers.length);
+          // Récupérer le summary depuis la session si disponible
+          const sessionSummary = (sessionData as any).current_summary || null;
+
+          console.log('[useUserPackage] → Session en état completion/summary, isCompleted=true (fallback), answers:', sessionAnswers.length, 'hasSummary:', !!sessionSummary);
 
           setPackageInfo({
             packageId: pkg?.id || sessionData.selected_package_id || 'test',
@@ -149,7 +152,7 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
               ? (sessionData.start_date.includes('/') ? sessionData.start_date : new Date(sessionData.start_date).toLocaleDateString('fr-FR'))
               : new Date().toLocaleDateString('fr-FR'),
             isCompleted: true,
-            summary: null, // La synthèse n'est pas dans la session, elle sera régénérée
+            summary: sessionSummary,
             answers: sessionAnswers,
             loading: false,
             error: null,
