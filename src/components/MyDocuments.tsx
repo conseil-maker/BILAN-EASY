@@ -222,6 +222,50 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
           break;
 
         case 'plan':
+          // Extraire les actions du plan depuis la structure { shortTerm, mediumTerm, longTerm }
+          const extractedPlanActions: any[] = [];
+          const actionPlan = summary?.actionPlan;
+          if (actionPlan) {
+            if (Array.isArray(actionPlan)) {
+              // Format legacy : actionPlan est directement un tableau
+              actionPlan.forEach((item: any, index: number) => {
+                extractedPlanActions.push({
+                  action: item.text || item,
+                  echeance: index < 2 ? 'Court terme' : index < 4 ? 'Moyen terme' : 'Long terme',
+                  priorite: index < 2 ? 'haute' : index < 4 ? 'moyenne' : 'basse',
+                  statut: item.completed ? 'termine' : 'a_faire',
+                });
+              });
+            } else {
+              // Format structuré : { shortTerm: [...], mediumTerm: [...], longTerm: [...] }
+              (actionPlan.shortTerm || []).forEach((item: any) => {
+                extractedPlanActions.push({
+                  action: item.text || item,
+                  echeance: 'Court terme (0-3 mois)',
+                  priorite: 'haute' as const,
+                  statut: item.completed ? 'termine' : 'a_faire',
+                });
+              });
+              (actionPlan.mediumTerm || []).forEach((item: any) => {
+                extractedPlanActions.push({
+                  action: item.text || item,
+                  echeance: 'Moyen terme (3-6 mois)',
+                  priorite: 'moyenne' as const,
+                  statut: item.completed ? 'termine' : 'a_faire',
+                });
+              });
+              (actionPlan.longTerm || []).forEach((item: any) => {
+                extractedPlanActions.push({
+                  action: item.text || item,
+                  echeance: 'Long terme (6-12 mois)',
+                  priorite: 'basse' as const,
+                  statut: item.completed ? 'termine' : 'a_faire',
+                });
+              });
+            }
+          }
+          console.log('[MyDocuments] Plan d\'action extrait:', extractedPlanActions.length, 'actions');
+          
           const planData: SyntheseData = {
             userName,
             userEmail,
@@ -232,12 +276,8 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
             organizationName: organizationConfig.name,
             summary: summary || {},
             answers: answers || [],
-            planAction: summary?.actionPlan?.map((item: any, index: number) => ({
-              action: item.text || item,
-              echeance: index < 2 ? 'Court terme' : index < 4 ? 'Moyen terme' : 'Long terme',
-              priorite: index < 2 ? 'haute' : index < 4 ? 'moyenne' : 'basse',
-              statut: item.completed ? 'termine' : 'a_faire',
-            })) || [],
+            projectProfessionnel: summary?.projectProfessionnel || '',
+            planAction: extractedPlanActions,
           };
           blob = syntheseService.generatePlanAction(planData);
           filename = `plan-action-${userName.replace(/\s+/g, '-')}-${Date.now()}.pdf`;
