@@ -463,12 +463,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 // Ajouter un message explicite pour annoncer le passage à la nouvelle phase
                 const transitionMessages: Record<string, { recap: string; intro: string }> = {
                     '1_to_2': {
-                        recap: `🌟 Excellent travail ${userName} ! Nous avons terminé la **Phase Préliminaire**. J'ai maintenant une bonne compréhension de votre situation actuelle, de vos motivations pour ce bilan et de vos attentes.`,
-                        intro: `Nous passons maintenant à la **Phase d'Investigation** - le cœur du bilan. Nous allons explorer en profondeur vos compétences (techniques et transversales), vos valeurs professionnelles, vos motivations profondes et les possibilités d'évolution qui s'offrent à vous. Cette phase est plus approfondie, prenez le temps de réfléchir à chaque question. 💪`
+                        recap: `${userName}, nous avons terminé la **Phase Préliminaire**. J'ai maintenant une bonne compréhension de votre situation actuelle, de vos motivations pour ce bilan et de vos attentes.`,
+                        intro: `Nous passons maintenant à la **Phase d'Investigation** — le cœur du bilan. Nous allons explorer en profondeur vos compétences, vos valeurs professionnelles, vos motivations et les possibilités d'évolution. Cette phase est plus approfondie, prenez le temps de réfléchir à chaque question.`
                     },
                     '2_to_3': {
-                        recap: `🎯 Bravo ${userName} ! La **Phase d'Investigation** est terminée. Nous avons identifié vos compétences clés, vos valeurs, vos motivations et exploré plusieurs pistes professionnelles.`,
-                        intro: `Nous entrons maintenant dans la **Phase de Conclusion**. C'est le moment de valider votre projet professionnel, de construire un plan d'action concret et de vous projeter dans l'avenir. Nous allons transformer toute cette réflexion en actions concrètes ! 🚀`
+                        recap: `${userName}, la **Phase d'Investigation** est terminée. Nous avons identifié vos compétences clés, vos valeurs, vos motivations et exploré plusieurs pistes professionnelles.`,
+                        intro: `Nous entrons maintenant dans la **Phase de Conclusion**. C'est le moment de confronter vos aspirations avec la réalité, de valider votre projet professionnel et de construire un plan d'action concret.`
                     }
                 };
                 
@@ -537,15 +537,29 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             }
         }
 
-        // DÉSACTIVÉ : La synthèse intermédiaire génère des questions de validation interdites
-        // Le système génère maintenant des questions personnalisées en continu sans interruption
-        // if (currentAnswers.length > 0 && currentAnswers.length % 3 === 0 && currentAnswers.length % 5 !== 0) {
-        //     await handleGenerateSynthesis(currentAnswers);
-        //     return;
-        // }
+        // R6 : Mini-synthèses conversationnelles toutes les 6 questions
+        // Ces synthèses ne comptent PAS dans le quota de questions
+        if (currentAnswers.length > 0 && currentAnswers.length % 6 === 0) {
+            console.log(`[runNextStep] Mini-synthèse intermédiaire après ${currentAnswers.length} questions`);
+            // Ajouter un message de synthèse conversationnelle dans le chat
+            const recentAnswers = currentAnswers.slice(-6);
+            const themes = recentAnswers
+                .map(a => a.categoryId || a.questionTitle?.split(' ').slice(0, 3).join(' '))
+                .filter(Boolean);
+            const uniqueThemes = [...new Set(themes)];
+            
+            const synthMessage = {
+                id: `synth-${currentAnswers.length}`,
+                type: 'ai' as const,
+                content: `**Point d'étape après ${currentAnswers.length} questions** \n\nVoici ce que nous avons exploré jusqu'ici :\n${uniqueThemes.map(t => `\u2022 ${t}`).join('\n')}\n\nSi quelque chose ne vous semble pas juste ou si vous souhaitez nuancer un point, n'hésitez pas à me le dire dans votre prochaine réponse. Continuons.`,
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, synthMessage]);
+            // Petit délai pour que l'utilisateur voie la synthèse avant la question suivante
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
         
         // Générer la prochaine question avec les réponses à jour
-        // console.log('[runNextStep] Appel de fetchNextQuestion avec', currentAnswers.length, 'réponses');
         await fetchNextQuestion({}, 0, currentAnswers);
     }, [pkg, userName, coachingStyle, onComplete, SESSION_STORAGE_KEY, getPhaseInfo, updateDashboard, fetchNextQuestion, handleGenerateSynthesis, satisfactionSubmittedPhases, careerExplorationOffered, endWarningShown, showEndConfirmation, userWantsToDeepen, answers, userProfile]);
 

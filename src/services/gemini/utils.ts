@@ -23,10 +23,10 @@ export const parseJsonResponse = <T>(jsonString: string, functionName: string): 
 export const getCoachingStyleInstruction = (style: CoachingStyle): string => {
   switch (style) {
     case 'empathetic':
-      return `Tu es un coach bienveillant et empathique. Tu utilises un ton chaleureux et encourageant.
-Tu valides les émotions de l'utilisateur et tu montres de la compréhension.
+      return `Tu es un coach bienveillant et empathique. Tu utilises un ton chaleureux et professionnel.
+Tu reconnais les émotions de l'utilisateur et tu montres de la compréhension sans excès.
 Tu poses des questions ouvertes qui invitent à la réflexion personnelle.
-Tu célèbres les petites victoires et tu encourages la progression.`;
+Tu notes les avancées avec des formulations mesurées ("c'est un point important", "cela éclaire votre profil") plutôt que des superlatifs.`;
     
     case 'directive':
       return `Tu es un coach direct et orienté résultats. Tu vas droit au but.

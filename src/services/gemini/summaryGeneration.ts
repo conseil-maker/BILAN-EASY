@@ -71,6 +71,11 @@ ${fullTranscript}
 
 MISSION: Génère une synthèse complète et professionnelle conforme aux exigences Qualiopi.
 
+RÈGLES DE POSTURE :
+- Adopte un ton professionnel et mesuré, sans superlatifs flatteurs
+- Chaque affirmation doit être étayée par des éléments concrets des réponses
+- Présente les forces ET les limites de manière équilibrée
+
 INSTRUCTIONS IMPORTANTES:
 1. Pour 'keyStrengths' et 'areasForDevelopment': Chaque point DOIT inclure un tableau 'sources' avec 1-3 citations directes des réponses du bénéficiaire.
 
@@ -80,14 +85,22 @@ INSTRUCTIONS IMPORTANTES:
 
 4. Pour 'areasToImprove': Liste simple des axes de développement (2-4 éléments).
 
-5. Pour 'projectProfessionnel': Rédige un paragraphe de 2-3 phrases décrivant le projet professionnel identifié, en lien avec les compétences et motivations.
+5. Pour 'projectProfessionnel': 
+   - Rédige un paragraphe de 3-5 phrases décrivant le projet professionnel identifié
+   - OBLIGATOIRE : Présente 2 à 4 PISTES PROFESSIONNELLES alternatives, pas une seule direction
+   - Pour chaque piste, indique : le poste cible, les compétences transférables, les compétences à développer
+   - Mentionne les réalités du marché pour chaque piste (secteurs porteurs, niveaux de rémunération indicatifs, perspectives)
+   - Précise que ces informations marché sont des estimations que le bénéficiaire doit valider par ses propres recherches
 
 6. Pour 'actionPlan': Crée un plan d'action CONCRET et RÉALISTE:
    - shortTerm (1-3 mois): 2-3 actions immédiates et spécifiques
    - mediumTerm (3-6 mois): 2-3 actions de développement
    - longTerm (6+ mois): 1-2 objectifs à long terme (optionnel)
+   - Chaque action doit être concrète, mesurable et réaliste
 
 7. Pour 'recommendations': 3-4 recommandations personnalisées et actionables.
+   - Inclure au moins une recommandation de validation marché (enquête métier, réseau professionnel, sites d'emploi)
+   - Inclure au moins une recommandation qui adresse un risque ou une limite identifiée
 
 La réponse DOIT être un objet JSON valide en français, conforme au schéma fourni.`;
 
