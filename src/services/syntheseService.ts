@@ -574,87 +574,198 @@ export const syntheseService = {
   generatePlanAction(data: SyntheseData): Blob {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
+    const contentWidth = pageWidth - 2 * margin;
+    const actionTextWidth = contentWidth - 20; // Espace pour la pastille numérotée
     let y = 20;
 
-    // En-tête
-    doc.setFillColor(79, 70, 229);
-    doc.rect(0, 0, pageWidth, 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PLAN D\'ACTION', pageWidth / 2, 20, { align: 'center' });
-    doc.setFontSize(12);
-    doc.text(`${data.userName} - ${data.endDate}`, pageWidth / 2, 32, { align: 'center' });
+    // Fonction utilitaire pour vérifier si on doit ajouter une nouvelle page
+    const checkPageBreak = (neededSpace: number) => {
+      if (y + neededSpace > pageHeight - 30) {
+        doc.addPage();
+        y = 25;
+      }
+    };
 
-    y = 55;
+    // === EN-TÊTE ===
+    doc.setFillColor(79, 70, 229);
+    doc.rect(0, 0, pageWidth, 45, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PLAN D\'ACTION', pageWidth / 2, 22, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${data.userName} - ${data.endDate}`, pageWidth / 2, 36, { align: 'center' });
+
+    y = 60;
     doc.setTextColor(0, 0, 0);
 
-    // Objectif principal
+    // === OBJECTIF PRINCIPAL ===
+    doc.setFillColor(245, 243, 255);
+    doc.roundedRect(margin, y - 5, contentWidth, 10, 2, 2, 'F');
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('Objectif principal', margin, y);
-    y += 10;
-    doc.setFontSize(11);
+    doc.setTextColor(79, 70, 229);
+    doc.text('Objectif principal', margin + 5, y + 2);
+    y += 12;
+
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    const objectif = data.projectProfessionnel || 'Définir et mettre en œuvre le projet professionnel identifié lors du bilan de compétences.';
-    const objectifLines = doc.splitTextToSize(objectif, pageWidth - 2 * margin);
+    const objectif = data.projectProfessionnel || 'Définir et mettre en oeuvre le projet professionnel identifié lors du bilan de compétences.';
+    const objectifLines = doc.splitTextToSize(objectif, contentWidth - 10);
     objectifLines.forEach((line: string) => {
-      doc.text(line, margin, y);
+      checkPageBreak(6);
+      doc.text(line, margin + 5, y);
       y += 6;
     });
 
-    y += 10;
+    y += 12;
 
-    // Actions
+    // === ACTIONS PAR SECTION ===
     if (data.planAction && data.planAction.length > 0) {
-      data.planAction.forEach((item, index) => {
-        if (y > 250) {
-          doc.addPage();
-          y = 20;
-        }
+      // Regrouper les actions par échéance
+      const sections = [
+        {
+          title: 'Court terme (0-3 mois)',
+          color: [220, 38, 38] as number[],
+          bgColor: [254, 242, 242] as number[],
+          items: data.planAction.filter(a => a.priorite === 'haute'),
+        },
+        {
+          title: 'Moyen terme (3-6 mois)',
+          color: [234, 179, 8] as number[],
+          bgColor: [254, 252, 232] as number[],
+          items: data.planAction.filter(a => a.priorite === 'moyenne'),
+        },
+        {
+          title: 'Long terme (6-12 mois)',
+          color: [34, 197, 94] as number[],
+          bgColor: [240, 253, 244] as number[],
+          items: data.planAction.filter(a => a.priorite === 'basse'),
+        },
+      ];
 
-        // Numéro et priorité
-        const prioriteColor = item.priorite === 'haute' ? [220, 38, 38] : 
-                             item.priorite === 'moyenne' ? [234, 179, 8] : [34, 197, 94];
-        
-        doc.setFillColor(prioriteColor[0], prioriteColor[1], prioriteColor[2]);
-        doc.circle(margin + 5, y + 3, 5, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(10);
+      let globalIndex = 1;
+
+      sections.forEach((section) => {
+        if (section.items.length === 0) return;
+
+        checkPageBreak(30);
+
+        // Titre de section avec barre colorée
+        doc.setFillColor(section.color[0], section.color[1], section.color[2]);
+        doc.rect(margin, y, 4, 12, 'F');
+        doc.setFillColor(section.bgColor[0], section.bgColor[1], section.bgColor[2]);
+        doc.roundedRect(margin + 4, y, contentWidth - 4, 12, 0, 0, 'F');
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
-        doc.text(String(index + 1), margin + 3, y + 5);
+        doc.setTextColor(section.color[0], section.color[1], section.color[2]);
+        doc.text(section.title, margin + 10, y + 8);
+        y += 18;
 
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text(item.action, margin + 15, y + 5);
+        // Actions de cette section
+        section.items.forEach((item) => {
+          // Calculer la hauteur nécessaire pour cette action
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          const actionLines = doc.splitTextToSize(item.action, actionTextWidth);
+          const actionHeight = actionLines.length * 5.5 + 18; // Texte + échéance + marge
+          
+          checkPageBreak(actionHeight);
 
-        y += 12;
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Échéance : ${item.echeance}`, margin + 15, y);
-        doc.text(`Priorité : ${item.priorite}`, margin + 80, y);
-        
-        // Case à cocher
-        doc.rect(pageWidth - margin - 15, y - 4, 10, 10, 'S');
-        if (item.statut === 'termine') {
-          doc.text('✓', pageWidth - margin - 12, y + 3);
-        }
+          // Pastille numérotée
+          doc.setFillColor(section.color[0], section.color[1], section.color[2]);
+          doc.circle(margin + 6, y + 4, 6, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          const numStr = String(globalIndex);
+          doc.text(numStr, margin + 6 - (doc.getTextWidth(numStr) / 2), y + 6);
 
-        y += 15;
+          // Texte de l'action (wrappé sur plusieurs lignes)
+          doc.setTextColor(30, 30, 30);
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          actionLines.forEach((line: string, lineIndex: number) => {
+            doc.text(line, margin + 16, y + 4 + (lineIndex * 5.5));
+          });
+
+          y += actionLines.length * 5.5 + 4;
+
+          // Échéance et priorité
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(100, 100, 100);
+          doc.text(`Echeance : ${item.echeance}`, margin + 16, y);
+          
+          // Badge priorité
+          const prioriteLabel = item.priorite.charAt(0).toUpperCase() + item.priorite.slice(1);
+          doc.setFillColor(section.color[0], section.color[1], section.color[2]);
+          const badgeX = margin + 90;
+          doc.roundedRect(badgeX, y - 3.5, 30, 5, 1.5, 1.5, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          doc.text(prioriteLabel, badgeX + 15, y, { align: 'center' });
+
+          // Case à cocher
+          doc.setDrawColor(180, 180, 180);
+          doc.setLineWidth(0.5);
+          doc.roundedRect(pageWidth - margin - 12, y - 4, 8, 8, 1, 1, 'S');
+          if (item.statut === 'termine') {
+            doc.setTextColor(34, 197, 94);
+            doc.setFontSize(10);
+            doc.text('v', pageWidth - margin - 9, y + 2);
+          }
+
+          y += 12;
+          globalIndex++;
+        });
+
+        y += 6; // Espacement entre sections
       });
     }
 
-    // Suivi
-    y += 10;
-    doc.setFontSize(12);
+    // === SECTION SUIVI ===
+    checkPageBreak(40);
+    y += 5;
+    doc.setFillColor(240, 249, 255);
+    doc.roundedRect(margin, y - 5, contentWidth, 35, 3, 3, 'F');
+    doc.setDrawColor(59, 130, 246);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(margin, y - 5, contentWidth, 35, 3, 3, 'S');
+
+    doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
-    doc.text('Suivi', margin, y);
-    y += 8;
+    doc.setTextColor(30, 64, 175);
+    doc.text('Suivi post-bilan', margin + 8, y + 4);
+
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text('Un entretien de suivi est prévu 6 mois après la fin du bilan pour évaluer la progression.', margin, y);
+    doc.setTextColor(50, 50, 50);
+    const suiviText = 'Un entretien de suivi est prévu 6 mois après la fin du bilan pour évaluer la progression de votre projet professionnel et ajuster le plan d\'action si nécessaire.';
+    const suiviLines = doc.splitTextToSize(suiviText, contentWidth - 16);
+    suiviLines.forEach((line: string, i: number) => {
+      doc.text(line, margin + 8, y + 14 + (i * 5.5));
+    });
+
+    // === PIED DE PAGE ===
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Plan d'action - ${data.userName} - ${data.organizationName || 'BILAN-EASY'} - Page ${i}/${totalPages}`,
+        pageWidth / 2,
+        pageHeight - 10,
+        { align: 'center' }
+      );
+    }
 
     return doc.output('blob');
   }
