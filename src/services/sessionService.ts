@@ -26,6 +26,7 @@ export interface SessionData {
   current_answers: Answer[];
   current_questions: QuestionData[];
   last_ai_message?: string; // Dernière question posée par l'IA (pour reprise exacte)
+  current_summary?: any; // Summary du bilan (sauvegardé lors de la complétion)
   current_phase: string;
   progress: number;
   start_date: string;
@@ -43,25 +44,32 @@ export const saveSession = async (
   sessionData: Omit<SessionData, 'user_id' | 'updated_at'>
 ): Promise<void> => {
   try {
+    const upsertData: any = {
+      user_id: userId,
+      app_state: sessionData.app_state,
+      user_name: sessionData.user_name,
+      selected_package_id: sessionData.selected_package_id,
+      coaching_style: sessionData.coaching_style,
+      current_answers: sessionData.current_answers || [],
+      current_questions: sessionData.current_questions || [],
+      last_ai_message: sessionData.last_ai_message || null,
+      current_phase: sessionData.current_phase || 'preliminary',
+      progress: sessionData.progress || 0,
+      start_date: sessionData.start_date,
+      time_spent: sessionData.time_spent,
+      consent_data: sessionData.consent_data || null,
+      user_profile: sessionData.user_profile || null,
+      updated_at: new Date().toISOString()
+    };
+
+    // Inclure current_summary s'il est fourni (important pour la phase de complétion)
+    if (sessionData.current_summary !== undefined) {
+      upsertData.current_summary = sessionData.current_summary;
+    }
+
     const { error } = await supabase
       .from('user_sessions')
-      .upsert({
-        user_id: userId,
-        app_state: sessionData.app_state,
-        user_name: sessionData.user_name,
-        selected_package_id: sessionData.selected_package_id,
-        coaching_style: sessionData.coaching_style,
-        current_answers: sessionData.current_answers || [],
-        current_questions: sessionData.current_questions || [],
-        last_ai_message: sessionData.last_ai_message || null,
-        current_phase: sessionData.current_phase || 'preliminary',
-        progress: sessionData.progress || 0,
-        start_date: sessionData.start_date,
-        time_spent: sessionData.time_spent,
-        consent_data: sessionData.consent_data || null,
-        user_profile: sessionData.user_profile || null,
-        updated_at: new Date().toISOString()
-      }, {
+      .upsert(upsertData, {
         onConflict: 'user_id'
       });
 

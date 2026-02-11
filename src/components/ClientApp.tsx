@@ -134,16 +134,41 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
           setConsentData(session.consent_data || null);
           setUserProfile(session.user_profile || null);
           
-          // Si en état completion, récupérer le dernier bilan pour avoir le summary
+          // Si en état completion, récupérer le summary (assessment OU session)
           if (session.app_state === 'completion') {
+            // 1. Essayer depuis l'assessment complété
             const latestBilan = await getLatestCompletedAssessment(user.id);
             if (latestBilan && latestBilan.summary) {
               setCurrentSummary(latestBilan.summary);
               setCurrentAnswers(latestBilan.answers || session.current_answers || []);
               setAppState('completion');
               showInfo('Reprise de votre bilan terminé');
+            } else if ((session as any).current_summary) {
+              // 2. Fallback : récupérer le summary depuis la session (filet de sécurité)
+              console.log('[ClientApp] Summary récupéré depuis la session (fallback)');
+              setCurrentSummary((session as any).current_summary);
+              setCurrentAnswers(session.current_answers || []);
+              setAppState('completion');
+              showInfo('Reprise de votre bilan terminé');
+              
+              // Tenter de sauvegarder l'assessment manquant en arrière-plan
+              try {
+                const historyItem: HistoryItem = {
+                  id: crypto.randomUUID ? crypto.randomUUID() : new Date().toISOString(),
+                  date: new Date().toISOString(),
+                  userName: session.user_name || userName,
+                  packageName: PACKAGES.find(p => p.id === session.selected_package_id)?.name || 'Bilan',
+                  summary: (session as any).current_summary,
+                  answers: session.current_answers || [],
+                };
+                await saveAssessmentToHistory(historyItem, user.id);
+                console.log('[ClientApp] Assessment manquant recréé avec succès depuis la session');
+              } catch (e) {
+                console.warn('[ClientApp] Impossible de recréer l\'assessment manquant:', e);
+              }
             } else {
-              // Pas de bilan trouvé, revenir à l'accueil
+              // Pas de summary trouvé nulle part, revenir à l'accueil
+              console.warn('[ClientApp] Session en completion mais aucun summary trouvé');
               setAppState('welcome');
             }
           } else {
@@ -334,12 +359,9 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
       answers: answers,
     };
     
+    // TOUJOURS sauvegarder le summary dans la session d'abord (filet de sécurité)
+    // Même si saveAssessmentToHistory échoue, le summary sera récupérable
     try {
-      console.log('[ClientApp] Sauvegarde assessment:', { id: newAssessmentId, userId: user.id, packageName: selectedPackage!.name, answersCount: answers.length, hasSummary: !!summary });
-      await saveAssessmentToHistory(historyItem, user.id);
-      console.log('[ClientApp] Assessment sauvegardé avec succès dans Supabase');
-      // Ne pas effacer la session ici - elle sera effacée quand l'utilisateur clique sur "Terminer"
-      // Sauvegarder l'état 'completion' dans la session pour permettre la reprise
       await saveSession(user.id, {
         app_state: 'completion',
         user_name: userName,
@@ -347,13 +369,39 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         coaching_style: coachingStyle,
         current_answers: answers,
         current_summary: summary,
+        current_questions: [],
+        current_phase: 'completion',
+        progress: 100,
         start_date: startDate,
         time_spent: timeSpent
       });
-      showSuccess('Bilan sauvegardé avec succès !');
-    } catch (error) {
-      console.error('[ClientApp] Erreur sauvegarde bilan:', error);
-      showError('Erreur lors de la sauvegarde du bilan');
+      console.log('[ClientApp] Summary sauvegardé dans la session (filet de sécurité)');
+    } catch (sessionError) {
+      console.error('[ClientApp] Erreur sauvegarde session avec summary:', sessionError);
+    }
+
+    // Sauvegarder l'assessment dans la table assessments (avec retry)
+    let assessmentSaved = false;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.log(`[ClientApp] Sauvegarde assessment (tentative ${attempt}/3):`, { id: newAssessmentId, userId: user.id, packageName: selectedPackage!.name, answersCount: answers.length, hasSummary: !!summary });
+        await saveAssessmentToHistory(historyItem, user.id);
+        console.log('[ClientApp] Assessment sauvegardé avec succès dans Supabase');
+        assessmentSaved = true;
+        showSuccess('Bilan sauvegardé avec succès !');
+        break;
+      } catch (error) {
+        console.error(`[ClientApp] Erreur sauvegarde assessment (tentative ${attempt}/3):`, error);
+        if (attempt < 3) {
+          // Attendre avant de réessayer (1s, puis 2s)
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
+      }
+    }
+
+    if (!assessmentSaved) {
+      console.error('[ClientApp] Échec de la sauvegarde de l\'assessment après 3 tentatives. Le summary est dans la session.');
+      showError('Erreur lors de la sauvegarde du bilan. Vos données sont préservées, veuillez réessayer.');
     }
 
     setAppState('completion');
