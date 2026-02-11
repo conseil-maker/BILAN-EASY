@@ -548,11 +548,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 .filter(Boolean);
             const uniqueThemes = [...new Set(themes)];
             
-            const synthMessage = {
-                id: `synth-${currentAnswers.length}`,
-                type: 'ai' as const,
-                content: `**Point d'étape après ${currentAnswers.length} questions** \n\nVoici ce que nous avons exploré jusqu'ici :\n${uniqueThemes.map(t => `\u2022 ${t}`).join('\n')}\n\nSi quelque chose ne vous semble pas juste ou si vous souhaitez nuancer un point, n'hésitez pas à me le dire dans votre prochaine réponse. Continuons.`,
-                timestamp: new Date()
+            const synthMessage: Message = {
+                sender: 'ai',
+                text: `**Point d'étape après ${currentAnswers.length} questions** \n\nVoici ce que nous avons exploré jusqu'ici :\n${uniqueThemes.map(t => `• ${t}`).join('\n')}\n\nSi quelque chose ne vous semble pas juste ou si vous souhaitez nuancer un point, n'hésitez pas à me le dire dans votre prochaine réponse. Continuons.`,
+                isSynthesis: true
             };
             setMessages(prev => [...prev, synthMessage]);
             // Petit délai pour que l'utilisateur voie la synthèse avant la question suivante
