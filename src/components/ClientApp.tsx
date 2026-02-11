@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import WelcomeScreen from './WelcomeScreen';
 import PackageSelector from './PackageSelector';
@@ -63,6 +63,9 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const [resumeInfo, setResumeInfo] = useState<{ answersCount: number; lastUpdate: string } | null>(null);
   const [lastAiMessage, setLastAiMessage] = useState<string | undefined>(undefined);
   const [assessmentId, setAssessmentId] = useState<string>('');
+  // Flag : l'utilisateur a confirmé vouloir un nouveau bilan (étape 1 de la double validation)
+  // La suppression effective des données se fera uniquement quand il choisira un forfait (étape 2)
+  const [pendingNewBilan, setPendingNewBilan] = useState(false);
   const { showSuccess, showInfo, showError } = useToast();
 
   // Charger la session depuis Supabase au démarrage
@@ -83,14 +86,11 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         const forceNewBilan = urlParams.get('new') === 'true';
         
         if (forceNewBilan) {
-          console.log('[ClientApp] Nouveau bilan demandé, effacement de la session...');
-          // Effacer la session existante et démarrer un nouveau bilan
-          try {
-            await clearSession(user.id);
-          } catch (e) {
-            console.warn('[ClientApp] Erreur lors de l\'effacement de la session:', e);
-          }
-          // Réinitialiser tous les états
+          console.log('[ClientApp] Nouveau bilan demandé — suppression DIFFÉRÉE (en attente du choix de forfait)');
+          // NE PAS supprimer les données maintenant !
+          // Marquer simplement l'intention de nouveau bilan
+          setPendingNewBilan(true);
+          // Réinitialiser les états locaux pour afficher la sélection de forfait vierge
           setSelectedPackage(null);
           setCurrentAnswers([]);
           setCurrentSummary(null);
@@ -102,7 +102,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
           setLastAiMessage(undefined);
           setAppState('package-selection');
           setIsLoading(false);
-          setSessionRestored(true); // Nouveau bilan = pas de restauration à protéger
+          setSessionRestored(false); // IMPORTANT : bloquer la sauvegarde automatique tant que le forfait n'est pas choisi
           // Nettoyer l'URL sans déclencher de rechargement
           window.history.replaceState(null, '', '#/bilan');
           return;
@@ -178,7 +178,10 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         clearTimeout(safetyTimeout);
         setIsLoading(false);
         // Marquer la session comme restaurée APRÈS que tous les états soient mis à jour
-        setTimeout(() => setSessionRestored(true), 500);
+        // Sauf si pendingNewBilan est actif (on attend le choix de forfait)
+        if (!pendingNewBilan) {
+          setTimeout(() => setSessionRestored(true), 500);
+        }
       }
     };
     
@@ -189,6 +192,11 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   // Sauvegarder la session dans Supabase à chaque changement important
   const saveCurrentSession = useCallback(async () => {
+    // Ne pas sauvegarder si un nouveau bilan est en attente (les anciennes données ne doivent pas être écrasées)
+    if (pendingNewBilan) {
+      console.log('[ClientApp] Sauvegarde bloquée : nouveau bilan en attente de confirmation (choix de forfait)');
+      return;
+    }
     if (['summary', 'history', 'view-history-record', 'welcome'].includes(appState)) {
       return;
     }
@@ -213,7 +221,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     } catch (error) {
       console.error('[ClientApp] Erreur sauvegarde session:', error);
     }
-  }, [appState, userName, selectedPackage, coachingStyle, currentAnswers, startDate, timeSpent, user.id, progress, consentData, userProfile, lastAiMessage]);
+  }, [appState, userName, selectedPackage, coachingStyle, currentAnswers, startDate, timeSpent, user.id, progress, consentData, userProfile, lastAiMessage, pendingNewBilan]);
 
   // Sauvegarder immédiatement après chaque nouvelle réponse
   useEffect(() => {
@@ -259,37 +267,36 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
   // Calculer la progression globale basée sur le nombre de questions
   useEffect(() => {
-    if (appState === 'questionnaire' && selectedPackage) {
-      // Utiliser le nouveau service de progression
-      const progressionInfo = calculateProgression(
-        currentAnswers,
-        selectedPackage.id,
-        userProfile
+    if (selectedPackage && currentAnswers.length > 0) {
+      const progressionInfo: ProgressionInfo = calculateProgression(
+        currentAnswers.length,
+        selectedPackage.timeBudget.total,
+        selectedPackage.id
       );
-      setProgress(progressionInfo.globalProgress);
-    } else {
-      // Pour les étapes hors questionnaire, utiliser une progression fixe
-      const stateProgress: Record<AppState, number> = {
-        'welcome': 0,
-        'package-selection': 5,
-        'preliminary-phase': 10,
-        'personalization-step': 15,
-        'questionnaire': 20, // Sera remplacé par le calcul dynamique
-        'completion': 95,
-        'summary': 100,
-        'history': 0,
-        'view-history-record': 0,
-      };
-      setProgress(stateProgress[appState] || 0);
+      setProgress(progressionInfo.percentage);
     }
-  }, [appState, currentAnswers.length, selectedPackage, userProfile]);
+  }, [currentAnswers.length, selectedPackage]);
 
-  const handleStart = (name: string) => {
-    setUserName(name);
+  const handleStart = () => {
     setAppState('package-selection');
   };
 
-  const handlePackageSelect = (pkg: Package) => {
+  const handlePackageSelect = async (pkg: Package) => {
+    // ÉTAPE 2 DE LA DOUBLE VALIDATION :
+    // Si un nouveau bilan était en attente, c'est maintenant qu'on supprime les anciennes données
+    if (pendingNewBilan) {
+      console.log('[ClientApp] Forfait choisi — suppression effective des anciennes données');
+      try {
+        await clearSession(user.id);
+        console.log('[ClientApp] Anciennes données supprimées avec succès');
+      } catch (e) {
+        console.warn('[ClientApp] Erreur lors de la suppression des anciennes données:', e);
+      }
+      // Désactiver le flag et autoriser les sauvegardes
+      setPendingNewBilan(false);
+      setSessionRestored(true);
+    }
+    
     setSelectedPackage(pkg);
     setStartDate(new Date().toLocaleDateString('fr-FR'));
     setAppState('preliminary-phase');
@@ -377,6 +384,12 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   };
 
   const handleDashboard = () => {
+    // Si l'utilisateur revient au dashboard alors qu'un nouveau bilan était en attente,
+    // annuler l'intention (les données n'ont pas été supprimées)
+    if (pendingNewBilan) {
+      console.log('[ClientApp] Retour au dashboard — annulation du nouveau bilan en attente (données préservées)');
+      setPendingNewBilan(false);
+    }
     // Rediriger vers le dashboard
     window.location.hash = '#/dashboard';
   };
