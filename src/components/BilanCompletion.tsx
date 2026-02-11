@@ -16,6 +16,7 @@ interface BilanCompletionProps {
   summary: Summary;
   answers: Answer[];
   startDate: string;
+  existingAssessmentId?: string;
   onRestart: () => void;
   onViewHistory: () => void;
 }
@@ -62,6 +63,7 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
   summary,
   answers,
   startDate,
+  existingAssessmentId,
   onRestart,
   onViewHistory,
 }) => {
@@ -77,11 +79,12 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
   // Générer u  // Générer un ID d'évaluation unique (UUID v4 valide) et sauvegarder
   useEffect(() => {
     const initAssessment = async () => {
-      const id = crypto.randomUUID();
-      console.log('Generated Assessment ID:', id);
+      // Réutiliser l'ID existant si fourni par ClientApp (évite la double sauvegarde)
+      const id = existingAssessmentId || crypto.randomUUID();
+      console.log('[BilanCompletion] Assessment ID:', id, existingAssessmentId ? '(réutilisé)' : '(nouveau)');
       setAssessmentId(id);
       
-      // Sauvegarder le bilan complété en base et attendre
+      // Mettre à jour le bilan existant ou en créer un nouveau
       await saveBilanToDatabase(id);
       setIsAssessmentSaving(false); // Fin du chargement
     };

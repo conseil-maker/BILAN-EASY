@@ -67,6 +67,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
   const [changingPassword, setChangingPassword] = useState(false);
+  const [showNewBilanModal, setShowNewBilanModal] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -255,6 +256,28 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     } finally {
       setChangingPassword(false);
     }
+  };
+
+  // Gestion du clic sur "Nouveau bilan" avec vérification du bilan en cours
+  const handleNewBilanClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (currentBilan && currentBilan.progress < 100) {
+      // Un bilan est en cours, afficher la modale de confirmation
+      setShowNewBilanModal(true);
+    } else {
+      // Pas de bilan en cours, naviguer directement
+      window.location.hash = '#/bilan?new=true';
+    }
+  };
+
+  const handleConfirmNewBilan = () => {
+    setShowNewBilanModal(false);
+    window.location.hash = '#/bilan?new=true';
+  };
+
+  const handleContinueExistingBilan = () => {
+    setShowNewBilanModal(false);
+    window.location.hash = '#/bilan';
   };
 
   const tabs = [
@@ -447,12 +470,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   Continuer mon bilan
                 </button>
               )}
-              <a
-                href="#/bilan?new=true"
+              <button
+                onClick={handleNewBilanClick}
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition-colors"
               >
                 {stats.totalBilans === 0 ? 'Commencer mon bilan' : 'Nouveau bilan'}
-              </a>
+              </button>
             </div>
           </div>
 
@@ -1089,6 +1112,67 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 <strong>RGPD :</strong> Vous pouvez demander l'accès, la rectification ou la suppression 
                 de vos données personnelles en nous contactant à rgpd@bilan-easy.fr
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* Modal confirmation nouveau bilan */}
+        {showNewBilanModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-lg w-full shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Vous avez un bilan en cours
+                </h3>
+              </div>
+
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <span className="text-xl mt-0.5">⏳</span>
+                  <div>
+                    <p className="font-medium text-amber-800 dark:text-amber-200">
+                      {currentBilan?.package_name || 'Bilan de comp\u00e9tences'}
+                    </p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                      {currentBilan?.answers_count || 0} r\u00e9ponse{(currentBilan?.answers_count || 0) > 1 ? 's' : ''} \u2022 {Math.round(currentBilan?.progress || 0)}% compl\u00e9t\u00e9
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+                Si vous commencez un nouveau bilan, <strong className="text-red-600 dark:text-red-400">toutes les r\u00e9ponses de votre bilan en cours seront d\u00e9finitivement perdues</strong>. Cette action est irr\u00e9versible.
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleContinueExistingBilan}
+                  className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Reprendre mon bilan en cours
+                </button>
+                <button
+                  onClick={handleConfirmNewBilan}
+                  className="w-full px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                >
+                  Abandonner et commencer un nouveau bilan
+                </button>
+                <button
+                  onClick={() => setShowNewBilanModal(false)}
+                  className="w-full px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors text-sm"
+                >
+                  Annuler
+                </button>
+              </div>
             </div>
           </div>
         )}

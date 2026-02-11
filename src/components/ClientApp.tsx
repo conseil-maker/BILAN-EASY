@@ -62,6 +62,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   const [showWelcomeBack, setShowWelcomeBack] = useState(false);
   const [resumeInfo, setResumeInfo] = useState<{ answersCount: number; lastUpdate: string } | null>(null);
   const [lastAiMessage, setLastAiMessage] = useState<string | undefined>(undefined);
+  const [assessmentId, setAssessmentId] = useState<string>('');
   const { showSuccess, showInfo, showError } = useToast();
 
   // Charger la session depuis Supabase au démarrage
@@ -313,8 +314,12 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     setCurrentAnswers(answers);
     setCurrentSummary(summary);
 
+    // Générer un seul ID pour l'assessment et le stocker
+    const newAssessmentId = crypto.randomUUID ? crypto.randomUUID() : new Date().toISOString();
+    setAssessmentId(newAssessmentId);
+
     const historyItem: HistoryItem = {
-      id: crypto.randomUUID ? crypto.randomUUID() : new Date().toISOString(),
+      id: newAssessmentId,
       date: new Date().toISOString(),
       userName: userName,
       packageName: selectedPackage!.name,
@@ -480,6 +485,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             summary={currentSummary}
             answers={currentAnswers}
             startDate={startDate}
+            existingAssessmentId={assessmentId}
             onRestart={handleRestart}
             onViewHistory={handleShowHistory}
           />
