@@ -49,7 +49,7 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
     const fetchPackageInfo = async () => {
       try {
         // 1. D'abord chercher le dernier assessment complété (pour les documents)
-        const { data: completedAssessment } = await supabase
+        const { data: completedAssessment, error: assessmentError } = await supabase
           .from('assessments')
           .select('id, package_name, status, created_at, completed_at, summary, answers')
           .eq('user_id', userId)
@@ -58,12 +58,27 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
           .limit(1)
           .maybeSingle();
 
+        console.log('[useUserPackage] Assessment complété:', completedAssessment ? { id: completedAssessment.id, status: completedAssessment.status, package: completedAssessment.package_name, hasSummary: !!completedAssessment.summary, hasAnswers: !!completedAssessment.answers } : 'AUCUN', 'Error:', assessmentError);
+
+        // 1b. Si aucun assessment 'completed', chercher TOUS les assessments pour debug
+        if (!completedAssessment) {
+          const { data: allAssessments } = await supabase
+            .from('assessments')
+            .select('id, status, package_name, created_at')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(5);
+          console.log('[useUserPackage] Tous les assessments:', allAssessments);
+        }
+
         // 2. Chercher aussi la session active (pour le forfait en cours)
-        const { data: sessionData } = await supabase
+        const { data: sessionData, error: sessionError } = await supabase
           .from('user_sessions')
           .select('selected_package_id, start_date, updated_at, session_data')
           .eq('user_id', userId)
           .maybeSingle();
+
+        console.log('[useUserPackage] Session active:', sessionData ? { packageId: sessionData.selected_package_id, startDate: sessionData.start_date } : 'AUCUNE', 'Error:', sessionError);
 
         // 3. Si on a un assessment complété, l'utiliser en priorité
         if (completedAssessment && completedAssessment.status === 'completed') {
