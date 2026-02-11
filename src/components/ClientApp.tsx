@@ -328,7 +328,9 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
     };
     
     try {
+      console.log('[ClientApp] Sauvegarde assessment:', { id: newAssessmentId, userId: user.id, packageName: selectedPackage!.name, answersCount: answers.length, hasSummary: !!summary });
       await saveAssessmentToHistory(historyItem, user.id);
+      console.log('[ClientApp] Assessment sauvegardé avec succès dans Supabase');
       // Ne pas effacer la session ici - elle sera effacée quand l'utilisateur clique sur "Terminer"
       // Sauvegarder l'état 'completion' dans la session pour permettre la reprise
       await saveSession(user.id, {

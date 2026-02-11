@@ -25,6 +25,9 @@ export interface UserPackageInfo {
  * 1. Chercher un assessment complété (prioritaire pour les documents)
  * 2. Si pas de bilan complété, chercher la session active
  * 3. Combiner les deux sources pour avoir toutes les infos
+ * 
+ * IMPORTANT: La table assessments utilise `client_id` (pas `user_id`)
+ * IMPORTANT: La table user_sessions utilise `current_answers` (pas `session_data`)
  */
 export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
   const [packageInfo, setPackageInfo] = useState<UserPackageInfo>({
@@ -52,33 +55,37 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
         const { data: completedAssessment, error: assessmentError } = await supabase
           .from('assessments')
           .select('id, package_name, status, created_at, completed_at, summary, answers')
-          .eq('user_id', userId)
+          .eq('client_id', userId)
           .eq('status', 'completed')
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        console.log('[useUserPackage] Assessment complété:', completedAssessment ? { id: completedAssessment.id, status: completedAssessment.status, package: completedAssessment.package_name, hasSummary: !!completedAssessment.summary, hasAnswers: !!completedAssessment.answers } : 'AUCUN', 'Error:', assessmentError);
+        console.log('[useUserPackage] Assessment complété:', completedAssessment ? { 
+          id: completedAssessment.id, 
+          status: completedAssessment.status, 
+          package: completedAssessment.package_name, 
+          hasSummary: !!completedAssessment.summary, 
+          hasAnswers: !!completedAssessment.answers,
+          answersCount: Array.isArray(completedAssessment.answers) ? completedAssessment.answers.length : 0
+        } : 'AUCUN', 'Error:', assessmentError);
 
-        // 1b. Si aucun assessment 'completed', chercher TOUS les assessments pour debug
-        if (!completedAssessment) {
-          const { data: allAssessments } = await supabase
-            .from('assessments')
-            .select('id, status, package_name, created_at')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false })
-            .limit(5);
-          console.log('[useUserPackage] Tous les assessments:', allAssessments);
-        }
-
-        // 2. Chercher aussi la session active (pour le forfait en cours)
+        // 2. Chercher aussi la session active (pour le forfait en cours et les answers)
         const { data: sessionData, error: sessionError } = await supabase
           .from('user_sessions')
-          .select('selected_package_id, start_date, updated_at, session_data')
+          .select('selected_package_id, start_date, updated_at, current_answers, app_state, current_phase, progress')
           .eq('user_id', userId)
           .maybeSingle();
 
-        console.log('[useUserPackage] Session active:', sessionData ? { packageId: sessionData.selected_package_id, startDate: sessionData.start_date } : 'AUCUNE', 'Error:', sessionError);
+        console.log('[useUserPackage] Session active:', sessionData ? { 
+          packageId: sessionData.selected_package_id, 
+          startDate: sessionData.start_date,
+          appState: sessionData.app_state,
+          phase: sessionData.current_phase,
+          progress: sessionData.progress,
+          hasAnswers: !!sessionData.current_answers,
+          answersCount: Array.isArray(sessionData.current_answers) ? sessionData.current_answers.length : 0
+        } : 'AUCUNE', 'Error:', sessionError);
 
         // 3. Si on a un assessment complété, l'utiliser en priorité
         if (completedAssessment && completedAssessment.status === 'completed') {
@@ -87,26 +94,18 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
             (completedAssessment.package_name || '').toLowerCase().includes(p.id)
           );
 
-          // Essayer de récupérer les answers depuis l'assessment ou la session
+          // Récupérer les answers depuis l'assessment ou la session
           let assessmentAnswers = completedAssessment.answers || [];
           let assessmentSummary = completedAssessment.summary || null;
           
           // Si les answers ne sont pas dans l'assessment, essayer depuis la session
-          if (assessmentAnswers.length === 0 && sessionData?.session_data) {
-            try {
-              const sessionParsed = typeof sessionData.session_data === 'string' 
-                ? JSON.parse(sessionData.session_data) 
-                : sessionData.session_data;
-              if (sessionParsed?.answers && Array.isArray(sessionParsed.answers)) {
-                assessmentAnswers = sessionParsed.answers;
-              }
-              if (!assessmentSummary && sessionParsed?.summary) {
-                assessmentSummary = sessionParsed.summary;
-              }
-            } catch (e) {
-              console.error('[useUserPackage] Erreur parsing session_data:', e);
+          if ((!Array.isArray(assessmentAnswers) || assessmentAnswers.length === 0) && sessionData?.current_answers) {
+            if (Array.isArray(sessionData.current_answers)) {
+              assessmentAnswers = sessionData.current_answers;
             }
           }
+
+          console.log('[useUserPackage] → Bilan COMPLÉTÉ trouvé, isCompleted=true, answers:', assessmentAnswers.length);
 
           setPackageInfo({
             packageId: pkg?.id || 'test',
@@ -128,44 +127,46 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
           return;
         }
 
-        // 4. Si pas de bilan complété, chercher un assessment en cours
-        const { data: inProgressAssessment } = await supabase
-          .from('assessments')
-          .select('id, package_name, status, created_at, summary, answers')
-          .eq('user_id', userId)
-          .neq('status', 'completed')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        // 4. Si pas de bilan complété mais session en état 'completion' ou 'summary'
+        // → Le bilan est terminé côté UI mais l'assessment n'a pas été sauvegardé correctement
+        if (sessionData?.app_state === 'completion' || sessionData?.app_state === 'summary') {
+          const pkg = PACKAGES.find(p => p.id === sessionData.selected_package_id);
+          
+          // Récupérer les answers depuis la session
+          let sessionAnswers: any[] = [];
+          if (sessionData.current_answers && Array.isArray(sessionData.current_answers)) {
+            sessionAnswers = sessionData.current_answers;
+          }
 
-        // 5. Utiliser la session active si disponible
+          console.log('[useUserPackage] → Session en état completion/summary, isCompleted=true (fallback), answers:', sessionAnswers.length);
+
+          setPackageInfo({
+            packageId: pkg?.id || sessionData.selected_package_id || 'test',
+            packageName: pkg?.name || 'Bilan',
+            packageDuration: pkg?.totalHours || 2,
+            packagePrice: getPackagePrice(pkg?.name || ''),
+            startDate: sessionData.start_date 
+              ? (sessionData.start_date.includes('/') ? sessionData.start_date : new Date(sessionData.start_date).toLocaleDateString('fr-FR'))
+              : new Date().toLocaleDateString('fr-FR'),
+            isCompleted: true,
+            summary: null, // La synthèse n'est pas dans la session, elle sera régénérée
+            answers: sessionAnswers,
+            loading: false,
+            error: null,
+          });
+          return;
+        }
+
+        // 5. Utiliser la session active si disponible (bilan en cours)
         if (sessionData?.selected_package_id) {
           const pkg = PACKAGES.find(p => p.id === sessionData.selected_package_id);
           if (pkg) {
-            // Récupérer les answers depuis la session
             let sessionAnswers: any[] = [];
-            let sessionSummary: any = null;
-            
-            if (sessionData.session_data) {
-              try {
-                const sessionParsed = typeof sessionData.session_data === 'string'
-                  ? JSON.parse(sessionData.session_data)
-                  : sessionData.session_data;
-                if (sessionParsed?.answers && Array.isArray(sessionParsed.answers)) {
-                  sessionAnswers = sessionParsed.answers;
-                }
-                if (sessionParsed?.summary) {
-                  sessionSummary = sessionParsed.summary;
-                }
-              } catch (e) {
-                console.error('[useUserPackage] Erreur parsing session_data:', e);
-              }
+            if (sessionData.current_answers && Array.isArray(sessionData.current_answers)) {
+              sessionAnswers = sessionData.current_answers;
             }
 
-            // Aussi vérifier l'assessment en cours pour les answers
-            if (sessionAnswers.length === 0 && inProgressAssessment?.answers) {
-              sessionAnswers = inProgressAssessment.answers;
-            }
+            console.log('[useUserPackage] → Session active en cours, isCompleted=false, answers:', sessionAnswers.length);
 
             setPackageInfo({
               packageId: pkg.id,
@@ -173,10 +174,10 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
               packageDuration: pkg.totalHours,
               packagePrice: getPackagePrice(pkg.name),
               startDate: sessionData.start_date 
-                ? new Date(sessionData.start_date).toLocaleDateString('fr-FR')
+                ? (sessionData.start_date.includes('/') ? sessionData.start_date : new Date(sessionData.start_date).toLocaleDateString('fr-FR'))
                 : new Date().toLocaleDateString('fr-FR'),
               isCompleted: false,
-              summary: sessionSummary,
+              summary: null,
               answers: sessionAnswers,
               loading: false,
               error: null,
@@ -185,31 +186,8 @@ export const useUserPackage = (userId: string | undefined): UserPackageInfo => {
           }
         }
 
-        // 6. Utiliser l'assessment en cours si pas de session
-        if (inProgressAssessment?.package_name) {
-          const pkg = PACKAGES.find(p => 
-            p.name.toLowerCase().includes(inProgressAssessment.package_name.toLowerCase()) ||
-            inProgressAssessment.package_name.toLowerCase().includes(p.id)
-          );
-          
-          setPackageInfo({
-            packageId: pkg?.id || 'essentiel',
-            packageName: inProgressAssessment.package_name,
-            packageDuration: getPackageDuration(inProgressAssessment.package_name),
-            packagePrice: getPackagePrice(inProgressAssessment.package_name),
-            startDate: inProgressAssessment.created_at 
-              ? new Date(inProgressAssessment.created_at).toLocaleDateString('fr-FR')
-              : new Date().toLocaleDateString('fr-FR'),
-            isCompleted: false,
-            summary: inProgressAssessment.summary || null,
-            answers: inProgressAssessment.answers || [],
-            loading: false,
-            error: null,
-          });
-          return;
-        }
-
-        // 7. Valeurs par défaut si rien trouvé
+        // 6. Valeurs par défaut si rien trouvé
+        console.log('[useUserPackage] → Rien trouvé, valeurs par défaut');
         setPackageInfo({
           packageId: 'test',
           packageName: 'Forfait Test',
