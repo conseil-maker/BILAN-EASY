@@ -65,7 +65,23 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
     }
   };
 
+  // Logique de disponibilité des documents :
+  // - Livret d'accueil : TOUJOURS disponible (document d'information préalable)
+  // - Convention : TOUJOURS disponible (document contractuel initial)
+  // - Attestation : disponible à la FIN du bilan uniquement
+  // - Synthèse : disponible à la FIN du bilan (nécessite summary)
+  // - Plan d'action : disponible à la FIN du bilan (nécessite summary)
   const documents: DocumentItem[] = [
+    {
+      id: 'livret',
+      name: 'Livret d\'accueil',
+      description: 'Guide complet présentant le déroulement et la méthodologie du bilan',
+      icon: '📘',
+      color: 'blue',
+      available: true,
+      type: 'livret',
+      qualiopi: true,
+    },
     {
       id: 'convention',
       name: 'Convention de prestation',
@@ -74,16 +90,6 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
       color: 'indigo',
       available: true,
       type: 'convention',
-      qualiopi: true,
-    },
-    {
-      id: 'livret',
-      name: 'Livret d\'accueil',
-      description: 'Guide complet présentant le déroulement et la méthodologie',
-      icon: '📘',
-      color: 'blue',
-      available: true,
-      type: 'livret',
       qualiopi: true,
     },
     {

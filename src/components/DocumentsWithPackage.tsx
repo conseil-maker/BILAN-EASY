@@ -48,7 +48,10 @@ export const DocumentsWithPackage: React.FC<DocumentsPageProps> = ({ user, userR
     packageDuration: packageInfo.packageDuration,
     packagePrice: packageInfo.packagePrice,
     startDate: packageInfo.startDate,
+    endDate: packageInfo.endDate,
     isCompleted: packageInfo.isCompleted,
+    summary: packageInfo.summary,
+    answers: packageInfo.answers,
   };
 
   if (pageType === 'documents') {
