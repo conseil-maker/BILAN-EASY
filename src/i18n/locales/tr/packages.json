@@ -3,6 +3,7 @@
   "subtitle": "İhtiyaçlarınıza uygun paketi seçin",
   "duration": "{{hours}} saat rehberlik",
   "features": "Dahil özellikler",
+  "hours": "saat",
   "select": "Bu paketi seç",
   "selected": "Paket seçildi",
   "popular": "Popüler",

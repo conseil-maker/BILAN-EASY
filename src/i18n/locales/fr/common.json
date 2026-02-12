@@ -36,6 +36,8 @@
   "selectLanguage": "Choisir la langue",
   "nav": {
     "home": "Accueil",
+    "backToHome": "Retour à l'accueil",
+    "bilanTitle": "Bilan de Compétences",
     "documents": "Documents",
     "appointments": "Rendez-vous",
     "about": "À propos",

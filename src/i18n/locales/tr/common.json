@@ -36,6 +36,8 @@
   "selectLanguage": "Dil seçin",
   "nav": {
     "home": "Ana Sayfa",
+    "backToHome": "Ana sayfaya dön",
+    "bilanTitle": "Yetkinlik Değerlendirmesi",
     "documents": "Belgeler",
     "appointments": "Randevular",
     "about": "Hakkımızda",

@@ -3,6 +3,7 @@
   "subtitle": "Sélectionnez le forfait qui correspond à vos besoins",
   "duration": "{{hours}}h d'accompagnement",
   "features": "Fonctionnalités incluses",
+  "hours": "heures",
   "select": "Choisir ce forfait",
   "selected": "Forfait sélectionné",
   "popular": "Populaire",
