@@ -87,5 +87,25 @@
     "rights": "Tüm hakları saklıdır",
     "legal": "Yasal bilgiler",
     "privacy": "Gizlilik"
+  },
+  "welcome": {
+    "title": "Yetkinlik Değerlendirmesi",
+    "subtitle": "Güçlü yönlerinizi keşfedin ve mesleki geleceğinizi çizin.",
+    "greeting": "Hoş geldiniz, {{name}}!",
+    "nameLabel": "Adınız",
+    "namePlaceholder": "Adınızı girin",
+    "startButton": "Değerlendirmemi başlat",
+    "viewHistory": "Geçmişi görüntüle",
+    "logout": "Çıkış",
+    "quickAccess": "Hızlı erişim",
+    "dashboard": "Kontrol Panelim",
+    "documents": "Belgelerim",
+    "satisfaction": "Memnuniyet",
+    "certified": "Sertifikalı kuruluş",
+    "validation": {
+      "required": "Devam etmek için lütfen adınızı girin",
+      "minLength": "Ad en az 2 karakter içermelidir",
+      "maxLength": "Ad 50 karakteri aşamaz"
+    }
   }
 }

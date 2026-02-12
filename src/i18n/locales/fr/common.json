@@ -87,5 +87,25 @@
     "rights": "Tous droits réservés",
     "legal": "Mentions légales",
     "privacy": "Confidentialité"
+  },
+  "welcome": {
+    "title": "Bilan de Compétences",
+    "subtitle": "Découvrez vos forces et dessinez votre avenir professionnel.",
+    "greeting": "Bienvenue, {{name}} !",
+    "nameLabel": "Votre nom",
+    "namePlaceholder": "Entrez votre prénom",
+    "startButton": "Commencer mon bilan",
+    "viewHistory": "Consulter l'historique",
+    "logout": "Déconnexion",
+    "quickAccess": "Accès rapides",
+    "dashboard": "Mon Dashboard",
+    "documents": "Mes documents",
+    "satisfaction": "Satisfaction",
+    "certified": "Organisme certifié",
+    "validation": {
+      "required": "Veuillez entrer votre prénom pour continuer",
+      "minLength": "Le prénom doit contenir au moins 2 caractères",
+      "maxLength": "Le prénom ne peut pas dépasser 50 caractères"
+    }
   }
 }
