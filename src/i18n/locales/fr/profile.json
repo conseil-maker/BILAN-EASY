@@ -1,0 +1,72 @@
+{
+  "title": "Mon Profil",
+  "subtitle": "Gérez vos informations personnelles",
+  "back": "Retour",
+  "tabs": {
+    "info": "Informations",
+    "security": "Sécurité",
+    "data": "Mes Données"
+  },
+  "fields": {
+    "fullName": "Nom complet",
+    "fullNamePlaceholder": "Jean Dupont",
+    "email": "Email",
+    "emailNote": "L'email ne peut pas être modifié",
+    "phone": "Téléphone",
+    "phonePlaceholder": "06 12 34 56 78",
+    "birthDate": "Date de naissance",
+    "profession": "Profession actuelle",
+    "professionPlaceholder": "Développeur, Manager, etc.",
+    "company": "Entreprise",
+    "companyPlaceholder": "Nom de l'entreprise",
+    "address": "Adresse",
+    "addressPlaceholder": "123 rue de la Paix",
+    "postalCode": "Code postal",
+    "postalCodePlaceholder": "75001",
+    "city": "Ville",
+    "cityPlaceholder": "Paris"
+  },
+  "buttons": {
+    "saving": "Enregistrement...",
+    "save": "Enregistrer les modifications"
+  },
+  "security": {
+    "changePassword": "Changer le mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "changingPassword": "Modification...",
+    "changePasswordBtn": "Modifier le mot de passe",
+    "activeSessions": "Sessions actives",
+    "activeSessionsDesc": "Vous êtes actuellement connecté depuis cet appareil.",
+    "signOut": "Se déconnecter"
+  },
+  "data": {
+    "exportTitle": "Exporter mes données",
+    "exportDesc": "Conformément au RGPD, vous pouvez télécharger une copie de toutes vos données personnelles.",
+    "exportBtn": "Télécharger mes données",
+    "deleteTitle": "Supprimer mon compte",
+    "deleteDesc": "Cette action est irréversible. Toutes vos données seront définitivement supprimées.",
+    "deleteBtn": "Supprimer mon compte",
+    "deleteConfirmText": "Pour confirmer la suppression, tapez <strong>SUPPRIMER</strong> ci-dessous :",
+    "deleteConfirmWord": "SUPPRIMER",
+    "deleteConfirmBtn": "Confirmer la suppression",
+    "cancelBtn": "Annuler"
+  },
+  "messages": {
+    "profileLoaded": "Profil chargé",
+    "profileLoadError": "Erreur lors du chargement du profil",
+    "profileSaved": "Profil mis à jour avec succès",
+    "profileSaveError": "Erreur lors de la sauvegarde",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+    "passwordChanged": "Mot de passe modifié avec succès",
+    "passwordChangeError": "Erreur lors du changement de mot de passe",
+    "deleteConfirmError": "Veuillez taper SUPPRIMER pour confirmer",
+    "accountDeleted": "Compte supprimé avec succès",
+    "accountDeleteError": "Erreur lors de la suppression du compte",
+    "dataExported": "Données exportées avec succès",
+    "dataExportError": "Erreur lors de l'export des données"
+  },
+  "rgpdNote": "Vos données sont protégées conformément au RGPD.",
+  "learnMore": "En savoir plus"
+}

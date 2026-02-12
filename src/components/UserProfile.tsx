@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { useToast } from './ToastProvider';
@@ -24,6 +25,7 @@ interface ProfileData {
 }
 
 export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
+  const { t } = useTranslation('profile');
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -75,7 +77,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
       setCompany(data.company || '');
     } catch (error) {
       console.error('Erreur chargement profil:', error);
-      showError('Erreur lors du chargement du profil');
+      showError(t('messages.profileLoadError'));
     } finally {
       setLoading(false);
     }
@@ -101,11 +103,11 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
 
       if (error) throw error;
 
-      showSuccess('Profil mis à jour avec succès');
+      showSuccess(t('messages.profileSaved'));
       fetchProfile();
     } catch (error: any) {
       console.error('Erreur sauvegarde profil:', error);
-      showError(error.message || 'Erreur lors de la sauvegarde');
+      showError(error.message || t('messages.profileSaveError'));
     } finally {
       setSaving(false);
     }
@@ -113,12 +115,12 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
-      showError('Les mots de passe ne correspondent pas');
+      showError(t('messages.passwordMismatch'));
       return;
     }
 
     if (newPassword.length < 6) {
-      showError('Le mot de passe doit contenir au moins 6 caractères');
+      showError(t('messages.passwordTooShort'));
       return;
     }
 
@@ -130,21 +132,21 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
 
       if (error) throw error;
 
-      showSuccess('Mot de passe modifié avec succès');
+      showSuccess(t('messages.passwordChanged'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error: any) {
       console.error('Erreur changement mot de passe:', error);
-      showError(error.message || 'Erreur lors du changement de mot de passe');
+      showError(error.message || t('messages.passwordChangeError'));
     } finally {
       setChangingPassword(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== 'SUPPRIMER') {
-      showError('Veuillez taper SUPPRIMER pour confirmer');
+    if (deleteConfirmText !== t('data.deleteConfirmWord')) {
+      showError(t('messages.deleteConfirmError'));
       return;
     }
 
@@ -158,10 +160,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
       // Déconnecter l'utilisateur
       await supabase.auth.signOut();
 
-      showSuccess('Compte supprimé avec succès');
+      showSuccess(t('messages.accountDeleted'));
     } catch (error: any) {
       console.error('Erreur suppression compte:', error);
-      showError(error.message || 'Erreur lors de la suppression du compte');
+      showError(error.message || t('messages.accountDeleteError'));
     }
   };
 
@@ -192,10 +194,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showSuccess('Données exportées avec succès');
+      showSuccess(t('messages.dataExported'));
     } catch (error: any) {
       console.error('Erreur export données:', error);
-      showError('Erreur lors de l\'export des données');
+      showError(t('messages.dataExportError'));
     }
   };
 
@@ -220,10 +222,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Retour
+              {t('back')}
             </button>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Mon Profil</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">Gérez vos informations personnelles</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('title')}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">{t('subtitle')}</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center">
@@ -244,7 +246,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
             }`}
           >
-            Informations
+            {t('tabs.info')}
           </button>
           <button
             onClick={() => setActiveTab('security')}
@@ -254,7 +256,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
             }`}
           >
-            Sécurité
+            {t('tabs.security')}
           </button>
           <button
             onClick={() => setActiveTab('data')}
@@ -264,7 +266,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
             }`}
           >
-            Mes Données
+            {t('tabs.data')}
           </button>
         </div>
 
@@ -275,19 +277,19 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nom complet
+                    {t('fields.fullName')}
                   </label>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    placeholder="Jean Dupont"
+                    placeholder={t('fields.fullNamePlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email
+                    {t('fields.email')}
                   </label>
                   <input
                     type="email"
@@ -295,23 +297,23 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                     disabled
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                   />
-                  <p className="text-xs text-gray-500 mt-1">L'email ne peut pas être modifié</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('fields.emailNote')}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Téléphone
+                    {t('fields.phone')}
                   </label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    placeholder="06 12 34 56 78"
+                    placeholder={t('fields.phonePlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Date de naissance
+                    {t('fields.birthDate')}
                   </label>
                   <input
                     type="date"
@@ -322,67 +324,67 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Profession actuelle
+                    {t('fields.profession')}
                   </label>
                   <input
                     type="text"
                     value={profession}
                     onChange={(e) => setProfession(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    placeholder="Développeur, Manager, etc."
+                    placeholder={t('fields.professionPlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Entreprise
+                    {t('fields.company')}
                   </label>
                   <input
                     type="text"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    placeholder="Nom de l'entreprise"
+                    placeholder={t('fields.companyPlaceholder')}
                   />
                 </div>
               </div>
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Adresse</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('fields.address')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-3">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Adresse
+                      {t('fields.address')}
                     </label>
                     <input
                       type="text"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      placeholder="123 rue de la Paix"
+                      placeholder={t('fields.addressPlaceholder')}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Code postal
+                      {t('fields.postalCode')}
                     </label>
                     <input
                       type="text"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      placeholder="75001"
+                      placeholder={t('fields.postalCodePlaceholder')}
                     />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Ville
+                      {t('fields.city')}
                     </label>
                     <input
                       type="text"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      placeholder="Paris"
+                      placeholder={t('fields.cityPlaceholder')}
                     />
                   </div>
                 </div>
@@ -394,7 +396,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                   disabled={saving}
                   className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:opacity-50"
                 >
-                  {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                  {saving ? t('buttons.saving') : t('buttons.save')}
                 </button>
               </div>
             </div>
@@ -404,12 +406,12 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
             <div className="space-y-8">
               <div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                  Changer le mot de passe
+                  {t('security.changePassword')}
                 </h3>
                 <div className="space-y-4 max-w-md">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Nouveau mot de passe
+                      {t('security.newPassword')}
                     </label>
                     <input
                       type="password"
@@ -421,7 +423,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Confirmer le nouveau mot de passe
+                      {t('security.confirmPassword')}
                     </label>
                     <input
                       type="password"
@@ -436,23 +438,23 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                     disabled={changingPassword || !newPassword || !confirmPassword}
                     className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:opacity-50"
                   >
-                    {changingPassword ? 'Modification...' : 'Modifier le mot de passe'}
+                    {changingPassword ? t('security.changingPassword') : t('security.changePasswordBtn')}
                   </button>
                 </div>
               </div>
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Sessions actives
+                  {t('security.activeSessions')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Vous êtes actuellement connecté depuis cet appareil.
+                  {t('security.activeSessionsDesc')}
                 </p>
                 <button
                   onClick={() => supabase.auth.signOut()}
                   className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                 >
-                  Se déconnecter
+                  {t('security.signOut')}
                 </button>
               </div>
             </div>
@@ -462,25 +464,25 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
             <div className="space-y-8">
               <div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Exporter mes données
+                  {t('data.exportTitle')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Conformément au RGPD, vous pouvez télécharger une copie de toutes vos données personnelles.
+                  {t('data.exportDesc')}
                 </p>
                 <button
                   onClick={handleExportData}
                   className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition"
                 >
-                  Télécharger mes données
+                  {t('data.exportBtn')}
                 </button>
               </div>
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
                 <h3 className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">
-                  Supprimer mon compte
+                  {t('data.deleteTitle')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Cette action est irréversible. Toutes vos données seront définitivement supprimées.
+                  {t('data.deleteDesc')}
                 </p>
                 
                 {!showDeleteConfirm ? (
@@ -488,27 +490,25 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                     onClick={() => setShowDeleteConfirm(true)}
                     className="px-6 py-3 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition"
                   >
-                    Supprimer mon compte
+                    {t('data.deleteBtn')}
                   </button>
                 ) : (
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                    <p className="text-red-700 dark:text-red-300 mb-4">
-                      Pour confirmer la suppression, tapez <strong>SUPPRIMER</strong> ci-dessous :
-                    </p>
+                    <p className="text-red-700 dark:text-red-300 mb-4" dangerouslySetInnerHTML={{ __html: t('data.deleteConfirmText') }} />
                     <input
                       type="text"
                       value={deleteConfirmText}
                       onChange={(e) => setDeleteConfirmText(e.target.value)}
                       className="w-full px-4 py-3 border border-red-300 dark:border-red-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
-                      placeholder="SUPPRIMER"
+                      placeholder={t('data.deleteConfirmWord')}
                     />
                     <div className="flex gap-4">
                       <button
                         onClick={handleDeleteAccount}
-                        disabled={deleteConfirmText !== 'SUPPRIMER'}
+                        disabled={deleteConfirmText !== t('data.deleteConfirmWord')}
                         className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition disabled:opacity-50"
                       >
-                        Confirmer la suppression
+                        {t('data.deleteConfirmBtn')}
                       </button>
                       <button
                         onClick={() => {
@@ -517,7 +517,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                         }}
                         className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                       >
-                        Annuler
+                        {t('data.cancelBtn')}
                       </button>
                     </div>
                   </div>
@@ -530,9 +530,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
         {/* Info RGPD */}
         <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>
-            Vos données sont protégées conformément au RGPD.{' '}
+            {t('rgpdNote')}{' '}
             <a href="#/legal/privacy" className="text-indigo-600 hover:underline">
-              En savoir plus
+              {t('learnMore')}
             </a>
           </p>
         </div>
