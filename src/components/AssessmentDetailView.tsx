@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Assessment } from '../lib/supabaseClient';
 import { supabase } from '../lib/supabaseClient';
 import { ConsultantNotes } from './ConsultantNotes';
@@ -14,6 +15,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
   onBack,
   isConsultantView = false 
 }) => {
+  const { t } = useTranslation('consultant');
   const [activeTab, setActiveTab] = useState<'overview' | 'cv' | 'questionnaire' | 'summary'>('overview');
   const [clientInfo, setClientInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -42,10 +44,10 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
 
   const getStatusBadge = (status: string) => {
     const badges = {
-      draft: { bg: 'bg-slate-100', text: 'text-slate-800', label: 'Brouillon' },
-      in_progress: { bg: 'bg-orange-100', text: 'text-orange-800', label: 'En cours' },
-      completed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Complété' },
-      archived: { bg: 'bg-slate-100', text: 'text-slate-600', label: 'Archivé' }
+      draft: { bg: 'bg-slate-100', text: 'text-slate-800', label: t('status.notStarted') },
+      in_progress: { bg: 'bg-orange-100', text: 'text-orange-800', label: t('status.inProgress') },
+      completed: { bg: 'bg-green-100', text: 'text-green-800', label: t('status.completed') },
+      archived: { bg: 'bg-slate-100', text: 'text-slate-600', label: t('status.completed') }
     };
     
     const badge = badges[status as keyof typeof badges] || badges.draft;
@@ -60,15 +62,15 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
   const renderOverview = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-slate-800 mb-4">Informations générales</h3>
+        <h3 className="text-xl font-bold text-slate-800 mb-4">{t('detail.generalInfo')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-slate-500">Titre du bilan</p>
+            <p className="text-sm text-slate-500">{t('detail.bilanTitle')}</p>
             <p className="font-semibold text-slate-900">{assessment.title}</p>
           </div>
           {isConsultantView && clientInfo && (
             <div>
-              <p className="text-sm text-slate-500">Client</p>
+              <p className="text-sm text-slate-500">{t('table.client')}</p>
               <p className="font-semibold text-slate-900">{clientInfo.full_name || clientInfo.email}</p>
               {clientInfo.full_name && (
                 <p className="text-xs text-slate-500">{clientInfo.email}</p>
@@ -76,18 +78,18 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
             </div>
           )}
           <div>
-            <p className="text-sm text-slate-500">Style de coaching</p>
+            <p className="text-sm text-slate-500">{t('detail.coachingStyle')}</p>
             <p className="font-semibold text-slate-900">
-              {assessment.coaching_style === 'collaborative' ? 'Collaboratif' :
-               assessment.coaching_style === 'analytical' ? 'Analytique' : 'Créatif'}
+              {assessment.coaching_style === 'collaborative' ? t('detail.collaborative') :
+               assessment.coaching_style === 'analytical' ? t('detail.analytical') : t('detail.creative')}
             </p>
           </div>
           <div>
-            <p className="text-sm text-slate-500">Statut</p>
+            <p className="text-sm text-slate-500">{t('table.status')}</p>
             <div className="mt-1">{getStatusBadge(assessment.status)}</div>
           </div>
           <div>
-            <p className="text-sm text-slate-500">Date de création</p>
+            <p className="text-sm text-slate-500">{t('detail.creationDate')}</p>
             <p className="font-semibold text-slate-900">
               {new Date(assessment.created_at).toLocaleDateString('fr-FR', {
                 year: 'numeric',
@@ -98,7 +100,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
           </div>
           {assessment.completed_at && (
             <div>
-              <p className="text-sm text-slate-500">Date de complétion</p>
+              <p className="text-sm text-slate-500">{t('detail.completionDate')}</p>
               <p className="font-semibold text-slate-900">
                 {new Date(assessment.completed_at).toLocaleDateString('fr-FR', {
                   year: 'numeric',
@@ -117,7 +119,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
     if (!assessment.cv_analysis) {
       return (
         <div className="bg-white rounded-lg shadow-md p-8 text-center text-slate-600">
-          Aucune analyse de CV disponible pour ce bilan.
+          {t('detail.noCVAnalysis')}
         </div>
       );
     }
@@ -127,18 +129,18 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
     return (
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-slate-800 mb-4">Analyse du CV</h3>
+          <h3 className="text-xl font-bold text-slate-800 mb-4">{t('detail.cvAnalysis')}</h3>
           
           {cvData.experience && (
             <div className="mb-6">
-              <h4 className="font-semibold text-slate-700 mb-2">Expérience professionnelle</h4>
+              <h4 className="font-semibold text-slate-700 mb-2">{t('detail.experience')}</h4>
               <p className="text-slate-600 whitespace-pre-wrap">{cvData.experience}</p>
             </div>
           )}
           
           {cvData.skills && (
             <div className="mb-6">
-              <h4 className="font-semibold text-slate-700 mb-2">Compétences identifiées</h4>
+              <h4 className="font-semibold text-slate-700 mb-2">{t('detail.skills')}</h4>
               <div className="flex flex-wrap gap-2">
                 {Array.isArray(cvData.skills) ? (
                   cvData.skills.map((skill: string, index: number) => (
@@ -155,7 +157,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
           
           {cvData.education && (
             <div className="mb-6">
-              <h4 className="font-semibold text-slate-700 mb-2">Formation</h4>
+              <h4 className="font-semibold text-slate-700 mb-2">{t('detail.education')}</h4>
               <p className="text-slate-600 whitespace-pre-wrap">{cvData.education}</p>
             </div>
           )}
@@ -168,7 +170,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
     if (!assessment.questionnaire_data || !assessment.questionnaire_data.answers) {
       return (
         <div className="bg-white rounded-lg shadow-md p-8 text-center text-slate-600">
-          Aucune réponse au questionnaire disponible pour ce bilan.
+          {t('detail.noQuestionnaire')}
         </div>
       );
     }
@@ -191,7 +193,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
     if (!assessment.summary_data) {
       return (
         <div className="bg-white rounded-lg shadow-md p-8 text-center text-slate-600">
-          Aucune synthèse disponible pour ce bilan.
+          {t('detail.noSummary')}
         </div>
       );
     }
@@ -201,18 +203,18 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
     return (
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-slate-800 mb-4">Synthèse du bilan</h3>
+          <h3 className="text-xl font-bold text-slate-800 mb-4">{t('detail.summary')}</h3>
           
           {summary.profileType && (
             <div className="mb-6">
-              <h4 className="font-semibold text-slate-700 mb-2">Type de profil</h4>
+              <h4 className="font-semibold text-slate-700 mb-2">{t('detail.profileType')}</h4>
               <p className="text-lg text-primary-600 font-semibold">{summary.profileType}</p>
             </div>
           )}
           
           {summary.strengths && summary.strengths.length > 0 && (
             <div className="mb-6">
-              <h4 className="font-semibold text-slate-700 mb-2">Forces principales</h4>
+              <h4 className="font-semibold text-slate-700 mb-2">{t('detail.strengths')}</h4>
               <ul className="list-disc list-inside space-y-1">
                 {summary.strengths.map((strength: string, index: number) => (
                   <li key={index} className="text-slate-600">{strength}</li>
@@ -223,7 +225,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
           
           {summary.areasForDevelopment && summary.areasForDevelopment.length > 0 && (
             <div className="mb-6">
-              <h4 className="font-semibold text-slate-700 mb-2">Axes de développement</h4>
+              <h4 className="font-semibold text-slate-700 mb-2">{t('detail.development')}</h4>
               <ul className="list-disc list-inside space-y-1">
                 {summary.areasForDevelopment.map((area: string, index: number) => (
                   <li key={index} className="text-slate-600">{area}</li>
@@ -234,7 +236,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
           
           {summary.recommendations && summary.recommendations.length > 0 && (
             <div className="mb-6">
-              <h4 className="font-semibold text-slate-700 mb-2">Recommandations</h4>
+              <h4 className="font-semibold text-slate-700 mb-2">{t('detail.recommendations')}</h4>
               <ul className="list-disc list-inside space-y-1">
                 {summary.recommendations.map((rec: string, index: number) => (
                   <li key={index} className="text-slate-600">{rec}</li>
@@ -245,7 +247,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
           
           {summary.actionPlan && summary.actionPlan.length > 0 && (
             <div>
-              <h4 className="font-semibold text-slate-700 mb-2">Plan d'action</h4>
+              <h4 className="font-semibold text-slate-700 mb-2">{t('detail.actionPlan')}</h4>
               <div className="space-y-3">
                 {summary.actionPlan.map((action: any, index: number) => (
                   <div key={index} className="border-l-4 border-primary-500 pl-4 py-2">
@@ -307,7 +309,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                 }`}
               >
-                Vue d'ensemble
+                {t('tabs.overview')}
               </button>
               <button
                 onClick={() => setActiveTab('cv')}
@@ -317,7 +319,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                 }`}
               >
-                Analyse CV
+                {t('detail.cvAnalysis')}
               </button>
               <button
                 onClick={() => setActiveTab('questionnaire')}
@@ -327,7 +329,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                 }`}
               >
-                Questionnaire
+                {t('detail.questionnaire')}
               </button>
               <button
                 onClick={() => setActiveTab('summary')}
@@ -337,7 +339,7 @@ export const AssessmentDetailView: React.FC<AssessmentDetailViewProps> = ({
                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                 }`}
               >
-                Synthèse
+                {t('detail.summary')}
               </button>
             </nav>
           </div>
