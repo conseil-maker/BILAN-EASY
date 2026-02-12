@@ -9,6 +9,28 @@
     "title": "Gizlilik Politikası"
   },
   "cookies": {
-    "title": "Çerez Politikası"
+    "title": "Çerez yönetimi",
+    "close": "Kapat",
+    "description": "Bilan-Easy'deki deneyiminizi geliştirmek için çerezler kullanıyoruz. Bazı çerezler platformun çalışması için gereklidir, diğerleri platformu geliştirmemize yardımcı olur.",
+    "necessary": {
+      "title": "Gerekli çerezler",
+      "description": "Çalışma için vazgeçilmez (kimlik doğrulama, tercihler)"
+    },
+    "alwaysActive": "Her zaman aktif",
+    "performance": {
+      "title": "Performans çerezleri",
+      "description": "Platformu geliştirmek için kullanım analizi"
+    },
+    "functional": {
+      "title": "İşlevsel çerezler",
+      "description": "Kullanıcı deneyiminin iyileştirilmesi"
+    },
+    "learnMore": "Çerez politikamız hakkında daha fazla bilgi edinin",
+    "customize": "Seçimlerimi özelleştir",
+    "rejectOptional": "İsteğe bağlı olanları reddet",
+    "saveChoices": "Seçimlerimi kaydet",
+    "acceptAll": "Tümünü kabul et",
+    "footer": "KVKK ve eGizlilik yönergesine uygun olarak.",
+    "privacyPolicy": "Gizlilik politikası"
   }
 }

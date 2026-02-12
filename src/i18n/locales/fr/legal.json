@@ -9,6 +9,28 @@
     "title": "Politique de Confidentialité"
   },
   "cookies": {
-    "title": "Politique de Cookies"
+    "title": "Gestion des cookies",
+    "close": "Fermer",
+    "description": "Nous utilisons des cookies pour améliorer votre expérience sur Bilan-Easy. Certains cookies sont nécessaires au fonctionnement de la plateforme, d'autres nous aident à l'améliorer.",
+    "necessary": {
+      "title": "Cookies nécessaires",
+      "description": "Indispensables au fonctionnement (authentification, préférences)"
+    },
+    "alwaysActive": "Toujours actif",
+    "performance": {
+      "title": "Cookies de performance",
+      "description": "Analyse de l'utilisation pour améliorer la plateforme"
+    },
+    "functional": {
+      "title": "Cookies fonctionnels",
+      "description": "Amélioration de l'expérience utilisateur"
+    },
+    "learnMore": "En savoir plus sur notre politique de cookies",
+    "customize": "Personnaliser mes choix",
+    "rejectOptional": "Refuser les optionnels",
+    "saveChoices": "Enregistrer mes choix",
+    "acceptAll": "Tout accepter",
+    "footer": "Conformément au RGPD et à la directive ePrivacy.",
+    "privacyPolicy": "Politique de confidentialité"
   }
 }
