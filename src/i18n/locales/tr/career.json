@@ -52,22 +52,52 @@
   "market": {
     "loading": {
       "title": "Pazar analizi yapılıyor...",
-      "subtitle": "Yapay zeka, profilinizle ilgili iş piyasası trendlerini analiz ediyor.",
-      "searching": "Aranıyor..."
+      "subtitle": "Yapay zekamız {{job}} mesleği için iş piyasasını analiz ediyor ve projenizin uygulanabilirliğini değerlendiriyor.",
+      "searching": "Aranıyor...",
+      "collecting": "Pazar verileri toplanıyor..."
     },
+    "error": "Pazar analizi sırasında bir hata oluştu. Lütfen tekrar deneyin.",
+    "errorTitle": "Hata",
     "header": {
-      "title": "Pazar keşfi",
-      "subtitle": "Profiliniz için trendler ve fırsatlar"
+      "title": "📊 Pazar Keşfi",
+      "subtitle": "{{job}} için kapsamlı analiz"
+    },
+    "feasibility": {
+      "title": "Uygulanabilirlik Puanı",
+      "subtitle": "Profilinize ve güncel pazara dayalı"
+    },
+    "scores": {
+      "excellent": "Mükemmel",
+      "good": "İyi",
+      "moderate": "Orta",
+      "difficult": "Zor"
+    },
+    "labels": {
+      "demand": "Talep",
+      "trend": "Eğilim",
+      "salary": "Maaş",
+      "regions": "Bölgeler"
     },
     "sections": {
+      "marketAnalysis": "Pazar Analizi",
+      "hiringSectors": "İşe alan sektörler",
+      "skillsAnalysis": "Yetkinlik Analiziniz",
+      "matchingSkills": "Eşleşen yetkinlikler",
+      "skillGaps": "Geliştirilecek yetkinlikler",
+      "strengths": "Bu meslek için güçlü yönleriniz",
+      "training": "Önerilen Eğitimler",
+      "alternatives": "Alternatif Meslekler",
       "overview": "Pazar genel görünümü",
       "opportunities": "Belirlenen fırsatlar",
       "threats": "Dikkat edilecek noktalar",
       "recommendations": "Öneriler"
     },
+    "transition": "Geçiş",
     "buttons": {
       "close": "Kapat",
-      "continue": "Değerlendirmeye devam et"
+      "continue": "Değerlendirmeye devam et",
+      "retry": "Tekrar dene",
+      "simulate": "Meslek araştırması simülasyonu"
     }
   },
   "interview": {

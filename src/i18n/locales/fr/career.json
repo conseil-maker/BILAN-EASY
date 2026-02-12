@@ -52,22 +52,52 @@
   "market": {
     "loading": {
       "title": "Analyse du marché en cours...",
-      "subtitle": "L'IA analyse les tendances du marché de l'emploi en lien avec votre profil.",
-      "searching": "Recherche en cours..."
+      "subtitle": "Notre IA analyse le marché de l'emploi pour le métier de {{job}} et évalue la faisabilité de votre projet.",
+      "searching": "Recherche en cours...",
+      "collecting": "Collecte des données du marché..."
     },
+    "error": "Une erreur est survenue lors de l'analyse du marché. Veuillez réessayer.",
+    "errorTitle": "Erreur",
     "header": {
-      "title": "Exploration du marché",
-      "subtitle": "Tendances et opportunités pour votre profil"
+      "title": "📊 Exploration du Marché",
+      "subtitle": "Analyse complète pour : {{job}}"
+    },
+    "feasibility": {
+      "title": "Score de Faisabilité",
+      "subtitle": "Basé sur votre profil et le marché actuel"
+    },
+    "scores": {
+      "excellent": "Excellent",
+      "good": "Bon",
+      "moderate": "Modéré",
+      "difficult": "Difficile"
+    },
+    "labels": {
+      "demand": "Demande",
+      "trend": "Tendance",
+      "salary": "Salaire",
+      "regions": "Régions"
     },
     "sections": {
+      "marketAnalysis": "Analyse du Marché",
+      "hiringSectors": "Secteurs qui recrutent",
+      "skillsAnalysis": "Analyse de vos Compétences",
+      "matchingSkills": "Compétences correspondantes",
+      "skillGaps": "Compétences à développer",
+      "strengths": "Vos atouts pour ce métier",
+      "training": "Formations Recommandées",
+      "alternatives": "Métiers Alternatifs",
       "overview": "Vue d'ensemble du marché",
       "opportunities": "Opportunités identifiées",
       "threats": "Points de vigilance",
       "recommendations": "Recommandations"
     },
+    "transition": "Transition",
     "buttons": {
       "close": "Fermer",
-      "continue": "Continuer le bilan"
+      "continue": "Continuer le bilan",
+      "retry": "Réessayer",
+      "simulate": "Simuler une enquête métier"
     }
   },
   "interview": {
