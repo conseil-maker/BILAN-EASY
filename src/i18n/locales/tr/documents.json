@@ -76,5 +76,18 @@
   "loadingDocs": "Belgeler yükleniyor...",
   "loadingLibrary": "Kütüphane yükleniyor...",
   "loadingMyDocs": "Belgeleriniz yükleniyor...",
-  "defaultUser": "Kullanıcı"
+  "defaultUser": "Kullanıcı",
+  "qualiopi": {
+    "title": "Zorunlu Belgeler",
+    "subtitle": "Resmi belgelerinizi indirin",
+    "profileNotFound": "Kullanıcı profili bulunamadı",
+    "attestationNotReady": "Katılım belgesi yalnızca değerlendirme sonunda oluşturulabilir",
+    "downloadSuccess": "\"{{type}}\" belgesi başarıyla indirildi!",
+    "generateError": "Belge oluşturulurken hata oluştu",
+    "importantInfo": "Önemli bilgiler",
+    "info1": "Sözleşme değerlendirme başlamadan önce imzalanmalıdır",
+    "info2": "Katılım belgesi sürecinizin sonunda kullanılabilir olacaktır",
+    "info3": "Tüm belgeler yasal düzenlemelere uygundur",
+    "info4": "Verileriniz KVKK kapsamında korunmaktadır"
+  }
 }

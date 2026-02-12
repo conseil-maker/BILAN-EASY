@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileText, Download, CheckCircle, AlertCircle } from 'lucide-react';
 import { qualiopiDocuments, ConventionData, AttestationData } from '../services/qualiopiDocuments';
 import { supabase } from '../lib/supabaseClient';
@@ -22,6 +23,7 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
   endDate,
   isCompleted = false
 }) => {
+  const { t } = useTranslation('documents');
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
         .single();
 
       if (!profile) {
-        throw new Error('Profil utilisateur introuvable');
+        throw new Error(t('qualiopi.profileNotFound'));
       }
 
       let blob: Blob;
@@ -65,7 +67,7 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
         filename = `convention-${profile.full_name?.replace(/\s+/g, '-')}-${Date.now()}.pdf`;
       } else if (type === 'attestation') {
         if (!isCompleted || !endDate) {
-          throw new Error('L\'attestation ne peut être générée qu\'à la fin du bilan');
+          throw new Error(t('qualiopi.attestationNotReady'));
         }
         const attestationData: AttestationData = {
           clientName: profile.full_name || profile.email,
@@ -93,10 +95,10 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      setSuccess(`Document "${type}" téléchargé avec succès !`);
+      setSuccess(t('qualiopi.downloadSuccess', { type }));
     } catch (err) {
       console.error('Erreur génération document:', err);
-      setError(err instanceof Error ? err.message : 'Erreur lors de la génération du document');
+      setError(err instanceof Error ? err.message : t('qualiopi.generateError'));
     } finally {
       setLoading(null);
     }
@@ -107,10 +109,10 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
           <FileText className="mr-3 text-indigo-600" size={28} />
-          Documents Obligatoires
+          {t('qualiopi.title')}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          Téléchargez vos documents officiels conformes Qualiopi
+          {t('qualiopi.subtitle')}
         </p>
 
         {error && (
@@ -133,9 +135,9 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
             <div className="flex items-start mb-3">
               <FileText className="text-indigo-600 mr-3 flex-shrink-0" size={24} />
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Convention de prestation</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('docs.convention.name')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Document contractuel obligatoire (8 articles)
+                  {t('docs.convention.description')}
                 </p>
               </div>
             </div>
@@ -147,12 +149,12 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
               {loading === 'convention' ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  Génération...
+                  {t('buttons.generating')}
                 </>
               ) : (
                 <>
                   <Download size={16} className="mr-2" />
-                  Télécharger
+                  {t('buttons.downloadPdf')}
                 </>
               )}
             </button>
@@ -163,9 +165,9 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
             <div className="flex items-start mb-3">
               <FileText className="text-green-600 mr-3 flex-shrink-0" size={24} />
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Attestation de présence</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('docs.attestation.name')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Disponible à la fin du bilan
+                  {t('docs.attestation.availableMessage')}
                 </p>
               </div>
             </div>
@@ -177,12 +179,12 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
               {loading === 'attestation' ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  Génération...
+                  {t('buttons.generating')}
                 </>
               ) : (
                 <>
                   <Download size={16} className="mr-2" />
-                  {isCompleted ? 'Télécharger' : 'Non disponible'}
+                  {isCompleted ? t('buttons.downloadPdf') : t('buttons.notAvailable')}
                 </>
               )}
             </button>
@@ -193,9 +195,9 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
             <div className="flex items-start mb-3">
               <FileText className="text-purple-600 mr-3 flex-shrink-0" size={24} />
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Livret d'accueil</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('docs.livret.name')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Guide complet de votre parcours
+                  {t('docs.livret.description')}
                 </p>
               </div>
             </div>
@@ -207,12 +209,12 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
               {loading === 'livret' ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  Génération...
+                  {t('buttons.generating')}
                 </>
               ) : (
                 <>
                   <Download size={16} className="mr-2" />
-                  Télécharger
+                  {t('buttons.downloadPdf')}
                 </>
               )}
             </button>
@@ -220,12 +222,12 @@ export const DocumentsQualiopi: React.FC<DocumentsQualiopiProps> = ({
         </div>
 
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">📋 Informations importantes</h4>
+          <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">📋 {t('qualiopi.importantInfo')}</h4>
           <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-            <li>• La convention doit être signée avant le début du bilan</li>
-            <li>• L'attestation sera disponible à la fin de votre parcours</li>
-            <li>• Tous les documents sont conformes Qualiopi et au Code du travail</li>
-            <li>• Vos données sont protégées conformément au RGPD</li>
+            <li>• {t('qualiopi.info1')}</li>
+            <li>• {t('qualiopi.info2')}</li>
+            <li>• {t('qualiopi.info3')}</li>
+            <li>• {t('qualiopi.info4')}</li>
           </ul>
         </div>
       </div>

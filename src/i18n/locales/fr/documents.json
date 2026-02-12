@@ -76,5 +76,18 @@
   "loadingDocs": "Chargement des documents...",
   "loadingLibrary": "Chargement de la bibliothèque...",
   "loadingMyDocs": "Chargement de vos documents...",
-  "defaultUser": "Utilisateur"
+  "defaultUser": "Utilisateur",
+  "qualiopi": {
+    "title": "Documents Obligatoires",
+    "subtitle": "Téléchargez vos documents officiels conformes Qualiopi",
+    "profileNotFound": "Profil utilisateur introuvable",
+    "attestationNotReady": "L'attestation ne peut être générée qu'à la fin du bilan",
+    "downloadSuccess": "Document \"{{type}}\" téléchargé avec succès !",
+    "generateError": "Erreur lors de la génération du document",
+    "importantInfo": "Informations importantes",
+    "info1": "La convention doit être signée avant le début du bilan",
+    "info2": "L'attestation sera disponible à la fin de votre parcours",
+    "info3": "Tous les documents sont conformes Qualiopi et au Code du travail",
+    "info4": "Vos données sont protégées conformément au RGPD"
+  }
 }
