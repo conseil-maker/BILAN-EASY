@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Package, CoachingStyle } from '../types';
 import { QUESTION_CATEGORIES } from '../constants';
 
@@ -17,7 +18,7 @@ const PhaseCard: React.FC<{ number: number; name: string; objective: string; dur
             <div className="w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">{number}</div>
             <div>
                 <h3 className="font-bold text-lg text-primary-900">{name}</h3>
-                <p className="text-sm text-slate-500">{duration} min estimées</p>
+                <p className="text-sm text-slate-500">{duration} {t('phase.estimatedMin')}</p>
             </div>
         </div>
         <p className="text-slate-700 text-sm">{objective}</p>
@@ -33,13 +34,14 @@ const CoachingStyleCard: React.FC<{title: string, description: string, isSelecte
 
 
 const PhasePreliminaire: React.FC<PhasePreliminaireProps> = ({ pkg, userName, onConfirm, onGoBack, coachingStyle, setCoachingStyle }) => {
+  const { t } = useTranslation('questionnaire');
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-8 transform transition-all duration-500">
         <header className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-primary-800 mb-2">Prêt à commencer, {userName} ?</h1>
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-primary-800 mb-2">{t('phase.readyTitle', { name: userName })}</h1>
           <p className="text-slate-600 text-lg">
-            Vous avez choisi le parcours "{pkg.name}". Voici comment va se dérouler votre bilan.
+            {t('phase.readySubtitle', { packageName: pkg.name })}
           </p>
         </header>
 
@@ -50,17 +52,17 @@ const PhasePreliminaire: React.FC<PhasePreliminaireProps> = ({ pkg, userName, on
         </div>
         
         <div className="mb-8">
-            <h3 className="font-bold text-lg text-primary-900 text-center mb-4">Choisissez votre style de coaching</h3>
+            <h3 className="font-bold text-lg text-primary-900 text-center mb-4">{t('phase.chooseCoaching')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <CoachingStyleCard title="Collaboratif" description="Approche bienveillante, centrée sur vos forces." isSelected={coachingStyle === 'collaborative'} onClick={() => setCoachingStyle('collaborative')} />
-                <CoachingStyleCard title="Analytique" description="Approche structurée et logique pour décortiquer les sujets." isSelected={coachingStyle === 'analytic'} onClick={() => setCoachingStyle('analytic')} />
-                <CoachingStyleCard title="Créatif" description="Approche inspirante pour explorer de nouvelles pistes." isSelected={coachingStyle === 'creative'} onClick={() => setCoachingStyle('creative')} />
+                <CoachingStyleCard title={t('phase.collaborative')} description={t('phase.collaborativeDesc')} isSelected={coachingStyle === 'collaborative'} onClick={() => setCoachingStyle('collaborative')} />
+                <CoachingStyleCard title={t('phase.analytic')} description={t('phase.analyticDesc')} isSelected={coachingStyle === 'analytic'} onClick={() => setCoachingStyle('analytic')} />
+                <CoachingStyleCard title={t('phase.creative')} description={t('phase.creativeDesc')} isSelected={coachingStyle === 'creative'} onClick={() => setCoachingStyle('creative')} />
             </div>
         </div>
 
         <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
-            <button onClick={onConfirm} className="w-full sm:w-auto bg-primary-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-primary-700 transition-transform transform hover:scale-105 duration-300">Commencer le Bilan</button>
-            <button onClick={onGoBack} className="text-sm text-slate-500 hover:text-primary-600">Changer de forfait</button>
+            <button onClick={onConfirm} className="w-full sm:w-auto bg-primary-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-primary-700 transition-transform transform hover:scale-105 duration-300">{t('phase.startBilan')}</button>
+            <button onClick={onGoBack} className="text-sm text-slate-500 hover:text-primary-600">{t('phase.changePackage')}</button>
         </div>
       </div>
     </div>

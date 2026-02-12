@@ -185,6 +185,20 @@
   "timeElapsed": "Temps écoulé: {{time}}",
   "minutesRemaining": "min restantes",
   "emergingThemes": "Thèmes émergents",
+  "phase": {
+    "readyTitle": "Prêt à commencer, {{name}} ?",
+    "readySubtitle": "Vous avez choisi le parcours \"{{packageName}}\". Voici comment va se dérouler votre bilan.",
+    "estimatedMin": "min estimées",
+    "chooseCoaching": "Choisissez votre style de coaching",
+    "collaborative": "Collaboratif",
+    "collaborativeDesc": "Approche bienveillante, centrée sur vos forces.",
+    "analytic": "Analytique",
+    "analyticDesc": "Approche structurée et logique pour décortiquer les sujets.",
+    "creative": "Créatif",
+    "creativeDesc": "Approche inspirante pour explorer de nouvelles pistes.",
+    "startBilan": "Commencer le Bilan",
+    "changePackage": "Changer de forfait"
+  },
   "personalization": {
     "title": "Hyper-Personnalisation",
     "subtitle": "Pour un bilan encore plus pertinent, partagez votre CV ou profil.",

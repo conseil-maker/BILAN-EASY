@@ -185,6 +185,20 @@
   "timeElapsed": "Geçen süre: {{time}}",
   "minutesRemaining": "dk kalan",
   "emergingThemes": "Ortaya çıkan temalar",
+  "phase": {
+    "readyTitle": "Başlamaya hazır mısınız, {{name}}?",
+    "readySubtitle": "\"{{packageName}}\" programını seçtiniz. Değerlendirmeniz şöyle ilerleyecek.",
+    "estimatedMin": "dk tahmini",
+    "chooseCoaching": "Koçluk tarzınızı seçin",
+    "collaborative": "İşbirlikçi",
+    "collaborativeDesc": "Güçlü yönlerinize odaklanan destekleyici yaklaşım.",
+    "analytic": "Analitik",
+    "analyticDesc": "Konuları ayrıntılı incelemek için yapılandırılmış ve mantıksal yaklaşım.",
+    "creative": "Yaratıcı",
+    "creativeDesc": "Yeni yolları keşfetmek için ilham verici yaklaşım.",
+    "startBilan": "Değerlendirmeyi Başlat",
+    "changePackage": "Paketi değiştir"
+  },
   "personalization": {
     "title": "Hiper-Kişiselleştirme",
     "subtitle": "Daha anlamlı bir değerlendirme için özgeçmişinizi veya profilinizi paylaşın.",
