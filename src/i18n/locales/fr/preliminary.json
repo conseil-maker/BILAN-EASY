@@ -1,0 +1,95 @@
+{
+  "step0": {
+    "title": "Bienvenue {{name}} !",
+    "subtitle": "Avant de commencer votre bilan de compétences, prenons le temps de bien comprendre vos objectifs.",
+    "objectivesTitle": "Objectifs du bilan de compétences",
+    "objectivesIntro": "Conformément à l'article L.6313-4 du Code du travail, le bilan de compétences a pour objectif de vous permettre :",
+    "objective1": "D'analyser vos compétences professionnelles et personnelles",
+    "objective2": "D'identifier vos aptitudes et motivations",
+    "objective3": "De définir un projet professionnel ou de formation",
+    "objective4": "D'élaborer un plan d'action concret",
+    "pathTitle": "Votre parcours : {{package}}",
+    "pathDuration": "Durée totale : <strong>{{hours}} heures</strong>",
+    "pathDescription": "Ce parcours comprend les trois phases réglementaires du bilan de compétences.",
+    "consentObjectives": "J'ai compris les objectifs du bilan de compétences",
+    "consentObjectivesDesc": "Je comprends que ce bilan vise à m'aider à définir mon projet professionnel."
+  },
+  "step1": {
+    "title": "Déroulement du bilan",
+    "subtitle": "Votre bilan se déroule en trois phases obligatoires",
+    "phase1": {
+      "title": "Phase préliminaire",
+      "time": "~17% du temps total",
+      "objectiveTitle": "Objectif :",
+      "objective": "Analyser votre demande et définir vos besoins",
+      "items": ["Analyse de votre situation actuelle", "Définition de vos attentes et objectifs", "Présentation de la méthodologie", "Validation du consentement éclairé"]
+    },
+    "phase2": {
+      "title": "Phase d'investigation",
+      "time": "~50% du temps total",
+      "objectiveTitle": "Objectif :",
+      "objective": "Explorer et construire votre projet",
+      "items": ["Analyse de votre parcours professionnel", "Identification de vos compétences", "Exploration de vos valeurs et motivations", "Recherche de pistes professionnelles", "Confrontation au marché de l'emploi"]
+    },
+    "phase3": {
+      "title": "Phase de conclusion",
+      "time": "~17% du temps total",
+      "objectiveTitle": "Objectif :",
+      "objective": "Finaliser et planifier",
+      "items": ["Synthèse des résultats", "Validation du projet professionnel", "Élaboration du plan d'action", "Remise du document de synthèse"]
+    },
+    "coachingTitle": "Choisissez votre style d'accompagnement",
+    "styles": {
+      "collaborative": { "title": "Collaboratif", "desc": "Approche bienveillante centrée sur vos forces" },
+      "analytic": { "title": "Analytique", "desc": "Approche structurée et méthodique" },
+      "creative": { "title": "Créatif", "desc": "Approche inspirante et exploratoire" }
+    },
+    "consentMethodology": "J'accepte la méthodologie proposée",
+    "consentMethodologyDesc": "Je comprends le déroulement des trois phases du bilan."
+  },
+  "step2": {
+    "title": "Consentement éclairé",
+    "subtitle": "Conformément au Code du travail et au RGPD",
+    "confidentialityTitle": "Confidentialité garantie",
+    "confidentialityText": "Conformément à l'article L.6313-10-1 du Code du travail, les résultats de votre bilan sont <strong>strictement confidentiels</strong>. Ils ne peuvent être communiqués à un tiers (employeur, financeur, etc.) qu'avec votre accord écrit explicite.",
+    "rightsTitle": "Vos droits",
+    "rights": ["Vous pouvez interrompre le bilan à tout moment", "Vous êtes propriétaire des résultats", "Vous avez accès à vos données (RGPD)", "Vous pouvez demander la suppression de vos données"],
+    "consentInformed": "Je donne mon consentement éclairé",
+    "consentInformedDesc": "J'ai reçu toutes les informations nécessaires sur le bilan de compétences.",
+    "consentVoluntary": "Je participe volontairement",
+    "consentVoluntaryDesc": "Ma participation est libre et volontaire, sans aucune contrainte.",
+    "consentConfidentiality": "J'ai compris les règles de confidentialité",
+    "consentConfidentialityDesc": "Je comprends que les résultats m'appartiennent et ne seront pas communiqués sans mon accord.",
+    "consentData": "J'accepte le traitement de mes données",
+    "consentDataDesc": "Conformément au RGPD, j'autorise le traitement de mes données pour la réalisation du bilan.",
+    "warningText": "En validant ces conditions, vous confirmez avoir lu et compris les informations ci-dessus. Vous pouvez consulter nos",
+    "cgu": "CGU",
+    "cgv": "CGV",
+    "privacy": "Politique de confidentialité",
+    "and": "et"
+  },
+  "step3": {
+    "title": "Récapitulatif",
+    "subtitle": "Vérifiez les informations avant de commencer",
+    "bilanTitle": "Votre bilan de compétences",
+    "beneficiary": "Bénéficiaire",
+    "path": "Parcours",
+    "duration": "Durée",
+    "hours": "{{hours}} heures",
+    "coachingStyle": "Style d'accompagnement",
+    "consentsTitle": "Consentements validés",
+    "consent1": "Objectifs du bilan compris",
+    "consent2": "Méthodologie acceptée",
+    "consent3": "Consentement éclairé donné",
+    "consent4": "Participation volontaire confirmée",
+    "consent5": "Confidentialité comprise",
+    "consent6": "Traitement des données accepté",
+    "signatureDate": "Date de signature :"
+  },
+  "nav": {
+    "changePackage": "Changer de forfait",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "start": "Commencer mon bilan"
+  }
+}

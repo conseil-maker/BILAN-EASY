@@ -1,0 +1,95 @@
+{
+  "step0": {
+    "title": "Hoş geldiniz {{name}}!",
+    "subtitle": "Yetkinlik değerlendirmenize başlamadan önce, hedeflerinizi iyi anlayalım.",
+    "objectivesTitle": "Yetkinlik değerlendirmesinin amaçları",
+    "objectivesIntro": "Yetkinlik değerlendirmesi size şunları sağlamayı amaçlar:",
+    "objective1": "Mesleki ve kişisel yetkinliklerinizi analiz etmek",
+    "objective2": "Yeteneklerinizi ve motivasyonlarınızı belirlemek",
+    "objective3": "Bir mesleki veya eğitim projesi tanımlamak",
+    "objective4": "Somut bir eylem planı oluşturmak",
+    "pathTitle": "Programınız: {{package}}",
+    "pathDuration": "Toplam süre: <strong>{{hours}} saat</strong>",
+    "pathDescription": "Bu program, yetkinlik değerlendirmesinin üç zorunlu aşamasını kapsar.",
+    "consentObjectives": "Yetkinlik değerlendirmesinin amaçlarını anladım",
+    "consentObjectivesDesc": "Bu değerlendirmenin mesleki projemi tanımlamama yardımcı olacağını anlıyorum."
+  },
+  "step1": {
+    "title": "Değerlendirme süreci",
+    "subtitle": "Değerlendirmeniz üç zorunlu aşamada gerçekleşir",
+    "phase1": {
+      "title": "Ön aşama",
+      "time": "Toplam sürenin ~%17'si",
+      "objectiveTitle": "Amaç:",
+      "objective": "Talebinizi analiz etmek ve ihtiyaçlarınızı belirlemek",
+      "items": ["Mevcut durumunuzun analizi", "Beklentilerinizin ve hedeflerinizin belirlenmesi", "Metodolojinin sunumu", "Bilgilendirilmiş onayın doğrulanması"]
+    },
+    "phase2": {
+      "title": "Araştırma aşaması",
+      "time": "Toplam sürenin ~%50'si",
+      "objectiveTitle": "Amaç:",
+      "objective": "Projenizi keşfetmek ve oluşturmak",
+      "items": ["Mesleki geçmişinizin analizi", "Yetkinliklerinizin belirlenmesi", "Değerlerinizin ve motivasyonlarınızın keşfi", "Mesleki alternatiflerin araştırılması", "İş piyasasıyla karşılaştırma"]
+    },
+    "phase3": {
+      "title": "Sonuç aşaması",
+      "time": "Toplam sürenin ~%17'si",
+      "objectiveTitle": "Amaç:",
+      "objective": "Sonuçlandırmak ve planlamak",
+      "items": ["Sonuçların sentezi", "Mesleki projenin doğrulanması", "Eylem planının hazırlanması", "Sentez belgesinin teslimi"]
+    },
+    "coachingTitle": "Eşlik tarzınızı seçin",
+    "styles": {
+      "collaborative": { "title": "İşbirlikçi", "desc": "Güçlü yönlerinize odaklanan destekleyici yaklaşım" },
+      "analytic": { "title": "Analitik", "desc": "Yapılandırılmış ve metodik yaklaşım" },
+      "creative": { "title": "Yaratıcı", "desc": "İlham verici ve keşifçi yaklaşım" }
+    },
+    "consentMethodology": "Önerilen metodolojiyi kabul ediyorum",
+    "consentMethodologyDesc": "Değerlendirmenin üç aşamasının işleyişini anlıyorum."
+  },
+  "step2": {
+    "title": "Bilgilendirilmiş onay",
+    "subtitle": "KVKK uyarınca",
+    "confidentialityTitle": "Gizlilik garantisi",
+    "confidentialityText": "Değerlendirmenizin sonuçları <strong>kesinlikle gizlidir</strong>. Açık yazılı onayınız olmadan üçüncü taraflara (işveren, finansör vb.) iletilemez.",
+    "rightsTitle": "Haklarınız",
+    "rights": ["Değerlendirmeyi istediğiniz zaman durdurabilirsiniz", "Sonuçların sahibi sizsiniz", "Verilerinize erişim hakkınız var (KVKK)", "Verilerinizin silinmesini talep edebilirsiniz"],
+    "consentInformed": "Bilgilendirilmiş onayımı veriyorum",
+    "consentInformedDesc": "Yetkinlik değerlendirmesi hakkında gerekli tüm bilgileri aldım.",
+    "consentVoluntary": "Gönüllü olarak katılıyorum",
+    "consentVoluntaryDesc": "Katılımım özgür ve gönüllüdür, herhangi bir zorlama yoktur.",
+    "consentConfidentiality": "Gizlilik kurallarını anladım",
+    "consentConfidentialityDesc": "Sonuçların bana ait olduğunu ve onayım olmadan paylaşılmayacağını anlıyorum.",
+    "consentData": "Verilerimin işlenmesini kabul ediyorum",
+    "consentDataDesc": "KVKK uyarınca, değerlendirmenin gerçekleştirilmesi için verilerimin işlenmesine izin veriyorum.",
+    "warningText": "Bu koşulları onaylayarak, yukarıdaki bilgileri okuduğunuzu ve anladığınızı onaylıyorsunuz. Şunları inceleyebilirsiniz:",
+    "cgu": "Kullanım Koşulları",
+    "cgv": "Satış Koşulları",
+    "privacy": "Gizlilik Politikası",
+    "and": "ve"
+  },
+  "step3": {
+    "title": "Özet",
+    "subtitle": "Başlamadan önce bilgileri kontrol edin",
+    "bilanTitle": "Yetkinlik değerlendirmeniz",
+    "beneficiary": "Yararlanıcı",
+    "path": "Program",
+    "duration": "Süre",
+    "hours": "{{hours}} saat",
+    "coachingStyle": "Eşlik tarzı",
+    "consentsTitle": "Onaylanan izinler",
+    "consent1": "Değerlendirme amaçları anlaşıldı",
+    "consent2": "Metodoloji kabul edildi",
+    "consent3": "Bilgilendirilmiş onay verildi",
+    "consent4": "Gönüllü katılım onaylandı",
+    "consent5": "Gizlilik anlaşıldı",
+    "consent6": "Veri işleme kabul edildi",
+    "signatureDate": "İmza tarihi:"
+  },
+  "nav": {
+    "changePackage": "Paketi değiştir",
+    "previous": "Önceki",
+    "next": "Sonraki",
+    "start": "Değerlendirmemi başlat"
+  }
+}
