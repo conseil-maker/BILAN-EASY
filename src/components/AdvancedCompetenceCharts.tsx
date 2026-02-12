@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
@@ -224,6 +225,7 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
   userName,
   showExport = true
 }) => {
+  const { t } = useTranslation('questionnaire');
   const chartRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<'radar' | 'bars' | 'themes'>('radar');
   const [isExporting, setIsExporting] = useState(false);
@@ -298,7 +300,7 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-bold mb-1">📊 Profil de compétences</h2>
+            <h2 className="text-2xl font-bold mb-1">📊 {t('enhanced.competenceProfile', 'Profil de compétences')}</h2>
             <p className="opacity-80">{userName}</p>
             {data.profileType && (
               <p className="mt-2 text-lg font-semibold">{data.profileType}</p>
@@ -306,7 +308,7 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
           </div>
           <div className="text-right">
             <div className="text-4xl font-bold">{globalScore.toFixed(1)}/5</div>
-            <p className="text-sm opacity-80">Score global</p>
+            <p className="text-sm opacity-80">{t('enhanced.globalScore', 'Score global')}</p>
           </div>
         </div>
       </div>
@@ -314,9 +316,9 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
       {/* Onglets */}
       <div className="flex border-b dark:border-gray-700">
         {[
-          { id: 'radar', label: 'Radar', icon: '🎯' },
-          { id: 'bars', label: 'Détails', icon: '📊' },
-          { id: 'themes', label: 'Thèmes', icon: '💡' },
+          { id: 'radar', label: t('enhanced.tabRadar', 'Radar'), icon: '🎯' },
+          { id: 'bars', label: t('enhanced.tabDetails', 'Détails'), icon: '📊' },
+          { id: 'themes', label: t('enhanced.tabThemes', 'Thèmes'), icon: '💡' },
         ].map(tab => (
           <button
             key={tab.id}
@@ -383,7 +385,7 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
         {activeTab === 'themes' && (
           <div>
             <h3 className="font-semibold text-gray-800 dark:text-white mb-4">
-              Thèmes prioritaires identifiés
+              {t('enhanced.priorityThemes', 'Thèmes prioritaires identifiés')}
             </h3>
             <div className="space-y-3">
               {data.themes
@@ -399,7 +401,7 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
                           {theme.text}
                         </span>
                         <span className="text-sm text-gray-500">
-                          Importance: {theme.weight}/10
+                          {t('enhanced.importance', 'Importance')}: {theme.weight}/10
                         </span>
                       </div>
                       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -416,7 +418,7 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
             {data.maturityLevel && (
               <div className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
                 <h4 className="font-semibold text-indigo-800 dark:text-indigo-300 mb-2">
-                  Niveau de maturité du projet
+                  {t('enhanced.maturityLevel', 'Niveau de maturité du projet')}
                 </h4>
                 <p className="text-gray-700 dark:text-gray-300">{data.maturityLevel}</p>
               </div>
@@ -434,7 +436,7 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
             className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
           >
             <span>🖼️</span>
-            Exporter en image
+            {t('enhanced.exportImage', 'Exporter en image')}
           </button>
           <button
             onClick={exportAsPDF}
@@ -442,7 +444,7 @@ export const AdvancedCompetenceCharts: React.FC<AdvancedCompetenceChartsProps> =
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
           >
             <span>📄</span>
-            Exporter en PDF
+            {t('enhanced.exportPDF', 'Exporter en PDF')}
           </button>
         </div>
       )}

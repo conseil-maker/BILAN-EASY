@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface RadarChartProps {
   data: { label: string; value: number; maxValue?: number }[];
@@ -219,7 +220,7 @@ export const CompetenceScoreCard: React.FC<CompetenceScoreProps> = ({
         <div className="flex-1 w-full">
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Score global</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{t('enhanced.globalScore', 'Score global')}</span>
               <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {globalPercentage}%
               </span>
@@ -268,6 +269,7 @@ export const ComparisonChart: React.FC<{
   maxValue?: number;
   title?: string;
 }> = ({ before, after, maxValue = 10, title }) => {
+  const { t } = useTranslation('questionnaire');
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
       {title && (
@@ -277,11 +279,11 @@ export const ComparisonChart: React.FC<{
       <div className="flex items-center gap-4 mb-4">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-gray-400 rounded" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Avant</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">{t('enhanced.before', 'Avant')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-indigo-500 rounded" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Après</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">{t('enhanced.after', 'Après')}</span>
         </div>
       </div>
 

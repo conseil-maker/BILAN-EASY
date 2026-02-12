@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { User } from '@supabase/supabase-js';
 import ClientApp from './ClientApp';
 import ConsultantDashboardPro from './ConsultantDashboardPro';
@@ -91,6 +92,7 @@ export const RoleNavigation: React.FC<RoleNavigationProps> = ({
   onViewChange,
 }) => {
   const permissions = useRolePermissions(userRole);
+  const { t } = useTranslation('common');
   
   return (
     <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
@@ -103,7 +105,7 @@ export const RoleNavigation: React.FC<RoleNavigationProps> = ({
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
           }`}
         >
-          Administration
+          {t('nav.administration', 'Administration')}
         </button>
       )}
       {permissions.canAccessConsultant && (
@@ -115,7 +117,7 @@ export const RoleNavigation: React.FC<RoleNavigationProps> = ({
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
           }`}
         >
-          Consultant
+          {t('nav.consultant', 'Consultant')}
         </button>
       )}
       <button
@@ -126,7 +128,7 @@ export const RoleNavigation: React.FC<RoleNavigationProps> = ({
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
         }`}
       >
-        Vue Client
+        {t('nav.clientView', 'Vue Client')}
       </button>
     </div>
   );
