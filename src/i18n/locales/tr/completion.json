@@ -1,0 +1,29 @@
+{
+  "title": "Değerlendirme tamamlandı",
+  "congratulations": "Tebrikler!",
+  "message": "Yetkinlik değerlendirmenizi tamamladınız.",
+  "summary": {
+    "title": "Değerlendirme özetiniz",
+    "profile": "Profesyonel profiliniz",
+    "strengths": "Güçlü yönleriniz",
+    "development": "Gelişim alanları",
+    "skills": "Belirlenen yetkinlikler",
+    "recommendations": "Öneriler",
+    "actionPlan": "Eylem planı"
+  },
+  "satisfaction": {
+    "title": "Memnuniyet anketi",
+    "subtitle": "Görüşünüz hizmetimizi geliştirmemize yardımcı olur",
+    "rating": "Deneyiminizi nasıl değerlendirirsiniz?",
+    "comment": "Yorum (isteğe bağlı)",
+    "commentPlaceholder": "Deneyiminizi paylaşın...",
+    "submit": "Görüşümü gönder",
+    "thankYou": "Geri bildiriminiz için teşekkürler!"
+  },
+  "download": {
+    "synthesis": "Özeti indir",
+    "actionPlan": "Eylem planını indir",
+    "certificate": "Katılım belgesini indir"
+  },
+  "backToDashboard": "Kontrol paneline dön"
+}

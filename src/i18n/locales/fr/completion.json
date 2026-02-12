@@ -1,0 +1,29 @@
+{
+  "title": "Bilan terminé",
+  "congratulations": "Félicitations !",
+  "message": "Vous avez terminé votre bilan de compétences.",
+  "summary": {
+    "title": "Synthèse de votre bilan",
+    "profile": "Votre profil professionnel",
+    "strengths": "Vos forces",
+    "development": "Axes de développement",
+    "skills": "Compétences identifiées",
+    "recommendations": "Recommandations",
+    "actionPlan": "Plan d'action"
+  },
+  "satisfaction": {
+    "title": "Formulaire de satisfaction",
+    "subtitle": "Votre avis nous aide à améliorer notre service",
+    "rating": "Comment évaluez-vous votre expérience ?",
+    "comment": "Commentaire (optionnel)",
+    "commentPlaceholder": "Partagez votre expérience...",
+    "submit": "Envoyer mon avis",
+    "thankYou": "Merci pour votre retour !"
+  },
+  "download": {
+    "synthesis": "Télécharger la synthèse",
+    "actionPlan": "Télécharger le plan d'action",
+    "certificate": "Télécharger l'attestation"
+  },
+  "backToDashboard": "Retour au tableau de bord"
+}

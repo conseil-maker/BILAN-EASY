@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabaseClient';
 import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import LoginPro from './LoginPro';
@@ -9,6 +10,7 @@ interface AuthWrapperProps {
 }
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
+  const { t } = useTranslation('auth');
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string>('client'); // Default to 'client'
   const [loading, setLoading] = useState(true);
@@ -251,7 +253,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement de votre session...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">{t('loading.session')}</p>
         </div>
       </div>
     );

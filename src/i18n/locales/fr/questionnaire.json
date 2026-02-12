@@ -1,0 +1,35 @@
+{
+  "title": "Questionnaire",
+  "phase": "Phase {{number}}: {{name}}",
+  "question": "Question {{current}} sur {{total}}",
+  "progress": "Progression: {{percent}}%",
+  "placeholder": "Tapez votre réponse ici...",
+  "send": "Envoyer",
+  "skip": "Passer",
+  "thinking": "Réflexion en cours...",
+  "typing": "En train d'écrire...",
+  "miniSynthesis": {
+    "title": "Mini-synthèse de la phase",
+    "generating": "Génération de la synthèse en cours..."
+  },
+  "phases": {
+    "preliminary": "Phase préliminaire",
+    "investigation": "Phase d'investigation",
+    "conclusion": "Phase de conclusion"
+  },
+  "phaseTransition": {
+    "title": "Changement de phase",
+    "message": "Vous passez maintenant à la phase suivante.",
+    "continue": "Continuer"
+  },
+  "chat": {
+    "welcomeMessage": "Bienvenue dans votre bilan de compétences. Je suis votre conseiller IA et je vais vous accompagner tout au long de ce parcours.",
+    "inputPlaceholder": "Écrivez votre réponse...",
+    "sendButton": "Envoyer"
+  },
+  "completion": {
+    "title": "Félicitations !",
+    "message": "Vous avez terminé toutes les questions du bilan.",
+    "generating": "Génération de votre synthèse en cours..."
+  }
+}

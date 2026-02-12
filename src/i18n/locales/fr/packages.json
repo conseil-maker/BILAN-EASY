@@ -1,0 +1,17 @@
+{
+  "title": "Choisissez votre forfait",
+  "subtitle": "Sélectionnez le forfait qui correspond à vos besoins",
+  "duration": "{{hours}}h d'accompagnement",
+  "features": "Fonctionnalités incluses",
+  "select": "Choisir ce forfait",
+  "selected": "Forfait sélectionné",
+  "popular": "Populaire",
+  "recommended": "Recommandé",
+  "includes": "Inclus",
+  "phases": "phases",
+  "questions": "questions",
+  "synthesis": "Synthèse complète",
+  "actionPlan": "Plan d'action",
+  "certificate": "Attestation de présence",
+  "support": "Accompagnement personnalisé"
+}

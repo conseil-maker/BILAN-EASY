@@ -1,0 +1,35 @@
+{
+  "title": "Anket",
+  "phase": "Aşama {{number}}: {{name}}",
+  "question": "Soru {{current}} / {{total}}",
+  "progress": "İlerleme: {{percent}}%",
+  "placeholder": "Cevabınızı buraya yazın...",
+  "send": "Gönder",
+  "skip": "Atla",
+  "thinking": "Düşünüyor...",
+  "typing": "Yazıyor...",
+  "miniSynthesis": {
+    "title": "Aşama mini özeti",
+    "generating": "Özet oluşturuluyor..."
+  },
+  "phases": {
+    "preliminary": "Ön aşama",
+    "investigation": "Araştırma aşaması",
+    "conclusion": "Sonuç aşaması"
+  },
+  "phaseTransition": {
+    "title": "Aşama değişikliği",
+    "message": "Şimdi bir sonraki aşamaya geçiyorsunuz.",
+    "continue": "Devam et"
+  },
+  "chat": {
+    "welcomeMessage": "Yetkinlik değerlendirmenize hoş geldiniz. Ben yapay zeka danışmanınızım ve bu süreç boyunca size eşlik edeceğim.",
+    "inputPlaceholder": "Cevabınızı yazın...",
+    "sendButton": "Gönder"
+  },
+  "completion": {
+    "title": "Tebrikler!",
+    "message": "Değerlendirmenin tüm sorularını tamamladınız.",
+    "generating": "Özetiniz oluşturuluyor..."
+  }
+}

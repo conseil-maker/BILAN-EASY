@@ -1,0 +1,46 @@
+{
+  "title": "Mes Documents",
+  "subtitle": "Retrouvez tous vos documents liés au bilan",
+  "categories": {
+    "administrative": "Documents administratifs",
+    "results": "Résultats du bilan",
+    "export": "Export des données",
+    "complementary": "Documents complémentaires"
+  },
+  "items": {
+    "welcomeBooklet": {
+      "title": "Livret d'accueil",
+      "description": "Guide complet présentant le déroulement et la méthodologie du bilan"
+    },
+    "convention": {
+      "title": "Convention de prestation",
+      "description": "Document contractuel obligatoire définissant les modalités du bilan"
+    },
+    "attendance": {
+      "title": "Attestation de présence",
+      "description": "Certificat de participation au bilan de compétences",
+      "availability": "Disponible à la fin du bilan"
+    },
+    "synthesis": {
+      "title": "Document de synthèse",
+      "description": "Synthèse complète conforme à l'article R.6313-8 du Code du travail",
+      "availability": "Disponible après la phase de conclusion"
+    },
+    "actionPlan": {
+      "title": "Plan d'action",
+      "description": "Feuille de route avec objectifs et échéances",
+      "availability": "Disponible après la phase de conclusion"
+    },
+    "csvExport": {
+      "title": "Export Excel (CSV)",
+      "description": "Téléchargez toutes vos réponses et analyses au format Excel pour une exploitation personnalisée"
+    }
+  },
+  "buttons": {
+    "downloadPdf": "Télécharger PDF",
+    "downloadExcel": "Télécharger Excel",
+    "notAvailable": "Non disponible",
+    "generating": "Génération en cours..."
+  },
+  "viewAll": "Voir tous →"
+}

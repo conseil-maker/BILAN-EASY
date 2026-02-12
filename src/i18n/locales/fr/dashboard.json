@@ -1,0 +1,38 @@
+{
+  "title": "Tableau de bord",
+  "welcome": "Bienvenue",
+  "welcomeBack": "Bienvenue, {{name}}",
+  "progress": {
+    "title": "Progression du bilan",
+    "phase": "Phase {{current}} sur {{total}}",
+    "completed": "Bilan terminé",
+    "notStarted": "Non commencé",
+    "inProgress": "En cours",
+    "questionsAnswered": "{{count}} questions répondues",
+    "estimatedTime": "Temps estimé restant : {{time}}"
+  },
+  "actions": {
+    "continueBilan": "Continuer mon bilan",
+    "startBilan": "Commencer mon bilan",
+    "newBilan": "Nouveau bilan",
+    "abandonAndRestart": "Abandonner et commencer un nouveau bilan",
+    "viewResults": "Voir mes résultats",
+    "downloadSynthesis": "Télécharger la synthèse"
+  },
+  "sections": {
+    "documents": "Mes documents",
+    "history": "Historique",
+    "appointments": "Mes rendez-vous",
+    "support": "Support"
+  },
+  "confirmNewBilan": {
+    "title": "Commencer un nouveau bilan ?",
+    "message": "Attention : toutes les données de votre bilan actuel seront définitivement supprimées. Cette action est irréversible.",
+    "confirm": "Oui, commencer un nouveau bilan",
+    "cancel": "Annuler"
+  },
+  "noBilan": {
+    "title": "Aucun bilan en cours",
+    "message": "Commencez votre premier bilan de compétences pour découvrir votre potentiel professionnel."
+  }
+}

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabaseClient';
+import LanguageSelector from './LanguageSelector';
 
 interface SignupProps {
   onToggle: () => void;
 }
 
 export default function Signup({ onToggle }: SignupProps) {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -31,7 +34,7 @@ export default function Signup({ onToggle }: SignupProps) {
       });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout: L\'inscription prend trop de temps. Veuillez réessayer.')), 30000)
+        setTimeout(() => reject(new Error(t('errors.signupTimeout'))), 30000)
       );
 
       const { data, error: signUpError } = await Promise.race([
@@ -50,7 +53,7 @@ export default function Signup({ onToggle }: SignupProps) {
       
       setSuccess(true);
     } catch (error: any) {
-      setError(error.message || 'Erreur lors de l\'inscription');
+      setError(error.message || t('errors.genericSignup'));
     } finally {
       setLoading(false);
     }
@@ -67,16 +70,16 @@ export default function Signup({ onToggle }: SignupProps) {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Inscription réussie !
+              {t('signup.successTitle')}
             </h2>
             <p className="text-gray-600 mb-6">
-              Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.
+              {t('signup.successMessage')}
             </p>
             <button
               onClick={onToggle}
               className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 transition"
             >
-              Se connecter
+              {t('signup.login')}
             </button>
           </div>
         </div>
@@ -87,12 +90,17 @@ export default function Signup({ onToggle }: SignupProps) {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
+        {/* Sélecteur de langue */}
+        <div className="flex justify-end">
+          <LanguageSelector variant="inline" />
+        </div>
+
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Créer un compte
+            {t('signup.title')}
           </h1>
           <p className="text-gray-600">
-            Rejoignez Bilan de Compétences IA
+            {t('signup.subtitle')}
           </p>
         </div>
 
@@ -106,7 +114,7 @@ export default function Signup({ onToggle }: SignupProps) {
 
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom complet
+                {t('signup.fullName')}
               </label>
               <input
                 id="fullName"
@@ -115,13 +123,13 @@ export default function Signup({ onToggle }: SignupProps) {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                placeholder="Jean Dupont"
+                placeholder={t('signup.fullNamePlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                {t('signup.email')}
               </label>
               <input
                 id="email"
@@ -130,13 +138,13 @@ export default function Signup({ onToggle }: SignupProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                placeholder="votre@email.com"
+                placeholder={t('signup.emailPlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Mot de passe
+                {t('signup.password')}
               </label>
               <input
                 id="password"
@@ -146,10 +154,10 @@ export default function Signup({ onToggle }: SignupProps) {
                 required
                 minLength={6}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                placeholder="••••••••"
+                placeholder={t('signup.passwordPlaceholder')}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Minimum 6 caractères
+                {t('signup.passwordHint')}
               </p>
             </div>
 
@@ -158,18 +166,18 @@ export default function Signup({ onToggle }: SignupProps) {
               disabled={loading}
               className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Inscription...' : 'S\'inscrire'}
+              {loading ? t('signup.loading') : t('signup.submit')}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Déjà un compte ?{' '}
+              {t('signup.hasAccount')}{' '}
               <button
                 onClick={onToggle}
                 className="text-indigo-600 hover:text-indigo-700 font-medium"
               >
-                Se connecter
+                {t('signup.login')}
               </button>
             </p>
           </div>

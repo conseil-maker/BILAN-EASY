@@ -1,0 +1,38 @@
+{
+  "title": "Kontrol Paneli",
+  "welcome": "Hoş geldiniz",
+  "welcomeBack": "Hoş geldiniz, {{name}}",
+  "progress": {
+    "title": "Değerlendirme ilerlemesi",
+    "phase": "Aşama {{current}} / {{total}}",
+    "completed": "Değerlendirme tamamlandı",
+    "notStarted": "Başlanmadı",
+    "inProgress": "Devam ediyor",
+    "questionsAnswered": "{{count}} soru yanıtlandı",
+    "estimatedTime": "Tahmini kalan süre: {{time}}"
+  },
+  "actions": {
+    "continueBilan": "Değerlendirmeme devam et",
+    "startBilan": "Değerlendirmemi başlat",
+    "newBilan": "Yeni değerlendirme",
+    "abandonAndRestart": "Bırak ve yeni değerlendirme başlat",
+    "viewResults": "Sonuçlarımı gör",
+    "downloadSynthesis": "Özeti indir"
+  },
+  "sections": {
+    "documents": "Belgelerim",
+    "history": "Geçmiş",
+    "appointments": "Randevularım",
+    "support": "Destek"
+  },
+  "confirmNewBilan": {
+    "title": "Yeni değerlendirme başlatılsın mı?",
+    "message": "Dikkat: Mevcut değerlendirmenizin tüm verileri kalıcı olarak silinecektir. Bu işlem geri alınamaz.",
+    "confirm": "Evet, yeni değerlendirme başlat",
+    "cancel": "İptal"
+  },
+  "noBilan": {
+    "title": "Devam eden değerlendirme yok",
+    "message": "Profesyonel potansiyelinizi keşfetmek için ilk yetkinlik değerlendirmenizi başlatın."
+  }
+}
