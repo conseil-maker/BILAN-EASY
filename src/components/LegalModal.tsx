@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, FileText, Shield, Scale } from 'lucide-react';
 
 // ============================================
@@ -208,6 +209,7 @@ Cette politique peut être mise à jour. Vous serez informé de toute modificati
 // ============================================
 
 const LegalModal: React.FC<LegalModalProps> = ({ documentType, onClose }) => {
+  const { t } = useTranslation('legal');
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -248,19 +250,19 @@ const LegalModal: React.FC<LegalModalProps> = ({ documentType, onClose }) => {
     switch (documentType) {
       case 'cgu':
         return {
-          title: 'Conditions Générales d\'Utilisation',
+          title: t('cgu.title'),
           icon: <FileText size={24} />,
           content: CGU_CONTENT
         };
       case 'cgv':
         return {
-          title: 'Conditions Générales de Vente',
+          title: t('cgv.title'),
           icon: <Scale size={24} />,
           content: CGV_CONTENT
         };
       case 'privacy':
         return {
-          title: 'Politique de Confidentialité',
+          title: t('privacy.title'),
           icon: <Shield size={24} />,
           content: PRIVACY_CONTENT
         };
@@ -297,7 +299,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ documentType, onClose }) => {
           <button
             onClick={handleClose}
             className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            aria-label="Fermer"
+            aria-label={t('close')}
           >
             <X size={24} />
           </button>
@@ -333,7 +335,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ documentType, onClose }) => {
             onClick={handleClose}
             className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
           >
-            J'ai compris
+            {t('understood')}
           </button>
         </div>
       </div>
