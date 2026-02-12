@@ -1,0 +1,66 @@
+{
+  "sourceModal": {
+    "title": "Justification par vos réponses",
+    "close": "Fermer"
+  },
+  "coachModal": {
+    "title": "Discuter avec un coach",
+    "text1": "Cette synthèse est un excellent point de départ pour une discussion approfondie avec un coach de carrière certifié.",
+    "text2": "Utilisez ce document pour préparer votre entretien et maximiser la valeur de votre accompagnement.",
+    "understood": "J'ai compris"
+  },
+  "resourceModal": {
+    "title": "Pistes pour : \"{{text}}\"",
+    "intro": "Voici un point de départ pour vos recherches. L'objectif est de vous guider, pas de faire le travail à votre place.",
+    "searching": "Recherche en cours...",
+    "keywords": "Mots-clés à rechercher :",
+    "resourceTypes": "Types de ressources à explorer :",
+    "platforms": "Exemples de plateformes :",
+    "noResults": "Impossible de trouver des pistes pour le moment.",
+    "close": "Fermer"
+  },
+  "exportModal": {
+    "title": "Exporter vos données",
+    "intro": "Choisissez le format qui vous convient. Vos données vous appartiennent.",
+    "json": "JSON",
+    "jsonDesc": "Idéal pour la portabilité et la réutilisation technique.",
+    "csv": "CSV",
+    "csvDesc": "Parfait pour ouvrir vos réponses dans un tableur.",
+    "cancel": "Annuler"
+  },
+  "actionItem": {
+    "findLeads": "Trouver des pistes"
+  },
+  "header": {
+    "title": "Synthèse de votre Bilan",
+    "subtitle": "{{name}} - {{package}}"
+  },
+  "cards": {
+    "strengths": "Vos Forces Clés",
+    "development": "Vos Axes de Développement",
+    "recommendations": "Recommandations",
+    "actionPlan": "Plan d'Action",
+    "skills": "Positionnement des Compétences",
+    "why": "(Pourquoi ?)",
+    "shortTerm": "Court terme (1-3 mois)",
+    "mediumTerm": "Moyen terme (3-6 mois)",
+    "skillsIntro": "Voici une visualisation de votre profil de compétences, basé sur vos réponses.",
+    "skillsLoading": "Analyse des compétences en cours...",
+    "skillsUnavailable": "Les données de compétences ne sont pas disponibles."
+  },
+  "actions": {
+    "restart": "Refaire un bilan",
+    "history": "Voir mon historique",
+    "historyBack": "Retour à l'historique",
+    "generatePdf": "Générer et Télécharger PDF",
+    "exportData": "Exporter mes données",
+    "talkCoach": "Discuter avec un coach"
+  },
+  "pdf": {
+    "title": "Bilan de Compétences - {{package}}",
+    "shortTermTimeline": "Court terme (1-3 mois)",
+    "mediumTermTimeline": "Moyen terme (3-6 mois)",
+    "success": "PDF généré et sauvegardé avec succès!",
+    "error": "Erreur lors de la génération du PDF"
+  }
+}
