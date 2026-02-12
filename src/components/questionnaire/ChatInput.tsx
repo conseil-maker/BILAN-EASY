@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Icônes
 const SendIcon = () => (
@@ -52,10 +53,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
   isListening = false,
   onMicClick,
   speechRecSupported = false,
-  placeholder = 'Tapez votre réponse...',
+  placeholder,
   jokersRemaining = 0,
   disabled = false,
 }) => {
+  const { t } = useTranslation('questionnaire');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   // Auto-resize du textarea
@@ -91,7 +93,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={placeholder || t('chatInput.placeholder')}
             disabled={isLoading || disabled}
             rows={1}
             className="w-full resize-none rounded-xl border border-slate-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
@@ -107,7 +109,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                   ? 'bg-red-100 text-red-500' 
                   : 'text-slate-400 hover:text-slate-600'
               }`}
-              title={isListening ? 'Arrêter la dictée' : 'Dictée vocale'}
+              title={isListening ? t('chatInput.stopDictation') : t('chatInput.startDictation')}
             >
               <MicIcon active={isListening} />
             </button>
@@ -119,7 +121,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           onClick={handleSubmit}
           disabled={!value.trim() || isLoading || disabled}
           className="p-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
-          title="Envoyer"
+          title={t('chatInput.send')}
         >
           <SendIcon />
         </button>
@@ -134,7 +136,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
             className="flex items-center px-4 py-2 text-sm text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <JokerIcon />
-            Passer cette question ({jokersRemaining} restant{jokersRemaining > 1 ? 's' : ''})
+            {jokersRemaining > 1 
+              ? t('chatInput.skipQuestionPlural', { count: jokersRemaining })
+              : t('chatInput.skipQuestion', { count: jokersRemaining })
+            }
           </button>
         </div>
       )}
@@ -142,7 +147,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       {/* Indicateur de chargement */}
       {isLoading && (
         <div className="mt-2 text-center text-sm text-slate-500">
-          L'IA prépare la prochaine question...
+          {t('chatInput.aiPreparing')}
         </div>
       )}
     </div>

@@ -1,4 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
+import i18n from '../i18n';
+
+const tNotif = (fr: string, tr: string): string => (i18n.language || 'fr') === 'tr' ? tr : fr;
 
 export interface Notification {
   id: string;
@@ -27,43 +30,43 @@ export interface Reminder {
 export const NOTIFICATION_TYPES = {
   BILAN_STARTED: {
     type: 'info' as const,
-    title: 'Bilan démarré',
-    template: (userName: string) => `${userName} a commencé son bilan de compétences.`
+    get title() { return tNotif('Bilan démarré', 'Değerlendirme başladı'); },
+    template: (userName: string) => tNotif(`${userName} a commencé son bilan de compétences.`, `${userName} yetkinlik değerlendirmesine başladı.`)
   },
   BILAN_COMPLETED: {
     type: 'success' as const,
-    title: 'Bilan terminé',
-    template: (userName: string) => `${userName} a terminé son bilan de compétences.`
+    get title() { return tNotif('Bilan terminé', 'Değerlendirme tamamlandı'); },
+    template: (userName: string) => tNotif(`${userName} a terminé son bilan de compétences.`, `${userName} yetkinlik değerlendirmesini tamamladı.`)
   },
   DOCUMENT_READY: {
     type: 'success' as const,
-    title: 'Document disponible',
-    template: (docType: string) => `Votre ${docType} est prêt à être téléchargé.`
+    get title() { return tNotif('Document disponible', 'Belge hazır'); },
+    template: (docType: string) => tNotif(`Votre ${docType} est prêt à être téléchargé.`, `${docType} indirilmeye hazır.`)
   },
   APPOINTMENT_REMINDER: {
     type: 'reminder' as const,
-    title: 'Rappel de rendez-vous',
-    template: (date: string, time: string) => `N'oubliez pas votre rendez-vous le ${date} à ${time}.`
+    get title() { return tNotif('Rappel de rendez-vous', 'Randevu hatırlatması'); },
+    template: (date: string, time: string) => tNotif(`N'oubliez pas votre rendez-vous le ${date} à ${time}.`, `${date} tarihinde saat ${time}'deki randevunuzu unutmayın.`)
   },
   FOLLOW_UP_6_MONTHS: {
     type: 'reminder' as const,
-    title: 'Suivi à 6 mois',
-    template: (userName: string) => `Il est temps de planifier le suivi à 6 mois avec ${userName}.`
+    get title() { return tNotif('Suivi à 6 mois', '6 aylık takip'); },
+    template: (userName: string) => tNotif(`Il est temps de planifier le suivi à 6 mois avec ${userName}.`, `${userName} ile 6 aylık takip görüşmesini planlama zamanı.`)
   },
   INACTIVITY_WARNING: {
     type: 'warning' as const,
-    title: 'Client inactif',
-    template: (userName: string, days: number) => `${userName} n'a pas eu d'activité depuis ${days} jours.`
+    get title() { return tNotif('Client inactif', 'İnaktif danışan'); },
+    template: (userName: string, days: number) => tNotif(`${userName} n'a pas eu d'activité depuis ${days} jours.`, `${userName} ${days} gündür aktif değil.`)
   },
   NEW_CLIENT_ASSIGNED: {
     type: 'info' as const,
-    title: 'Nouveau client',
-    template: (userName: string) => `Un nouveau client vous a été assigné : ${userName}.`
+    get title() { return tNotif('Nouveau client', 'Yeni danışan'); },
+    template: (userName: string) => tNotif(`Un nouveau client vous a été assigné : ${userName}.`, `Size yeni bir danışan atandı: ${userName}.`)
   },
   SATISFACTION_RECEIVED: {
     type: 'success' as const,
-    title: 'Avis reçu',
-    template: (rating: number) => `Un client a laissé un avis de ${rating}/5.`
+    get title() { return tNotif('Avis reçu', 'Görüş alındı'); },
+    template: (rating: number) => tNotif(`Un client a laissé un avis de ${rating}/5.`, `Bir danışan ${rating}/5 puan verdi.`)
   }
 };
 
@@ -274,7 +277,7 @@ class NotificationService {
       title, 
       template(userName),
       '#/consultant/assessments',
-      'Voir le bilan'
+      tNotif('Voir le bilan', 'Değerlendirmeyi gör')
     );
   }
 
@@ -286,7 +289,7 @@ class NotificationService {
       title, 
       template(docType),
       '#/mes-documents',
-      'Télécharger'
+      tNotif('Télécharger', 'İndir')
     );
   }
 

@@ -1,5 +1,8 @@
 import { Package, Answer, UserProfile } from '../types';
 import { PHASE_THRESHOLDS, PACKAGES } from '../constants';
+import i18n from '../i18n';
+
+const tProg = (fr: string, tr: string): string => (i18n.language || 'fr') === 'tr' ? tr : fr;
 
 /**
  * Service de calcul de la progression du bilan
@@ -63,7 +66,9 @@ export const calculateCvReductionFactor = (userProfile: UserProfile | null): num
     }
     
     // Bonus si le CV contient des mots-clés importants
-    const keywords = ['compétences', 'expérience', 'formation', 'projet', 'management', 'responsable'];
+    const keywords = (i18n.language || 'fr') === 'tr'
+      ? ['yetkinlik', 'deneyim', 'eğitim', 'proje', 'yönetim', 'sorumlu']
+      : ['compétences', 'expérience', 'formation', 'projet', 'management', 'responsable'];
     const cvLower = userProfile.cvText.toLowerCase();
     const keywordsFound = keywords.filter(k => cvLower.includes(k)).length;
     reductionScore += Math.min(5, keywordsFound);
@@ -252,21 +257,21 @@ export const getProgressionStatusMessage = (progressionInfo: ProgressionInfo): s
   const { currentPhase, questionsInCurrentPhase, targetInCurrentPhase, thresholds } = progressionInfo;
   
   const phaseNames: Record<BilanPhase, string> = {
-    phase1: 'Phase Préliminaire',
-    phase2: "Phase d'Investigation",
-    phase3: 'Phase de Conclusion'
+    phase1: tProg('Phase Préliminaire', 'Ön Aşama'),
+    phase2: tProg("Phase d'Investigation", 'Araştırma Aşaması'),
+    phase3: tProg('Phase de Conclusion', 'Sonuç Aşaması')
   };
   
   const phaseName = phaseNames[currentPhase];
   const remaining = Math.max(0, targetInCurrentPhase - questionsInCurrentPhase);
   
   if (thresholds.maximumReached) {
-    return `${phaseName} terminée. Passage à la phase suivante.`;
+    return tProg(`${phaseName} terminée. Passage à la phase suivante.`, `${phaseName} tamamlandı. Sonraki aşamaya geçiliyor.`);
   } else if (thresholds.optimalReached) {
-    return `${phaseName} complète. Vous pouvez passer à la suite ou approfondir.`;
+    return tProg(`${phaseName} complète. Vous pouvez passer à la suite ou approfondir.`, `${phaseName} tamamlandı. Devam edebilir veya derinleştirebilirsiniz.`);
   } else if (thresholds.minimumReached) {
-    return `${phaseName} bientôt terminée. Encore quelques questions pour approfondir.`;
+    return tProg(`${phaseName} bientôt terminée. Encore quelques questions pour approfondir.`, `${phaseName} neredeyse tamamlandı. Derinleştirmek için birkaç soru daha.`);
   } else {
-    return `${phaseName} en cours. Environ ${remaining} questions restantes.`;
+    return tProg(`${phaseName} en cours. Environ ${remaining} questions restantes.`, `${phaseName} devam ediyor. Yaklaşık ${remaining} soru kaldı.`);
   }
 };

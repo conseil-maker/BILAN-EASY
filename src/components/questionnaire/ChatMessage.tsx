@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Message } from '../../types';
 
 interface ChatMessageProps {
@@ -16,7 +17,8 @@ interface ChatMessageProps {
   userName?: string;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, userName = 'Vous' }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, userName }) => {
+  const { t } = useTranslation('questionnaire');
   const isUser = message.sender === 'user';
   const isLoading = message.isLoading;
   const isError = message.isError;
@@ -38,7 +40,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, userName = 'Vous' })
         <p className={`text-xs font-medium mb-1 ${
           isUser ? 'text-primary-200' : isError ? 'text-red-500' : 'text-primary-600'
         }`}>
-          {isUser ? userName : '🤖 Assistant IA'}
+          {isUser ? (userName || t('chatMessage.you')) : `🤖 ${t('chatMessage.aiAssistant')}`}
         </p>
         
         {/* Contenu du message */}

@@ -13,6 +13,16 @@ import frCompletion from './locales/fr/completion.json';
 import frLegal from './locales/fr/legal.json';
 import frEmails from './locales/fr/emails.json';
 import frAi from './locales/fr/ai.json';
+import frSatisfaction from './locales/fr/satisfaction.json';
+import frSummary from './locales/fr/summary.json';
+import frAbout from './locales/fr/about.json';
+import frProfile from './locales/fr/profile.json';
+import frPreliminary from './locales/fr/preliminary.json';
+import frFollowup from './locales/fr/followup.json';
+import frAppointments from './locales/fr/appointments.json';
+import frAdmin from './locales/fr/admin.json';
+import frConsultant from './locales/fr/consultant.json';
+import frCareer from './locales/fr/career.json';
 
 // Imports TR
 import trCommon from './locales/tr/common.json';
@@ -25,6 +35,16 @@ import trCompletion from './locales/tr/completion.json';
 import trLegal from './locales/tr/legal.json';
 import trEmails from './locales/tr/emails.json';
 import trAi from './locales/tr/ai.json';
+import trSatisfaction from './locales/tr/satisfaction.json';
+import trSummary from './locales/tr/summary.json';
+import trAbout from './locales/tr/about.json';
+import trProfile from './locales/tr/profile.json';
+import trPreliminary from './locales/tr/preliminary.json';
+import trFollowup from './locales/tr/followup.json';
+import trAppointments from './locales/tr/appointments.json';
+import trAdmin from './locales/tr/admin.json';
+import trConsultant from './locales/tr/consultant.json';
+import trCareer from './locales/tr/career.json';
 
 export const supportedLanguages = {
   fr: { name: 'Français', flag: '🇫🇷' },
@@ -45,6 +65,16 @@ const resources = {
     legal: frLegal,
     emails: frEmails,
     ai: frAi,
+    satisfaction: frSatisfaction,
+    summary: frSummary,
+    about: frAbout,
+    profile: frProfile,
+    preliminary: frPreliminary,
+    followup: frFollowup,
+    appointments: frAppointments,
+    admin: frAdmin,
+    consultant: frConsultant,
+    career: frCareer,
   },
   tr: {
     common: trCommon,
@@ -57,6 +87,16 @@ const resources = {
     legal: trLegal,
     emails: trEmails,
     ai: trAi,
+    satisfaction: trSatisfaction,
+    summary: trSummary,
+    about: trAbout,
+    profile: trProfile,
+    preliminary: trPreliminary,
+    followup: trFollowup,
+    appointments: trAppointments,
+    admin: trAdmin,
+    consultant: trConsultant,
+    career: trCareer,
   },
 };
 
@@ -67,7 +107,11 @@ i18n
     resources,
     fallbackLng: 'fr',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'dashboard', 'questionnaire', 'documents', 'packages', 'completion', 'legal', 'emails', 'ai'],
+    ns: [
+      'common', 'auth', 'dashboard', 'questionnaire', 'documents', 'packages',
+      'completion', 'legal', 'emails', 'ai', 'satisfaction', 'summary', 'about',
+      'profile', 'preliminary', 'followup', 'appointments', 'admin', 'consultant', 'career'
+    ],
     interpolation: {
       escapeValue: false, // React already escapes
     },

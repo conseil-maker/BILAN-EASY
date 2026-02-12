@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SatisfactionModalProps {
   phaseName: string;
@@ -16,6 +17,7 @@ interface SatisfactionModalProps {
 }
 
 const SatisfactionModal: React.FC<SatisfactionModalProps> = ({ phaseName, onSubmit }) => {
+  const { t } = useTranslation('questionnaire');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   
@@ -57,12 +59,12 @@ const SatisfactionModal: React.FC<SatisfactionModalProps> = ({ phaseName, onSubm
         </button>
         
         <h2 className="text-2xl font-bold font-display text-primary-800 mb-2">
-          Votre avis sur la phase terminée
+          {t('modals.satisfaction.title')}
         </h2>
         <p className="text-slate-600 mb-4">"{phaseName}"</p>
         
         <div className="mb-4">
-          <p className="mb-2 text-slate-700">Cette phase vous a-t-elle semblé pertinente ?</p>
+          <p className="mb-2 text-slate-700">{t('modals.satisfaction.question')}</p>
           <div className="flex justify-center text-3xl gap-2">
             {[1, 2, 3, 4, 5].map(star => (
               <span 
@@ -81,7 +83,7 @@ const SatisfactionModal: React.FC<SatisfactionModalProps> = ({ phaseName, onSubm
         <textarea 
           value={comment} 
           onChange={e => setComment(e.target.value)} 
-          placeholder="Un commentaire ? (optionnel)" 
+          placeholder={t('modals.satisfaction.commentPlaceholder')} 
           rows={3} 
           className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
         />
@@ -92,13 +94,13 @@ const SatisfactionModal: React.FC<SatisfactionModalProps> = ({ phaseName, onSubm
             disabled={rating === 0} 
             className="flex-1 bg-primary-600 text-white font-bold py-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
           >
-            Valider
+            {t('modals.satisfaction.submit')}
           </button>
           <button 
             onClick={() => onSubmit(3, comment)} 
             className="px-6 bg-slate-200 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-300 transition-colors"
           >
-            Passer
+            {t('modals.satisfaction.skip')}
           </button>
         </div>
       </div>

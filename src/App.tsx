@@ -8,6 +8,7 @@ import { CookieConsent } from './components/CookieConsent';
 import { GlobalNavbar } from './components/GlobalNavbar';
 import { LoadingSpinner, FullPageLoader } from './components/LazyComponents';
 import { useUserPackage } from './hooks/useUserPackage';
+import { useTranslation } from 'react-i18next';
 
 // ============================================
 // LAZY IMPORTS - Chargement à la demande
@@ -148,6 +149,7 @@ const BackButton: React.FC = () => (
 const App: React.FC = () => {
   const route = useHashRouter();
   const [useProDashboards] = useState(true);
+  const { t } = useTranslation('common');
 
   // Pages légales (sans auth)
   const renderLegalPage = () => {
@@ -252,8 +254,8 @@ const App: React.FC = () => {
     if (route === '/satisfaction') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Satisfaction" />
-          <Suspense fallback={<LoadingSpinner message="Chargement du questionnaire..." />}>
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title={t('satisfaction', 'Satisfaction')} />
+          <Suspense fallback={<LoadingSpinner message={t('loadingQuestionnaire')} />}>
             <SatisfactionSurvey 
               userId={user.id} 
               assessmentId={crypto.randomUUID()} 
@@ -267,7 +269,7 @@ const App: React.FC = () => {
     // Routes documents avec récupération dynamique du forfait
     if (route === '/documents') {
       return (
-        <Suspense fallback={<LoadingSpinner message="Chargement des documents..." />}>
+        <Suspense fallback={<LoadingSpinner message={t('loadingDocuments')} />}>
           <DocumentsWithPackage user={user} userRole={userRole} pageType="documents" />
         </Suspense>
       );
@@ -275,7 +277,7 @@ const App: React.FC = () => {
 
     if (route === '/library') {
       return (
-        <Suspense fallback={<LoadingSpinner message="Chargement de la bibliothèque..." />}>
+        <Suspense fallback={<LoadingSpinner message={t('loadingLibrary')} />}>
           <DocumentsWithPackage user={user} userRole={userRole} pageType="library" />
         </Suspense>
       );
@@ -283,7 +285,7 @@ const App: React.FC = () => {
 
     if (route === '/mes-documents') {
       return (
-        <Suspense fallback={<LoadingSpinner message="Chargement de vos documents..." />}>
+        <Suspense fallback={<LoadingSpinner message={t('loadingYourDocuments')} />}>
           <DocumentsWithPackage user={user} userRole={userRole} pageType="mes-documents" />
         </Suspense>
       );
@@ -292,9 +294,9 @@ const App: React.FC = () => {
     if (route === '/dashboard') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={false} title="Mon Tableau de Bord" />
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={false} title={t('userMenu.dashboard', 'Mon Tableau de Bord')} />
           <DashboardErrorBoundary>
-            <Suspense fallback={<LoadingSpinner message="Chargement du tableau de bord..." />}>
+            <Suspense fallback={<LoadingSpinner message={t('loadingDashboard')} />}>
               <ClientDashboard
                 user={user}
                 onStartNewBilan={() => window.location.hash = '#/bilan'}
@@ -321,8 +323,8 @@ const App: React.FC = () => {
       const record = JSON.parse(storedRecord);
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Résultats du bilan" />
-          <Suspense fallback={<LoadingSpinner message="Chargement des résultats..." />}>
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title={t('bilanResults')} />
+          <Suspense fallback={<LoadingSpinner message={t('loadingResults')} />}>
             <SummaryDashboard
               summary={record.summary}
               answers={record.answers || []}
@@ -341,7 +343,7 @@ const App: React.FC = () => {
     if (route === '/bilan') {
       return (
         <QuestionnaireErrorBoundary>
-          <Suspense fallback={<FullPageLoader message="Chargement du bilan..." />}>
+          <Suspense fallback={<FullPageLoader message={t('loadingBilan')} />}>
             <ClientApp user={user} />
           </Suspense>
         </QuestionnaireErrorBoundary>
@@ -351,11 +353,11 @@ const App: React.FC = () => {
     if (route === '/rendez-vous') {
       return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mes Rendez-vous" />
-          <Suspense fallback={<LoadingSpinner message="Chargement des rendez-vous..." />}>
+          <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title={t('userMenu.appointments', 'Mes Rendez-vous')} />
+          <Suspense fallback={<LoadingSpinner message={t('loadingAppointments')} />}>
             <AppointmentSystem
               userId={user.id}
-              userName={user.email?.split('@')[0] || 'Utilisateur'}
+              userName={user.email?.split('@')[0] || t('userMenu.user', 'Utilisateur')}
               userEmail={user.email || ''}
               mode="client"
             />
@@ -366,7 +368,7 @@ const App: React.FC = () => {
 
     if (route === '/profile') {
       return (
-        <Suspense fallback={<LoadingSpinner message="Chargement du profil..." />}>
+        <Suspense fallback={<LoadingSpinner message={t('loadingProfile')} />}>
           <UserProfile
             user={user}
             onBack={handleBack}
@@ -378,7 +380,7 @@ const App: React.FC = () => {
     // Routes Admin
     if (route === '/admin' || route === '/admin/dashboard') {
       return (
-        <Suspense fallback={<FullPageLoader message="Chargement du dashboard admin..." />}>
+        <Suspense fallback={<FullPageLoader message={t('loadingAdminDashboard')} />}>
           {useProDashboards 
             ? <AdminDashboardPro onBack={handleBack} />
             : <AdminDashboard onBack={handleBack} />}
@@ -389,7 +391,7 @@ const App: React.FC = () => {
     // Routes Consultant
     if (route === '/consultant' || route === '/consultant/dashboard') {
       return (
-        <Suspense fallback={<FullPageLoader message="Chargement du dashboard consultant..." />}>
+        <Suspense fallback={<FullPageLoader message={t('loadingConsultantDashboard')} />}>
           {useProDashboards
             ? <ConsultantDashboardPro onBack={handleBack} />
             : <ConsultantDashboard onBack={handleBack} />}
@@ -401,7 +403,7 @@ const App: React.FC = () => {
     switch (userRole) {
       case 'admin':
         return (
-          <Suspense fallback={<FullPageLoader message="Chargement du dashboard admin..." />}>
+          <Suspense fallback={<FullPageLoader message={t('loadingAdminDashboard')} />}>
             {useProDashboards 
               ? <AdminDashboardPro onBack={handleBack} />
               : <AdminDashboard onBack={handleBack} />}
@@ -409,7 +411,7 @@ const App: React.FC = () => {
         );
       case 'consultant':
         return (
-          <Suspense fallback={<FullPageLoader message="Chargement du dashboard consultant..." />}>
+          <Suspense fallback={<FullPageLoader message={t('loadingConsultantDashboard')} />}>
             {useProDashboards
               ? <ConsultantDashboardPro onBack={handleBack} />
               : <ConsultantDashboard onBack={handleBack} />}
@@ -423,7 +425,7 @@ const App: React.FC = () => {
           return <FullPageLoader message="Redirection vers votre tableau de bord..." />;
         }
         return (
-          <Suspense fallback={<FullPageLoader message="Chargement de l'application..." />}>
+          <Suspense fallback={<FullPageLoader message={t('loadingApp')} />}>
             <ClientAppWithSession user={user} />
           </Suspense>
         );

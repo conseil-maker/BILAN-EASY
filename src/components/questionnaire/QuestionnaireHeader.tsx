@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Package, CurrentPhaseInfo } from '../../types';
 import { ProgressionInfo } from '../../services/progressionService';
 
@@ -64,6 +65,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
   isDarkMode = false,
   onToggleDarkMode,
 }) => {
+  const { t } = useTranslation('questionnaire');
   const progressPercent = progressionInfo?.progressPercent || 0;
   
   return (
@@ -76,7 +78,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
               {pkg.name}
             </h1>
             <p className="text-sm text-slate-500">
-              Bonjour {userName}
+              {t('questionnaireHeader.greeting', { name: userName })}
             </p>
           </div>
           
@@ -107,7 +109,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
           {/* Indicateur de sauvegarde */}
           {lastSaveTime && (
             <p className="text-xs text-slate-400 text-right mt-1">
-              ✓ Sauvegardé
+              ✓ {t('questionnaireHeader.saved')}
             </p>
           )}
         </div>
@@ -117,7 +119,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
           <button
             onClick={onHelpClick}
             className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-            title="Aide"
+            title={t('questionnaireHeader.help')}
           >
             <HelpIcon />
           </button>
@@ -125,7 +127,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
           <button
             onClick={onDashboardClick}
             className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-            title="Tableau de bord"
+            title={t('questionnaireHeader.dashboard')}
           >
             <DashboardIcon />
           </button>
@@ -133,7 +135,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
           <button
             onClick={onSettingsClick}
             className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-            title="Paramètres"
+            title={t('questionnaireHeader.settings')}
           >
             <SettingsIcon />
           </button>
@@ -142,7 +144,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
             <button
               onClick={onToggleDarkMode}
               className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-              title={isDarkMode ? 'Mode clair' : 'Mode sombre'}
+              title={isDarkMode ? t('questionnaireHeader.lightMode') : t('questionnaireHeader.darkMode')}
             >
               {isDarkMode ? '☀️' : '🌙'}
             </button>
@@ -151,7 +153,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
           <button
             onClick={onLogoutClick}
             className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="Se déconnecter"
+            title={t('questionnaireHeader.logout')}
           >
             <LogoutIcon />
           </button>

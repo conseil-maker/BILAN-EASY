@@ -251,6 +251,99 @@
     "bravo": "Bravo {{name}} ! Vous avez complété la phase \"{{phase}}\".",
     "continueToPhase": "Continuer vers {{phase}}"
   },
+  "chatInput": {
+    "placeholder": "Tapez votre réponse...",
+    "stopDictation": "Arrêter la dictée",
+    "startDictation": "Dictée vocale",
+    "send": "Envoyer",
+    "skipQuestion": "Passer cette question ({{count}} restant)",
+    "skipQuestionPlural": "Passer cette question ({{count}} restants)",
+    "aiPreparing": "L'IA prépare la prochaine question..."
+  },
+  "chatMessage": {
+    "you": "Vous",
+    "aiAssistant": "Assistant IA"
+  },
+  "modals": {
+    "logout": {
+      "title": "Déconnexion",
+      "unsavedWarning": "Attention : Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir vous déconnecter ?",
+      "confirmMessage": "Êtes-vous sûr de vouloir vous déconnecter ? Votre progression est automatiquement sauvegardée.",
+      "cancel": "Annuler",
+      "confirm": "Se déconnecter"
+    },
+    "help": {
+      "title": "Aide",
+      "howToAnswer": "Comment répondre aux questions ?",
+      "howToAnswerDesc": "Répondez de manière authentique et détaillée. Plus vos réponses sont complètes, plus la synthèse sera pertinente.",
+      "jokerButton": "Que fait le bouton \"J'ai besoin d'aide\" ?",
+      "jokerButtonDesc": "Il reformule la question de manière plus simple ou propose un exemple pour vous guider dans votre réflexion.",
+      "progressSaved": "Ma progression est-elle sauvegardée ?",
+      "progressSavedDesc": "Oui, votre progression est automatiquement sauvegardée. Vous pouvez reprendre à tout moment là où vous vous êtes arrêté.",
+      "speechSynthesis": "Comment fonctionne la synthèse vocale ?",
+      "speechSynthesisDesc": "Cliquez sur l'icône de haut-parleur pour activer/désactiver la lecture vocale des questions. Vous pouvez personnaliser la voix dans les paramètres.",
+      "understood": "Compris"
+    },
+    "endConfirmation": {
+      "title": "Terminer le bilan ?",
+      "progress": "Vous avez complété <strong>{{percent}}%</strong> du questionnaire.",
+      "question": "Souhaitez-vous générer votre synthèse maintenant ou approfondir certains aspects ?",
+      "hint": "Plus vous approfondissez, plus votre synthèse sera riche et personnalisée.",
+      "deepen": "Approfondir encore",
+      "generate": "Générer ma synthèse",
+      "continue": "Continuer le questionnaire"
+    },
+    "endWarning": {
+      "title": "Bientôt terminé !",
+      "remaining": "Il vous reste environ <strong>{{count}} questions</strong> avant la fin du questionnaire.",
+      "advice": "Prenez le temps de bien répondre à ces dernières questions, elles sont importantes pour finaliser votre profil.",
+      "continue": "Continuer"
+    },
+    "outOfScope": {
+      "title": "Information importante",
+      "alternativeResources": "Ressources alternatives :",
+      "continueAssessment": "Continuer le bilan",
+      "close": "Fermer"
+    },
+    "module": {
+      "title": "Approfondissement proposé",
+      "description": "Souhaitez-vous explorer ce sujet avec quelques questions supplémentaires ? C'est entièrement optionnel.",
+      "accept": "Oui, je suis intéressé(e)",
+      "decline": "Non, merci"
+    },
+    "satisfaction": {
+      "title": "Votre avis sur la phase terminée",
+      "question": "Cette phase vous a-t-elle semblé pertinente ?",
+      "commentPlaceholder": "Un commentaire ? (optionnel)",
+      "submit": "Valider",
+      "skip": "Passer"
+    }
+  },
+  "badge": {
+    "unlocked": "Badge débloqué !",
+    "completed": "Vous avez terminé : {{phase}}"
+  },
+  "themes": {
+    "showThemes": "Afficher les thèmes",
+    "title": "Thèmes Émergents",
+    "hide": "Masquer",
+    "noThemesYet": "Les thèmes apparaîtront au fur et à mesure de vos réponses.",
+    "detectedThemes": "Thèmes détectés",
+    "noThemesDetected": "Aucun thème détecté pour l'instant",
+    "identifiedSkills": "Compétences identifiées",
+    "skillsAnalyzing": "Les compétences seront analysées progressivement",
+    "note": "Ces thèmes et compétences sont détectés automatiquement à partir de vos réponses. Ils aident l'IA à personnaliser les questions suivantes."
+  },
+  "questionnaireHeader": {
+    "greeting": "Bonjour {{name}}",
+    "saved": "Sauvegardé",
+    "help": "Aide",
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "logout": "Se déconnecter"
+  },
   "enhanced": {
     "hidePanel": "Masquer le panneau",
     "advice": "Conseil",

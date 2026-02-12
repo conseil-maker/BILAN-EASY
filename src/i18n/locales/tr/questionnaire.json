@@ -251,6 +251,99 @@
     "bravo": "Tebrikler {{name}}! \"{{phase}}\" aşamasını tamamladınız.",
     "continueToPhase": "{{phase}} aşamasına devam et"
   },
+  "chatInput": {
+    "placeholder": "Cevabınızı yazın...",
+    "stopDictation": "Dikteyi durdur",
+    "startDictation": "Sesli dikte",
+    "send": "Gönder",
+    "skipQuestion": "Bu soruyu atla ({{count}} kalan)",
+    "skipQuestionPlural": "Bu soruyu atla ({{count}} kalan)",
+    "aiPreparing": "Yapay zeka bir sonraki soruyu hazırlıyor..."
+  },
+  "chatMessage": {
+    "you": "Siz",
+    "aiAssistant": "Yapay Zeka Asistanı"
+  },
+  "modals": {
+    "logout": {
+      "title": "Çıkış",
+      "unsavedWarning": "Dikkat: Kaydedilmemiş değişiklikleriniz var. Çıkış yapmak istediğinizden emin misiniz?",
+      "confirmMessage": "Çıkış yapmak istediğinizden emin misiniz? İlerlemeniz otomatik olarak kaydedilir.",
+      "cancel": "İptal",
+      "confirm": "Çıkış yap"
+    },
+    "help": {
+      "title": "Yardım",
+      "howToAnswer": "Sorulara nasıl cevap verilir?",
+      "howToAnswerDesc": "Samimi ve ayrıntılı bir şekilde cevap verin. Cevaplarınız ne kadar eksiksiz olursa, özet o kadar anlamlı olur.",
+      "jokerButton": "\"Yardıma ihtiyacım var\" düğmesi ne yapar?",
+      "jokerButtonDesc": "Soruyu daha basit bir şekilde yeniden formule eder veya düşüncenizde size rehberlik edecek bir örnek sunar.",
+      "progressSaved": "İlerlememem kaydediliyor mu?",
+      "progressSavedDesc": "Evet, ilerlemeniz otomatik olarak kaydedilir. Kaldığınız yerden istediğiniz zaman devam edebilirsiniz.",
+      "speechSynthesis": "Sesli okuma nasıl çalışır?",
+      "speechSynthesisDesc": "Soruların sesli okunmasını etkinleştirmek/devre dışı bırakmak için hoparlör simgesine tıklayın. Sesi ayarlardan özelleştirebilirsiniz.",
+      "understood": "Anladım"
+    },
+    "endConfirmation": {
+      "title": "Değerlendirmeyi bitir?",
+      "progress": "Anketin <strong>%{{percent}}</strong>'ini tamamladınız.",
+      "question": "Özetinizi şimdi oluşturmak mı yoksa bazı yönleri derinleştirmek mi istiyorsunuz?",
+      "hint": "Ne kadar derinleştirirseniz, özetiniz o kadar zengin ve kişisel olur.",
+      "deepen": "Daha fazla derinleştir",
+      "generate": "Özetimi oluştur",
+      "continue": "Ankete devam et"
+    },
+    "endWarning": {
+      "title": "Neredeyse bitti!",
+      "remaining": "Anketin sonuna yaklaşık <strong>{{count}} soru</strong> kaldı.",
+      "advice": "Bu son sorulara iyi cevap vermek için zaman ayırın, profilinizi tamamlamak için önemlidirler.",
+      "continue": "Devam et"
+    },
+    "outOfScope": {
+      "title": "Önemli bilgi",
+      "alternativeResources": "Alternatif kaynaklar:",
+      "continueAssessment": "Değerlendirmeye devam et",
+      "close": "Kapat"
+    },
+    "module": {
+      "title": "Derinleştirme önerisi",
+      "description": "Bu konuyu birkaç ek soruyla keşfetmek ister misiniz? Tamamen isteğe bağlıdır.",
+      "accept": "Evet, ilgileniyorum",
+      "decline": "Hayır, teşekkürler"
+    },
+    "satisfaction": {
+      "title": "Tamamlanan aşama hakkında görüşünüz",
+      "question": "Bu aşama size uygun geldi mi?",
+      "commentPlaceholder": "Bir yorumunuz var mı? (isteğe bağlı)",
+      "submit": "Onayla",
+      "skip": "Atla"
+    }
+  },
+  "badge": {
+    "unlocked": "Rozet kazanıldı!",
+    "completed": "Tamamladınız: {{phase}}"
+  },
+  "themes": {
+    "showThemes": "Temaları göster",
+    "title": "Ortaya Çıkan Temalar",
+    "hide": "Gizle",
+    "noThemesYet": "Temalar cevaplarınıza göre ortaya çıkacaktır.",
+    "detectedThemes": "Tespit edilen temalar",
+    "noThemesDetected": "Şu an tespit edilen tema yok",
+    "identifiedSkills": "Belirlenen yetkinlikler",
+    "skillsAnalyzing": "Yetkinlikler aşamalı olarak analiz edilecektir",
+    "note": "Bu temalar ve yetkinlikler cevaplarınızdan otomatik olarak tespit edilir. Yapay zekanın sonraki soruları kişiselleştirmesine yardımcı olurlar."
+  },
+  "questionnaireHeader": {
+    "greeting": "Merhaba {{name}}",
+    "saved": "Kaydedildi",
+    "help": "Yardım",
+    "dashboard": "Kontrol paneli",
+    "settings": "Ayarlar",
+    "lightMode": "Açık mod",
+    "darkMode": "Koyu mod",
+    "logout": "Çıkış yap"
+  },
   "enhanced": {
     "hidePanel": "Paneli gizle",
     "advice": "Öneri",

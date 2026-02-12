@@ -36,7 +36,12 @@
     "title": "Votre avis compte",
     "subtitle": "Aidez-nous à améliorer notre accompagnement",
     "description": "Conformément aux exigences Qualiopi, nous vous invitons à évaluer votre expérience. Vos retours sont précieux pour l'amélioration continue de nos services.",
-    "loading": "Chargement du questionnaire..."
+    "loading": "Chargement du questionnaire...",
+    "rating": "Votre note",
+    "comment": "Votre commentaire",
+    "commentPlaceholder": "Partagez votre expérience...",
+    "submit": "Envoyer mon avis",
+    "thankYou": "Merci pour votre retour !"
   },
   "final": {
     "title": "Félicitations {{name}} !",
