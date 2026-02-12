@@ -93,6 +93,8 @@
     "addNote": "Not ekle",
     "placeholder": "Gözlemlerinizi yazın...",
     "save": "Kaydet",
-    "noNotes": "Bu danışan için not yok"
+    "noNotes": "Şu anda not bulunmamaktadır.",
+    "saving": "Kaydediliyor...",
+    "delete": "Sil"
   }
 }

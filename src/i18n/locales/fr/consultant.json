@@ -93,6 +93,8 @@
     "addNote": "Ajouter une note",
     "placeholder": "Écrivez vos observations...",
     "save": "Enregistrer",
-    "noNotes": "Aucune note pour ce client"
+    "noNotes": "Aucune note pour le moment.",
+    "saving": "Enregistrement...",
+    "delete": "Supprimer"
   }
 }
