@@ -2,14 +2,76 @@
   "title": "Anket",
   "phase": "Aşama {{number}}: {{name}}",
   "question": "Soru {{current}} / {{total}}",
-  "progress": "İlerleme: {{percent}}%",
+  "progress": {
+    "title": "İlerleme",
+    "phase": "Aşama {{current}} / {{total}}",
+    "questions": "{{count}} / {{target}} soru",
+    "percent": "{{percent}}%",
+    "label": "İlerleme: {{percent}}%"
+  },
   "placeholder": "Cevabınızı buraya yazın...",
   "send": "Gönder",
   "skip": "Atla",
-  "thinking": "Düşünüyor...",
+  "thinking": "Düşünülüyor...",
   "typing": "Yazıyor...",
+  "header": {
+    "dashboard": "Kontrol Paneli",
+    "dashboardTooltip": "Kontrol Paneline Dön",
+    "dashboardAriaLabel": "Kontrol paneline geri dön",
+    "help": "Yardım",
+    "helpAriaLabel": "Yardım ve ipuçlarını aç",
+    "settings": "Ses ayarları (ses, hız, ton)",
+    "settingsAriaLabel": "Gelişmiş sesli okuma ayarlarını aç",
+    "logout": "Çıkış",
+    "logoutAriaLabel": "Uygulamadan çıkış yap",
+    "lightMode": "Açık mod",
+    "darkMode": "Koyu mod",
+    "lightModeAriaLabel": "Açık modu etkinleştir",
+    "darkModeAriaLabel": "Koyu modu etkinleştir",
+    "speakerStop": "Okumayı durdur",
+    "speakerRead": "Mesajı oku",
+    "speakerEnable": "Etkinleştir ve oku",
+    "speakerStopAriaLabel": "Sesli okumayı durdur",
+    "speakerReadAriaLabel": "Son mesajı oku",
+    "speakerEnableAriaLabel": "Sesli okumayı etkinleştir",
+    "speakerTooltipStop": "Durdurmak için tıklayın",
+    "speakerTooltipRead": "Okumak için tıklayın",
+    "speakerTooltipEnable": "Etkinleştirmek için tıklayın",
+    "closeSettings": "Ayarları kapat",
+    "showPanel": "Paneli göster"
+  },
+  "chat": {
+    "welcomeMessage": "Yetkinlik değerlendirmenize hoş geldiniz. Ben yapay zeka danışmanınızım ve bu süreç boyunca size eşlik edeceğim.",
+    "inputLabel": "Cevabınızı yazın",
+    "inputPlaceholder": "Cevabınızı yazın... (Göndermek için Enter, yeni satır için Shift+Enter)",
+    "inputAriaLabel": "Cevap giriş alanı",
+    "sendButton": "Gönder",
+    "sendAriaLabel": "Cevabı gönder",
+    "micStart": "Sesli kaydı başlat",
+    "micStop": "Sesli kaydı durdur",
+    "formAriaLabel": "Cevap formu",
+    "choicesAriaLabel": "Cevap seçenekleri",
+    "choiceAriaLabel": "Seçenek {{index}}: {{choice}}"
+  },
+  "joker": {
+    "label": "Cevaplamak için yardıma ihtiyacım var",
+    "ariaLabel": "Soruyu cevaplamak için yardım iste",
+    "tooltip": "Sunulan yardımlar düşünmeye yönelik metodolojik yardımlardır. Bir analiz, yorum veya sonuç niteliği taşımazlar.",
+    "disclaimer": "Düşünmeye yönelik metodolojik yardım • Cevap niteliği taşımaz"
+  },
+  "synthesis": {
+    "confirmYes": "Evet, doğru",
+    "confirmNo": "Hayır, tam olarak değil",
+    "confirmYesAriaLabel": "Özetin doğru olduğunu onaylayın",
+    "confirmNoAriaLabel": "Özetin tam olarak doğru olmadığını belirtin",
+    "confirmYesText": "Evet, doğru.",
+    "confirmNoText": "Hayır, tam olarak değil.",
+    "groupAriaLabel": "Özet onayı"
+  },
   "miniSynthesis": {
-    "title": "Aşama mini özeti",
+    "title": "**{{count}} sorudan sonra durum değerlendirmesi**",
+    "intro": "\n\nŞimdiye kadar keşfettiklerimiz:\n",
+    "footer": "\n\nSize doğru gelmeyen bir şey varsa veya bir noktayı detaylandırmak isterseniz, bir sonraki cevabınızda bana söylemekten çekinmeyin. Devam edelim.",
     "generating": "Özet oluşturuluyor..."
   },
   "phases": {
@@ -22,10 +84,98 @@
     "message": "Şimdi bir sonraki aşamaya geçiyorsunuz.",
     "continue": "Devam et"
   },
-  "chat": {
-    "welcomeMessage": "Yetkinlik değerlendirmenize hoş geldiniz. Ben yapay zeka danışmanınızım ve bu süreç boyunca size eşlik edeceğim.",
-    "inputPlaceholder": "Cevabınızı yazın...",
-    "sendButton": "Gönder"
+  "summarizing": {
+    "title": "🧠 Özetiniz oluşturuluyor...",
+    "description": "Yapay zekamız kişiselleştirilmiş bir rapor oluşturmak için cevaplarınızı analiz ediyor.",
+    "analyzing": "Analiz devam ediyor...",
+    "timeEstimate": "⏱️ Bu işlem 60 saniyeye kadar sürebilir.",
+    "patience": "Sabrınız için teşekkürler!",
+    "autoSave": "💾 İlerlemeniz otomatik olarak kaydedildi"
+  },
+  "endWarning": {
+    "title": "Sona yaklaşıyoruz!",
+    "description": "Yetkinlik değerlendirmenizin yaklaşık <strong>%{{percent}}</strong>'ini tamamladınız.",
+    "hint": "💡 <strong>Birkaç soru daha</strong> profesyonel projenizin analizini tamamlamak ve kişiselleştirilmiş özetinizi hazırlamak için.",
+    "continue": "Anladım, devam edelim!"
+  },
+  "endConfirmation": {
+    "title": "Değerlendirmeniz neredeyse tamamlandı!",
+    "description": "<strong>{{count}} soruyu</strong> cevapladınız. Kişiselleştirilmiş özetinizi oluşturmak için yeterli bilgiye sahibiz.",
+    "beforeContinue": "📝 Devam etmeden önce:",
+    "deepenQuestion": "Bir şey eklemek veya düşüncenizin belirli bir noktasını derinleştirmek ister misiniz?",
+    "generateSynthesis": "✅ Özetimi oluştur",
+    "deepen": "🔍 Derinleştir"
+  },
+  "careerExploration": {
+    "title": "Kariyer yolları keşfi",
+    "hint": "💡 Yapay zeka profilinizi analiz edebilir ve yetkinliklerinize ve iş piyasasının güncel trendlerine dayalı kişiselleştirilmiş kariyer önerileri sunabilir.",
+    "accept": "Evet, kariyer yollarını keşfet",
+    "decline": "Hayır, değerlendirmeye devam et",
+    "closeMessage": "🎯 Harika! {{count}} ilginç kariyer yolu belirlediniz: {{paths}}. Bu yollar özet belgenize entegre edilecektir. Projenizi detaylandırmak için değerlendirmeye devam edelim."
+  },
+  "marketExploration": {
+    "closeMessage": "📊 {{job}} mesleği için piyasayı analiz ettim. Fizibilite puanı: {{score}}/10. {{comment}}... Bu bilgiler özetinize entegre edilecektir.",
+    "interviewCloseMessage": "💬 {{name}} ile bu görüşme için teşekkürler! {{job}} mesleğinin gerçeklerini keşfettiniz. Bu görüşmeden elde edilen bilgiler özet belgenize entegre edilecektir."
+  },
+  "outOfScope": {
+    "title": "Önemli bilgi",
+    "resources": "📚 Uygun kaynaklar:",
+    "defaultResources": {
+      "cio": "İŞKUR - Ücretsiz kariyer danışmanlığı",
+      "counselor": "Okulunuzdaki rehberlik danışmanı",
+      "parcoursup": "YÖK - Üniversite tercihleri için",
+      "onisep": "İŞKUR Meslek Bilgi Merkezi - meslekleri keşfetmek için"
+    },
+    "backToDashboard": "Kontrol paneline dön",
+    "continueAnyway": "Yine de devam et"
+  },
+  "logoutModal": {
+    "title": "Emin misiniz?",
+    "description": "İlerlemeniz otomatik olarak kaydedilecektir. Bir sonraki girişinizde kaldığınız yerden devam edebilirsiniz.",
+    "cancel": "İptal",
+    "confirm": "Çıkış yap"
+  },
+  "helpModal": {
+    "title": "Yardım & İpuçları",
+    "journey": {
+      "title": "Süreciniz",
+      "description": "Yetkinlik değerlendirmeniz 3 aşamada gerçekleşir:",
+      "phase1Title": "Aşama 1 - Araştırma:",
+      "phase1Desc": "Motivasyonlarınızın ve tutkularınızın keşfi",
+      "phase2Title": "Aşama 2 - Analiz:",
+      "phase2Desc": "Yetkinliklerinizin ve deneyimlerinizin belirlenmesi",
+      "phase3Title": "Aşama 3 - Sonuç:",
+      "phase3Desc": "Özet ve kişiselleştirilmiş eylem planı"
+    },
+    "tips": {
+      "title": "Cevaplama İpuçları",
+      "tip1": "Acele etmeyin, yanlış cevap diye bir şey yoktur",
+      "tip2": "Cevaplarınızda samimi ve dürüst olun",
+      "tip3": "Deneyimlerinizden somut örnekler verin",
+      "tip4": "İlerlemeniz otomatik olarak kaydedilir"
+    },
+    "features": {
+      "title": "Mevcut Özellikler",
+      "speechTitle": "Sesli okuma:",
+      "speechDesc": "Soruları sesli olarak dinleyin",
+      "themesTitle": "Ortaya çıkan temalar:",
+      "themesDesc": "Süreç boyunca belirlenen temaları görselleştirin",
+      "skillsTitle": "Yetkinlik analizi:",
+      "skillsDesc": "Yetkinlik radarınızı inceleyin",
+      "autoSaveTitle": "Otomatik kayıt:",
+      "autoSaveDesc": "Kaldığınız yerden devam edin"
+    },
+    "contact": {
+      "title": "Yardıma mı İhtiyacınız Var?",
+      "description": "Ekibimiz size yardımcı olmak için burada. Bize ulaşın:"
+    }
+  },
+  "saveIndicator": {
+    "saved": "Kaydedildi!",
+    "savedAgo": "{{minutes}} dk önce kaydedildi"
+  },
+  "sidePanel": {
+    "ariaLabel": "Ortaya çıkan temalar ve yetkinlik analizi kontrol paneli"
   },
   "completion": {
     "title": "Tebrikler!",
@@ -33,6 +183,6 @@
     "generating": "Özetiniz oluşturuluyor..."
   },
   "timeElapsed": "Geçen süre: {{time}}",
-  "minutesRemaining": "dk kaldı",
+  "minutesRemaining": "dk kalan",
   "emergingThemes": "Ortaya çıkan temalar"
 }
