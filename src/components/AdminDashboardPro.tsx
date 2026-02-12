@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabaseClient';
 import { organizationConfig } from '../config/organization';
 
@@ -38,6 +39,7 @@ interface AdminDashboardProProps {
 }
 
 export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) => {
+  const { t } = useTranslation('admin');
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'assessments' | 'reports' | 'settings'>('overview');
   const [users, setUsers] = useState<User[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
@@ -149,9 +151,9 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
 
   const getRoleBadge = (role: string) => {
     const roles: Record<string, { label: string; color: string }> = {
-      admin: { label: 'Admin', color: 'bg-red-100 text-red-800' },
-      consultant: { label: 'Consultant', color: 'bg-green-100 text-green-800' },
-      client: { label: 'Client', color: 'bg-blue-100 text-blue-800' }
+      admin: { label: t('users.roles.admin'), color: 'bg-red-100 text-red-800' },
+      consultant: { label: t('users.roles.consultant'), color: 'bg-green-100 text-green-800' },
+      client: { label: t('users.roles.client'), color: 'bg-blue-100 text-blue-800' }
     };
     const r = roles[role] || { label: role, color: 'bg-slate-100 text-slate-800' };
     return <span className={`px-2 py-1 text-xs font-semibold rounded-full ${r.color}`}>{r.label}</span>;
@@ -159,9 +161,9 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
 
   const getStatusBadge = (status: string) => {
     const statuses: Record<string, { label: string; color: string }> = {
-      completed: { label: 'Terminé', color: 'bg-green-100 text-green-800' },
-      in_progress: { label: 'En cours', color: 'bg-orange-100 text-orange-800' },
-      draft: { label: 'Brouillon', color: 'bg-slate-100 text-slate-800' }
+      completed: { label: t('stats.completedBilans'), color: 'bg-green-100 text-green-800' },
+      in_progress: { label: t('stats.inProgressBilans'), color: 'bg-orange-100 text-orange-800' },
+      draft: { label: t('back'), color: 'bg-slate-100 text-slate-800' }
     };
     const s = statuses[status] || { label: status, color: 'bg-slate-100 text-slate-800' };
     return <span className={`px-2 py-1 text-xs font-semibold rounded-full ${s.color}`}>{s.label}</span>;
@@ -187,18 +189,18 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
             <span className="text-white font-bold">BE</span>
           </div>
           <div>
-            <h1 className="text-white font-bold">Bilan-Easy</h1>
-            <p className="text-xs text-slate-400">Administration</p>
+            <h1 className="text-white font-bold">{t('title')}</h1>
+            <p className="text-xs text-slate-400">{t('subtitle')}</p>
           </div>
         </div>
 
         <nav className="space-y-1">
           {[
-            { id: 'overview', label: 'Vue d\'ensemble', icon: '📊' },
-            { id: 'users', label: 'Utilisateurs', icon: '👥' },
-            { id: 'assessments', label: 'Bilans', icon: '📋' },
-            { id: 'reports', label: 'Rapports', icon: '📈' },
-            { id: 'settings', label: 'Paramètres', icon: '⚙️' }
+            { id: 'overview', label: t('tabs.overview'), icon: '📊' },
+            { id: 'users', label: t('tabs.users'), icon: '👥' },
+            { id: 'assessments', label: t('tabs.bilans'), icon: '📋' },
+            { id: 'reports', label: t('tabs.reports'), icon: '📈' },
+            { id: 'settings', label: t('tabs.settings'), icon: '⚙️' }
           ].map(item => (
             <button
               key={item.id}
@@ -223,7 +225,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span>Retour</span>
+            <span>{t('back')}</span>
           </button>
         </div>
       </aside>
@@ -273,7 +275,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   </span>
                 </div>
                 <p className="text-3xl font-bold text-white">{stats.totalUsers}</p>
-                <p className="text-slate-400 text-sm">Utilisateurs totaux</p>
+                <p className="text-slate-400 text-sm">{t('stats.totalUsers')}</p>
               </div>
 
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
@@ -283,7 +285,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   </div>
                 </div>
                 <p className="text-3xl font-bold text-white">{stats.completedAssessments}</p>
-                <p className="text-slate-400 text-sm">Bilans terminés</p>
+                <p className="text-slate-400 text-sm">{t('stats.completedBilans')}</p>
               </div>
 
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
@@ -293,7 +295,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   </div>
                 </div>
                 <p className="text-3xl font-bold text-white">{stats.inProgressAssessments}</p>
-                <p className="text-slate-400 text-sm">Bilans en cours</p>
+                <p className="text-slate-400 text-sm">{t('stats.inProgressBilans')}</p>
               </div>
 
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
@@ -303,7 +305,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   </div>
                 </div>
                 <p className="text-3xl font-bold text-white">{stats.revenue.toLocaleString('fr-FR')} €</p>
-                <p className="text-slate-400 text-sm">Chiffre d'affaires</p>
+                <p className="text-slate-400 text-sm">{t('stats.revenue')}</p>
               </div>
             </div>
 
@@ -311,7 +313,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Bar chart - Bilans par mois */}
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-6">Bilans par mois</h3>
+                <h3 className="text-lg font-semibold text-white mb-6">{t('charts.bilansByMonth')}</h3>
                 <div className="flex items-end justify-between h-48 gap-4">
                   {monthlyData.map((data, index) => (
                     <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -327,7 +329,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
 
               {/* Pie chart - Répartition des utilisateurs */}
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-6">Répartition des utilisateurs</h3>
+                <h3 className="text-lg font-semibold text-white mb-6">{t('charts.userDistribution')}</h3>
                 <div className="flex items-center justify-center gap-8">
                   <div className="relative w-40 h-40">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -375,7 +377,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
             {/* Recent activity */}
             <div className="bg-slate-800 rounded-xl border border-slate-700">
               <div className="p-6 border-b border-slate-700">
-                <h3 className="text-lg font-semibold text-white">Activité récente</h3>
+                <h3 className="text-lg font-semibold text-white">{t('activity.title')}</h3>
               </div>
               <div className="divide-y divide-slate-700">
                 {assessments.slice(0, 5).map(assessment => (
@@ -437,10 +439,10 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
               <table className="w-full">
                 <thead className="bg-slate-700/50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Utilisateur</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Rôle</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Inscription</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.user')}</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.role')}</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.registration')}</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700">
@@ -467,9 +469,9 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                           onChange={(e) => handleChangeRole(user.id, e.target.value as any)}
                           className="bg-slate-700 border border-slate-600 rounded px-3 py-1 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
-                          <option value="client">Client</option>
-                          <option value="consultant">Consultant</option>
-                          <option value="admin">Admin</option>
+                          <option value="client">{t('users.roles.client')}</option>
+                          <option value="consultant">{t('users.roles.consultant')}</option>
+                          <option value="admin">{t('users.roles.admin')}</option>
                         </select>
                       </td>
                     </tr>
@@ -491,11 +493,11 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
             <table className="w-full">
               <thead className="bg-slate-700/50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Titre</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Forfait</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Statut</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Date</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('bilans.table.title')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('bilans.table.package')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('bilans.table.status')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('bilans.table.date')}</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -508,7 +510,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                       {new Date(assessment.created_at).toLocaleDateString('fr-FR')}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="text-indigo-400 hover:text-indigo-300">Voir</button>
+                      <button className="text-indigo-400 hover:text-indigo-300">{t('bilans.view')}</button>
                     </td>
                   </tr>
                 ))}
@@ -521,21 +523,21 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-4">Rapport mensuel</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">{t('reports.monthlyReport')}</h3>
                 <p className="text-slate-400 text-sm mb-4">Générez un rapport détaillé de l'activité du mois.</p>
                 <button className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
                   Générer PDF
                 </button>
               </div>
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-4">Export utilisateurs</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">{t('reports.userExport')}</h3>
                 <p className="text-slate-400 text-sm mb-4">Exportez la liste complète des utilisateurs.</p>
                 <button className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
                   Exporter CSV
                 </button>
               </div>
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-4">Statistiques Qualiopi</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">{t('reports.qualiopiStats')}</h3>
                 <p className="text-slate-400 text-sm mb-4">Indicateurs pour le renouvellement Qualiopi.</p>
                 <button className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
                   Voir les indicateurs
@@ -545,23 +547,23 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
 
             {/* KPIs Qualiopi */}
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-6">Indicateurs Qualiopi</h3>
+              <h3 className="text-lg font-semibold text-white mb-6">{t('qualiopi.indicators')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="text-center">
                   <p className="text-3xl font-bold text-green-400">{stats.satisfactionAvg}/5</p>
-                  <p className="text-slate-400 text-sm">Satisfaction moyenne</p>
+                  <p className="text-slate-400 text-sm">{t('qualiopi.averageSatisfaction')}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-3xl font-bold text-blue-400">98%</p>
-                  <p className="text-slate-400 text-sm">Taux de complétion</p>
+                  <p className="text-slate-400 text-sm">{t('qualiopi.completionRate')}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-3xl font-bold text-purple-400">100%</p>
-                  <p className="text-slate-400 text-sm">Conformité documents</p>
+                  <p className="text-slate-400 text-sm">{t('qualiopi.documentCompliance')}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-3xl font-bold text-amber-400">95%</p>
-                  <p className="text-slate-400 text-sm">Suivi à 6 mois</p>
+                  <p className="text-slate-400 text-sm">{t('qualiopi.sixMonthFollowUp')}</p>
                 </div>
               </div>
             </div>
@@ -571,10 +573,10 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
         {activeTab === 'settings' && (
           <div className="space-y-6">
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-6">Informations de l'organisme</h3>
+              <h3 className="text-lg font-semibold text-white mb-6">{t('settings.orgInfo')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">Nom de l'organisme</label>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">{t('settings.orgName')}</label>
                   <input
                     type="text"
                     defaultValue={organizationConfig.name}
@@ -582,7 +584,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">SIRET</label>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">{t('settings.siret')}</label>
                   <input
                     type="text"
                     defaultValue={organizationConfig.siret}
@@ -590,7 +592,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">N° Qualiopi</label>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">{t('settings.qualiopiNumber')}</label>
                   <input
                     type="text"
                     defaultValue={organizationConfig.qualiopi}
@@ -598,7 +600,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-2">NDA</label>
+                  <label className="block text-sm font-medium text-slate-400 mb-2">{t('settings.nda')}</label>
                   <input
                     type="text"
                     defaultValue={organizationConfig.nda}
@@ -612,7 +614,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
             </div>
 
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-6">Tarification</h3>
+              <h3 className="text-lg font-semibold text-white mb-6">{t('settings.pricing')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {Object.entries(organizationConfig.pricing).map(([key, value]) => (
                   <div key={key}>
