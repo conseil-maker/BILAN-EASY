@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useTranslation } from 'react-i18next';
 import { organizationConfig } from '../config/organization';
 
 interface Client {
@@ -40,6 +41,7 @@ interface ConsultantDashboardProProps {
 }
 
 export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ onBack }) => {
+  const { t } = useTranslation('consultant');
   const [activeTab, setActiveTab] = useState<'overview' | 'clients' | 'calendar' | 'documents'>('overview');
   const [clients, setClients] = useState<Client[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
@@ -149,11 +151,11 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case 'completed':
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Terminé</span>;
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">{t('status.completed')}</span>;
       case 'in_progress':
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">En cours</span>;
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">{t('status.inProgress')}</span>;
       default:
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-800">Non démarré</span>;
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-800">{t('status.notStarted')}</span>;
     }
   };
 
@@ -195,7 +197,7 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Espace Consultant</h1>
+                <h1 className="text-2xl font-bold text-slate-900">{t('title')}</h1>
                 <p className="text-sm text-slate-500">{organizationConfig.name} - Certifié Qualiopi</p>
               </div>
             </div>
@@ -254,7 +256,7 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
               <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-500">Clients actifs</p>
+                    <p className="text-sm text-slate-500">{t('stats.activeClients')}</p>
                     <p className="text-3xl font-bold text-slate-900">{stats.activeClients}</p>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -267,40 +269,40 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
               <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-500">Bilans terminés</p>
+                    <p className="text-sm text-slate-500">{t('stats.completedBilans')}</p>
                     <p className="text-3xl font-bold text-green-600">{stats.completedBilans}</p>
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <span className="text-2xl">✅</span>
                   </div>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">ce mois-ci</p>
+                <p className="text-xs text-slate-400 mt-2">{t('stats.thisMonth')}</p>
               </div>
 
               <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-500">RDV à venir</p>
+                    <p className="text-sm text-slate-500">{t('stats.upcomingAppointments')}</p>
                     <p className="text-3xl font-bold text-purple-600">{stats.upcomingAppointments}</p>
                   </div>
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <span className="text-2xl">📅</span>
                   </div>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">cette semaine</p>
+                <p className="text-xs text-slate-400 mt-2">{t('stats.thisWeek')}</p>
               </div>
 
               <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-500">Satisfaction</p>
+                    <p className="text-sm text-slate-500">{t('stats.satisfaction')}</p>
                     <p className="text-3xl font-bold text-amber-600">{stats.satisfactionRate}/5</p>
                   </div>
                   <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
                     <span className="text-2xl">⭐</span>
                   </div>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">moyenne globale</p>
+                <p className="text-xs text-slate-400 mt-2">{t('stats.globalAverage')}</p>
               </div>
             </div>
 
@@ -316,14 +318,14 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
                 </div>
                 <div className="p-6">
                   {clientsNeedingAction.length === 0 ? (
-                    <p className="text-slate-500 text-center py-4">Aucune action urgente</p>
+                    <p className="text-slate-500 text-center py-4">{t('overview.noUrgentActions')}</p>
                   ) : (
                     <ul className="space-y-3">
                       {clientsNeedingAction.map(client => (
                         <li key={client.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
                           <div>
                             <p className="font-medium text-slate-900">{client.full_name || client.email}</p>
-                            <p className="text-sm text-slate-500">Inactif depuis 7+ jours</p>
+                            <p className="text-sm text-slate-500">{t('overview.inactiveSince')}</p>
                           </div>
                           <button className="text-orange-600 hover:text-orange-700 font-medium text-sm">
                             Contacter →
@@ -351,7 +353,7 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
                 </div>
                 <div className="p-6">
                   {upcomingAppointments.length === 0 ? (
-                    <p className="text-slate-500 text-center py-4">Aucun rendez-vous prévu</p>
+                    <p className="text-slate-500 text-center py-4">{t('calendar.noAppointments')}</p>
                   ) : (
                     <ul className="space-y-3">
                       {upcomingAppointments.map(apt => (
@@ -374,17 +376,17 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
             {/* Derniers bilans */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200">
               <div className="p-6 border-b border-slate-200">
-                <h2 className="text-lg font-semibold text-slate-900">Derniers bilans</h2>
+                <h2 className="text-lg font-semibold text-slate-900">{t('overview.latestBilans')}</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-slate-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Client</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Forfait</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Statut</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('table.client')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('table.package')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('table.status')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('table.date')}</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -463,7 +465,7 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
                   {client.assessmentProgress !== undefined && client.assessmentProgress > 0 && (
                     <div className="mt-4">
                       <div className="flex justify-between text-xs text-slate-500 mb-1">
-                        <span>Progression du bilan</span>
+                        <span>{t('overview.bilanProgress')}</span>
                         <span>{client.assessmentProgress}%</span>
                       </div>
                       <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
@@ -478,7 +480,7 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
               ))}
               {clients.length === 0 && (
                 <div className="p-12 text-center text-slate-500">
-                  <p className="text-lg mb-2">Aucun client assigné</p>
+                  <p className="text-lg mb-2">{t('clients.noClients')}</p>
                   <p className="text-sm">Contactez l'administrateur pour vous faire assigner des clients.</p>
                 </div>
               )}
@@ -489,7 +491,7 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
         {activeTab === 'calendar' && (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-semibold text-slate-900">Calendrier des rendez-vous</h2>
+              <h2 className="text-lg font-semibold text-slate-900">{t('calendar.title')}</h2>
               <button 
                 onClick={() => setShowNewAppointmentModal(true)}
                 className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
@@ -541,9 +543,9 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
 
             {/* Liste des rendez-vous */}
             <div className="border-t border-slate-200 pt-6">
-              <h3 className="font-medium text-slate-900 mb-4">Tous les rendez-vous</h3>
+              <h3 className="font-medium text-slate-900 mb-4">{t('calendar.allAppointments')}</h3>
               {appointments.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">Aucun rendez-vous planifié</p>
+                <p className="text-slate-500 text-center py-8">{t('calendar.noAppointments')}</p>
               ) : (
                 <div className="space-y-3">
                   {appointments.map(apt => (
@@ -580,7 +582,7 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
 
         {activeTab === 'documents' && (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-6">Documents à valider</h2>
+            <h2 className="text-lg font-semibold text-slate-900 mb-6">{t('documents.toValidate')}</h2>
             
             <div className="space-y-4">
               <div className="p-4 border border-slate-200 rounded-lg hover:border-indigo-300 transition-colors">
@@ -590,8 +592,8 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
                       <span className="text-red-600">📄</span>
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900">Synthèse - Client Demo</p>
-                      <p className="text-sm text-slate-500">En attente de validation</p>
+                      <p className="font-medium text-slate-900">{t('documents.synthesis')}</p>
+                      <p className="text-sm text-slate-500">{t('documents.awaitingValidation')}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -617,12 +619,12 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
       {showNewAppointmentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Nouveau rendez-vous</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">{t('appointmentForm.title')}</h3>
             <form className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Client</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('appointmentForm.client')}</label>
                 <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="">Sélectionner un client</option>
+                  <option value="">{t('appointmentForm.selectClient')}</option>
                   {clients.map(c => (
                     <option key={c.id} value={c.id}>{c.full_name || c.email}</option>
                   ))}
@@ -630,25 +632,25 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('appointmentForm.date')}</label>
                   <input type="date" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Heure</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('appointmentForm.time')}</label>
                   <input type="time" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('appointmentForm.type')}</label>
                 <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="preliminary">Phase préliminaire</option>
-                  <option value="investigation">Investigation</option>
-                  <option value="conclusion">Conclusion</option>
-                  <option value="follow_up">Suivi 6 mois</option>
+                  <option value="preliminary">{t('appointmentForm.preliminary')}</option>
+                  <option value="investigation">{t('appointmentForm.investigation')}</option>
+                  <option value="conclusion">{t('appointmentForm.conclusion')}</option>
+                  <option value="follow_up">{t('appointmentForm.followUp')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('appointmentForm.notes')}</label>
                 <textarea className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" rows={3} />
               </div>
               <div className="flex gap-3 pt-4">

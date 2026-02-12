@@ -1,0 +1,74 @@
+{
+  "title": "Danışman Alanı",
+  "tabs": {
+    "overview": "Genel Bakış",
+    "clients": "Danışanlar",
+    "calendar": "Takvim",
+    "documents": "Belgeler"
+  },
+  "status": {
+    "completed": "Tamamlandı",
+    "inProgress": "Devam ediyor",
+    "notStarted": "Başlamadı"
+  },
+  "stats": {
+    "activeClients": "Aktif danışanlar",
+    "completedBilans": "Tamamlanan değerlendirmeler",
+    "thisMonth": "bu ay",
+    "upcomingAppointments": "Yaklaşan randevular",
+    "thisWeek": "bu hafta",
+    "satisfaction": "Memnuniyet",
+    "globalAverage": "genel ortalama"
+  },
+  "overview": {
+    "urgentActions": "Acil işlemler",
+    "noUrgentActions": "Acil işlem yok",
+    "inactiveSince": "7+ gündür aktif değil",
+    "noAppointments": "Planlanmış randevu yok",
+    "latestBilans": "Son değerlendirmeler",
+    "bilanProgress": "Değerlendirme ilerlemesi"
+  },
+  "clients": {
+    "noClients": "Atanmış danışan yok",
+    "contactInfo": "İletişim bilgileri",
+    "assignedDate": "Atanma tarihi"
+  },
+  "calendar": {
+    "title": "Randevu takvimi",
+    "allAppointments": "Tüm randevular",
+    "noAppointments": "Planlanmış randevu yok",
+    "newAppointment": "Yeni randevu"
+  },
+  "documents": {
+    "toValidate": "Onaylanacak belgeler",
+    "synthesis": "Özet - Demo Danışan",
+    "awaitingValidation": "Onay bekliyor"
+  },
+  "appointmentForm": {
+    "title": "Yeni randevu",
+    "client": "Danışan",
+    "selectClient": "Danışan seçin",
+    "date": "Tarih",
+    "time": "Saat",
+    "type": "Tür",
+    "preliminary": "Ön aşama",
+    "investigation": "Araştırma",
+    "conclusion": "Sonuç",
+    "followUp": "6 aylık takip",
+    "notes": "Notlar"
+  },
+  "table": {
+    "client": "Danışan",
+    "package": "Paket",
+    "status": "Durum",
+    "date": "Tarih",
+    "actions": "İşlemler"
+  },
+  "notes": {
+    "title": "Takip notları",
+    "addNote": "Not ekle",
+    "placeholder": "Gözlemlerinizi yazın...",
+    "save": "Kaydet",
+    "noNotes": "Bu danışan için not yok"
+  }
+}

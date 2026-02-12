@@ -1,0 +1,74 @@
+{
+  "title": "Espace Consultant",
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "clients": "Clients",
+    "calendar": "Calendrier",
+    "documents": "Documents"
+  },
+  "status": {
+    "completed": "Terminé",
+    "inProgress": "En cours",
+    "notStarted": "Non démarré"
+  },
+  "stats": {
+    "activeClients": "Clients actifs",
+    "completedBilans": "Bilans terminés",
+    "thisMonth": "ce mois-ci",
+    "upcomingAppointments": "RDV à venir",
+    "thisWeek": "cette semaine",
+    "satisfaction": "Satisfaction",
+    "globalAverage": "moyenne globale"
+  },
+  "overview": {
+    "urgentActions": "Actions urgentes",
+    "noUrgentActions": "Aucune action urgente",
+    "inactiveSince": "Inactif depuis 7+ jours",
+    "noAppointments": "Aucun rendez-vous prévu",
+    "latestBilans": "Derniers bilans",
+    "bilanProgress": "Progression du bilan"
+  },
+  "clients": {
+    "noClients": "Aucun client assigné",
+    "contactInfo": "Coordonnées",
+    "assignedDate": "Assigné le"
+  },
+  "calendar": {
+    "title": "Calendrier des rendez-vous",
+    "allAppointments": "Tous les rendez-vous",
+    "noAppointments": "Aucun rendez-vous planifié",
+    "newAppointment": "Nouveau rendez-vous"
+  },
+  "documents": {
+    "toValidate": "Documents à valider",
+    "synthesis": "Synthèse - Client Demo",
+    "awaitingValidation": "En attente de validation"
+  },
+  "appointmentForm": {
+    "title": "Nouveau rendez-vous",
+    "client": "Client",
+    "selectClient": "Sélectionner un client",
+    "date": "Date",
+    "time": "Heure",
+    "type": "Type",
+    "preliminary": "Phase préliminaire",
+    "investigation": "Investigation",
+    "conclusion": "Conclusion",
+    "followUp": "Suivi 6 mois",
+    "notes": "Notes"
+  },
+  "table": {
+    "client": "Client",
+    "package": "Forfait",
+    "status": "Statut",
+    "date": "Date",
+    "actions": "Actions"
+  },
+  "notes": {
+    "title": "Notes de suivi",
+    "addNote": "Ajouter une note",
+    "placeholder": "Écrivez vos observations...",
+    "save": "Enregistrer",
+    "noNotes": "Aucune note pour ce client"
+  }
+}
