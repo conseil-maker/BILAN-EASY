@@ -1,46 +1,72 @@
 {
-  "title": "Belgelerim",
-  "subtitle": "Değerlendirmeyle ilgili tüm belgelerinizi burada bulabilirsiniz",
-  "categories": {
-    "administrative": "İdari belgeler",
-    "results": "Değerlendirme sonuçları",
-    "export": "Veri dışa aktarımı",
-    "complementary": "Ek belgeler"
+  "header": {
+    "title": "Belgelerim",
+    "subtitle": "Tüm resmi belgelerinizi burada bulabilirsiniz",
+    "package": "Paket:",
+    "startDate": "Başlangıç:",
+    "endDate": "Bitiş:"
   },
-  "items": {
-    "welcomeBooklet": {
-      "title": "Karşılama kitapçığı",
-      "description": "Değerlendirmenin sürecini ve metodolojisini sunan kapsamlı rehber"
+  "messages": {
+    "error": "Hata",
+    "success": "Başarılı",
+    "downloadSuccess": "\"{{name}}\" belgesi başarıyla indirildi!"
+  },
+  "sections": {
+    "qualiopi": "Zorunlu resmi belgeler",
+    "export": "Veri dışa aktarımı",
+    "complementary": "Ek belgeler",
+    "legal": "Yasal bilgiler"
+  },
+  "docs": {
+    "livret": {
+      "name": "Karşılama kitapçığı",
+      "description": "Değerlendirme sürecini ve metodolojisini sunan kapsamlı rehber"
     },
     "convention": {
-      "title": "Hizmet sözleşmesi",
+      "name": "Hizmet sözleşmesi",
       "description": "Değerlendirme koşullarını tanımlayan zorunlu sözleşme belgesi"
     },
-    "attendance": {
-      "title": "Katılım belgesi",
+    "attestation": {
+      "name": "Katılım belgesi",
       "description": "Yetkinlik değerlendirmesine katılım sertifikası",
-      "availability": "Değerlendirme sonunda kullanılabilir"
+      "availableMessage": "Değerlendirme sonunda kullanılabilir"
     },
-    "synthesis": {
-      "title": "Özet belgesi",
-      "description": "İş Kanunu R.6313-8 maddesine uygun kapsamlı özet",
-      "availability": "Sonuç aşamasından sonra kullanılabilir"
+    "synthese": {
+      "name": "Sentez belgesi",
+      "description": "Yetkinlik değerlendirmesi kapsamlı sentez raporu",
+      "availableMessage": "Sonuç aşamasından sonra kullanılabilir"
     },
-    "actionPlan": {
-      "title": "Eylem planı",
-      "description": "Hedefler ve zaman çizelgesi içeren yol haritası",
-      "availability": "Sonuç aşamasından sonra kullanılabilir"
-    },
-    "csvExport": {
-      "title": "Excel dışa aktarımı (CSV)",
-      "description": "Kişiselleştirilmiş kullanım için tüm yanıtlarınızı ve analizlerinizi Excel formatında indirin"
+    "plan": {
+      "name": "Eylem planı",
+      "description": "Hedefler ve zaman çizelgesi ile yol haritası",
+      "availableMessage": "Sonuç aşamasından sonra kullanılabilir"
     }
   },
+  "excel": {
+    "title": "Excel Dışa Aktarımı (CSV)",
+    "description": "Kişiselleştirilmiş kullanım için tüm yanıtlarınızı ve analizlerinizi Excel formatında indirin",
+    "availableMessage": "Sorulara yanıt verdikten sonra kullanılabilir",
+    "downloadButton": "Excel İndir",
+    "successMessage": "Excel dışa aktarımı başarıyla indirildi!",
+    "errorMessage": "Excel dışa aktarımı sırasında hata oluştu"
+  },
   "buttons": {
+    "generating": "Oluşturuluyor...",
     "downloadPdf": "PDF İndir",
-    "downloadExcel": "Excel İndir",
-    "notAvailable": "Kullanılamıyor",
-    "generating": "Oluşturuluyor..."
+    "notAvailable": "Kullanılamaz"
+  },
+  "legal": {
+    "confidentiality": "Sentez belgesi yazılı onayınız olmadan üçüncü şahıslara iletilemez.",
+    "confidentialityLabel": "Gizlilik:",
+    "conservation": "Belgeleriniz 3 yıl boyunca saklanır ve hesabınızdan her zaman indirilebilir.",
+    "conservationLabel": "Saklama:",
+    "rgpd": "Erişim, düzeltme ve silme haklarınızı kullanmak için bize rgpd@bilan-easy.fr adresinden ulaşabilirsiniz.",
+    "rgpdLabel": "KVKK:"
+  },
+  "actionPlan": {
+    "shortTerm": "Kısa vadeli (0-3 ay)",
+    "mediumTerm": "Orta vadeli (3-6 ay)",
+    "longTerm": "Uzun vadeli (6-12 ay)"
   },
   "viewAll": "Tümünü gör →"
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { qualiopiDocuments, ConventionData, AttestationData } from '../services/qualiopiDocuments';
@@ -42,6 +43,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
   summary,
   answers = [],
 }) => {
+  const { t } = useTranslation('documents');
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -74,8 +76,8 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
   const documents: DocumentItem[] = [
     {
       id: 'livret',
-      name: 'Livret d\'accueil',
-      description: 'Guide complet présentant le déroulement et la méthodologie du bilan',
+      name: t('docs.livret.name'),
+      description: t('docs.livret.description'),
       icon: '📘',
       color: 'blue',
       available: true,
@@ -84,8 +86,8 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
     },
     {
       id: 'convention',
-      name: 'Convention de prestation',
-      description: 'Document contractuel obligatoire définissant les modalités du bilan',
+      name: t('docs.convention.name'),
+      description: t('docs.convention.description'),
       icon: '📄',
       color: 'indigo',
       available: true,
@@ -94,34 +96,34 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
     },
     {
       id: 'attestation',
-      name: 'Attestation de présence',
-      description: 'Certificat de participation au bilan de compétences',
+      name: t('docs.attestation.name'),
+      description: t('docs.attestation.description'),
       icon: '✅',
       color: 'green',
       available: isCompleted,
-      availableMessage: 'Disponible à la fin du bilan',
+      availableMessage: t('docs.attestation.availableMessage'),
       type: 'attestation',
       qualiopi: true,
     },
     {
       id: 'synthese',
-      name: 'Document de synthèse',
-      description: 'Synthèse complète conforme à l\'article R.6313-8 du Code du travail',
+      name: t('docs.synthese.name'),
+      description: t('docs.synthese.description'),
       icon: '📋',
       color: 'purple',
       available: isCompleted && !!summary,
-      availableMessage: 'Disponible après la phase de conclusion',
+      availableMessage: t('docs.synthese.availableMessage'),
       type: 'synthese',
       qualiopi: true,
     },
     {
       id: 'plan',
-      name: 'Plan d\'action',
-      description: 'Feuille de route avec objectifs et échéances',
+      name: t('docs.plan.name'),
+      description: t('docs.plan.description'),
       icon: '🎯',
       color: 'orange',
       available: isCompleted && !!summary,
-      availableMessage: 'Disponible après la phase de conclusion',
+      availableMessage: t('docs.plan.availableMessage'),
       type: 'plan',
       qualiopi: false,
     },
@@ -143,10 +145,10 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
         themes: summary?.themes || [],
       });
       
-      showSuccess('Export Excel téléchargé avec succès !');
+      showSuccess(t('excel.successMessage'));
     } catch (err) {
       console.error('Erreur export Excel:', err);
-      showError('Erreur lors de l\'export Excel');
+      showError(t('excel.errorMessage'));
     } finally {
       setLoading(null);
     }
@@ -297,7 +299,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      setSuccess(`Document "${doc.name}" téléchargé avec succès !`);
+      setSuccess(t('messages.downloadSuccess', { name: doc.name }));
       
       // Sauvegarder l'historique de téléchargement
       await saveDownloadHistory(doc);
@@ -359,20 +361,20 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
     <div className="max-w-4xl mx-auto p-6">
       {/* En-tête */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-8">
-        <h1 className="text-2xl font-bold mb-2">📁 Mes Documents</h1>
+        <h1 className="text-2xl font-bold mb-2">📁 {t('header.title')}</h1>
         <p className="text-indigo-100">
-          Retrouvez tous vos documents officiels conformes Qualiopi
+          {t('header.subtitle')}
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
           <div className="bg-white/20 rounded-lg px-3 py-1">
-            <span className="opacity-75">Forfait :</span> {packageName}
+            <span className="opacity-75">{t('header.package')}</span> {packageName}
           </div>
           <div className="bg-white/20 rounded-lg px-3 py-1">
-            <span className="opacity-75">Début :</span> {startDate}
+            <span className="opacity-75">{t('header.startDate')}</span> {startDate}
           </div>
           {isCompleted && endDate && (
             <div className="bg-white/20 rounded-lg px-3 py-1">
-              <span className="opacity-75">Fin :</span> {endDate}
+              <span className="opacity-75">{t('header.endDate')}</span> {endDate}
             </div>
           )}
         </div>
@@ -383,7 +385,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
         <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start">
           <span className="text-xl mr-3">⚠️</span>
           <div>
-            <p className="font-medium text-red-800 dark:text-red-300">Erreur</p>
+            <p className="font-medium text-red-800 dark:text-red-300">{t('messages.error')}</p>
             <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
           </div>
         </div>
@@ -393,7 +395,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
         <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-start">
           <span className="text-xl mr-3">✅</span>
           <div>
-            <p className="font-medium text-green-800 dark:text-green-300">Succès</p>
+            <p className="font-medium text-green-800 dark:text-green-300">{t('messages.success')}</p>
             <p className="text-sm text-green-700 dark:text-green-400">{success}</p>
           </div>
         </div>
@@ -405,7 +407,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
           <span className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3 text-green-600">
             ✓
           </span>
-          Documents obligatoires Qualiopi
+          {t('sections.qualiopi')}
         </h2>
         
         <div className="grid md:grid-cols-2 gap-4">
@@ -441,14 +443,14 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
                       {loading === doc.id ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                          Génération...
+                          {t('buttons.generating')}
                         </>
                       ) : (
                         <>
                           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
-                          {doc.available ? 'Télécharger PDF' : 'Non disponible'}
+                          {doc.available ? t('buttons.downloadPdf') : t('buttons.notAvailable')}
                         </>
                       )}
                     </button>
@@ -466,7 +468,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
           <span className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mr-3 text-emerald-600">
             📊
           </span>
-          Export des données
+          {t('sections.export')}
         </h2>
         
         <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-5">
@@ -474,16 +476,16 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
             <span className="text-3xl">📈</span>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900 dark:text-white">
-                Export Excel (CSV)
+                {t('excel.title')}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Téléchargez toutes vos réponses et analyses au format Excel pour une exploitation personnalisée
+                {t('excel.description')}
               </p>
               
               {answers.length === 0 && (
                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center">
                   <span className="mr-1">⏳</span>
-                  Disponible après avoir répondu à des questions
+                  {t('excel.availableMessage')}
                 </p>
               )}
               
@@ -502,7 +504,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    {answers.length > 0 ? 'Télécharger Excel' : 'Non disponible'}
+                    {answers.length > 0 ? t('excel.downloadButton') : t('buttons.notAvailable')}
                   </>
                 )}
               </button>
@@ -517,7 +519,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
           <span className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3 text-blue-600">
             📎
           </span>
-          Documents complémentaires
+          {t('sections.complementary')}
         </h2>
         
         <div className="grid md:grid-cols-2 gap-4">
@@ -553,14 +555,14 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
                       {loading === doc.id ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                          Génération...
+                          {t('buttons.generating')}
                         </>
                       ) : (
                         <>
                           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
-                          {doc.available ? 'Télécharger PDF' : 'Non disponible'}
+                          {doc.available ? t('buttons.downloadPdf') : t('buttons.notAvailable')}
                         </>
                       )}
                     </button>
@@ -576,20 +578,17 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
         <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
           <span className="mr-2">⚖️</span>
-          Informations légales
+          {t('sections.legal')}
         </h3>
         <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
           <p>
-            <strong>Confidentialité :</strong> Conformément à l'article L.6313-10-1 du Code du travail, 
-            le document de synthèse ne peut être communiqué à un tiers qu'avec votre accord écrit.
+            <strong>{t('legal.confidentialityLabel')}</strong> {t('legal.confidentiality')}
           </p>
           <p>
-            <strong>Conservation :</strong> Vos documents sont conservés pendant 3 ans conformément 
-            aux exigences Qualiopi et peuvent être téléchargés à tout moment depuis votre espace.
+            <strong>{t('legal.conservationLabel')}</strong> {t('legal.conservation')}
           </p>
           <p>
-            <strong>RGPD :</strong> Vous pouvez exercer vos droits d'accès, de rectification et de 
-            suppression en nous contactant à rgpd@bilan-easy.fr
+            <strong>{t('legal.rgpdLabel')}</strong> {t('legal.rgpd')}
           </p>
         </div>
       </div>

@@ -1,46 +1,72 @@
 {
-  "title": "Mes Documents",
-  "subtitle": "Retrouvez tous vos documents liés au bilan",
-  "categories": {
-    "administrative": "Documents administratifs",
-    "results": "Résultats du bilan",
-    "export": "Export des données",
-    "complementary": "Documents complémentaires"
+  "header": {
+    "title": "Mes Documents",
+    "subtitle": "Retrouvez tous vos documents officiels conformes Qualiopi",
+    "package": "Forfait :",
+    "startDate": "Début :",
+    "endDate": "Fin :"
   },
-  "items": {
-    "welcomeBooklet": {
-      "title": "Livret d'accueil",
+  "messages": {
+    "error": "Erreur",
+    "success": "Succès",
+    "downloadSuccess": "Document \"{{name}}\" téléchargé avec succès !"
+  },
+  "sections": {
+    "qualiopi": "Documents obligatoires Qualiopi",
+    "export": "Export des données",
+    "complementary": "Documents complémentaires",
+    "legal": "Informations légales"
+  },
+  "docs": {
+    "livret": {
+      "name": "Livret d'accueil",
       "description": "Guide complet présentant le déroulement et la méthodologie du bilan"
     },
     "convention": {
-      "title": "Convention de prestation",
+      "name": "Convention de prestation",
       "description": "Document contractuel obligatoire définissant les modalités du bilan"
     },
-    "attendance": {
-      "title": "Attestation de présence",
+    "attestation": {
+      "name": "Attestation de présence",
       "description": "Certificat de participation au bilan de compétences",
-      "availability": "Disponible à la fin du bilan"
+      "availableMessage": "Disponible à la fin du bilan"
     },
-    "synthesis": {
-      "title": "Document de synthèse",
+    "synthese": {
+      "name": "Document de synthèse",
       "description": "Synthèse complète conforme à l'article R.6313-8 du Code du travail",
-      "availability": "Disponible après la phase de conclusion"
+      "availableMessage": "Disponible après la phase de conclusion"
     },
-    "actionPlan": {
-      "title": "Plan d'action",
+    "plan": {
+      "name": "Plan d'action",
       "description": "Feuille de route avec objectifs et échéances",
-      "availability": "Disponible après la phase de conclusion"
-    },
-    "csvExport": {
-      "title": "Export Excel (CSV)",
-      "description": "Téléchargez toutes vos réponses et analyses au format Excel pour une exploitation personnalisée"
+      "availableMessage": "Disponible après la phase de conclusion"
     }
   },
+  "excel": {
+    "title": "Export Excel (CSV)",
+    "description": "Téléchargez toutes vos réponses et analyses au format Excel pour une exploitation personnalisée",
+    "availableMessage": "Disponible après avoir répondu à des questions",
+    "downloadButton": "Télécharger Excel",
+    "successMessage": "Export Excel téléchargé avec succès !",
+    "errorMessage": "Erreur lors de l'export Excel"
+  },
   "buttons": {
+    "generating": "Génération...",
     "downloadPdf": "Télécharger PDF",
-    "downloadExcel": "Télécharger Excel",
-    "notAvailable": "Non disponible",
-    "generating": "Génération en cours..."
+    "notAvailable": "Non disponible"
+  },
+  "legal": {
+    "confidentiality": "Conformément à l'article L.6313-10-1 du Code du travail, le document de synthèse ne peut être communiqué à un tiers qu'avec votre accord écrit.",
+    "confidentialityLabel": "Confidentialité :",
+    "conservation": "Vos documents sont conservés pendant 3 ans conformément aux exigences Qualiopi et peuvent être téléchargés à tout moment depuis votre espace.",
+    "conservationLabel": "Conservation :",
+    "rgpd": "Vous pouvez exercer vos droits d'accès, de rectification et de suppression en nous contactant à rgpd@bilan-easy.fr",
+    "rgpdLabel": "RGPD :"
+  },
+  "actionPlan": {
+    "shortTerm": "Court terme (0-3 mois)",
+    "mediumTerm": "Moyen terme (3-6 mois)",
+    "longTerm": "Long terme (6-12 mois)"
   },
   "viewAll": "Voir tous →"
 }
