@@ -88,6 +88,14 @@
     "legal": "Mentions légales",
     "privacy": "Confidentialité"
   },
+  "userMenu": {
+    "user": "Utilisateur",
+    "dashboard": "Mon tableau de bord",
+    "documents": "Mes documents",
+    "appointments": "Mes rendez-vous",
+    "admin": "Administration",
+    "consultant": "Espace consultant"
+  },
   "welcome": {
     "title": "Bilan de Compétences",
     "subtitle": "Découvrez vos forces et dessinez votre avenir professionnel.",

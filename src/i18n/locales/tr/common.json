@@ -88,6 +88,14 @@
     "legal": "Yasal bilgiler",
     "privacy": "Gizlilik"
   },
+  "userMenu": {
+    "user": "Kullanıcı",
+    "dashboard": "Kontrol panelim",
+    "documents": "Belgelerim",
+    "appointments": "Randevularım",
+    "admin": "Yönetim",
+    "consultant": "Danışman alanı"
+  },
   "welcome": {
     "title": "Yetkinlik Değerlendirmesi",
     "subtitle": "Güçlü yönlerinizi keşfedin ve mesleki geleceğinizi çizin.",
