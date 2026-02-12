@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface JourneyProgressProps {
   current: number;
@@ -7,6 +8,7 @@ interface JourneyProgressProps {
 }
 
 const JourneyProgress: React.FC<JourneyProgressProps> = React.memo(({ current, total, phases }) => {
+  const { t } = useTranslation('questionnaire');
   const phaseBoundaries = useMemo(() => 
     phases.reduce((acc, val, i) => {
       acc.push((acc[i-1] || 0) + val);
@@ -65,7 +67,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = React.memo(({ current, t
           <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <span className="font-medium">{current}/{total} questions</span>
+          <span className="font-medium">{current}/{total} {t('progress.questions', 'questions')}</span>
         </div>
         
         {questionsRemaining > 0 && (
@@ -96,7 +98,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = React.memo(({ current, t
             <div 
               key={i} 
               className={`relative w-1.5 h-1.5 rounded-full border-2 transition-all duration-300 ${statusStyles[status]} ${isPhaseEnd ? 'w-2.5 h-2.5 shadow-md' : ''}`}
-              title={`Question ${i+1}${isPhaseEnd ? ' - Fin de phase' : ''}`}
+              title={`${t('progress.question', 'Question')} ${i+1}${isPhaseEnd ? ` - ${t('progress.phaseEnd', 'Fin de phase')}` : ''}`}
             />
           );
         })}
