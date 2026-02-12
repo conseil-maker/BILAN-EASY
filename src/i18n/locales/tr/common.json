@@ -39,7 +39,40 @@
     "documents": "Belgeler",
     "appointments": "Randevular",
     "about": "Hakkımızda",
-    "qualiopi": "Qualiopi"
+    "qualiopi": "Qualiopi",
+    "backTo": "Geri dön:",
+    "phases": {
+      "welcome": {
+        "label": "Ana Sayfa",
+        "short": "Ana Sayfa",
+        "description": "Alanınıza hoş geldiniz"
+      },
+      "packageSelection": {
+        "label": "Paket seçimi",
+        "short": "Paket",
+        "description": "Parkurunuzu seçin"
+      },
+      "preliminary": {
+        "label": "Ön aşama",
+        "short": "Ön aşama",
+        "description": "Hedefler ve onay"
+      },
+      "personalization": {
+        "label": "Kişiselleştirme",
+        "short": "Profil",
+        "description": "Parkurunuzu uyarlayın"
+      },
+      "questionnaire": {
+        "label": "Araştırma aşaması",
+        "short": "Araştırma",
+        "description": "Derinlemesine keşif"
+      },
+      "completion": {
+        "label": "Sonuç aşaması",
+        "short": "Sonuç",
+        "description": "Özet ve belgeler"
+      }
+    }
   },
   "footer": {
     "rights": "Tüm hakları saklıdır",

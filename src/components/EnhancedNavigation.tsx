@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export type BilanPhase = 
   | 'welcome'
@@ -12,9 +13,9 @@ export type BilanPhase =
 
 interface PhaseInfo {
   id: BilanPhase;
-  label: string;
-  shortLabel: string;
-  description: string;
+  labelKey: string;
+  shortLabelKey: string;
+  descriptionKey: string;
   icon: string;
   qualiopi?: string;
 }
@@ -22,46 +23,46 @@ interface PhaseInfo {
 const PHASES: PhaseInfo[] = [
   {
     id: 'welcome',
-    label: 'Accueil',
-    shortLabel: 'Accueil',
-    description: 'Bienvenue sur votre espace',
+    labelKey: 'nav.phases.welcome.label',
+    shortLabelKey: 'nav.phases.welcome.short',
+    descriptionKey: 'nav.phases.welcome.description',
     icon: '👋',
   },
   {
     id: 'package-selection',
-    label: 'Choix du forfait',
-    shortLabel: 'Forfait',
-    description: 'Sélectionnez votre parcours',
+    labelKey: 'nav.phases.packageSelection.label',
+    shortLabelKey: 'nav.phases.packageSelection.short',
+    descriptionKey: 'nav.phases.packageSelection.description',
     icon: '📦',
   },
   {
     id: 'preliminary-phase',
-    label: 'Phase préliminaire',
-    shortLabel: 'Préliminaire',
-    description: 'Objectifs et consentement',
+    labelKey: 'nav.phases.preliminary.label',
+    shortLabelKey: 'nav.phases.preliminary.short',
+    descriptionKey: 'nav.phases.preliminary.description',
     icon: '📋',
     qualiopi: 'Art. L.6313-4',
   },
   {
     id: 'personalization-step',
-    label: 'Personnalisation',
-    shortLabel: 'Profil',
-    description: 'Adaptez votre parcours',
+    labelKey: 'nav.phases.personalization.label',
+    shortLabelKey: 'nav.phases.personalization.short',
+    descriptionKey: 'nav.phases.personalization.description',
     icon: '🎯',
   },
   {
     id: 'questionnaire',
-    label: 'Phase d\'investigation',
-    shortLabel: 'Investigation',
-    description: 'Exploration approfondie',
+    labelKey: 'nav.phases.questionnaire.label',
+    shortLabelKey: 'nav.phases.questionnaire.short',
+    descriptionKey: 'nav.phases.questionnaire.description',
     icon: '🔍',
     qualiopi: 'Art. R.6313-4',
   },
   {
     id: 'completion',
-    label: 'Phase de conclusion',
-    shortLabel: 'Conclusion',
-    description: 'Synthèse et documents',
+    labelKey: 'nav.phases.completion.label',
+    shortLabelKey: 'nav.phases.completion.short',
+    descriptionKey: 'nav.phases.completion.description',
     icon: '📄',
     qualiopi: 'Art. R.6313-8',
   },
@@ -86,6 +87,7 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
   totalTime = 120,
   onNavigate,
 }) => {
+  const { t } = useTranslation('common');
   const currentIndex = PHASES.findIndex(p => p.id === currentPhase);
   const currentPhaseInfo = PHASES[currentIndex];
 
@@ -130,11 +132,11 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
                         ? 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer'
                         : 'text-gray-500 dark:text-gray-400 cursor-default'
                   }`}
-                  title={index < currentIndex && onNavigate ? `Retourner à ${phase.label}` : undefined}
+                  title={index < currentIndex && onNavigate ? `${t('nav.backTo')} ${t(phase.labelKey)}` : undefined}
                 >
                   <span className="hidden sm:inline">{phase.icon}</span>
-                  <span className="hidden md:inline">{phase.label}</span>
-                  <span className="md:hidden">{phase.shortLabel}</span>
+                  <span className="hidden md:inline">{t(phase.labelKey)}</span>
+                  <span className="md:hidden">{t(phase.shortLabelKey)}</span>
                 </button>
               </React.Fragment>
             ))}
@@ -157,7 +159,7 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
               </span>
             )}
 
-            {/* Timer - Affiché uniquement après le choix du forfait et PAS dans le questionnaire */}
+            {/* Timer */}
             {currentPhase !== 'package-selection' && currentPhase !== 'questionnaire' && packageName && (
               <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +169,7 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
               </span>
             )}
 
-            {/* Progression - Affichée uniquement après le choix du forfait et PAS dans le questionnaire */}
+            {/* Progression */}
             {currentPhase !== 'package-selection' && currentPhase !== 'questionnaire' && packageName && (
               <span className="flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400">
                 {Math.round(progress)}%
@@ -182,7 +184,7 @@ export const EnhancedNavigation: React.FC<EnhancedNavigationProps> = ({
             <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
               Qualiopi
             </span>
-            <span>{currentPhaseInfo.qualiopi} - {currentPhaseInfo.description}</span>
+            <span>{currentPhaseInfo.qualiopi} - {t(currentPhaseInfo.descriptionKey)}</span>
           </div>
         )}
       </div>
@@ -210,6 +212,7 @@ export const QuestionnaireProgress: React.FC<QuestionnaireProgressProps> = ({
   estimatedTimeRemaining,
   themes,
 }) => {
+  const { t } = useTranslation('questionnaire');
   const phaseProgress = (currentQuestion / totalQuestions) * 100;
 
   return (
@@ -238,17 +241,17 @@ export const QuestionnaireProgress: React.FC<QuestionnaireProgressProps> = ({
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>Temps écoulé: {Math.floor(timeSpent / 60)}:{(timeSpent % 60).toString().padStart(2, '0')}</span>
+          <span>{t('timeElapsed', { time: `${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toString().padStart(2, '0')}` })}</span>
         </div>
         <div className="text-indigo-600 dark:text-indigo-400">
-          ~{estimatedTimeRemaining} min restantes
+          ~{estimatedTimeRemaining} {t('minutesRemaining')}
         </div>
       </div>
 
       {/* Thèmes détectés */}
       {themes.length > 0 && (
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Thèmes émergents</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t('emergingThemes')}</p>
           <div className="flex flex-wrap gap-1">
             {themes.slice(0, 5).map((theme, index) => (
               <span

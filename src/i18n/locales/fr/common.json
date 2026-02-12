@@ -39,7 +39,40 @@
     "documents": "Documents",
     "appointments": "Rendez-vous",
     "about": "À propos",
-    "qualiopi": "Qualiopi"
+    "qualiopi": "Qualiopi",
+    "backTo": "Retourner à",
+    "phases": {
+      "welcome": {
+        "label": "Accueil",
+        "short": "Accueil",
+        "description": "Bienvenue sur votre espace"
+      },
+      "packageSelection": {
+        "label": "Choix du forfait",
+        "short": "Forfait",
+        "description": "Sélectionnez votre parcours"
+      },
+      "preliminary": {
+        "label": "Phase préliminaire",
+        "short": "Préliminaire",
+        "description": "Objectifs et consentement"
+      },
+      "personalization": {
+        "label": "Personnalisation",
+        "short": "Profil",
+        "description": "Adaptez votre parcours"
+      },
+      "questionnaire": {
+        "label": "Phase d'investigation",
+        "short": "Investigation",
+        "description": "Exploration approfondie"
+      },
+      "completion": {
+        "label": "Phase de conclusion",
+        "short": "Conclusion",
+        "description": "Synthèse et documents"
+      }
+    }
   },
   "footer": {
     "rights": "Tous droits réservés",

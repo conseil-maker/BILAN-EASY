@@ -1,38 +1,144 @@
 {
   "title": "Kontrol Paneli",
   "welcome": "Hoş geldiniz",
-  "welcomeBack": "Hoş geldiniz, {{name}}",
-  "progress": {
-    "title": "Değerlendirme ilerlemesi",
-    "phase": "Aşama {{current}} / {{total}}",
-    "completed": "Değerlendirme tamamlandı",
-    "notStarted": "Başlanmadı",
-    "inProgress": "Devam ediyor",
-    "questionsAnswered": "{{count}} soru yanıtlandı",
-    "estimatedTime": "Tahmini kalan süre: {{time}}"
+  "greeting": "Merhaba {{name}} 👋",
+  "subtitle": "Bilan-Easy kişisel alanınıza hoş geldiniz",
+  "loading": "Alanınız yükleniyor...",
+  "stats": {
+    "totalBilans": "Yapılan değerlendirmeler",
+    "completedBilans": "Tamamlanan değerlendirmeler",
+    "totalHours": "Danışmanlık saatleri",
+    "documentsGenerated": "Oluşturulan belgeler"
+  },
+  "tabs": {
+    "overview": "Genel Bakış",
+    "history": "Geçmiş",
+    "documents": "Belgeler",
+    "profile": "Profil"
   },
   "actions": {
     "continueBilan": "Değerlendirmeme devam et",
     "startBilan": "Değerlendirmemi başlat",
     "newBilan": "Yeni değerlendirme",
-    "abandonAndRestart": "Bırak ve yeni değerlendirme başlat",
-    "viewResults": "Sonuçlarımı gör",
-    "downloadSynthesis": "Özeti indir"
+    "continue": "Devam et →",
+    "resume": "Devam et",
+    "viewResults": "Sonuçları gör"
   },
-  "sections": {
+  "currentBilan": {
+    "title": "Devam eden değerlendirme",
+    "startedOn": "{{date}} tarihinde başladı",
+    "answers": "{{count}} cevap",
+    "answersWithTarget": "{{count}} / {{target}} soru",
+    "completed": "%{{percent}} tamamlandı",
+    "active": "Aktif",
+    "phase1": "Ön Aşama",
+    "phase2": "Araştırma Aşaması",
+    "phase3": "Sonuç Aşaması"
+  },
+  "quickAccess": {
     "documents": "Belgelerim",
-    "history": "Geçmiş",
+    "documentsDesc": "Resmi belgelerinizi indirin",
     "appointments": "Randevularım",
-    "support": "Destek"
+    "appointmentsDesc": "Görüşmelerinizi planlayın",
+    "feedback": "Görüşümü bildir",
+    "feedbackDesc": "Deneyiminizi değerlendirin"
+  },
+  "lastActivity": "Son aktivite",
+  "relativeTime": {
+    "today": "Bugün",
+    "yesterday": "Dün",
+    "daysAgo": "{{count}} gün önce",
+    "weeksAgo": "{{count}} hafta önce"
+  },
+  "history": {
+    "title": "Değerlendirme geçmişim",
+    "completedTitle": "Tamamlanan değerlendirmeler",
+    "noCompleted": "Tamamlanan değerlendirme yok",
+    "noCompletedWithCurrent": "Burada görünmesi için devam eden değerlendirmenizi tamamlayın.",
+    "noCompletedNoCurrent": "Geçmişinizi burada görmek için ilk yetkinlik değerlendirmenizi başlatın."
+  },
+  "documents": {
+    "title": "Belgelerim",
+    "synthesisTitle": "Değerlendirme özetleri",
+    "synthesisItem": "Özet - {{name}}",
+    "downloadPdf": "PDF İndir",
+    "exchangeHistory": "Görüşme geçmişi",
+    "exchangeDesc": "Yapay zeka ile olan tüm görüşme geçmişinizi Excel formatında dışa aktarın.",
+    "exportExcel": "Excel olarak dışa aktar",
+    "exportCsv": "CSV olarak dışa aktar",
+    "recentDocs": "Son belgeler",
+    "viewAll": "Tümünü gör →",
+    "noDocuments": "Mevcut belge yok",
+    "noDocumentsDesc": "PDF özetinizi ve görüşme geçmişinizi almak için ilk değerlendirmenizi tamamlayın.",
+    "excelHeaders": {
+      "date": "Tarih",
+      "package": "Paket",
+      "question": "Soru",
+      "answer": "Cevap",
+      "category": "Kategori"
+    }
+  },
+  "profile": {
+    "title": "Profilim",
+    "edit": "Düzenle",
+    "notProvided": "Belirtilmemiş",
+    "fields": {
+      "email": "E-posta",
+      "phone": "Telefon",
+      "profession": "Mevcut meslek",
+      "address": "Adres",
+      "birthDate": "Doğum tarihi",
+      "memberSince": "Üyelik tarihi",
+      "firstName": "Ad *",
+      "lastName": "Soyad *"
+    },
+    "placeholders": {
+      "firstName": "Adınız",
+      "lastName": "Soyadınız",
+      "phone": "0532 123 45 67",
+      "profession": "Mesleğiniz",
+      "address": "Tam adresiniz"
+    },
+    "saving": "Kaydediliyor...",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "saveSuccess": "Profil başarıyla güncellendi",
+    "saveError": "Profil kaydedilirken hata oluştu"
+  },
+  "security": {
+    "title": "Güvenlik",
+    "password": "Şifre",
+    "passwordDesc": "Giriş şifrenizi değiştirin",
+    "changePassword": "Şifreyi değiştir",
+    "newPassword": "Yeni şifre",
+    "newPasswordPlaceholder": "En az 6 karakter",
+    "confirmPassword": "Şifreyi onayla",
+    "confirmPasswordPlaceholder": "Şifreyi onaylayın",
+    "changing": "Değiştiriliyor...",
+    "change": "Değiştir",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "passwordTooShort": "Şifre en az 6 karakter olmalıdır",
+    "passwordSuccess": "Şifre başarıyla değiştirildi",
+    "passwordError": "Şifre değiştirilirken hata oluştu"
+  },
+  "rgpd": {
+    "label": "KVKK",
+    "message": "Kişisel verilerinize erişim, düzeltme veya silme talebinde bulunmak için bize kvkk@bilan-easy.fr adresinden ulaşabilirsiniz"
   },
   "confirmNewBilan": {
-    "title": "Yeni değerlendirme başlatılsın mı?",
-    "message": "Dikkat: Mevcut değerlendirmenizin tüm verileri kalıcı olarak silinecektir. Bu işlem geri alınamaz.",
-    "confirm": "Evet, yeni değerlendirme başlat",
-    "cancel": "İptal"
+    "title": "Devam eden bir değerlendirmeniz var",
+    "warningMessage": "Yeni bir değerlendirme başlatırsanız, <strong>devam eden değerlendirmenizin tüm cevapları kalıcı olarak silinecektir</strong>. Bu işlem geri alınamaz.",
+    "resumeCurrent": "Devam eden değerlendirmeme dön",
+    "abandonAndRestart": "Bırak ve yeni değerlendirme başlat",
+    "cancel": "İptal",
+    "answers": "{{count}} cevap",
+    "answersPlural": "{{count}} cevap",
+    "percentCompleted": "%{{percent}} tamamlandı"
   },
-  "noBilan": {
-    "title": "Devam eden değerlendirme yok",
-    "message": "Profesyonel potansiyelinizi keşfetmek için ilk yetkinlik değerlendirmenizi başlatın."
+  "toasts": {
+    "pdfSuccess": "PDF özet başarıyla indirildi!",
+    "pdfError": "PDF indirirken bir hata oluştu.",
+    "excelError": "Excel dışa aktarırken bir hata oluştu.",
+    "csvError": "CSV dışa aktarırken bir hata oluştu."
   }
 }

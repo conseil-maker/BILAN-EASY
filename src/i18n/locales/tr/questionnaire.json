@@ -31,5 +31,8 @@
     "title": "Tebrikler!",
     "message": "Değerlendirmenin tüm sorularını tamamladınız.",
     "generating": "Özetiniz oluşturuluyor..."
-  }
+  },
+  "timeElapsed": "Geçen süre: {{time}}",
+  "minutesRemaining": "dk kaldı",
+  "emergingThemes": "Ortaya çıkan temalar"
 }

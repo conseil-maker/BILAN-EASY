@@ -31,5 +31,8 @@
     "title": "Félicitations !",
     "message": "Vous avez terminé toutes les questions du bilan.",
     "generating": "Génération de votre synthèse en cours..."
-  }
+  },
+  "timeElapsed": "Temps écoulé: {{time}}",
+  "minutesRemaining": "min restantes",
+  "emergingThemes": "Thèmes émergents"
 }

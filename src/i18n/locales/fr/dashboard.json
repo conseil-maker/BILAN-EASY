@@ -1,38 +1,144 @@
 {
   "title": "Tableau de bord",
   "welcome": "Bienvenue",
-  "welcomeBack": "Bienvenue, {{name}}",
-  "progress": {
-    "title": "Progression du bilan",
-    "phase": "Phase {{current}} sur {{total}}",
-    "completed": "Bilan terminé",
-    "notStarted": "Non commencé",
-    "inProgress": "En cours",
-    "questionsAnswered": "{{count}} questions répondues",
-    "estimatedTime": "Temps estimé restant : {{time}}"
+  "greeting": "Bonjour {{name}} 👋",
+  "subtitle": "Bienvenue dans votre espace personnel Bilan-Easy",
+  "loading": "Chargement de votre espace...",
+  "stats": {
+    "totalBilans": "Bilans réalisés",
+    "completedBilans": "Bilans terminés",
+    "totalHours": "Heures d'accompagnement",
+    "documentsGenerated": "Documents générés"
+  },
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "history": "Historique",
+    "documents": "Documents",
+    "profile": "Profil"
   },
   "actions": {
     "continueBilan": "Continuer mon bilan",
     "startBilan": "Commencer mon bilan",
     "newBilan": "Nouveau bilan",
-    "abandonAndRestart": "Abandonner et commencer un nouveau bilan",
-    "viewResults": "Voir mes résultats",
-    "downloadSynthesis": "Télécharger la synthèse"
+    "continue": "Continuer →",
+    "resume": "Reprendre",
+    "viewResults": "Voir les résultats"
   },
-  "sections": {
-    "documents": "Mes documents",
-    "history": "Historique",
-    "appointments": "Mes rendez-vous",
-    "support": "Support"
+  "currentBilan": {
+    "title": "Bilan en cours",
+    "startedOn": "Commencé le {{date}}",
+    "answers": "{{count}} réponses",
+    "answersWithTarget": "{{count}} / {{target}} questions",
+    "completed": "{{percent}}% complété",
+    "active": "Actif",
+    "phase1": "Phase Préliminaire",
+    "phase2": "Phase d'Investigation",
+    "phase3": "Phase de Conclusion"
+  },
+  "quickAccess": {
+    "documents": "Mes Documents",
+    "documentsDesc": "Téléchargez vos documents officiels",
+    "appointments": "Mes Rendez-vous",
+    "appointmentsDesc": "Planifiez vos entretiens",
+    "feedback": "Donner mon avis",
+    "feedbackDesc": "Évaluez votre expérience"
+  },
+  "lastActivity": "Dernière activité",
+  "relativeTime": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "daysAgo": "Il y a {{count}} jours",
+    "weeksAgo": "Il y a {{count}} semaines"
+  },
+  "history": {
+    "title": "Historique de mes bilans",
+    "completedTitle": "Bilans terminés",
+    "noCompleted": "Aucun bilan terminé",
+    "noCompletedWithCurrent": "Terminez votre bilan en cours pour le voir apparaître ici.",
+    "noCompletedNoCurrent": "Commencez votre premier bilan de compétences pour voir votre historique ici."
+  },
+  "documents": {
+    "title": "Mes documents",
+    "synthesisTitle": "Synthèses de vos bilans",
+    "synthesisItem": "Synthèse - {{name}}",
+    "downloadPdf": "Télécharger PDF",
+    "exchangeHistory": "Historique des échanges",
+    "exchangeDesc": "Exportez l'historique complet de vos échanges avec l'IA au format Excel.",
+    "exportExcel": "Exporter en Excel",
+    "exportCsv": "Exporter en CSV",
+    "recentDocs": "Documents récents",
+    "viewAll": "Voir tous →",
+    "noDocuments": "Aucun document disponible",
+    "noDocumentsDesc": "Terminez votre premier bilan pour obtenir votre synthèse PDF et l'historique de vos échanges.",
+    "excelHeaders": {
+      "date": "Date",
+      "package": "Forfait",
+      "question": "Question",
+      "answer": "Réponse",
+      "category": "Catégorie"
+    }
+  },
+  "profile": {
+    "title": "Mon profil",
+    "edit": "Modifier",
+    "notProvided": "Non renseigné",
+    "fields": {
+      "email": "Email",
+      "phone": "Téléphone",
+      "profession": "Profession actuelle",
+      "address": "Adresse",
+      "birthDate": "Date de naissance",
+      "memberSince": "Membre depuis",
+      "firstName": "Prénom *",
+      "lastName": "Nom *"
+    },
+    "placeholders": {
+      "firstName": "Votre prénom",
+      "lastName": "Votre nom",
+      "phone": "06 12 34 56 78",
+      "profession": "Votre profession",
+      "address": "Votre adresse complète"
+    },
+    "saving": "Enregistrement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "saveSuccess": "Profil mis à jour avec succès",
+    "saveError": "Erreur lors de la sauvegarde du profil"
+  },
+  "security": {
+    "title": "Sécurité",
+    "password": "Mot de passe",
+    "passwordDesc": "Modifiez votre mot de passe de connexion",
+    "changePassword": "Changer le mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "newPasswordPlaceholder": "Minimum 6 caractères",
+    "confirmPassword": "Confirmer le mot de passe",
+    "confirmPasswordPlaceholder": "Confirmez le mot de passe",
+    "changing": "Modification...",
+    "change": "Modifier",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+    "passwordSuccess": "Mot de passe modifié avec succès",
+    "passwordError": "Erreur lors du changement de mot de passe"
+  },
+  "rgpd": {
+    "label": "RGPD",
+    "message": "Vous pouvez demander l'accès, la rectification ou la suppression de vos données personnelles en nous contactant à rgpd@bilan-easy.fr"
   },
   "confirmNewBilan": {
-    "title": "Commencer un nouveau bilan ?",
-    "message": "Attention : toutes les données de votre bilan actuel seront définitivement supprimées. Cette action est irréversible.",
-    "confirm": "Oui, commencer un nouveau bilan",
-    "cancel": "Annuler"
+    "title": "Vous avez un bilan en cours",
+    "warningMessage": "Si vous commencez un nouveau bilan, <strong>toutes les réponses de votre bilan en cours seront définitivement perdues</strong>. Cette action est irréversible.",
+    "resumeCurrent": "Reprendre mon bilan en cours",
+    "abandonAndRestart": "Abandonner et commencer un nouveau bilan",
+    "cancel": "Annuler",
+    "answers": "{{count}} réponse",
+    "answersPlural": "{{count}} réponses",
+    "percentCompleted": "{{percent}}% complété"
   },
-  "noBilan": {
-    "title": "Aucun bilan en cours",
-    "message": "Commencez votre premier bilan de compétences pour découvrir votre potentiel professionnel."
+  "toasts": {
+    "pdfSuccess": "Synthèse PDF téléchargée avec succès !",
+    "pdfError": "Une erreur est survenue lors du téléchargement du PDF.",
+    "excelError": "Une erreur est survenue lors de l'export Excel.",
+    "csvError": "Une erreur est survenue lors de l'export CSV."
   }
 }
