@@ -242,5 +242,15 @@
     "googleHint": "Les voix Google (⭐) offrent généralement une meilleure qualité",
     "speed": "Vitesse",
     "pitch": "Hauteur"
+  },
+  "enhanced": {
+    "hidePanel": "Masquer le panneau",
+    "advice": "Conseil",
+    "emergingThemes": "Thèmes Émergents",
+    "analyzingThemes": "Analyse des thèmes...",
+    "themesBuilding": "Thèmes en construction",
+    "themesBuildingDesc": "Répondez à quelques questions pour voir apparaître les thèmes clés de votre parcours.",
+    "note": "Note",
+    "noteText": "L'analyse complète de vos compétences sera disponible dans votre synthèse finale."
   }
 }

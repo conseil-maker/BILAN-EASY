@@ -68,5 +68,13 @@
     "mediumTerm": "Orta vadeli (3-6 ay)",
     "longTerm": "Uzun vadeli (6-12 ay)"
   },
-  "viewAll": "Tümünü gör →"
+  "viewAll": "Tümünü gör →",
+  "title": "Belgeler",
+  "library": "Kütüphane",
+  "myDocuments": "Belgelerim",
+  "loadingInfo": "Bilgileriniz yükleniyor...",
+  "loadingDocs": "Belgeler yükleniyor...",
+  "loadingLibrary": "Kütüphane yükleniyor...",
+  "loadingMyDocs": "Belgeleriniz yükleniyor...",
+  "defaultUser": "Kullanıcı"
 }

@@ -136,13 +136,13 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
             {/* Titre */}
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Oups ! Une erreur est survenue
+              Oops! An error occurred / Bir hata oluştu
             </h1>
 
             {/* Message */}
             <p className="text-gray-600 mb-6">
               L'application a rencontré un problème inattendu. 
-              Nous nous excusons pour la gêne occasionnée.
+              Nous nous excusons pour la gêne occasionnée. / Uygulama beklenmeyen bir sorunla karşılaştı.
             </p>
 
             {/* Détails de l'erreur (en mode développement) */}
@@ -165,25 +165,25 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 onClick={this.handleRetry}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                🔄 Réessayer
+                🔄 Réessayer / Tekrar dene
               </button>
               <button
                 onClick={this.handleGoHome}
                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               >
-                🏠 Retour à l'accueil
+                🏠 Retour à l'accueil / Ana sayfa
               </button>
               <button
                 onClick={this.handleReload}
                 className="px-6 py-3 bg-gray-100 text-gray-600 rounded-lg font-medium hover:bg-gray-200 transition-colors"
               >
-                ↻ Recharger la page
+                ↻ Recharger / Yenile
               </button>
             </div>
 
             {/* Lien support */}
             <p className="mt-6 text-sm text-gray-500">
-              Si le problème persiste, veuillez contacter le support.
+              Si le problème persiste, contactez le support. / Sorun devam ederse destek ile iletişime geçin.
             </p>
           </div>
         </div>
@@ -215,18 +215,18 @@ export const QuestionnaireErrorBoundary: React.FC<{ children: ReactNode }> = ({ 
           <span className="text-4xl">🤔</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Problème avec le questionnaire
+          Problème avec le questionnaire / Anket sorunu
         </h1>
         <p className="text-gray-600 mb-6">
           Une erreur s'est produite pendant le questionnaire. 
-          Vos réponses ont été sauvegardées automatiquement.
+          Vos réponses ont été sauvegardées automatiquement. / Anket sırasında bir hata oluştu. Yanıtlarınız otomatik olarak kaydedildi.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={() => window.location.reload()}
             className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
           >
-            🔄 Reprendre le bilan
+            🔄 Reprendre / Devam et
           </button>
           <button
             onClick={() => {
@@ -235,7 +235,7 @@ export const QuestionnaireErrorBoundary: React.FC<{ children: ReactNode }> = ({ 
             }}
             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
           >
-            📊 Aller au tableau de bord
+            📊 Tableau de bord / Kontrol paneli
           </button>
         </div>
       </div>
@@ -260,17 +260,17 @@ export const DashboardErrorBoundary: React.FC<{ children: ReactNode }> = ({ chil
           <span className="text-4xl">📊</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Problème d'affichage du tableau de bord
+          Problème d'affichage / Görüntüleme sorunu
         </h1>
         <p className="text-gray-600 mb-6">
           Nous n'avons pas pu charger votre tableau de bord. 
-          Veuillez réessayer.
+          Veuillez réessayer. / Kontrol paneliniz yüklenemedi. Lütfen tekrar deneyin.
         </p>
         <button
           onClick={() => window.location.reload()}
           className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
         >
-          🔄 Recharger
+          🔄 Recharger / Yenile
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import React, { Suspense, lazy } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User } from '@supabase/supabase-js';
 import { useUserPackage } from '../hooks/useUserPackage';
 import { LoadingSpinner } from './LazyComponents';
@@ -26,6 +27,7 @@ interface DocumentsPageProps {
  * et le passe aux composants de documents
  */
 export const DocumentsWithPackage: React.FC<DocumentsPageProps> = ({ user, userRole, pageType }) => {
+  const { t } = useTranslation('documents');
   const packageInfo = useUserPackage(user.id);
 
   // Afficher un loader pendant le chargement du forfait
@@ -36,9 +38,9 @@ export const DocumentsWithPackage: React.FC<DocumentsPageProps> = ({ user, userR
           user={user} 
           userRole={userRole} 
           showBackButton={true} 
-          title={pageType === 'documents' ? 'Documents' : pageType === 'library' ? 'Bibliothèque' : 'Mes Documents'} 
+          title={pageType === 'documents' ? t('title') : pageType === 'library' ? t('library') : t('myDocuments')} 
         />
-        <LoadingSpinner message="Chargement de vos informations..." />
+        <LoadingSpinner message={t('loadingInfo')} />
       </div>
     );
   }
@@ -57,9 +59,9 @@ export const DocumentsWithPackage: React.FC<DocumentsPageProps> = ({ user, userR
   if (pageType === 'documents') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Documents" />
+        <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title={t('title')} />
         <div className="p-6">
-          <Suspense fallback={<LoadingSpinner message="Chargement des documents..." />}>
+          <Suspense fallback={<LoadingSpinner message={t('loadingDocs')} />}>
             <DocumentsQualiopi
               userId={user.id}
               {...commonProps}
@@ -73,11 +75,11 @@ export const DocumentsWithPackage: React.FC<DocumentsPageProps> = ({ user, userR
   if (pageType === 'library') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Bibliothèque" />
-        <Suspense fallback={<LoadingSpinner message="Chargement de la bibliothèque..." />}>
+        <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title={t('library')} />
+        <Suspense fallback={<LoadingSpinner message={t('loadingLibrary')} />}>
           <DocumentLibrary
             userId={user.id}
-            userName={user.email?.split('@')[0] || 'Utilisateur'}
+            userName={user.email?.split('@')[0] || t('defaultUser')}
             userEmail={user.email || ''}
             {...commonProps}
           />
@@ -89,8 +91,8 @@ export const DocumentsWithPackage: React.FC<DocumentsPageProps> = ({ user, userR
   // mes-documents
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title="Mes Documents" />
-      <Suspense fallback={<LoadingSpinner message="Chargement de vos documents..." />}>
+      <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title={t('myDocuments')} />
+      <Suspense fallback={<LoadingSpinner message={t('loadingMyDocs')} />}>
         <MyDocuments
           user={user}
           {...commonProps}

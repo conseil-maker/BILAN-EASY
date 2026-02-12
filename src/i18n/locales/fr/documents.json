@@ -68,5 +68,13 @@
     "mediumTerm": "Moyen terme (3-6 mois)",
     "longTerm": "Long terme (6-12 mois)"
   },
-  "viewAll": "Voir tous →"
+  "viewAll": "Voir tous →",
+  "title": "Documents",
+  "library": "Bibliothèque",
+  "myDocuments": "Mes Documents",
+  "loadingInfo": "Chargement de vos informations...",
+  "loadingDocs": "Chargement des documents...",
+  "loadingLibrary": "Chargement de la bibliothèque...",
+  "loadingMyDocs": "Chargement de vos documents...",
+  "defaultUser": "Utilisateur"
 }

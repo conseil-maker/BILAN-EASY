@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DashboardData } from '../types';
 import WordCloud from './WordCloud';
 
@@ -143,6 +144,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
   lastQuestion,
   onCollapse,
 }) => {
+  const { t } = useTranslation('questionnaire');
   const [currentQuote, setCurrentQuote] = useState(INSPIRATIONAL_QUOTES[0]);
   const [contextualTip, setContextualTip] = useState(CONTEXTUAL_TIPS.default);
 
@@ -186,7 +188,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
         <button
           onClick={onCollapse}
           className="absolute -left-3 top-0 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 p-1.5 rounded-full shadow transition-all z-10"
-          title="Masquer le panneau"
+          title={t('enhanced.hidePanel')}
         >
           <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
@@ -214,7 +216,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
         <div className="flex items-start gap-2">
           <span className="text-xl flex-shrink-0">{contextualTip.icon}</span>
           <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-            <strong>Conseil :</strong> {contextualTip.tip}
+            <strong>{t('enhanced.advice')}:</strong> {contextualTip.tip}
           </p>
         </div>
       </div>
@@ -222,7 +224,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
       {/* Titre du panneau - Thèmes Émergents */}
       <div className="flex items-center justify-center p-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-lg flex-shrink-0">
         <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-2">
-          <span>🏷️</span> Thèmes Émergents
+          <span>🏷️</span> {t('enhanced.emergingThemes')}
         </span>
       </div>
 
@@ -230,21 +232,21 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="space-y-3">
           {isLoading && !data ? (
-            <LoadingState message="Analyse des thèmes..." />
+            <LoadingState message={t('enhanced.analyzingThemes')} />
           ) : data?.themes && data.themes.length > 0 ? (
             <WordCloud data={data.themes} />
           ) : (
             <EmptyState
               icon="🏷️"
-              title="Thèmes en construction"
-              description="Répondez à quelques questions pour voir apparaître les thèmes clés de votre parcours."
+              title={t('enhanced.themesBuilding')}
+              description={t('enhanced.themesBuildingDesc')}
             />
           )}
           
           {/* Note informative */}
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
             <p className="text-xs text-blue-700 dark:text-blue-300">
-              💡 <strong>Note :</strong> L'analyse complète de vos compétences sera disponible dans votre synthèse finale.
+              💡 <strong>{t('enhanced.note')}:</strong> {t('enhanced.noteText')}
             </p>
           </div>
         </div>

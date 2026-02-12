@@ -242,5 +242,15 @@
     "googleHint": "Google sesleri (⭐) genellikle daha iyi kalite sunar",
     "speed": "Hız",
     "pitch": "Ton"
+  },
+  "enhanced": {
+    "hidePanel": "Paneli gizle",
+    "advice": "Öneri",
+    "emergingThemes": "Ortaya Çıkan Temalar",
+    "analyzingThemes": "Temalar analiz ediliyor...",
+    "themesBuilding": "Temalar oluşturuluyor",
+    "themesBuildingDesc": "Kariyer yolunuzun anahtar temalarını görmek için birkaç soruyu yanıtlayın.",
+    "note": "Not",
+    "noteText": "Yetkinliklerinizin tam analizi nihai sentezinizde mevcut olacaktır."
   }
 }
