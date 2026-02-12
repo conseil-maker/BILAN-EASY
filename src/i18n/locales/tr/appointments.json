@@ -1,0 +1,46 @@
+{
+  "title": "Randevu Al",
+  "subtitle": "{{consultant}} ile görüşmelerinizi planlayın",
+  "tabs": {
+    "book": "Rezervasyon",
+    "upcoming": "Yaklaşan",
+    "history": "Geçmiş"
+  },
+  "types": {
+    "initial": { "label": "İlk Görüşme", "description": "İlk tanışma randevusu" },
+    "followup": { "label": "Takip", "description": "Değerlendirme ilerleme toplantısı" },
+    "synthesis": { "label": "Sentez", "description": "Sentez belgesinin sunumu" },
+    "phone": { "label": "Telefon Görüşmesi", "description": "Telefonla hızlı görüşme" }
+  },
+  "calendar": {
+    "months": ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
+    "days": ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+  },
+  "steps": {
+    "chooseDate": "1. Bir tarih seçin",
+    "chooseType": "2. Randevu türü",
+    "chooseSlot": "3. Bir zaman dilimi seçin"
+  },
+  "noSlots": "Bu gün için uygun zaman dilimi yok",
+  "notes": "Notlar (isteğe bağlı)",
+  "notesPlaceholder": "Randevunuzun konusunu belirtin...",
+  "booking": "Rezervasyon yapılıyor...",
+  "confirm": "Randevuyu onayla",
+  "noUpcoming": "Yaklaşan randevu yok",
+  "bookOne": "Randevu al",
+  "noPast": "Geçmiş randevu yok",
+  "at": "saat",
+  "with": "İle",
+  "confirmed": "Onaylandı",
+  "pending": "Beklemede",
+  "completed": "Tamamlandı",
+  "confirmModal": {
+    "title": "Randevu alındı!",
+    "message": "Randevu talebiniz gönderildi. E-posta ile onay alacaksınız.",
+    "date": "Tarih:",
+    "time": "Saat:",
+    "type": "Tür:",
+    "consultant": "Danışman:",
+    "close": "Kapat"
+  }
+}
