@@ -184,5 +184,39 @@
   },
   "timeElapsed": "Temps écoulé: {{time}}",
   "minutesRemaining": "min restantes",
-  "emergingThemes": "Thèmes émergents"
+  "emergingThemes": "Thèmes émergents",
+  "personalization": {
+    "title": "Hyper-Personnalisation",
+    "subtitle": "Pour un bilan encore plus pertinent, partagez votre CV ou profil.",
+    "qualiopiNote": "🎯 Ces informations serviront à adapter les outils, exercices et échanges de la phase d'investigation.",
+    "optional": "(C'est optionnel, vous pouvez passer cette étape)",
+    "pasteText": "Coller le texte",
+    "uploadFile": "Uploader un fichier",
+    "textPlaceholder": "Collez ici le texte de votre CV, profil LinkedIn, ou description de votre parcours professionnel...",
+    "characters": "caractères",
+    "readyToAnalyze": "Prêt à analyser",
+    "removeFile": "Supprimer et choisir un autre fichier",
+    "dropHere": "Déposez le fichier ici",
+    "dragOrClick": "Glissez-déposez ou cliquez pour sélectionner",
+    "acceptedFormats": "Formats acceptés: PDF, Word, Texte (max 10MB)",
+    "analyzing": "Analyse en cours...",
+    "submit": "Personnaliser le bilan",
+    "skip": "Passer cette étape \u2192",
+    "confidentiality": "🔒 Vos données sont traitées de manière confidentielle et sécurisée.",
+    "errors": {
+      "unsupportedFormat": "Format de fichier non supporté. Veuillez uploader un PDF, Word ou fichier texte.",
+      "fileTooLarge": "Le fichier est trop volumineux. Taille maximale: 10MB.",
+      "pasteText": "Veuillez coller le texte de votre profil.",
+      "selectFile": "Veuillez sélectionner un fichier.",
+      "analysisFailed": "Désolé, une erreur est survenue lors de l'analyse. Nous allons continuer sans cette information."
+    },
+    "progress": {
+      "textExtracted": "Texte extrait du fichier",
+      "uploading": "Upload du CV en cours...",
+      "uploaded": "CV uploadé avec succès!",
+      "uploadFailed": "Upload échoué, analyse locale...",
+      "analyzing": "Analyse du profil en cours...",
+      "done": "Analyse terminée!"
+    }
+  }
 }

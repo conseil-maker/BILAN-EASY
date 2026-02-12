@@ -184,5 +184,39 @@
   },
   "timeElapsed": "Geçen süre: {{time}}",
   "minutesRemaining": "dk kalan",
-  "emergingThemes": "Ortaya çıkan temalar"
+  "emergingThemes": "Ortaya çıkan temalar",
+  "personalization": {
+    "title": "Hiper-Kişiselleştirme",
+    "subtitle": "Daha anlamlı bir değerlendirme için özgeçmişinizi veya profilinizi paylaşın.",
+    "qualiopiNote": "🎯 Bu bilgiler, araştırma aşamasındaki araçları, egzersizleri ve görüşmeleri uyarlamak için kullanılacaktır.",
+    "optional": "(Bu isteğe bağlıdır, bu adımı atlayabilirsiniz)",
+    "pasteText": "Metni yapıştır",
+    "uploadFile": "Dosya yükle",
+    "textPlaceholder": "Özgeçmişinizin, LinkedIn profilinizin veya mesleki geçmişinizin metnini buraya yapıştırın...",
+    "characters": "karakter",
+    "readyToAnalyze": "Analize hazır",
+    "removeFile": "Sil ve başka bir dosya seç",
+    "dropHere": "Dosyayı buraya bırakın",
+    "dragOrClick": "Sürükleyip bırakın veya seçmek için tıklayın",
+    "acceptedFormats": "Kabul edilen formatlar: PDF, Word, Metin (maks 10MB)",
+    "analyzing": "Analiz devam ediyor...",
+    "submit": "Değerlendirmeyi kişiselleştir",
+    "skip": "Bu adımı atla \u2192",
+    "confidentiality": "🔒 Verileriniz gizli ve güvenli bir şekilde işlenmektedir.",
+    "errors": {
+      "unsupportedFormat": "Desteklenmeyen dosya formatı. Lütfen PDF, Word veya metin dosyası yükleyin.",
+      "fileTooLarge": "Dosya çok büyük. Maksimum boyut: 10MB.",
+      "pasteText": "Lütfen profilinizin metnini yapıştırın.",
+      "selectFile": "Lütfen bir dosya seçin.",
+      "analysisFailed": "Üzgünüz, analiz sırasında bir hata oluştu. Bu bilgi olmadan devam edeceğiz."
+    },
+    "progress": {
+      "textExtracted": "Dosyadan metin çıkarıldı",
+      "uploading": "Özgeçmiş yükleniyor...",
+      "uploaded": "Özgeçmiş başarıyla yüklendi!",
+      "uploadFailed": "Yükleme başarısız, yerel analiz...",
+      "analyzing": "Profil analiz ediliyor...",
+      "done": "Analiz tamamlandı!"
+    }
+  }
 }

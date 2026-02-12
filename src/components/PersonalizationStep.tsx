@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UserProfile } from '../types';
 import { analyzeUserProfile } from '../services/geminiService';
 import { storageService } from '../services/storageService';
@@ -8,6 +9,7 @@ interface PersonalizationStepProps {
 }
 
 const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete }) => {
+  const { t } = useTranslation('questionnaire');
   const [cvText, setCvText] = useState('');
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [uploadMethod, setUploadMethod] = useState<'text' | 'file'>('text');
@@ -28,12 +30,12 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
     // Vérifier le type de fichier
     const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
     if (!allowedTypes.includes(file.type)) {
-      setError('Format de fichier non supporté. Veuillez uploader un PDF, Word ou fichier texte.');
+      setError(t('personalization.errors.unsupportedFormat'));
       return;
     }
     // Vérifier la taille (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      setError('Le fichier est trop volumineux. Taille maximale: 10MB.');
+      setError(t('personalization.errors.fileTooLarge'));
       return;
     }
     setCvFile(file);
@@ -44,7 +46,7 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
       try {
         const text = await file.text();
         setCvText(text);
-        setUploadProgress('Texte extrait du fichier');
+        setUploadProgress(t('personalization.progress.textExtracted'));
       } catch (err) {
         console.error('Erreur lecture fichier texte:', err);
       }
@@ -73,11 +75,11 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
 
   const handleSubmit = async () => {
     if (uploadMethod === 'text' && !cvText.trim()) {
-      setError('Veuillez coller le texte de votre profil.');
+      setError(t('personalization.errors.pasteText'));
       return;
     }
     if (uploadMethod === 'file' && !cvFile) {
-      setError('Veuillez sélectionner un fichier.');
+      setError(t('personalization.errors.selectFile'));
       return;
     }
     
@@ -89,16 +91,16 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
       
       // Si un fichier est uploadé
       if (uploadMethod === 'file' && cvFile) {
-        setUploadProgress('Upload du CV en cours...');
+        setUploadProgress(t('personalization.progress.uploading'));
         
         try {
           // Upload vers Supabase Storage
           await storageService.uploadCV(cvFile);
-          setUploadProgress('CV uploadé avec succès!');
+          setUploadProgress(t('personalization.progress.uploaded'));
         } catch (uploadError) {
           console.error('Erreur upload:', uploadError);
           // Continuer même si l'upload échoue
-          setUploadProgress('Upload échoué, analyse locale...');
+          setUploadProgress(t('personalization.progress.uploadFailed'));
         }
         
         // Si on a déjà extrait le texte (fichier .txt), l'utiliser
@@ -112,16 +114,16 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
       }
       
       if (profileText.trim()) {
-        setUploadProgress('Analyse du profil en cours...');
+        setUploadProgress(t('personalization.progress.analyzing'));
         const profile = await analyzeUserProfile(profileText);
-        setUploadProgress('Analyse terminée!');
+        setUploadProgress(t('personalization.progress.done'));
         onComplete(profile);
       } else {
         onComplete(null);
       }
     } catch (err) {
       console.error("Error analyzing profile:", err);
-      setError("Désolé, une erreur est survenue lors de l'analyse. Nous allons continuer sans cette information.");
+      setError(t('personalization.errors.analysisFailed'));
       setTimeout(() => onComplete(null), 2000);
     } finally {
       setIsLoading(false);
@@ -145,15 +147,15 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-display font-bold text-primary-800 mb-2">Hyper-Personnalisation</h1>
+          <h1 className="text-3xl font-display font-bold text-primary-800 mb-2">{t('personalization.title')}</h1>
           <p className="text-slate-600 text-lg">
-            Pour un bilan encore plus pertinent, partagez votre CV ou profil.
+            {t('personalization.subtitle')}
           </p>
           {/* Phrase d'adaptation pédagogique pour Qualiopi */}
           <p className="text-sm text-primary-600 mt-2 font-medium">
-            🎯 Ces informations serviront à adapter les outils, exercices et échanges de la phase d'investigation.
+            {t('personalization.qualiopiNote')}
           </p>
-          <p className="text-sm text-slate-500 mt-1">(C'est optionnel, vous pouvez passer cette étape)</p>
+          <p className="text-sm text-slate-500 mt-1">{t('personalization.optional')}</p>
         </header>
         
         {/* Sélection de la méthode d'upload */}
@@ -167,7 +169,7 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
             }`}
           >
             <span className="text-xl mb-1 block">📝</span>
-            <span className="font-medium">Coller le texte</span>
+            <span className="font-medium">{t('personalization.pasteText')}</span>
           </button>
           <button
             onClick={() => setUploadMethod('file')}
@@ -178,7 +180,7 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
             }`}
           >
             <span className="text-xl mb-1 block">📄</span>
-            <span className="font-medium">Uploader un fichier</span>
+            <span className="font-medium">{t('personalization.uploadFile')}</span>
           </button>
         </div>
         
@@ -187,13 +189,13 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
             <textarea
               value={cvText}
               onChange={(e) => setCvText(e.target.value)}
-              placeholder="Collez ici le texte de votre CV, profil LinkedIn, ou description de votre parcours professionnel..."
+              placeholder={t('personalization.textPlaceholder')}
               rows={8}
               className="w-full h-64 p-4 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none transition-colors"
             />
             {cvText && (
               <div className="absolute bottom-3 right-3 text-xs text-slate-400">
-                {cvText.length} caractères
+                {cvText.length} {t('personalization.characters')}
               </div>
             )}
           </div>
@@ -225,7 +227,7 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
                 <div className="text-5xl mb-2">✅</div>
                 <p className="font-medium text-green-700">{cvFile.name}</p>
                 <p className="text-sm text-green-600">
-                  {(cvFile.size / 1024).toFixed(1)} KB • Prêt à analyser
+                  {(cvFile.size / 1024).toFixed(1)} KB • {t('personalization.readyToAnalyze')}
                 </p>
                 <button
                   onClick={(e) => {
@@ -235,7 +237,7 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
                   }}
                   className="mt-2 text-sm text-slate-500 hover:text-red-600 underline"
                 >
-                  Supprimer et choisir un autre fichier
+                  {t('personalization.removeFile')}
                 </button>
               </div>
             ) : (
@@ -244,10 +246,10 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
                   {isDragging ? '📥' : '📎'}
                 </div>
                 <p className="text-slate-600 font-medium">
-                  {isDragging ? 'Déposez le fichier ici' : 'Glissez-déposez ou cliquez pour sélectionner'}
+                  {isDragging ? t('personalization.dropHere') : t('personalization.dragOrClick')}
                 </p>
                 <p className="text-sm text-slate-500">
-                  Formats acceptés: PDF, Word, Texte (max 10MB)
+                  {t('personalization.acceptedFormats')}
                 </p>
               </div>
             )}
@@ -279,14 +281,14 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                Analyse en cours...
+                {t('personalization.analyzing')}
               </>
             ) : (
               <>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Personnaliser le bilan
+                {t('personalization.submit')}
               </>
             )}
           </button>
@@ -295,13 +297,13 @@ const PersonalizationStep: React.FC<PersonalizationStepProps> = ({ onComplete })
             disabled={isLoading}
             className="text-sm text-slate-500 hover:text-primary-600 transition-colors"
           >
-            Passer cette étape →
+            {t('personalization.skip')}
           </button>
         </div>
         
         {/* Note de confidentialité */}
         <p className="mt-6 text-xs text-slate-400 text-center">
-          🔒 Vos données sont traitées de manière confidentielle et sécurisée.
+          {t('personalization.confidentiality')}
         </p>
       </div>
     </div>
