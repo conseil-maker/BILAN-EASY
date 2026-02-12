@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Summary, Answer } from '../types-ai-studio';
 import { SatisfactionSurvey } from './SatisfactionSurvey';
 import { DocumentsQualiopi } from './DocumentsQualiopi';
@@ -67,6 +68,7 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
   onRestart,
   onViewHistory,
 }) => {
+  const { t } = useTranslation('completion');
   const [currentStep, setCurrentStep] = useState<CompletionStep>('congratulations');
   const [syntheseGenerated, setSyntheseGenerated] = useState(false);
   const [syntheseData, setSyntheseData] = useState<SyntheseData | null>(null);
@@ -261,11 +263,11 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
   };
 
   const steps = [
-    { id: 'congratulations', label: 'Félicitations', icon: '🎉' },
-    { id: 'synthesis', label: 'Synthèse', icon: '📄' },
-    { id: 'documents', label: 'Documents', icon: '📁' },
-    { id: 'satisfaction', label: 'Satisfaction', icon: '⭐' },
-    { id: 'final', label: 'Terminé', icon: '✅' },
+    { id: 'congratulations', label: t('steps.congratulations'), icon: '🎉' },
+    { id: 'synthesis', label: t('steps.synthesis'), icon: '📄' },
+    { id: 'documents', label: t('steps.documents'), icon: '📁' },
+    { id: 'satisfaction', label: t('steps.satisfaction'), icon: '⭐' },
+    { id: 'final', label: t('steps.final'), icon: '✅' },
   ];
 
   const currentStepIndex = steps.findIndex(s => s.id === currentStep);
@@ -314,39 +316,38 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center animate-fade-in">
             <CelebrationIcon />
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-6 mb-4">
-              Félicitations {userName} ! 🎉
+              {t('congratulations.title', { name: userName })} 🎉
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
-              Vous avez terminé votre bilan de compétences "{packageName}"
+              {t('congratulations.subtitle', { package: packageName })}
             </p>
             
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-6 mb-8">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-3xl font-bold text-green-600">{answers.length}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Questions répondues</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('congratulations.questionsAnswered')}</p>
                 </div>
                 <div>
                   <p className="text-3xl font-bold text-blue-600">{packageDuration}h</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Durée du parcours</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('congratulations.duration')}</p>
                 </div>
                 <div>
                   <p className="text-3xl font-bold text-indigo-600">100%</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Complété</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('congratulations.completed')}</p>
                 </div>
               </div>
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              Conformément à l'article L.6313-4 du Code du travail, vous allez maintenant recevoir 
-              votre document de synthèse et les attestations obligatoires.
+              {t('congratulations.legalText')}
             </p>
 
             <button
               onClick={() => setCurrentStep('synthesis')}
               className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl"
             >
-              Continuer vers ma synthèse →
+              {t('congratulations.continueButton')}
             </button>
           </div>
         )}
@@ -360,25 +361,24 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Document de Synthèse
+                  {t('synthesis.title')}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Conforme à l'article R.6313-8 du Code du travail
+                  {t('synthesis.subtitle')}
                 </p>
               </div>
             </div>
 
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
               <p className="text-amber-800 dark:text-amber-200 text-sm">
-                <strong>Important :</strong> Ce document vous appartient. Conformément à l'article L.6313-10-1, 
-                il ne peut être communiqué à un tiers qu'avec votre accord écrit.
+                {t('synthesis.importantNotice')}
               </p>
             </div>
 
             {!syntheseGenerated ? (
               <div className="text-center py-8">
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Cliquez sur le bouton ci-dessous pour générer votre document de synthèse personnalisé.
+                  {t('synthesis.generatePrompt')}
                 </p>
                 <button
                   onClick={handleGenerateSynthese}
@@ -388,12 +388,12 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                   {isGeneratingSynthese ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                      Génération en cours...
+                      {t('synthesis.generating')}
                     </>
                   ) : (
                     <>
                       <DownloadIcon />
-                      Générer ma synthèse PDF
+                      {t('synthesis.generateButton')}
                     </>
                   )}
                 </button>
@@ -404,16 +404,16 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                   <CheckIcon />
                 </div>
                 <p className="text-green-600 dark:text-green-400 font-semibold mb-2">
-                  Synthèse générée avec succès !
+                  {t('synthesis.successTitle')}
                 </p>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Le document a été téléchargé automatiquement.
+                  {t('synthesis.successMessage')}
                 </p>
                 <button
                   onClick={() => setCurrentStep('documents')}
                   className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
                 >
-                  Voir tous mes documents →
+                  {t('synthesis.viewDocuments')}
                 </button>
               </div>
             )}
@@ -445,9 +445,9 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                   />
                 </div>
                 <label htmlFor="confirm-documents" className="text-sm text-amber-800 dark:text-amber-200">
-                  <strong>Je confirme avoir reçu et téléchargé ma synthèse de bilan de compétences</strong>
+                  <strong>{t('documents.confirmLabel')}</strong>
                   <p className="text-amber-700 dark:text-amber-300 mt-1">
-                    Conformément à l'article R.6313-8 du Code du travail, ce document vous appartient et ne peut être communiqué à un tiers qu'avec votre accord écrit.
+                    {t('documents.confirmLegal')}
                   </p>
                 </label>
               </div>
@@ -463,7 +463,7 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                {syntheseDownloadConfirmed ? 'Donner mon avis →' : 'Veuillez confirmer la réception de vos documents'}
+                {syntheseDownloadConfirmed ? t('documents.continueButton') : t('documents.confirmFirst')}
               </button>
             </div>
           </div>
@@ -479,21 +479,20 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Votre avis compte
+                    {t('satisfaction.title')}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Aidez-nous à améliorer notre accompagnement
+                    {t('satisfaction.subtitle')}
                   </p>
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400">
-                Conformément aux exigences Qualiopi, nous vous invitons à évaluer votre expérience. 
-                Vos retours sont précieux pour l'amélioration continue de nos services.
+                {t('satisfaction.description')}
               </p>
             </div>
             <div className="mt-8">
               {isAssessmentSaving ? (
-                <div className="text-center p-10">Chargement du questionnaire...</div>
+                <div className="text-center p-10">{t('satisfaction.loading')}</div>
               ) : (
                 <SatisfactionSurvey
                   userId={userId}
@@ -515,11 +514,11 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
             </div>
             
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Félicitations {userName} !
+              {t('final.title', { name: userName })}
             </h2>
             
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
-              Votre bilan de compétences est terminé.
+              {t('final.subtitle')}
             </p>
 
             {/* Message de redirection vers le Dashboard */}
@@ -529,57 +528,57 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <h3 className="font-bold text-green-800 dark:text-green-200 text-lg">
-                  Vos documents sont prêts !
+                  {t('final.documentsReady')}
                 </h3>
               </div>
               <p className="text-green-700 dark:text-green-300 mb-4">
-                Retrouvez dans votre <strong>Dashboard</strong> :
+                {t('final.dashboardPrompt')}
               </p>
               <ul className="text-left text-green-700 dark:text-green-300 space-y-2 max-w-md mx-auto">
                 <li className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span><strong>Synthèse PDF</strong> de votre bilan téléchargeable</span>
+                  <span>{t('final.synthesePdf')}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span><strong>Historique des échanges</strong> exportable en Excel/CSV</span>
+                  <span>{t('final.historyExport')}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span><strong>Documents Qualiopi</strong> (convention, attestation...)</span>
+                  <span>{t('final.qualiopiDocs')}</span>
                 </li>
               </ul>
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 mb-8">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                Récapitulatif de votre bilan
+                {t('final.summaryTitle')}
               </h3>
               <div className="grid grid-cols-2 gap-4 text-left">
                 <div>
-                  <p className="text-sm text-gray-500">Forfait</p>
+                  <p className="text-sm text-gray-500">{t('final.package')}</p>
                   <p className="font-medium text-gray-900 dark:text-white">{packageName}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Date de fin</p>
+                  <p className="text-sm text-gray-500">{t('final.endDate')}</p>
                   <p className="font-medium text-gray-900 dark:text-white">
                     {new Date().toLocaleDateString('fr-FR')}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Questions répondues</p>
+                  <p className="text-sm text-gray-500">{t('final.questionsAnswered')}</p>
                   <p className="font-medium text-gray-900 dark:text-white">{answers.length}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Satisfaction</p>
+                  <p className="text-sm text-gray-500">{t('final.satisfactionLabel')}</p>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {satisfactionCompleted ? '✅ Complété' : '⏳ En attente'}
+                    {satisfactionCompleted ? `✅ ${t('final.satisfactionCompleted')}` : `⏳ ${t('final.satisfactionPending')}`}
                   </p>
                 </div>
               </div>
@@ -593,7 +592,7 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                Accéder à mon Dashboard
+                {t('final.accessDashboard')}
               </button>
             </div>
 
@@ -602,19 +601,19 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
                 onClick={onViewHistory}
                 className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-sm"
               >
-                Voir mon historique
+                {t('final.viewHistory')}
               </button>
               <span className="text-gray-300 dark:text-gray-600">|</span>
               <button
                 onClick={onRestart}
                 className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-sm"
               >
-                Commencer un nouveau bilan
+                {t('final.startNewBilan')}
               </button>
             </div>
 
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-              Pour toute question, contactez-nous à support@bilan-easy.fr
+              {t('final.contactMessage')}
             </p>
           </div>
         )}
