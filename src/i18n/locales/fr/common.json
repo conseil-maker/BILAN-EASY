@@ -98,6 +98,25 @@
     "admin": "Administration",
     "consultant": "Espace consultant"
   },
+  "notifications": {
+    "title": "Notifications",
+    "reminders": "Rappels",
+    "markAllRead": "Tout marquer comme lu",
+    "markAsRead": "Marquer comme lu",
+    "markAsDone": "Marquer comme fait",
+    "noNotifications": "Aucune notification",
+    "noReminders": "Aucun rappel \u00e0 venir",
+    "view": "Voir",
+    "viewAll": "Voir toutes les notifications",
+    "justNow": "\u00c0 l'instant",
+    "minutesAgo": "Il y a {{count}} min",
+    "hoursAgo": "Il y a {{count}}h",
+    "daysAgo": "Il y a {{count}}j",
+    "overdue": "En retard",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "inDays": "Dans {{count}} jours"
+  },
   "welcome": {
     "title": "Bilan de Compétences",
     "subtitle": "Découvrez vos forces et dessinez votre avenir professionnel.",

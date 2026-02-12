@@ -98,6 +98,25 @@
     "admin": "Yönetim",
     "consultant": "Danışman alanı"
   },
+  "notifications": {
+    "title": "Bildirimler",
+    "reminders": "Hatırlatmalar",
+    "markAllRead": "Tümünü okundu olarak işaretle",
+    "markAsRead": "Okundu olarak işaretle",
+    "markAsDone": "Yapıldı olarak işaretle",
+    "noNotifications": "Bildirim yok",
+    "noReminders": "Yaklaşan hatırlatma yok",
+    "view": "Görüntüle",
+    "viewAll": "Tüm bildirimleri gör",
+    "justNow": "Az önce",
+    "minutesAgo": "{{count}} dk önce",
+    "hoursAgo": "{{count}} saat önce",
+    "daysAgo": "{{count}} gün önce",
+    "overdue": "Gecikmiş",
+    "today": "Bugün",
+    "tomorrow": "Yarın",
+    "inDays": "{{count}} gün içinde"
+  },
   "welcome": {
     "title": "Yetkinlik Değerlendirmesi",
     "subtitle": "Güçlü yönlerinizi keşfedin ve mesleki geleceğinizi çizin.",
