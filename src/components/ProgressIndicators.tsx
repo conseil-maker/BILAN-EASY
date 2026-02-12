@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Clock, Target, TrendingUp, Award, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ProgressCardProps {
@@ -84,6 +85,7 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   currentPhase,
   phaseProgress
 }) => {
+  const { t } = useTranslation('questionnaire');
   const timeProgress = Math.min(100, Math.round((timeSpent / timeTotal) * 100));
   const categoryProgress = Math.round((categoriesCompleted / categoriesTotal) * 100);
 
@@ -100,32 +102,32 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
       <ProgressCard
         icon={<Clock size={20} />}
-        label="Temps passé"
+        label={t('progress.timeSpent', 'Temps passé')}
         value={formatTime(timeSpent)}
-        subtext={`sur ${formatTime(timeTotal)}`}
+        subtext={`${t('progress.outOf', 'sur')} ${formatTime(timeTotal)}`}
         color="indigo"
         progress={timeProgress}
       />
       <ProgressCard
         icon={<Target size={20} />}
-        label="Questions"
+        label={t('progress.questions', 'Questions')}
         value={questionsAnswered}
-        subtext="réponses enregistrées"
+        subtext={t('progress.answersRecorded', 'réponses enregistrées')}
         color="green"
       />
       <ProgressCard
         icon={<TrendingUp size={20} />}
-        label="Catégories"
+        label={t('progress.categories', 'Catégories')}
         value={`${categoriesCompleted}/${categoriesTotal}`}
-        subtext="explorées"
+        subtext={t('progress.explored', 'explorées')}
         color="purple"
         progress={categoryProgress}
       />
       <ProgressCard
         icon={<Award size={20} />}
-        label="Phase"
+        label={t('progress.phase', 'Phase')}
         value={`${currentPhase}/3`}
-        subtext={currentPhase === 1 ? 'Préliminaire' : currentPhase === 2 ? 'Investigation' : 'Conclusion'}
+        subtext={currentPhase === 1 ? t('phases.preliminary', 'Préliminaire') : currentPhase === 2 ? t('phases.investigation', 'Investigation') : t('phases.conclusion', 'Conclusion')}
         color="orange"
         progress={phaseProgress}
       />
@@ -270,8 +272,8 @@ export const TimeRemaining: React.FC<{
       )}
       <span className="font-medium">
         {minutesRemaining > 60 
-          ? `${Math.floor(minutesRemaining / 60)}h ${minutesRemaining % 60}min restantes`
-          : `${minutesRemaining}min restantes`
+          ? `${Math.floor(minutesRemaining / 60)}h ${minutesRemaining % 60}min ${t('progress.remaining', 'restantes')}`
+          : `${minutesRemaining}min ${t('progress.remaining', 'restantes')}`
         }
       </span>
     </div>

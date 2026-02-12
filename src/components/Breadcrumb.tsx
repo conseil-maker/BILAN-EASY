@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, Home, CheckCircle, Circle, Clock } from 'lucide-react';
 
 export interface BreadcrumbStep {
@@ -21,6 +22,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   onStepClick,
   showDuration = false
 }) => {
+  // Breadcrumb uses labels passed as props, no direct text to translate
   const getStepIcon = (status: BreadcrumbStep['status']) => {
     switch (status) {
       case 'completed':
@@ -129,11 +131,12 @@ export const BilanBreadcrumb: React.FC<{
   currentCategory?: string;
   progress: number; // 0-100
 }> = ({ currentPhase, currentCategory, progress }) => {
+  const { t } = useTranslation('questionnaire');
   const phases = [
-    { id: 'preliminary', label: 'Phase préliminaire', percentage: 17 },
-    { id: 'investigation', label: 'Phase d\'investigation', percentage: 50 },
-    { id: 'conclusion', label: 'Phase de conclusion', percentage: 17 },
-    { id: 'satisfaction', label: 'Évaluation', percentage: 16 }
+    { id: 'preliminary', label: t('phases.preliminary', 'Phase préliminaire'), percentage: 17 },
+    { id: 'investigation', label: t('phases.investigation', 'Phase d\'investigation'), percentage: 50 },
+    { id: 'conclusion', label: t('phases.conclusion', 'Phase de conclusion'), percentage: 17 },
+    { id: 'satisfaction', label: t('phases.evaluation', 'Évaluation'), percentage: 16 }
   ];
 
   const currentPhaseIndex = phases.findIndex(p => p.id === currentPhase);
@@ -192,7 +195,7 @@ export const BilanBreadcrumb: React.FC<{
           {currentCategory && (
             <div className="text-center">
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                Catégorie actuelle : 
+                {t('progress.currentCategory', 'Catégorie actuelle')} : 
               </span>
               <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 ml-1">
                 {currentCategory}
