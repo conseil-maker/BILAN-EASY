@@ -4,6 +4,7 @@ import { Answer, Package, Question, QuestionType, Summary, UserProfile, Dashboar
 import { QUESTION_CATEGORIES } from "../constants";
 import { selectFallbackQuestion } from '../data/fallbackQuestions';
 import { generateSmartQuestion, generateOpeningQuestion } from './smartQuestionGenerator';
+import { getAITranslation, getLanguageContext, getCoachingStylePrompt, getFallbackText, getFallbackArray } from './aiTranslationHelper';
 
 // Configuration API Gemini - Mode sécurisé via Edge Functions
 // La clé API est stockée dans les secrets Supabase, jamais exposée côté client
@@ -151,6 +152,15 @@ const parseJsonResponse = <T>(jsonString: string, functionName: string): T => {
  * Optimisé pour créer une connexion émotionnelle et encourager l'engagement
  */
 const getSystemInstruction = (style: CoachingStyle): string => {
+    const ctx = getLanguageContext();
+    const rules = getAITranslation('prompts.systemInstruction.rules.language') ? {
+        language: getAITranslation('prompts.systemInstruction.rules.language'),
+        personalization: getAITranslation('prompts.systemInstruction.rules.personalization'),
+        validation: getAITranslation('prompts.systemInstruction.rules.validation'),
+        depth: getAITranslation('prompts.systemInstruction.rules.depth'),
+        progression: getAITranslation('prompts.systemInstruction.rules.progression'),
+    } : { language: 'Toujours en FRANÇAIS', personalization: 'Chaque question DOIT citer un élément de la dernière réponse', validation: 'Commence par reconnaître ce que la personne a partagé', depth: 'Creuse les émotions, motivations, valeurs', progression: 'Chaque question doit faire AVANCER la réflexion' };
+    
     const baseInstruction = `🛑🛑🛑 RÈGLE ABSOLUE #1 - LIRE EN PREMIER 🛑🛑🛑
 Tu ne dois JAMAIS poser de question de VALIDATION ou de SYNTHÈSE.
 Ces questions sont INTERDITES et INUTILES car elles ne font pas avancer le bilan.
@@ -172,17 +182,17 @@ AU LIEU DE VALIDER, TU DOIS TOUJOURS :
 ✅ Identifier des ressources ou forces cachées
 
 === QUI TU ES ===
-Tu es le meilleur consultant en bilan de compétences au monde. Tu as 25 ans d'expérience et tu es reconnu pour ta capacité exceptionnelle à créer des déclics chez tes clients.
+${getAITranslation('prompts.systemInstruction.base')}
 
 === TON APPROCHE ===
-Chaque question est un bijou ciselé spécifiquement pour cette personne. Tu rebondis TOUJOURS sur des éléments précis de la réponse précédente.
+${getAITranslation('prompts.systemInstruction.approach')}
 
 === RÈGLES ===
-1. LANGUE: Toujours en FRANÇAIS
-2. PERSONNALISATION: Chaque question DOIT citer un élément de la dernière réponse
-3. VALORISATION: Commence par reconnaître ce que la personne a partagé
-4. PROFONDEUR: Creuse les émotions, motivations, valeurs
-5. PROGRESSION: Chaque question doit faire AVANCER la réflexion
+1. LANGUE: ${rules.language}
+2. PERSONNALISATION: ${rules.personalization}
+3. VALORISATION: ${rules.validation}
+4. PROFONDEUR: ${rules.depth}
+5. PROGRESSION: ${rules.progression}
 
 === STRUCTURE ===
 1. ACCROCHE: Valorise un élément précis de la réponse
@@ -231,16 +241,15 @@ Si le client s'éloigne du sujet, utilise la technique de redirection douce :
 "Je comprends, c'est intéressant. Comment cela se rapporte-t-il à votre réflexion sur [thème principal] ?"
 Cela valide le propos tout en recentrant la conversation.`;
 
+    // Récupérer le style de coaching traduit
+    const stylePrompt = getCoachingStylePrompt(style);
+    
     switch (style) {
         case 'analytic':
             return `${baseInstruction}
 
 === STYLE ANALYTIQUE ===
-Tu es le consultant qui aide à décortiquer et comprendre. Ton approche:
-- Décompose les situations complexes en éléments analysables
-- Identifie les patterns, les causes et les conséquences
-- Pose des questions qui amènent à structurer sa pensée
-- Creuse les détails concrets et les méthodes utilisées
+${stylePrompt}
 
 EXEMPLE STYLE ANALYTIQUE:
 "Vous indiquez avoir géré une équipe de 8 développeurs pendant 3 ans. Quand vous analysez cette expérience, quels ont été les 2 ou 3 défis majeurs que vous avez dû résoudre, et quelle méthode avez-vous utilisée pour chacun ?"`;
@@ -249,28 +258,14 @@ EXEMPLE STYLE ANALYTIQUE:
             return `${baseInstruction}
 
 === STYLE CRÉATIF ===
-Tu es le consultant qui ouvre les possibles. Ton approche:
-- Invite à imaginer, rêver, projeter
-- Utilise des métaphores et des angles inattendus
-- Pose des questions qui libèrent la créativité
-- Encourage à explorer des chemins non conventionnels
-
-EXEMPLE STYLE CRÉATIF:
-"Vous décrivez votre quotidien comme une 'routine'. Imaginons que demain matin, en arrivant au bureau, tout soit possible - aucune contrainte. Quelle serait la première chose que vous changeriez dans votre journée type ?"`;
+${getCoachingStylePrompt('creative')}`;
         
         case 'collaborative':
         default:
             return `${baseInstruction}
 
 === STYLE COLLABORATIF ===
-Tu es le consultant qui accompagne avec bienveillance. Ton approche:
-- Crée un espace de confiance et de sécurité
-- Valorise systématiquement les forces et réussites
-- Accompagne avec empathie et encouragement
-- Pose des questions qui renforcent la confiance en soi
-
-EXEMPLE STYLE COLLABORATIF:
-"Ce que vous partagez sur votre évolution est vraiment inspirant - passer de développeur à directeur technique en 5 ans, c'est une belle progression ! Qu'est-ce qui, selon vous, a fait la différence dans votre parcours ?"`;
+${getCoachingStylePrompt('collaborative')}`;
     }
 };
 
@@ -536,32 +531,19 @@ Exemple: "${userName}, avant de plonger dans le bilan, j'aimerais vous connaîtr
     // Construire la description de la tâche
     let taskDescription = "";
     if (options.isModuleQuestion) {
-        taskDescription = `Module optionnel: ${options.isModuleQuestion.moduleId} (question ${options.isModuleQuestion.questionNum}/3). Pose une question ciblée sur ce thème tout en restant connecté au contexte de la conversation.`;
+        taskDescription = getAITranslation('prompts.questionGeneration.optionalModule', { moduleId: options.isModuleQuestion.moduleId, questionNum: String(options.isModuleQuestion.questionNum) });
     } else {
         const phaseInfo = QUESTION_CATEGORIES[phaseKey];
         const category = phaseInfo.categories[categoryIndex];
         
         let complexityGuidance = "";
         if (options.targetComplexity) {
-            switch (options.targetComplexity) {
-                case 'simple':
-                    complexityGuidance = "Question SIMPLE (1-2 min): factuelle, directe, facile à répondre.";
-                    break;
-                case 'moyenne':
-                    complexityGuidance = "Question MOYENNE (3-5 min): invite à la réflexion, demande des exemples.";
-                    break;
-                case 'complexe':
-                    complexityGuidance = "Question COMPLEXE (5-10 min): analyse approfondie, mise en perspective.";
-                    break;
-                case 'reflexion':
-                    complexityGuidance = "Question de RÉFLEXION PROFONDE (10-15 min): introspection, projection, vision.";
-                    break;
-            }
+            complexityGuidance = getAITranslation(`prompts.questionGeneration.complexity.${options.targetComplexity}`);
         }
         
-        taskDescription = `Phase: ${phaseInfo.name} | Catégorie: ${category.name}
+        taskDescription = `${getAITranslation('prompts.questionGeneration.phase')}: ${phaseInfo.name} | ${getAITranslation('prompts.questionGeneration.category')}: ${category.name}
 ${complexityGuidance}
-Génère une question qui explore cette catégorie tout en rebondissant sur les réponses précédentes.`;
+${getAITranslation('prompts.questionGeneration.generateExplore')}`;
     }
 
     // Instructions spéciales
@@ -583,18 +565,19 @@ Utilise les résultats de recherche pour poser une question enrichie qui connect
 ===========================`;
     }
 
+    const langCtx = getLanguageContext();
     const prompt = `${conversationContext}
 
 ${specialInstruction}
 
-TÂCHE: ${taskDescription}
+${getAITranslation('prompts.questionGeneration.task')}: ${taskDescription}
 
 ${getPhaseTransitionGuidance(phaseKey, previousAnswers.length, userName)}
 
-RAPPEL: La question doit être en FRANÇAIS, personnalisée pour ${userName}, et créer un vrai dialogue engageant.
-Le champ "description" peut contenir une phrase d'accroche ou de transition qui valorise la réponse précédente.
+${getAITranslation('prompts.questionGeneration.reminderLanguage', { userName })}
+${getAITranslation('prompts.questionGeneration.descriptionHint')}
 
-Génère la question au format JSON.`;
+${getAITranslation('prompts.questionGeneration.generateJson')}`;
 
     const config: any = { 
         systemInstruction,
@@ -664,7 +647,7 @@ Génère la question au format JSON.`;
             }
             
             // Si même le fallback échoue, lever l'erreur
-            throw new Error('Impossible de générer la question après 2 tentatives. Veuillez réessayer.');
+            throw new Error(getFallbackText('errorGeneration'));
         }
     }
 
@@ -767,17 +750,19 @@ export const suggestOptionalModule = async (answers: Answer[]): Promise<{ isNeed
 
 export const generateSynthesis = async (lastAnswers: Answer[], userName: string, coachingStyle: CoachingStyle): Promise<{ synthesis: string; confirmationRequest: string }> => {
     const systemInstruction = getSystemInstruction(coachingStyle);
+    const langCtx = getLanguageContext();
     const history = lastAnswers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
-    const prompt = `Context: User Name: ${userName}. Task: Act as an attentive coach. Based on the user's last few answers, create a concise, one-sentence summary and formulate a polite question to confirm if your summary is correct. The response MUST be a valid JSON object. Language: French. Last answers: ${history}`;
+    const prompt = `Context: User Name: ${userName}. Task: Act as an attentive coach. Based on the user's last few answers, create a concise, one-sentence summary and formulate a polite question to confirm if your summary is correct. The response MUST be a valid JSON object. Language: ${langCtx.language}. Last answers: ${history}`;
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: synthesisSchema } });
     return parseJsonResponse<{ synthesis: string; confirmationRequest: string }>(response.text, 'generateSynthesis');
 };
 
 export const generateSummary = async (answers: Answer[], pkg: Package, userName: string, coachingStyle: CoachingStyle): Promise<Summary> => {
     const systemInstruction = getSystemInstruction(coachingStyle);
+    const langCtx = getLanguageContext();
     const fullTranscript = answers.map(a => `Question ID: ${a.questionId}\nAnswer: ${a.value}`).join('\n\n');
     
-    const prompt = `Tu es un consultant expert en bilan de compétences certifié Qualiopi.
+    const prompt = `${getAITranslation('prompts.summary.systemInstruction')}
 
 Contexte:
 - Bénéficiaire: ${userName}
@@ -787,7 +772,7 @@ Contexte:
 Transcription complète du bilan:
 ${fullTranscript}
 
-MISSION: Génère une synthèse complète et professionnelle conforme aux exigences Qualiopi.
+MISSION: ${getAITranslation('prompts.summary.mission')}
 
 INSTRUCTIONS IMPORTANTES:
 1. Pour 'keyStrengths' et 'areasForDevelopment': Chaque point DOIT inclure un tableau 'sources' avec 1-3 citations directes des réponses du bénéficiaire.
@@ -807,7 +792,7 @@ INSTRUCTIONS IMPORTANTES:
 
 7. Pour 'recommendations': 3-4 recommandations personnalisées et actionables.
 
-La réponse DOIT être un objet JSON valide en français, conforme au schéma fourni.`;
+${getAITranslation('prompts.summary.languageInstruction')}`;
     
     const response = await ai.models.generateContent({ model: 'gemini-2.5-pro', contents: prompt, config: { systemInstruction, responseMimeType: "application/json", responseSchema: summarySchema } });
     return parseJsonResponse<Summary>(response.text, 'generateSummary');
@@ -818,14 +803,10 @@ La réponse DOIT être un objet JSON valide en français, conforme au schéma fo
  * Trouve des ressources et pistes pour un point de développement
  */
 export const findResourceLeads = async (developmentPoint: string): Promise<{ resources: string[], actions: string[] }> => {
-    const prompt = `Pour le point de développement suivant: "${developmentPoint}"
-    
-Suggère:
-1. 3-5 ressources concrètes (formations, livres, MOOCs, certifications)
-2. 3-5 actions pratiques à mettre en place
+    const langCtx = getLanguageContext();
+    const prompt = `${getAITranslation('prompts.resourceLeads.instruction', { developmentPoint })}
 
-Réponds en JSON avec les champs "resources" (array de strings) et "actions" (array de strings).
-Langue: Français.`;
+${getAITranslation('prompts.resourceLeads.languageInstruction')}`;
 
     const schema = {
         type: Type.OBJECT,
@@ -840,14 +821,14 @@ Langue: Français.`;
 const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
-            config: { responseMimeType: "application/json", responseSchema: followUpSchema },
+            config: { responseMimeType: "application/json", responseSchema: schema },
         });
         return parseJsonResponse<{ resources: string[], actions: string[] }>(response.text, 'findResourceLeads');
     } catch (error) {
         console.error('[findResourceLeads] Error:', error);
         return {
-            resources: ["Formation en ligne recommandée", "Livre de référence sur le sujet"],
-            actions: ["Identifier un mentor", "Pratiquer régulièrement"]
+            resources: getFallbackArray('defaultResources'),
+            actions: getFallbackArray('defaultActions')
         };
     }
 };
@@ -969,8 +950,9 @@ const careerExplorationSchema = {
  */
 export const detectCareerExplorationNeed = async (answers: Answer[]): Promise<ExplorationNeedResult> => {
     const history = answers.map(a => `Q: ${a.questionTitle || a.questionId}\nR: ${a.value}`).join('\n\n');
+    const langCtx = getLanguageContext();
     
-    const prompt = `Tu es un expert en orientation professionnelle. Analyse les réponses suivantes d'un bénéficiaire en bilan de compétences.
+    const prompt = `${getAITranslation('prompts.careerExploration.expertRole')}. Analyse les réponses suivantes d'un bénéficiaire en bilan de compétences.
 
 RÉPONSES DU BÉNÉFICIAIRE:
 ${history}
@@ -988,7 +970,7 @@ TYPES D'APPROCHE:
 - "refinement": Hésite entre plusieurs options, besoin d'affiner
 - "none": Projet clair et défini, pas besoin d'exploration
 
-Réponds en JSON. Langue: Français.`;
+${getAITranslation('prompts.careerExploration.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
@@ -1002,7 +984,7 @@ Réponds en JSON. Langue: Français.`;
         return {
             needsExploration: false,
             confidence: 0,
-            reason: "Erreur lors de l'analyse",
+            reason: getFallbackText('errorAnalysis'),
             suggestedApproach: 'none'
         };
     }
@@ -1018,8 +1000,9 @@ export const exploreCareerPaths = async (
     additionalContext?: string
 ): Promise<CareerExplorationResult> => {
     const history = answers.map(a => `Q: ${a.questionTitle || a.questionId}\nR: ${a.value}`).join('\n\n');
+    const langCtx = getLanguageContext();
     
-    const prompt = `Tu es un expert en orientation professionnelle et en marché du travail français.
+    const prompt = `${getAITranslation('prompts.careerExploration.expertRole')}
 
 PROFIL DU BÉNÉFICIAIRE (${userName}):
 ${history}
@@ -1032,8 +1015,8 @@ Propose 3 à 5 pistes métiers personnalisées et réalistes pour ce bénéficia
 CRITÈRES IMPORTANTS:
 1. Les métiers doivent correspondre aux compétences et aspirations exprimées
 2. Inclure un mix de métiers accessibles rapidement et de métiers nécessitant une formation
-3. Tenir compte des tendances actuelles du marché du travail en France (2024-2025)
-4. Être réaliste sur les salaires et les perspectives
+3. ${getAITranslation('prompts.careerExploration.marketContext')}
+4. ${getAITranslation('prompts.careerExploration.salaryNote')}
 5. Proposer des métiers variés mais cohérents avec le profil
 
 POUR CHAQUE MÉTIER:
@@ -1042,7 +1025,7 @@ POUR CHAQUE MÉTIER:
 - Donne des informations concrètes sur le marché
 - Propose des actions concrètes pour explorer cette piste
 
-Réponds en JSON. Langue: Français.`;
+${getAITranslation('prompts.careerExploration.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
@@ -1055,7 +1038,7 @@ Réponds en JSON. Langue: Français.`;
         console.error('[exploreCareerPaths] Error:', error);
         return {
             careerPaths: [],
-            profileSummary: "Erreur lors de l'analyse du profil",
+            profileSummary: getFallbackText('errorProfile'),
             keyStrengths: [],
             explorationQuestions: []
         };
@@ -1097,17 +1080,17 @@ ${userReaction === 'need_more_info' ? "- Identifier quelles informations lui man
 
 La question doit être ouverte, encourageante et aider le bénéficiaire à avancer dans sa réflexion.
 Réponds uniquement avec la question, sans introduction ni explication.
-Langue: Français.`;
+${getAITranslation('prompts.careerExploration.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-pro',
             contents: prompt,
         });
-        return response.text?.trim() || "Qu'est-ce qui vous attire ou vous freine dans cette direction ?";
+        return response.text?.trim() || getFallbackText('defaultCareerQuestion');
     } catch (error) {
         console.error('[generateCareerFollowUpQuestion] Error:', error);
-        return "Qu'est-ce qui vous attire ou vous freine dans cette direction ?";
+        return getFallbackText('defaultCareerQuestion');
     }
 };
 
@@ -1208,15 +1191,11 @@ export const analyzeResponseScope = async (
     const prompt = `Tu es un expert en bilan de compétences. Analyse la réponse suivante pour détecter tout problème de cohérence ou de cadre.
 
 === CADRE DU BILAN DE COMPÉTENCES ===
-Le bilan de compétences est un dispositif réservé aux :
-- Adultes (18 ans minimum)
-- Salariés, demandeurs d'emploi, indépendants
-- Personnes avec expérience professionnelle (même courte)
-- Personnes cherchant à faire le point sur leur carrière ou projet professionnel
+${getAITranslation('prompts.responseAnalysis.framework')}
 
 === SITUATIONS HORS-CADRE À DÉTECTER ===
 1. **Âge inapproprié** : Mineurs (collégiens, lycéens), étudiants sans expérience pro
-   → Rediriger vers CIO, ONISEP, Parcoursup
+   → Rediriger vers ${getLanguageContext().orientationResources}
 
 2. **Incohérence de profil** : La personne dit quelque chose de radicalement différent de son profil initial
    Ex: Dit être cadre supérieur puis collégien
@@ -1264,7 +1243,7 @@ RÈGLES :
 - Pour les problèmes critiques, propose des ressources alternatives
 - Pour les incohérences, demande une clarification avant de conclure
 
-Réponds en JSON. Langue: Français.`;
+${getAITranslation('prompts.responseAnalysis.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
@@ -1319,24 +1298,22 @@ Génère un message bienveillant et professionnel pour ${userName} qui :
 
 ${issueType === 'age_inappropriate' ? `
 IMPORTANT pour les mineurs/étudiants :
-- Expliquer que le bilan de compétences est un dispositif pour les adultes ayant une expérience professionnelle
-- Suggérer des alternatives : conseiller d'orientation scolaire, CIO (Centre d'Information et d'Orientation), Parcoursup
-- Rester encourageant sur leur démarche de réflexion sur l'avenir
+${getAITranslation('prompts.responseAnalysis.ageInappropriateRedirect')}
 ` : ''}
 
 Le message doit être chaleureux, pas condescendant, et aider la personne à comprendre la situation.
 Réponds uniquement avec le message, sans introduction.
-Langue: Français.`;
+${getAITranslation('prompts.marketExploration.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
         });
-        return response.text?.trim() || "Je vous remercie pour votre partage. Pourriez-vous me donner plus de détails sur votre situation professionnelle actuelle ?";
+        return response.text?.trim() || getFallbackText('defaultRedirect');
     } catch (error) {
         console.error('[generateRedirectMessage] Error:', error);
-        return "Je vous remercie pour votre partage. Pourriez-vous me donner plus de détails sur votre situation professionnelle actuelle ?";
+        return getFallbackText('defaultRedirect');
     }
 };
 
@@ -1572,7 +1549,8 @@ export const exploreJobMarket = async (
         `Q: ${a.questionTitle}\nR: ${a.text}`
     ).join('\n\n');
     
-    const prompt = `Tu es un expert en orientation professionnelle et en analyse du marché de l'emploi français.
+    const langCtx = getLanguageContext();
+    const prompt = `${getAITranslation('prompts.marketExploration.expertRole')}
 
 PROFIL DU BÉNÉFICIAIRE (${userName}):
 ${profileSummary}
@@ -1580,7 +1558,7 @@ ${profileSummary}
 MÉTIER CIBLÉ: ${targetJobTitle}
 
 TÂCHE:
-Réalise une analyse complète du marché de l'emploi pour ce métier en France, en tenant compte du profil du bénéficiaire.
+Réalise une analyse complète du marché de l'emploi pour ce métier, en tenant compte du profil du bénéficiaire.
 
 INSTRUCTIONS:
 1. **Fiche métier** : Décris le métier avec ses activités et compétences requises
@@ -1592,12 +1570,12 @@ INSTRUCTIONS:
 5. **Alternatives** : Suggère 2-3 métiers alternatifs si le métier principal semble difficile d'accès
 
 IMPORTANT:
-- Base ton analyse sur les réalités du marché français actuel (2024-2025)
-- Sois honnête et réaliste, pas excessivement optimiste
+- ${getAITranslation('prompts.marketExploration.marketContext')}
+- ${getAITranslation('prompts.marketExploration.honestNote')}
 - Personnalise l'analyse en fonction du profil spécifique du bénéficiaire
-- Les formations doivent être concrètes et accessibles en France
+- ${getAITranslation('prompts.marketExploration.trainingNote')}
 
-Langue: Français.`;
+${getAITranslation('prompts.marketExploration.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
@@ -1633,7 +1611,7 @@ export const simulateJobInterview = async (
         `Q: ${a.questionTitle}\nR: ${a.text}`
     ).join('\n\n');
     
-    const prompt = `Tu es un expert en orientation professionnelle. Tu vas créer une simulation d'entretien avec un professionnel expérimenté du métier ciblé.
+    const prompt = `${getAITranslation('prompts.marketExploration.expertRole')}. Tu vas créer une simulation d'entretien avec un professionnel expérimenté du métier ciblé.
 
 PROFIL DU BÉNÉFICIAIRE (${userName}):
 ${profileSummary}
@@ -1656,7 +1634,7 @@ IMPORTANT:
 - Inclure des aspects que les descriptions de poste ne mentionnent pas
 - Les questions doivent aider le bénéficiaire à vérifier si ce métier lui correspond vraiment
 
-Langue: Français.`;
+${getAITranslation('prompts.marketExploration.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
@@ -1706,17 +1684,17 @@ Format de réponse :
 2. Un conseil ou insight de ton expérience (1-2 phrases)
 3. Une question de suivi (1 phrase)
 
-Sois naturel, comme dans une vraie conversation. Langue: Français.`;
+Sois naturel, comme dans une vraie conversation. ${getAITranslation('prompts.marketExploration.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
         });
-        return response.text?.trim() || "C'est intéressant ce que vous me dites. Qu'est-ce qui vous attire le plus dans ce métier ?";
+        return response.text?.trim() || getFallbackText('defaultInterviewFollowUp');
     } catch (error) {
         console.error('[generateInterviewFollowUp] Error:', error);
-        return "C'est intéressant ce que vous me dites. Qu'est-ce qui vous attire le plus dans ce métier ?";
+        return getFallbackText('defaultInterviewFollowUp');
     }
 };
 
@@ -1769,7 +1747,7 @@ Génère un rapport de faisabilité structuré avec :
 5. Les opportunités à saisir (2-3 items)
 
 Réponds en JSON avec les clés: summary, feasibilityScore, keyFindings, actionItems, risks, opportunities.
-Langue: Français.`;
+${getAITranslation('prompts.feasibilityReport.languageInstruction')}`;
 
     try {
         const response = await ai.models.generateContent({
@@ -1796,7 +1774,7 @@ Langue: Français.`;
     } catch (error) {
         console.error('[generateFeasibilityReport] Error:', error);
         return {
-            summary: "Analyse de faisabilité en cours de finalisation.",
+            summary: getFallbackText('errorFeasibility'),
             feasibilityScore: marketExploration.feasibilityAnalysis.overallScore,
             keyFindings: [],
             actionItems: [],
