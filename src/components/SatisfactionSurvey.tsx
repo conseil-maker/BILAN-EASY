@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Star, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -130,6 +131,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
   assessmentId,
   onComplete
 }) => {
+  const { t } = useTranslation('satisfaction');
   const [answers, setAnswers] = useState<Record<string, SurveyAnswer>>({});
   const [currentCategory, setCurrentCategory] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -235,11 +237,10 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-8 text-center">
           <CheckCircle className="mx-auto text-green-600 dark:text-green-400 mb-4" size={64} />
           <h2 className="text-2xl font-bold text-green-900 dark:text-green-300 mb-2">
-            Merci pour votre retour !
+            {t('success.title')}
           </h2>
           <p className="text-green-800 dark:text-green-300">
-            Votre questionnaire de satisfaction a été enregistré avec succès.
-            Vos réponses nous aideront à améliorer notre service.
+            {t('success.message')}
           </p>
         </div>
       </div>
@@ -250,17 +251,17 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
     <div className="max-w-3xl mx-auto p-6">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
-          Questionnaire de Satisfaction
+          {t('title')}
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          Votre avis est précieux pour améliorer notre service
+          {t('subtitle')}
         </p>
 
         {/* Progression */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {categories[currentCategory]}
+              {t(`categories.${categories[currentCategory]}`)}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400">
               {currentCategory + 1} / {categories.length}
@@ -286,7 +287,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
           {currentQuestions.map((question, index) => (
             <div key={question.id} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0">
               <p className="font-medium text-gray-900 dark:text-white mb-4">
-                {index + 1}. {question.question}
+                {index + 1}. {t(`questions.${question.id}`)}
               </p>
 
               {question.type === 'rating' ? (
@@ -306,11 +307,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
                         }`}
                       />
                       <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {rating === 1 && 'Très insatisfait'}
-                        {rating === 2 && 'Insatisfait'}
-                        {rating === 3 && 'Neutre'}
-                        {rating === 4 && 'Satisfait'}
-                        {rating === 5 && 'Très satisfait'}
+                        {t(`ratings.${rating}`)}
                       </span>
                     </button>
                   ))}
@@ -319,7 +316,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
                 <textarea
                   value={answers[question.id]?.text ?? ''}
                   onChange={(e) => handleTextChange(question.id, e.target.value)}
-                  placeholder="Votre réponse (optionnel)..."
+                  placeholder={t('placeholder')}
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                 />
@@ -335,7 +332,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
             disabled={currentCategory === 0}
             className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Précédent
+            {t('navigation.previous')}
           </button>
 
           {currentCategory < categories.length - 1 ? (
@@ -344,7 +341,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
               disabled={!isCurrentCategoryComplete()}
               className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Suivant
+              {t('navigation.next')}
             </button>
           ) : (
             <button
@@ -355,12 +352,12 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
-                  Envoi en cours...
+                  {t('navigation.submitting')}
                 </>
               ) : (
                 <>
                   <Send size={20} className="mr-2" />
-                  Envoyer
+                  {t('navigation.submit')}
                 </>
               )}
             </button>
@@ -368,7 +365,7 @@ export const SatisfactionSurvey: React.FC<SatisfactionSurveyProps> = ({
         </div>
 
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-6">
-          * Les questions notées sont obligatoires. Les commentaires sont optionnels mais appréciés.
+          {t('footer')}
         </p>
       </div>
     </div>

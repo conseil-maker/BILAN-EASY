@@ -1,0 +1,52 @@
+{
+  "title": "Memnuniyet Anketi",
+  "subtitle": "Görüşleriniz hizmetimizi geliştirmemiz için çok değerli",
+  "success": {
+    "title": "Geri bildiriminiz için teşekkürler!",
+    "message": "Memnuniyet anketiniz başarıyla kaydedildi. Yanıtlarınız hizmetimizi geliştirmemize yardımcı olacaktır."
+  },
+  "navigation": {
+    "previous": "Önceki",
+    "next": "Sonraki",
+    "submit": "Gönder",
+    "submitting": "Gönderiliyor..."
+  },
+  "ratings": {
+    "1": "Çok memnuniyetsiz",
+    "2": "Memnuniyetsiz",
+    "3": "Nötr",
+    "4": "Memnun",
+    "5": "Çok memnun"
+  },
+  "placeholder": "Yanıtınız (isteğe bağlı)...",
+  "footer": "* Puanlama soruları zorunludur. Yorumlar isteğe bağlıdır ancak takdir edilir.",
+  "categories": {
+    "Accueil et information": "Karşılama ve bilgilendirme",
+    "Déroulement": "Süreç",
+    "Accompagnement": "Eşlik",
+    "Résultats": "Sonuçlar",
+    "Plateforme": "Platform",
+    "Satisfaction globale": "Genel memnuniyet",
+    "Commentaires": "Yorumlar"
+  },
+  "questions": {
+    "q1": "Değerlendirme başlamadan önce verilen bilgiler açık ve eksiksiz miydi?",
+    "q2": "Karşılama ve ilk yönlendirme tatmin edici miydi?",
+    "q3": "Değerlendirme süreci planlanan takvime uygun mu ilerledi?",
+    "q4": "Değerlendirme süresi ihtiyaçlarınıza uygun muydu?",
+    "q5": "Kullanılan araçlar ve yöntemler uygun muydu?",
+    "q6": "Danışmanınız ihtiyaçlarınızı dinledi mi?",
+    "q7": "Tavsiyeler ve öneriler durumunuza uygun muydu?",
+    "q8": "Süreç boyunca kendinizi desteklenmiş hissettiniz mi?",
+    "q9": "Sentez belgesi beklentilerinizi karşılıyor mu?",
+    "q10": "Değerlendirme, mesleki projenizi netleştirmenize yardımcı oldu mu?",
+    "q11": "Önerilen eylem planı gerçekçi ve uygulanabilir mi?",
+    "q12": "Bilan-Easy platformu kullanımı kolay mıydı?",
+    "q13": "Sunulan özellikler ihtiyaçlarınızı karşıladı mı?",
+    "q14": "Bilan-Easy'yi çevrenize tavsiye eder misiniz?",
+    "q15": "Bu yetkinlik değerlendirmesiyle ilgili genel memnuniyetiniz nedir?",
+    "q16": "Bu yetkinlik değerlendirmesinin güçlü yönleri nelerdir?",
+    "q17": "İyileştirilmesi gereken noktalar nelerdir?",
+    "q18": "Hizmetimizi geliştirmek için önerileriniz var mı?"
+  }
+}

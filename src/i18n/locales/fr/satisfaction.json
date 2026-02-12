@@ -1,0 +1,52 @@
+{
+  "title": "Questionnaire de Satisfaction",
+  "subtitle": "Votre avis est précieux pour améliorer notre service",
+  "success": {
+    "title": "Merci pour votre retour !",
+    "message": "Votre questionnaire de satisfaction a été enregistré avec succès. Vos réponses nous aideront à améliorer notre service."
+  },
+  "navigation": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "submit": "Envoyer",
+    "submitting": "Envoi en cours..."
+  },
+  "ratings": {
+    "1": "Très insatisfait",
+    "2": "Insatisfait",
+    "3": "Neutre",
+    "4": "Satisfait",
+    "5": "Très satisfait"
+  },
+  "placeholder": "Votre réponse (optionnel)...",
+  "footer": "* Les questions notées sont obligatoires. Les commentaires sont optionnels mais appréciés.",
+  "categories": {
+    "Accueil et information": "Accueil et information",
+    "Déroulement": "Déroulement",
+    "Accompagnement": "Accompagnement",
+    "Résultats": "Résultats",
+    "Plateforme": "Plateforme",
+    "Satisfaction globale": "Satisfaction globale",
+    "Commentaires": "Commentaires"
+  },
+  "questions": {
+    "q1": "Les informations fournies avant le début du bilan étaient-elles claires et complètes ?",
+    "q2": "L'accueil et la prise en charge ont-ils été satisfaisants ?",
+    "q3": "Le déroulement du bilan a-t-il respecté le planning prévu ?",
+    "q4": "La durée du bilan était-elle adaptée à vos besoins ?",
+    "q5": "Les outils et méthodes utilisés étaient-ils pertinents ?",
+    "q6": "Votre consultant était-il à l'écoute de vos besoins ?",
+    "q7": "Les conseils et recommandations étaient-ils adaptés à votre situation ?",
+    "q8": "Vous êtes-vous senti(e) accompagné(e) tout au long du parcours ?",
+    "q9": "Le document de synthèse répond-il à vos attentes ?",
+    "q10": "Le bilan vous a-t-il permis de clarifier votre projet professionnel ?",
+    "q11": "Le plan d'action proposé est-il réaliste et applicable ?",
+    "q12": "La plateforme Bilan-Easy était-elle facile à utiliser ?",
+    "q13": "Les fonctionnalités proposées répondaient-elles à vos besoins ?",
+    "q14": "Recommanderiez-vous Bilan-Easy à votre entourage ?",
+    "q15": "Quelle est votre satisfaction globale concernant ce bilan de compétences ?",
+    "q16": "Quels sont les points forts de ce bilan de compétences ?",
+    "q17": "Quels sont les points à améliorer ?",
+    "q18": "Avez-vous des suggestions pour améliorer notre service ?"
+  }
+}
