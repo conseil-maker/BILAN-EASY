@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Compass, TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp,
   ThumbsUp, ThumbsDown, HelpCircle, Briefcase, GraduationCap, 
@@ -36,6 +37,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
   onSelectPath,
   onFollowUpAnswer
 }) => {
+  const { t } = useTranslation('career');
   const [isLoading, setIsLoading] = useState(true);
   const [explorationResult, setExplorationResult] = useState<CareerExplorationResult | null>(null);
   const [expandedPath, setExpandedPath] = useState<string | null>(null);
@@ -122,11 +124,11 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
   const getTrendLabel = (trend: string) => {
     switch (trend) {
       case 'en_croissance':
-        return 'En croissance';
+        return t('exploration.trends.growing');
       case 'en_declin':
-        return 'En déclin';
+        return t('exploration.trends.declining');
       default:
-        return 'Stable';
+        return t('exploration.trends.stable');
     }
   };
 
@@ -143,16 +145,15 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
             <Sparkles className="w-6 h-6 text-yellow-500 absolute -top-1 -right-1 animate-bounce" />
           </div>
           <h3 className="text-xl font-semibold text-gray-800 dark:text-white mt-6">
-            Analyse de votre profil en cours...
+            {t('exploration.loading.title')}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mt-2 text-center max-w-md">
-            L'IA explore les pistes professionnelles qui correspondent à vos compétences, 
-            motivations et aspirations.
+            {t('exploration.loading.subtitle')}
           </p>
           <div className="flex items-center gap-2 mt-6">
             <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
             <span className="text-sm text-indigo-600 dark:text-indigo-400">
-              Recherche en cours...
+              {t('exploration.loading.searching')}
             </span>
           </div>
         </div>
@@ -166,17 +167,16 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
         <div className="text-center py-8">
           <Compass className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Aucune piste trouvée
+            {t('exploration.noResults.title')}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Nous n'avons pas pu générer de pistes pour le moment. 
-            Continuez le bilan pour enrichir votre profil.
+            {t('exploration.noResults.subtitle')}
           </p>
           <button
             onClick={onClose}
             className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
-            Continuer le bilan
+            {t('exploration.noResults.continueBtn')}
           </button>
         </div>
       </div>
@@ -191,9 +191,9 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
           <div className="flex items-center gap-3">
             <Compass className="w-8 h-8" />
             <div>
-              <h2 className="text-xl font-bold">Exploration de pistes professionnelles</h2>
+              <h2 className="text-xl font-bold">{t('exploration.header.title')}</h2>
               <p className="text-indigo-100 text-sm mt-1">
-                Basée sur votre profil et le marché actuel
+                {t('exploration.header.subtitle')}
               </p>
             </div>
           </div>
@@ -210,7 +210,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
       {/* Profile Summary */}
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
         <h3 className="font-semibold text-gray-800 dark:text-white mb-2">
-          Votre profil en bref
+          {t('exploration.profileSummary')}
         </h3>
         <p className="text-gray-600 dark:text-gray-400 text-sm">
           {explorationResult.profileSummary}
@@ -230,7 +230,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
       {/* Career Paths */}
       <div className="p-6">
         <h3 className="font-semibold text-gray-800 dark:text-white mb-4">
-          {explorationResult.careerPaths.length} pistes identifiées pour vous
+          {t('exploration.pathsFound', { count: explorationResult.careerPaths.length })}
         </h3>
         
         <div className="space-y-4">
@@ -266,7 +266,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                           </h4>
                           <div className="flex items-center gap-3 mt-1">
                             <span className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
-                              {path.matchScore}% de correspondance
+                              {t('exploration.matchScore', { score: path.matchScore })}
                             </span>
                             <span className="flex items-center gap-1 text-sm text-gray-500">
                               {getTrendIcon(path.marketTrend)}
@@ -285,8 +285,8 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                             ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                             : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                         }`}>
-                          {reaction.reaction === 'interested' ? 'Intéressé' : 
-                           reaction.reaction === 'not_interested' ? 'Pas pour moi' : 'À explorer'}
+                          {reaction.reaction === 'interested' ? t('exploration.reactions.interested') : 
+                           reaction.reaction === 'not_interested' ? t('exploration.reactions.notInterested') : t('exploration.reactions.explore')}
                         </span>
                       )}
                       {isExpanded ? (
@@ -309,7 +309,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                     <div className="mt-4">
                       <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                         <Target className="w-4 h-4 text-indigo-500" />
-                        Pourquoi cette piste vous correspond
+                        {t('exploration.sections.matchReasons')}
                       </h5>
                       <ul className="space-y-1">
                         {path.matchReasons.map((reason, i) => (
@@ -325,7 +325,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Compétences requises
+                          {t('exploration.sections.requiredSkills')}
                         </h5>
                         <div className="flex flex-wrap gap-1">
                           {path.requiredSkills.map((skill, i) => (
@@ -337,7 +337,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                       </div>
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          À développer
+                          {t('exploration.sections.skillsToDevelop')}
                         </h5>
                         <div className="flex flex-wrap gap-1">
                           {path.skillsToAcquire.map((skill, i) => (
@@ -353,7 +353,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          💰 Salaire indicatif
+                          💰 {t('exploration.sections.salary')}
                         </h5>
                         <p className="text-gray-800 dark:text-white font-semibold">
                           {path.salaryRange}
@@ -362,7 +362,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                       <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
                           <GraduationCap className="w-4 h-4" />
-                          Formations recommandées
+                          {t('exploration.sections.training')}
                         </h5>
                         <ul className="text-sm text-gray-600 dark:text-gray-400">
                           {path.trainingPath.slice(0, 2).map((training, i) => (
@@ -376,7 +376,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                     <div className="mt-4">
                       <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                         <ArrowRight className="w-4 h-4 text-green-500" />
-                        Prochaines étapes
+                        {t('exploration.sections.nextSteps')}
                       </h5>
                       <ul className="space-y-1">
                         {path.nextSteps.map((step, i) => (
@@ -392,7 +392,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                     {!reaction && (
                       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                          Que pensez-vous de cette piste ?
+                          {t('exploration.reactionPrompt')}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <button
@@ -401,7 +401,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                             className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors disabled:opacity-50"
                           >
                             <ThumbsUp className="w-4 h-4" />
-                            Ça m'intéresse
+                            {t('exploration.buttons.interested')}
                           </button>
                           <button
                             onClick={() => handleReaction(path, 'need_more_info')}
@@ -409,7 +409,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                             className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50"
                           >
                             <HelpCircle className="w-4 h-4" />
-                            J'ai des questions
+                            {t('exploration.buttons.questions')}
                           </button>
                           <button
                             onClick={() => handleReaction(path, 'not_interested')}
@@ -417,7 +417,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                             className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
                           >
                             <ThumbsDown className="w-4 h-4" />
-                            Pas pour moi
+                            {t('exploration.buttons.notForMe')}
                           </button>
                         </div>
                       </div>
@@ -432,7 +432,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                         <textarea
                           value={followUpAnswer}
                           onChange={(e) => setFollowUpAnswer(e.target.value)}
-                          placeholder="Votre réponse..."
+                          placeholder={t('exploration.followUp.placeholder')}
                           className="w-full p-3 border border-indigo-200 dark:border-indigo-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-white text-sm resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           rows={3}
                         />
@@ -441,7 +441,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
                           disabled={!followUpAnswer.trim()}
                           className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         >
-                          Envoyer
+                          {t('exploration.buttons.send')}
                         </button>
                       </div>
                     )}
@@ -466,7 +466,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
       {explorationResult.explorationQuestions.length > 0 && (
         <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
           <h3 className="font-semibold text-gray-800 dark:text-white mb-3">
-            Questions pour approfondir votre réflexion
+            {t('exploration.deeperQuestions')}
           </h3>
           <ul className="space-y-2">
             {explorationResult.explorationQuestions.map((question, i) => (
@@ -482,14 +482,13 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
       {/* Footer */}
       <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Ces pistes sont des suggestions basées sur votre profil. 
-          Elles seront intégrées à votre document de synthèse.
+          {t('exploration.footer')}
         </p>
         <button
           onClick={onClose}
           className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
-          Continuer le bilan
+          {t('exploration.buttons.continue')}
         </button>
       </div>
     </div>

@@ -1,0 +1,95 @@
+{
+  "exploration": {
+    "loading": {
+      "title": "Profiliniz analiz ediliyor...",
+      "subtitle": "Yapay zeka, yetkinliklerinize, motivasyonlarınıza ve hedeflerinize uygun kariyer yollarını araştırıyor.",
+      "searching": "Aranıyor..."
+    },
+    "noResults": {
+      "title": "Hiçbir yol bulunamadı",
+      "subtitle": "Şu anda öneriler oluşturamadık. Profilinizi zenginleştirmek için değerlendirmeye devam edin.",
+      "continueBtn": "Değerlendirmeye devam et"
+    },
+    "header": {
+      "title": "Kariyer yolları keşfi",
+      "subtitle": "Profilinize ve güncel pazara dayalı"
+    },
+    "profileSummary": "Profilinizin özeti",
+    "pathsFound": "Sizin için {{count}} yol belirlendi",
+    "matchScore": "%{{score}} uyumluluk",
+    "trends": {
+      "growing": "Büyüyen",
+      "declining": "Gerileyen",
+      "stable": "Durağan"
+    },
+    "reactions": {
+      "interested": "İlgilendim",
+      "notInterested": "Benim için değil",
+      "explore": "Keşfedilecek"
+    },
+    "sections": {
+      "matchReasons": "Bu yol neden size uygun",
+      "requiredSkills": "Gerekli yetkinlikler",
+      "skillsToDevelop": "Geliştirilecek",
+      "salary": "Tahmini maaş",
+      "training": "Önerilen eğitimler",
+      "nextSteps": "Sonraki adımlar"
+    },
+    "reactionPrompt": "Bu yol hakkında ne düşünüyorsunuz?",
+    "buttons": {
+      "interested": "İlgilendim",
+      "questions": "Sorularım var",
+      "notForMe": "Benim için değil",
+      "send": "Gönder",
+      "continue": "Değerlendirmeye devam et"
+    },
+    "followUp": {
+      "placeholder": "Yanıtınız..."
+    },
+    "deeperQuestions": "Düşüncenizi derinleştirmek için sorular",
+    "footer": "Bu yollar profilinize dayalı önerilerdir. Sentez belgenize dahil edilecektir."
+  },
+  "market": {
+    "loading": {
+      "title": "Pazar analizi yapılıyor...",
+      "subtitle": "Yapay zeka, profilinizle ilgili iş piyasası trendlerini analiz ediyor.",
+      "searching": "Aranıyor..."
+    },
+    "header": {
+      "title": "Pazar keşfi",
+      "subtitle": "Profiliniz için trendler ve fırsatlar"
+    },
+    "sections": {
+      "overview": "Pazar genel görünümü",
+      "opportunities": "Belirlenen fırsatlar",
+      "threats": "Dikkat edilecek noktalar",
+      "recommendations": "Öneriler"
+    },
+    "buttons": {
+      "close": "Kapat",
+      "continue": "Değerlendirmeye devam et"
+    }
+  },
+  "interview": {
+    "loading": {
+      "title": "Mülakat hazırlanıyor...",
+      "subtitle": "Yapay zeka, profilinize dayalı kişiselleştirilmiş bir mülakat hazırlıyor.",
+      "searching": "Yükleniyor..."
+    },
+    "header": {
+      "title": "Mülakat simülasyonu",
+      "subtitle": "Kişiselleştirilmiş sorularla hazırlanın"
+    },
+    "buttons": {
+      "send": "Gönder",
+      "finish": "Mülakatı bitir",
+      "close": "Kapat"
+    },
+    "placeholder": "Yanıtınız...",
+    "feedback": {
+      "title": "Yanıtlarınız hakkında geri bildirim",
+      "strengths": "Güçlü yönler",
+      "improvements": "Geliştirilecek alanlar"
+    }
+  }
+}

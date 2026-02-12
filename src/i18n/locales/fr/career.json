@@ -1,0 +1,95 @@
+{
+  "exploration": {
+    "loading": {
+      "title": "Analyse de votre profil en cours...",
+      "subtitle": "L'IA explore les pistes professionnelles qui correspondent à vos compétences, motivations et aspirations.",
+      "searching": "Recherche en cours..."
+    },
+    "noResults": {
+      "title": "Aucune piste trouvée",
+      "subtitle": "Nous n'avons pas pu générer de pistes pour le moment. Continuez le bilan pour enrichir votre profil.",
+      "continueBtn": "Continuer le bilan"
+    },
+    "header": {
+      "title": "Exploration de pistes professionnelles",
+      "subtitle": "Basée sur votre profil et le marché actuel"
+    },
+    "profileSummary": "Votre profil en bref",
+    "pathsFound": "{{count}} pistes identifiées pour vous",
+    "matchScore": "{{score}}% de correspondance",
+    "trends": {
+      "growing": "En croissance",
+      "declining": "En déclin",
+      "stable": "Stable"
+    },
+    "reactions": {
+      "interested": "Intéressé",
+      "notInterested": "Pas pour moi",
+      "explore": "À explorer"
+    },
+    "sections": {
+      "matchReasons": "Pourquoi cette piste vous correspond",
+      "requiredSkills": "Compétences requises",
+      "skillsToDevelop": "À développer",
+      "salary": "Salaire indicatif",
+      "training": "Formations recommandées",
+      "nextSteps": "Prochaines étapes"
+    },
+    "reactionPrompt": "Que pensez-vous de cette piste ?",
+    "buttons": {
+      "interested": "Ça m'intéresse",
+      "questions": "J'ai des questions",
+      "notForMe": "Pas pour moi",
+      "send": "Envoyer",
+      "continue": "Continuer le bilan"
+    },
+    "followUp": {
+      "placeholder": "Votre réponse..."
+    },
+    "deeperQuestions": "Questions pour approfondir votre réflexion",
+    "footer": "Ces pistes sont des suggestions basées sur votre profil. Elles seront intégrées à votre document de synthèse."
+  },
+  "market": {
+    "loading": {
+      "title": "Analyse du marché en cours...",
+      "subtitle": "L'IA analyse les tendances du marché de l'emploi en lien avec votre profil.",
+      "searching": "Recherche en cours..."
+    },
+    "header": {
+      "title": "Exploration du marché",
+      "subtitle": "Tendances et opportunités pour votre profil"
+    },
+    "sections": {
+      "overview": "Vue d'ensemble du marché",
+      "opportunities": "Opportunités identifiées",
+      "threats": "Points de vigilance",
+      "recommendations": "Recommandations"
+    },
+    "buttons": {
+      "close": "Fermer",
+      "continue": "Continuer le bilan"
+    }
+  },
+  "interview": {
+    "loading": {
+      "title": "Préparation de l'entretien...",
+      "subtitle": "L'IA prépare un entretien personnalisé basé sur votre profil.",
+      "searching": "Chargement en cours..."
+    },
+    "header": {
+      "title": "Simulation d'entretien",
+      "subtitle": "Préparez-vous avec des questions personnalisées"
+    },
+    "buttons": {
+      "send": "Envoyer",
+      "finish": "Terminer l'entretien",
+      "close": "Fermer"
+    },
+    "placeholder": "Votre réponse...",
+    "feedback": {
+      "title": "Retour sur vos réponses",
+      "strengths": "Points forts",
+      "improvements": "Axes d'amélioration"
+    }
+  }
+}
