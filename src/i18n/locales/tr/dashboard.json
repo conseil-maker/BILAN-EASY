@@ -135,6 +135,25 @@
     "answersPlural": "{{count}} cevap",
     "percentCompleted": "%{{percent}} tamamlandı"
   },
+  "history": {
+    "title": "Değerlendirme Geçmişi",
+    "subtitle": "Önceki değerlendirmelerinizi inceleyin.",
+    "loading": "Geçmiş yükleniyor...",
+    "empty": "Geçmişinizde hiçbir değerlendirme bulunamadı.",
+    "startNew": "Yeni bir değerlendirme başlat",
+    "saved": "☁️ Kaydedildi",
+    "completedOn": "Tamamlanma tarihi",
+    "profile": "Profil",
+    "answers": "cevap",
+    "view": "İncele",
+    "deleteTitle": "Bu değerlendirmeyi sil",
+    "backHome": "Ana sayfaya dön",
+    "errorLogin": "Geçmişi görmek için giriş yapmalısınız",
+    "errorLoad": "Geçmiş yüklenirken hata oluştu",
+    "confirmDelete": "Bu değerlendirmeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "deleteSuccess": "Değerlendirme başarıyla silindi",
+    "deleteError": "Değerlendirme silinirken hata oluştu"
+  },
   "toasts": {
     "pdfSuccess": "PDF özet başarıyla indirildi!",
     "pdfError": "PDF indirirken bir hata oluştu.",

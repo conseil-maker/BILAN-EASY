@@ -232,5 +232,15 @@
       "analyzing": "Profil analiz ediliyor...",
       "done": "Analiz tamamlandı!"
     }
+  },
+  "speech": {
+    "title": "Ses Ayarları",
+    "toggleLabel": "Sesli okumayı etkinleştir",
+    "enabled": "🔊 Sesli okuma etkin - Sorular otomatik olarak okunacak",
+    "disabled": "🔇 Sesli okuma devre dışı - Etkinleştirmek için düğmeye tıklayın",
+    "voice": "Ses",
+    "googleHint": "Google sesleri (⭐) genellikle daha iyi kalite sunar",
+    "speed": "Hız",
+    "pitch": "Ton"
   }
 }

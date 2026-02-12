@@ -232,5 +232,15 @@
       "analyzing": "Analyse du profil en cours...",
       "done": "Analyse terminée!"
     }
+  },
+  "speech": {
+    "title": "Paramètres de la Voix",
+    "toggleLabel": "Activer la lecture vocale",
+    "enabled": "🔊 Lecture vocale activée - Les questions seront lues automatiquement",
+    "disabled": "🔇 Lecture vocale désactivée - Cliquez sur le toggle pour activer",
+    "voice": "Voix",
+    "googleHint": "Les voix Google (⭐) offrent généralement une meilleure qualité",
+    "speed": "Vitesse",
+    "pitch": "Hauteur"
   }
 }

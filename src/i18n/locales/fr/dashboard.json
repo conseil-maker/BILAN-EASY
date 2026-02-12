@@ -135,6 +135,25 @@
     "answersPlural": "{{count}} réponses",
     "percentCompleted": "{{percent}}% complété"
   },
+  "history": {
+    "title": "Historique des Bilans",
+    "subtitle": "Consultez vos évaluations précédentes.",
+    "loading": "Chargement de l'historique...",
+    "empty": "Aucune évaluation n'a été trouvée dans votre historique.",
+    "startNew": "Commencer une nouvelle évaluation",
+    "saved": "☁️ Sauvegardé",
+    "completedOn": "Complété le",
+    "profile": "Profil",
+    "answers": "réponse(s)",
+    "view": "Consulter",
+    "deleteTitle": "Supprimer ce bilan",
+    "backHome": "Retour à l'accueil",
+    "errorLogin": "Vous devez être connecté pour voir l'historique",
+    "errorLoad": "Erreur lors du chargement de l'historique",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce bilan ? Cette action est irréversible.",
+    "deleteSuccess": "Bilan supprimé avec succès",
+    "deleteError": "Erreur lors de la suppression du bilan"
+  },
   "toasts": {
     "pdfSuccess": "Synthèse PDF téléchargée avec succès !",
     "pdfError": "Une erreur est survenue lors du téléchargement du PDF.",
