@@ -103,19 +103,31 @@
   "interview": {
     "loading": {
       "title": "Préparation de l'entretien...",
-      "subtitle": "L'IA prépare un entretien personnalisé basé sur votre profil.",
+      "subtitle": "Notre IA prépare un professionnel virtuel expérimenté en {{job}} pour répondre à vos questions.",
       "searching": "Chargement en cours..."
     },
     "header": {
-      "title": "Simulation d'entretien",
-      "subtitle": "Préparez-vous avec des questions personnalisées"
+      "title": "Enquête Métier : {{job}}",
+      "subtitle": "Préparez-vous avec des questions personnalisées",
+      "persona": "Avec {{name}} • {{years}} ans d'expérience"
+    },
+    "typing": "{{name}} écrit...",
+    "insights": "Insights de {{name}}",
+    "sections": {
+      "typicalDay": "Journée type",
+      "pros": "Avantages",
+      "cons": "Inconvénients",
+      "tips": "Conseils pour réussir",
+      "keySkills": "Compétences clés",
+      "idealProfile": "Profil idéal",
+      "futureOutlook": "Perspectives d'avenir"
     },
     "buttons": {
       "send": "Envoyer",
-      "finish": "Terminer l'entretien",
+      "finish": "Terminer l'enquête",
       "close": "Fermer"
     },
-    "placeholder": "Votre réponse...",
+    "placeholder": "Posez votre question ou répondez...",
     "feedback": {
       "title": "Retour sur vos réponses",
       "strengths": "Points forts",

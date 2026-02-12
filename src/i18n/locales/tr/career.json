@@ -103,19 +103,31 @@
   "interview": {
     "loading": {
       "title": "Mülakat hazırlanıyor...",
-      "subtitle": "Yapay zeka, profilinize dayalı kişiselleştirilmiş bir mülakat hazırlıyor.",
+      "subtitle": "Yapay zekamız {{job}} alanında deneyimli bir sanal profesyonel hazırlıyor.",
       "searching": "Yükleniyor..."
     },
     "header": {
-      "title": "Mülakat simülasyonu",
-      "subtitle": "Kişiselleştirilmiş sorularla hazırlanın"
+      "title": "Meslek Araştırması: {{job}}",
+      "subtitle": "Kişiselleştirilmiş sorularla hazırlanın",
+      "persona": "{{name}} ile • {{years}} yıl deneyim"
+    },
+    "typing": "{{name}} yazıyor...",
+    "insights": "{{name}} tarafından içgörüler",
+    "sections": {
+      "typicalDay": "Tipik bir gün",
+      "pros": "Avantajlar",
+      "cons": "Dezavantajlar",
+      "tips": "Başarı için ipuçları",
+      "keySkills": "Temel yetkinlikler",
+      "idealProfile": "İdeal profil",
+      "futureOutlook": "Gelecek perspektifleri"
     },
     "buttons": {
       "send": "Gönder",
-      "finish": "Mülakatı bitir",
+      "finish": "Araştırmayı bitir",
       "close": "Kapat"
     },
-    "placeholder": "Yanıtınız...",
+    "placeholder": "Sorunuzu sorun veya yanıtlayın...",
     "feedback": {
       "title": "Yanıtlarınız hakkında geri bildirim",
       "strengths": "Güçlü yönler",
