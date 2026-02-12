@@ -74,6 +74,15 @@
       }
     }
   },
+  "sessionResumed": "Tamamlanmış değerlendirmeniz devam ettiriliyor",
+  "bilanSaved": "Değerlendirme başarıyla kaydedildi!",
+  "bilanSaveError": "Değerlendirme kaydedilirken hata oluştu. Verileriniz korunmaktadır, lütfen tekrar deneyin.",
+  "welcomeBack": "Tekrar hoş geldiniz, {{name}}!",
+  "welcomeBackSubtitle": "Hazır olduğunuzda devam edebiliriz.",
+  "lastSession": "Son oturum:",
+  "questionsCompleted": "{{count}} soru zaten tamamlandı",
+  "resumeBilan": "Değerlendirmeme devam et",
+  "later": "Daha sonra",
   "footer": {
     "rights": "Tüm hakları saklıdır",
     "legal": "Yasal bilgiler",

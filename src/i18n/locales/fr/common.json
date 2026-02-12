@@ -74,6 +74,15 @@
       }
     }
   },
+  "sessionResumed": "Reprise de votre bilan terminé",
+  "bilanSaved": "Bilan sauvegardé avec succès !",
+  "bilanSaveError": "Erreur lors de la sauvegarde du bilan. Vos données sont préservées, veuillez réessayer.",
+  "welcomeBack": "Ravi de vous revoir, {{name}} !",
+  "welcomeBackSubtitle": "On peut reprendre dès que vous serez disponible.",
+  "lastSession": "Dernière session :",
+  "questionsCompleted": "{{count}} question(s) déjà complétée(s)",
+  "resumeBilan": "Reprendre mon bilan",
+  "later": "Plus tard",
   "footer": {
     "rights": "Tous droits réservés",
     "legal": "Mentions légales",
