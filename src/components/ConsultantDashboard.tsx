@@ -259,7 +259,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                         onClick={() => setSelectedAssessment(assessment)}
                         className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm"
                       >
-                        Consulter
+                        {t('table.actions')}
                       </button>
                     </div>
                   </div>
