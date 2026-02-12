@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
 import { AssignmentManager } from './AssignmentManager';
@@ -16,6 +17,7 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
+  const { t } = useTranslation('admin');
   const { showSuccess, showError } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,8 +100,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         <header className="mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold text-primary-800 mb-2">Dashboard Administrateur</h1>
-              <p className="text-slate-600">Gestion des utilisateurs et statistiques</p>
+              <h1 className="text-4xl font-bold text-primary-800 mb-2">{t('title')}</h1>
+              <p className="text-slate-600">{t('subtitle')}</p>
             </div>
             <button
               onClick={onBack}
@@ -114,19 +116,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-primary-600">{stats.totalUsers}</div>
-            <div className="text-slate-600 mt-1">Utilisateurs totaux</div>
+            <div className="text-slate-600 mt-1">{t('stats.totalUsers')}</div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-blue-600">{stats.totalClients}</div>
-            <div className="text-slate-600 mt-1">Clients</div>
+            <div className="text-slate-600 mt-1">{t('users.roles.client')}</div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-green-600">{stats.totalConsultants}</div>
-            <div className="text-slate-600 mt-1">Consultants</div>
+            <div className="text-slate-600 mt-1">{t('users.roles.consultant')}</div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-purple-600">{stats.totalAssessments}</div>
-            <div className="text-slate-600 mt-1">Bilans réalisés</div>
+            <div className="text-slate-600 mt-1">{t('stats.completedBilans')}</div>
           </div>
         </div>
 
@@ -138,7 +140,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         {/* Liste des utilisateurs */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="p-6 border-b border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-800">Gestion des utilisateurs</h2>
+            <h2 className="text-2xl font-bold text-slate-800">{t('users.management')}</h2>
           </div>
           
           <div className="overflow-x-auto">
@@ -146,19 +148,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Email
+                    {t('users.table.email')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Nom
+                    {t('users.table.name')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Rôle
+                    {t('users.table.role')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Date d'inscription
+                    {t('users.table.registration')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Actions
+                    {t('users.table.actions')}
                   </th>
                 </tr>
               </thead>
@@ -177,9 +179,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                         user.role === 'consultant' ? 'bg-green-100 text-green-800' :
                         'bg-blue-100 text-blue-800'
                       }`}>
-                        {user.role === 'admin' ? 'Admin' :
-                         user.role === 'consultant' ? 'Consultant' :
-                         'Client'}
+                        {user.role === 'admin' ? t('users.roles.admin') :
+                         user.role === 'consultant' ? t('users.roles.consultant') :
+                         t('users.roles.client')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
