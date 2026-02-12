@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from './ToastProvider';
 import { assignmentService } from '../services/assignmentService';
 
@@ -22,6 +23,7 @@ interface Assignment {
 }
 
 export const AssignmentManager: React.FC = () => {
+  const { t } = useTranslation('admin');
   const { showSuccess, showError, showWarning } = useToast();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [unassignedClients, setUnassignedClients] = useState<Client[]>([]);
@@ -106,7 +108,7 @@ export const AssignmentManager: React.FC = () => {
       {/* En-tête */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Gestion des affectations</h2>
+          <h2 className="text-2xl font-bold text-slate-800">{t('assignments.title')}</h2>
           <p className="text-slate-600 mt-1">
             {assignments.length} affectation{assignments.length > 1 ? 's' : ''} active{assignments.length > 1 ? 's' : ''} • {unassignedClients.length} client{unassignedClients.length > 1 ? 's' : ''} non assigné{unassignedClients.length > 1 ? 's' : ''}
           </p>
@@ -115,7 +117,7 @@ export const AssignmentManager: React.FC = () => {
           onClick={() => setShowAssignModal(true)}
           className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-semibold"
         >
-          + Nouvelle affectation
+          + {t('assignments.newAssignment')}
         </button>
       </div>
 
@@ -139,16 +141,16 @@ export const AssignmentManager: React.FC = () => {
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         {assignments.length === 0 ? (
           <div className="p-8 text-center text-slate-600">
-            Aucune affectation pour le moment.
+            {t('assignments.noAssignments')}
           </div>
         ) : (
           <table className="w-full">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Client</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Consultant</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date d'affectation</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('users.table.name')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('assignments.consultant')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('assignments.assignDate')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('users.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -182,7 +184,7 @@ export const AssignmentManager: React.FC = () => {
                       onClick={() => handleUnassign(assignment.id)}
                       className="text-red-600 hover:text-red-800 font-medium"
                     >
-                      Retirer
+                      {t('assignments.remove')}
                     </button>
                   </td>
                 </tr>
@@ -196,19 +198,19 @@ export const AssignmentManager: React.FC = () => {
       {showAssignModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-slate-800 mb-4">Nouvelle affectation</h3>
+            <h3 className="text-xl font-bold text-slate-800 mb-4">{t('assignments.newAssignment')}</h3>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Sélectionner un client
+                  {t('assignments.selectClient')}
                 </label>
                 <select
                   value={selectedClient}
                   onChange={(e) => setSelectedClient(e.target.value)}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2"
                 >
-                  <option value="">-- Choisir un client --</option>
+                  <option value="">-- {t('assignments.chooseClient')} --</option>
                   {unassignedClients.map(client => (
                     <option key={client.id} value={client.id}>
                       {client.full_name || client.email}
@@ -219,14 +221,14 @@ export const AssignmentManager: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Sélectionner un consultant
+                  {t('assignments.selectConsultant')}
                 </label>
                 <select
                   value={selectedConsultant}
                   onChange={(e) => setSelectedConsultant(e.target.value)}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2"
                 >
-                  <option value="">-- Choisir un consultant --</option>
+                  <option value="">-- {t('assignments.chooseConsultant')} --</option>
                   {consultants.map(consultant => (
                     <option key={consultant.id} value={consultant.id}>
                       {consultant.full_name || consultant.email}
@@ -246,14 +248,14 @@ export const AssignmentManager: React.FC = () => {
                 className="flex-1 bg-slate-200 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-300 transition-colors"
                 disabled={processing}
               >
-                Annuler
+                {t('assignments.cancel')}
               </button>
               <button
                 onClick={handleAssign}
                 disabled={processing || !selectedClient || !selectedConsultant}
                 className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed"
               >
-                {processing ? 'Affectation...' : 'Affecter'}
+                {processing ? t('assignments.assigning') : t('assignments.assign')}
               </button>
             </div>
           </div>

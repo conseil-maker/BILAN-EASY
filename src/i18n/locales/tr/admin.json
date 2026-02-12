@@ -24,10 +24,13 @@
     "title": "Son aktiviteler"
   },
   "users": {
+    "management": "Kullanıcı yönetimi",
     "table": {
       "user": "Kullanıcı",
+      "email": "E-posta",
+      "name": "Ad",
       "role": "Rol",
-      "registration": "Kayıt",
+      "registration": "Kayıt tarihi",
       "actions": "İşlemler"
     },
     "roles": {
@@ -57,6 +60,21 @@
     "completionRate": "Tamamlanma oranı",
     "documentCompliance": "Belge uygunluğu",
     "sixMonthFollowUp": "6 aylık takip"
+  },
+  "assignments": {
+    "title": "Atama yönetimi",
+    "noAssignments": "Şu anda atama bulunmamaktadır.",
+    "consultant": "Danışman",
+    "assignDate": "Atama tarihi",
+    "remove": "Kaldır",
+    "newAssignment": "Yeni atama",
+    "selectClient": "Danışan seçin",
+    "chooseClient": "Danışan seçin",
+    "selectConsultant": "Danışman seçin",
+    "chooseConsultant": "Danışman seçin",
+    "cancel": "İptal",
+    "assigning": "Atama yapılıyor...",
+    "assign": "Ata"
   },
   "settings": {
     "orgInfo": "Kuruluş bilgileri",

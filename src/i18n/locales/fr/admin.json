@@ -58,6 +58,37 @@
     "documentCompliance": "Conformité documents",
     "sixMonthFollowUp": "Suivi à 6 mois"
   },
+  "users": {
+    "management": "Gestion des utilisateurs",
+    "table": {
+      "user": "Utilisateur",
+      "email": "Email",
+      "name": "Nom",
+      "role": "R\u00f4le",
+      "registration": "Date d'inscription",
+      "actions": "Actions"
+    },
+    "roles": {
+      "client": "Client",
+      "consultant": "Consultant",
+      "admin": "Admin"
+    }
+  },
+  "assignments": {
+    "title": "Gestion des affectations",
+    "noAssignments": "Aucune affectation pour le moment.",
+    "consultant": "Consultant",
+    "assignDate": "Date d'affectation",
+    "remove": "Retirer",
+    "newAssignment": "Nouvelle affectation",
+    "selectClient": "S\u00e9lectionner un client",
+    "chooseClient": "Choisir un client",
+    "selectConsultant": "S\u00e9lectionner un consultant",
+    "chooseConsultant": "Choisir un consultant",
+    "cancel": "Annuler",
+    "assigning": "Affectation...",
+    "assign": "Affecter"
+  },
   "settings": {
     "orgInfo": "Informations de l'organisme",
     "orgName": "Nom de l'organisme",
