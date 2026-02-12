@@ -243,6 +243,14 @@
     "speed": "Hız",
     "pitch": "Ton"
   },
+  "aiFeedback": {
+    "progress": "İlerleme",
+    "didYouKnow": "Biliyor muydunuz?",
+    "identifiedThemes": "Tespit edilen temalar",
+    "phaseCompleted": "Aşama tamamlandı!",
+    "bravo": "Tebrikler {{name}}! \"{{phase}}\" aşamasını tamamladınız.",
+    "continueToPhase": "{{phase}} aşamasına devam et"
+  },
   "enhanced": {
     "hidePanel": "Paneli gizle",
     "advice": "Öneri",

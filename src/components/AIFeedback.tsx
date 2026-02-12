@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CoachingStyle, Answer } from '../types';
 import { 
   getPersonalizedEncouragement, 
@@ -22,6 +23,7 @@ export const AIFeedback: React.FC<AIFeedbackProps> = ({
   totalQuestions,
   isVisible
 }) => {
+  const { t } = useTranslation('questionnaire');
   const [encouragement, setEncouragement] = useState('');
   const [insight, setInsight] = useState<string | undefined>();
   const [progressFeedback, setProgressFeedback] = useState('');
@@ -46,7 +48,7 @@ export const AIFeedback: React.FC<AIFeedbackProps> = ({
       {/* Barre de progression visuelle */}
       <div className="mb-3">
         <div className="flex justify-between text-xs text-indigo-600 dark:text-indigo-400 mb-1">
-          <span>Progression</span>
+          <span>{t('aiFeedback.progress', 'Progression')}</span>
           <span>{progress}%</span>
         </div>
         <div className="h-2 bg-indigo-100 dark:bg-indigo-900 rounded-full overflow-hidden">
@@ -75,7 +77,7 @@ export const AIFeedback: React.FC<AIFeedbackProps> = ({
           <div className="flex items-center gap-2 mb-1">
             <span className="text-amber-500">💡</span>
             <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
-              Le saviez-vous ?
+              {t('aiFeedback.didYouKnow', 'Le saviez-vous ?')}
             </span>
           </div>
           <p className="text-sm text-gray-700 dark:text-gray-300 italic">
@@ -87,7 +89,7 @@ export const AIFeedback: React.FC<AIFeedbackProps> = ({
       {/* Thèmes détectés */}
       {themes.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          <span className="text-xs text-gray-500 dark:text-gray-400">Thèmes identifiés :</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">{t('aiFeedback.identifiedThemes', 'Thèmes identifiés')} :</span>
           {themes.map((theme, index) => (
             <span 
               key={index}
@@ -123,6 +125,7 @@ export const PhaseTransition: React.FC<PhaseTransitionProps> = ({
   userName,
   onContinue
 }) => {
+  const { t } = useTranslation('questionnaire');
   const phaseNames: Record<string, string> = {
     'phase1': 'Investigation',
     'phase2': 'Analyse des compétences',
@@ -143,10 +146,10 @@ export const PhaseTransition: React.FC<PhaseTransitionProps> = ({
             <span className="text-4xl">✓</span>
           </div>
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-            Phase terminée !
+            {t('aiFeedback.phaseCompleted', 'Phase terminée !')}
           </h2>
           <p className="text-gray-600 dark:text-gray-300">
-            Bravo {userName} ! Vous avez complété la phase "{phaseNames[fromPhase]}".
+            {t('aiFeedback.bravo', { name: userName, phase: phaseNames[fromPhase] })}
           </p>
         </div>
 
@@ -172,7 +175,7 @@ export const PhaseTransition: React.FC<PhaseTransitionProps> = ({
           onClick={onContinue}
           className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all"
         >
-          Continuer vers {phaseNames[toPhase]}
+          {t('aiFeedback.continueToPhase', { phase: phaseNames[toPhase] })}
         </button>
       </div>
     </div>

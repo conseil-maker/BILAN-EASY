@@ -243,6 +243,14 @@
     "speed": "Vitesse",
     "pitch": "Hauteur"
   },
+  "aiFeedback": {
+    "progress": "Progression",
+    "didYouKnow": "Le saviez-vous ?",
+    "identifiedThemes": "Thèmes identifiés",
+    "phaseCompleted": "Phase terminée !",
+    "bravo": "Bravo {{name}} ! Vous avez complété la phase \"{{phase}}\".",
+    "continueToPhase": "Continuer vers {{phase}}"
+  },
   "enhanced": {
     "hidePanel": "Masquer le panneau",
     "advice": "Conseil",

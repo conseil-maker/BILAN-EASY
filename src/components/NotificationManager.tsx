@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   isNotificationSupported,
   getPermissionStatus,
@@ -24,6 +25,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
   userName,
   onPermissionChange,
 }) => {
+  const { t } = useTranslation('common');
   const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>('default');
   const [showBanner, setShowBanner] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -88,8 +90,8 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
               </svg>
             </div>
             <div className="text-white">
-              <h3 className="font-semibold">Restez informé</h3>
-              <p className="text-sm text-white/80">Activez les notifications</p>
+              <h3 className="font-semibold">{t('notifications.stayInformed')}</h3>
+              <p className="text-sm text-white/80">{t('notifications.enableNotifications')}</p>
             </div>
           </div>
         </div>
@@ -97,7 +99,7 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
         {/* Content */}
         <div className="p-4">
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-            Recevez des rappels pour continuer votre bilan et des alertes pour vos rendez-vous.
+            {t('notifications.description')}
           </p>
 
           <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-2 mb-4">
@@ -105,19 +107,19 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
               <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              Rappels de rendez-vous
+              {t('notifications.appointmentReminders')}
             </li>
             <li className="flex items-center gap-2">
               <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              Progression du bilan
+              {t('notifications.bilanProgress')}
             </li>
             <li className="flex items-center gap-2">
               <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              Documents disponibles
+              {t('notifications.documentsAvailable')}
             </li>
           </ul>
 
@@ -127,13 +129,13 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
               onClick={handleRequestPermission}
               className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
             >
-              Activer
+              {t('notifications.enable')}
             </button>
             <button
               onClick={handleDismiss}
               className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              Plus tard
+              {t('notifications.later')}
             </button>
           </div>
         </div>
