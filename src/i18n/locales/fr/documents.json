@@ -77,6 +77,23 @@
   "loadingLibrary": "Chargement de la bibliothèque...",
   "loadingMyDocs": "Chargement de vos documents...",
   "defaultUser": "Utilisateur",
+  "library": {
+    "title": "Bibliothèque de documents",
+    "subtitle": "Tous vos documents officiels et ressources au même endroit",
+    "search": "Rechercher un document...",
+    "filterAll": "Tous les documents",
+    "filterRequired": "Documents obligatoires",
+    "filterSynthesis": "Synthèse",
+    "filterResources": "Ressources",
+    "available": "Disponible",
+    "pending": "En cours",
+    "locked": "Verrouillé",
+    "lastDownload": "Dernier téléchargement",
+    "jobGuide": "Guide des métiers",
+    "jobGuideDesc": "Fiches métiers correspondant à votre profil",
+    "qualiopiTitle": "Conformité Qualiopi",
+    "qualiopiText": "Tous les documents générés sont conformes au référentiel national qualité Qualiopi et aux articles L.6313-1 et suivants du Code du travail. Ils sont acceptés par les organismes financeurs (CPF, OPCO, etc.)."
+  },
   "qualiopi": {
     "title": "Documents Obligatoires",
     "subtitle": "Téléchargez vos documents officiels conformes Qualiopi",

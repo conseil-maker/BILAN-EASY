@@ -77,6 +77,23 @@
   "loadingLibrary": "Kütüphane yükleniyor...",
   "loadingMyDocs": "Belgeleriniz yükleniyor...",
   "defaultUser": "Kullanıcı",
+  "library": {
+    "title": "Belge kütüphanesi",
+    "subtitle": "Tüm resmi belgeleriniz ve kaynaklarınız tek bir yerde",
+    "search": "Belge ara...",
+    "filterAll": "Tüm belgeler",
+    "filterRequired": "Zorunlu belgeler",
+    "filterSynthesis": "Sentez",
+    "filterResources": "Kaynaklar",
+    "available": "Mevcut",
+    "pending": "Devam ediyor",
+    "locked": "Kilitli",
+    "lastDownload": "Son indirme",
+    "jobGuide": "Meslek rehberi",
+    "jobGuideDesc": "Profilinize uygun meslek bilgi sayfaları",
+    "qualiopiTitle": "Yasal uyumluluk",
+    "qualiopiText": "Oluşturulan tüm belgeler yasal düzenlemelere uygundur."
+  },
   "qualiopi": {
     "title": "Zorunlu Belgeler",
     "subtitle": "Resmi belgelerinizi indirin",

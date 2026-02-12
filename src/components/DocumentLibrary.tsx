@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   FileText, Download, FolderOpen, Clock, CheckCircle, 
   AlertCircle, Search, Filter, Calendar, User 
@@ -40,6 +41,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
   endDate,
   isCompleted = false
 }) => {
+  const { t } = useTranslation('documents');
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     saveDownload(docId);
-    setSuccess(`Document "${filename}" téléchargé avec succès !`);
+    setSuccess(t('messages.downloadSuccess', { name: filename }));
   };
 
   const generateConvention = async () => {
@@ -88,7 +90,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
       const blob = qualiopiDocuments.generateConvention(conventionData);
       downloadBlob(blob, `convention-${userName.replace(/\s+/g, '-')}.pdf`, 'convention');
     } catch (err) {
-      setError('Erreur lors de la génération de la convention');
+      setError(t('qualiopi.generateError'));
     } finally {
       setLoading(null);
     }
@@ -96,7 +98,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
 
   const generateAttestation = async () => {
     if (!isCompleted || !endDate) {
-      setError('L\'attestation sera disponible à la fin de votre bilan');
+      setError(t('qualiopi.attestationNotReady'));
       return;
     }
     
@@ -117,7 +119,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
       const blob = qualiopiDocuments.generateAttestation(attestationData);
       downloadBlob(blob, `attestation-${userName.replace(/\s+/g, '-')}.pdf`, 'attestation');
     } catch (err) {
-      setError('Erreur lors de la génération de l\'attestation');
+      setError(t('qualiopi.generateError'));
     } finally {
       setLoading(null);
     }
@@ -131,7 +133,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
       const blob = qualiopiDocuments.generateLivretAccueil();
       downloadBlob(blob, 'livret-accueil-bilan-easy.pdf', 'livret');
     } catch (err) {
-      setError('Erreur lors de la génération du livret');
+      setError(t('qualiopi.generateError'));
     } finally {
       setLoading(null);
     }
@@ -141,8 +143,8 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
     // Documents obligatoires
     {
       id: 'convention',
-      name: 'Convention de prestation',
-      description: 'Document contractuel obligatoire définissant les modalités du bilan',
+      name: t('docs.convention.name'),
+      description: t('docs.convention.description'),
       category: 'obligatoire',
       status: 'available',
       icon: <FileText size={24} />,
@@ -151,8 +153,8 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
     },
     {
       id: 'livret',
-      name: 'Livret d\'accueil',
-      description: 'Guide complet présentant le déroulement de votre bilan',
+      name: t('docs.livret.name'),
+      description: t('docs.livret.description'),
       category: 'obligatoire',
       status: 'available',
       icon: <FolderOpen size={24} />,
@@ -161,8 +163,8 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
     },
     {
       id: 'attestation',
-      name: 'Attestation de présence',
-      description: 'Certificat attestant de votre participation au bilan',
+      name: t('docs.attestation.name'),
+      description: t('docs.attestation.description'),
       category: 'obligatoire',
       status: isCompleted ? 'available' : 'locked',
       icon: <CheckCircle size={24} />,
@@ -172,29 +174,29 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
     // Documents de synthèse
     {
       id: 'synthese',
-      name: 'Document de synthèse',
-      description: 'Synthèse complète de votre bilan de compétences',
+      name: t('docs.synthese.name'),
+      description: t('docs.synthese.description'),
       category: 'synthese',
       status: isCompleted ? 'available' : 'pending',
       icon: <FileText size={24} />,
       color: 'blue',
-      action: () => setError('Document disponible à la fin du bilan')
+      action: () => setError(t('qualiopi.attestationNotReady'))
     },
     {
       id: 'plan-action',
-      name: 'Plan d\'action',
-      description: 'Votre feuille de route personnalisée',
+      name: t('docs.plan.name'),
+      description: t('docs.plan.description'),
       category: 'synthese',
       status: isCompleted ? 'available' : 'pending',
       icon: <Calendar size={24} />,
       color: 'orange',
-      action: () => setError('Document disponible à la fin du bilan')
+      action: () => setError(t('qualiopi.attestationNotReady'))
     },
     // Ressources
     {
       id: 'guide-metiers',
-      name: 'Guide des métiers',
-      description: 'Fiches métiers correspondant à votre profil',
+      name: t('library.jobGuide', 'Guide des métiers'),
+      description: t('library.jobGuideDesc', 'Fiches métiers correspondant à votre profil'),
       category: 'ressources',
       status: 'available',
       icon: <User size={24} />,
@@ -213,11 +215,11 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
   const getStatusBadge = (status: Document['status']) => {
     switch (status) {
       case 'available':
-        return <span className="px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">Disponible</span>;
+        return <span className="px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">{t('library.available', 'Disponible')}</span>;
       case 'pending':
-        return <span className="px-2 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full">En cours</span>;
+        return <span className="px-2 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full">{t('library.pending', 'En cours')}</span>;
       case 'locked':
-        return <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full">Verrouillé</span>;
+        return <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full">{t('library.locked', 'Verrouillé')}</span>;
     }
   };
 
@@ -239,10 +241,10 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
             <FolderOpen className="mr-3 text-indigo-600" size={32} />
-            Bibliothèque de documents
+            {t('library.title', 'Bibliothèque de documents')}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Tous vos documents officiels et ressources au même endroit
+            {t('library.subtitle', 'Tous vos documents officiels et ressources au même endroit')}
           </p>
         </header>
 
@@ -269,7 +271,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Rechercher un document..."
+              placeholder={t('library.search', 'Rechercher un document...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -282,10 +284,10 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
               onChange={(e) => setFilterCategory(e.target.value)}
               className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
-              <option value="all">Tous les documents</option>
-              <option value="obligatoire">Documents obligatoires</option>
-              <option value="synthese">Synthèse</option>
-              <option value="ressources">Ressources</option>
+              <option value="all">{t('library.filterAll', 'Tous les documents')}</option>
+              <option value="obligatoire">{t('library.filterRequired', 'Documents obligatoires')}</option>
+              <option value="synthese">{t('library.filterSynthesis', 'Synthèse')}</option>
+              <option value="ressources">{t('library.filterResources', 'Ressources')}</option>
             </select>
           </div>
         </div>
@@ -312,7 +314,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
               {downloadHistory.find(h => h.id === doc.id) && (
                 <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-3">
                   <Clock size={14} className="mr-1" />
-                  Dernier téléchargement : {new Date(downloadHistory.find(h => h.id === doc.id)!.date).toLocaleDateString('fr-FR')}
+                  {t('library.lastDownload', 'Dernier téléchargement')} : {new Date(downloadHistory.find(h => h.id === doc.id)!.date).toLocaleDateString('fr-FR')}
                 </div>
               )}
               
@@ -328,12 +330,12 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
                 {loading === doc.id ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                    Génération...
+                    {t('buttons.generating')}
                   </>
                 ) : (
                   <>
                     <Download size={18} className="mr-2" />
-                    {doc.status === 'locked' ? 'Non disponible' : 'Télécharger'}
+                    {doc.status === 'locked' ? t('buttons.notAvailable') : t('buttons.downloadPdf')}
                   </>
                 )}
               </button>
@@ -345,11 +347,10 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
         <div className="mt-8 p-6 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl">
           <h3 className="font-bold text-indigo-900 dark:text-indigo-300 mb-3 flex items-center">
             <CheckCircle className="mr-2" size={20} />
-            Conformité Qualiopi
+            {t('library.qualiopiTitle', 'Conformité Qualiopi')}
           </h3>
           <p className="text-indigo-800 dark:text-indigo-300 text-sm">
-            Tous les documents générés sont conformes au référentiel national qualité Qualiopi et aux articles 
-            L.6313-1 et suivants du Code du travail. Ils sont acceptés par les organismes financeurs (CPF, OPCO, etc.).
+            {t('library.qualiopiText', 'Tous les documents générés sont conformes au référentiel national qualité.')}
           </p>
         </div>
       </div>
