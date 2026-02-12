@@ -1,0 +1,107 @@
+{
+  "hero": {
+    "subtitle": "Mesleki geçişinizde başarılı olmanız için ortağınız",
+    "certification": "Sertifikasyon",
+    "qualiopiNumber": "Qualiopi No",
+    "validity": "Geçerlilik"
+  },
+  "tabs": {
+    "team": "Ekibimiz",
+    "method": "Yöntemimiz",
+    "values": "Değerlerimiz",
+    "qualiopi": "Qualiopi Sertifikası"
+  },
+  "team": {
+    "title": "Hizmetinizde olan ekibimiz",
+    "contact": "Bize ulaşın",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "address": "Adres",
+    "members": {
+      "mikail": {
+        "role": "Başkan - Yetkinlik Değerlendirme Danışmanı",
+        "description": "Profesyonel eşlik alanında uzun yıllara dayanan deneyimiyle Mikail, yararlanıcılara kariyer düşüncelerinde kişiselleştirilmiş ve destekleyici bir yaklaşımla eşlik etmektedir.",
+        "expertise": ["Yetkinlik değerlendirmesi", "Değişim yönetimi", "Mesleki dönüşüm", "Kişisel gelişim"]
+      },
+      "bahtisen": {
+        "role": "İdari Asistan ve Eğitmen",
+        "description": "Bahtisen, dosyaların idari takibini sağlamakta ve yararlanıcıların karşılanma kalitesine katkıda bulunmaktadır. Ayrıca ofis yazılımları modüllerinde eğitmen olarak görev yapmaktadır.",
+        "expertise": ["İdari yönetim", "Karşılama ve yönlendirme", "Ofis yazılımları eğitimi", "CPF/OPCO dosya takibi"]
+      }
+    }
+  },
+  "method": {
+    "title": "Metodolojimiz",
+    "subtitle": "İş Kanunu'na (md. L.6313-4) uygun, gerçekçi ve uygulanabilir bir mesleki proje oluşturmanıza yardımcı olmak için 3 aşamada yapılandırılmış bir eşlik.",
+    "totalDuration": "Toplam değerlendirme süresi",
+    "totalHours": "18 ile 24 saat",
+    "totalSpread": "Ritminize göre 2 ile 3 ay arasında dağıtılmış",
+    "steps": {
+      "phase1": {
+        "phase": "Aşama 1",
+        "title": "Ön aşama",
+        "duration": "2-3 saat",
+        "description": "Bu aşama ihtiyaçlarınızı belirlemenize, değerlendirmenin işleyişi hakkında bilgi almanıza ve katılımınızı onaylamanıza olanak tanır.",
+        "activities": ["Keşif görüşmesi", "Metodolojinin sunumu", "Kişiselleştirilmiş hedeflerin belirlenmesi", "Sözleşmenin imzalanması"]
+      },
+      "phase2": {
+        "phase": "Aşama 2",
+        "title": "Araştırma aşaması",
+        "duration": "12-16 saat",
+        "description": "Değerlendirmenin kalbidir. Kariyerinizi, yetkinliklerinizi, motivasyonlarınızı ve isteklerinizi birlikte keşfediyoruz.",
+        "activities": ["Mesleki geçmişin analizi", "Yetkinliklerin belirlenmesi", "Motivasyonların ve değerlerin keşfi", "Testler ve anketler", "Meslekler hakkında araştırma", "Doğrulama görüşmeleri"]
+      },
+      "phase3": {
+        "phase": "Aşama 3",
+        "title": "Sonuç aşaması",
+        "duration": "4-6 saat",
+        "description": "Mesleki projenizi birlikte oluşturuyor ve somut bir eylem planı belirliyoruz.",
+        "activities": ["Sonuçların sentezi", "Mesleki projenin hazırlanması", "Eylem planının oluşturulması", "Sentez belgesinin teslimi", "Kapanış görüşmesi"]
+      }
+    }
+  },
+  "values": {
+    "title": "Değerlerimiz",
+    "items": [
+      { "icon": "🎯", "title": "Kişiselleştirme", "description": "Her değerlendirme benzersizdir, kariyerinize ve hedeflerinize uyarlanmıştır." },
+      { "icon": "🤝", "title": "İyi niyet", "description": "Saygı ve aktif dinleme ile eşlik." },
+      { "icon": "🔒", "title": "Gizlilik", "description": "Bilgileriniz kesinlikle gizlidir." },
+      { "icon": "✨", "title": "Mükemmellik", "description": "Qualiopi sertifikalı bir kalite yaklaşımı." }
+    ],
+    "commitments": {
+      "title": "Kalite taahhütlerimiz",
+      "items": [
+        "Her talebe 48 saat içinde yanıt",
+        "Ücretsiz ve bağlayıcı olmayan keşif görüşmesi",
+        "Değerlendirme boyunca kişiselleştirilmiş eşlik",
+        "Sentez belgelerinin zamanında teslimi",
+        "Değerlendirme sonrası 6 aylık takip",
+        "Geri bildirimlerinize dayalı sürekli iyileştirme"
+      ]
+    }
+  },
+  "qualiopi": {
+    "badge": "Sertifikalı kuruluş",
+    "title": "Qualiopi Sertifikası",
+    "subtitle": "Qualiopi sertifikası, kuruluşumuzun yetkinlik geliştirme için uyguladığı sürecin kalitesini onaylar.",
+    "info": {
+      "title": "📋 Sertifika bilgileri",
+      "number": "Qualiopi No",
+      "certifier": "Sertifika veren kuruluş",
+      "validity": "Geçerlilik",
+      "nda": "NDA",
+      "siret": "SIRET"
+    },
+    "categories": {
+      "title": "🎯 Sertifikalı faaliyet kategorileri"
+    },
+    "guarantees": {
+      "title": "Qualiopi sertifikasının garantileri",
+      "items": [
+        { "icon": "💰", "title": "Finansman uygunluğu", "description": "Değerlendirmeniz CPF, OPCO, Pôle Emploi tarafından finanse edilebilir..." },
+        { "icon": "⭐", "title": "Hizmet kalitesi", "description": "Süreçlerimiz denetlenmekte ve ulusal referans çerçevesine uygundur." },
+        { "icon": "📈", "title": "Sürekli iyileştirme", "description": "Hizmetlerimizi sürekli iyileştirmek için geri bildirimlerinizi analiz ediyoruz." }
+      ]
+    }
+  }
+}

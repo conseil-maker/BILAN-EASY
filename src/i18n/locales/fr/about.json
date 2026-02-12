@@ -1,0 +1,107 @@
+{
+  "hero": {
+    "subtitle": "Votre partenaire pour réussir votre transition professionnelle",
+    "certification": "Certification",
+    "qualiopiNumber": "N° Qualiopi",
+    "validity": "Validité"
+  },
+  "tabs": {
+    "team": "Notre équipe",
+    "method": "Notre méthode",
+    "values": "Nos valeurs",
+    "qualiopi": "Certification Qualiopi"
+  },
+  "team": {
+    "title": "Notre équipe à votre service",
+    "contact": "Contactez-nous",
+    "phone": "Téléphone",
+    "email": "Email",
+    "address": "Adresse",
+    "members": {
+      "mikail": {
+        "role": "Président - Consultant en Bilan de Compétences",
+        "description": "Fort de plusieurs années d'expérience dans l'accompagnement professionnel, Mikail accompagne les bénéficiaires dans leur réflexion de carrière avec une approche personnalisée et bienveillante.",
+        "expertise": ["Bilan de compétences", "Accompagnement au changement", "Reconversion professionnelle", "Développement personnel"]
+      },
+      "bahtisen": {
+        "role": "Assistante Administrative et Formatrice",
+        "description": "Bahtisen assure le suivi administratif des dossiers et contribue à la qualité de l'accueil des bénéficiaires. Elle intervient également en tant que formatrice sur les modules bureautiques.",
+        "expertise": ["Gestion administrative", "Accueil et orientation", "Formation bureautique", "Suivi des dossiers CPF/OPCO"]
+      }
+    }
+  },
+  "method": {
+    "title": "Notre méthodologie",
+    "subtitle": "Un accompagnement structuré en 3 phases, conforme au Code du travail (art. L.6313-4), pour vous aider à construire un projet professionnel réaliste et réalisable.",
+    "totalDuration": "Durée totale du bilan",
+    "totalHours": "18 à 24 heures",
+    "totalSpread": "Réparties sur 2 à 3 mois selon votre rythme",
+    "steps": {
+      "phase1": {
+        "phase": "Phase 1",
+        "title": "Phase préliminaire",
+        "duration": "2-3 heures",
+        "description": "Cette phase permet de définir vos besoins, de vous informer sur le déroulement du bilan et de confirmer votre engagement.",
+        "activities": ["Entretien de découverte", "Présentation de la méthodologie", "Définition des objectifs personnalisés", "Signature de la convention"]
+      },
+      "phase2": {
+        "phase": "Phase 2",
+        "title": "Phase d'investigation",
+        "duration": "12-16 heures",
+        "description": "C'est le cœur du bilan. Nous explorons ensemble votre parcours, vos compétences, vos motivations et vos aspirations.",
+        "activities": ["Analyse du parcours professionnel", "Identification des compétences", "Exploration des motivations et valeurs", "Tests et questionnaires", "Recherche documentaire sur les métiers", "Entretiens de validation"]
+      },
+      "phase3": {
+        "phase": "Phase 3",
+        "title": "Phase de conclusion",
+        "duration": "4-6 heures",
+        "description": "Nous construisons ensemble votre projet professionnel et définissons un plan d'action concret.",
+        "activities": ["Synthèse des résultats", "Élaboration du projet professionnel", "Construction du plan d'action", "Remise du document de synthèse", "Entretien de clôture"]
+      }
+    }
+  },
+  "values": {
+    "title": "Nos valeurs",
+    "items": [
+      { "icon": "🎯", "title": "Personnalisation", "description": "Chaque bilan est unique, adapté à votre parcours et vos objectifs." },
+      { "icon": "🤝", "title": "Bienveillance", "description": "Un accompagnement dans le respect et l'écoute active." },
+      { "icon": "🔒", "title": "Confidentialité", "description": "Vos informations sont strictement confidentielles." },
+      { "icon": "✨", "title": "Excellence", "description": "Une démarche qualité certifiée Qualiopi." }
+    ],
+    "commitments": {
+      "title": "Nos engagements qualité",
+      "items": [
+        "Réponse sous 48h à toute demande",
+        "Entretien de découverte gratuit et sans engagement",
+        "Accompagnement personnalisé tout au long du bilan",
+        "Documents de synthèse remis dans les délais",
+        "Suivi à 6 mois post-bilan",
+        "Amélioration continue basée sur vos retours"
+      ]
+    }
+  },
+  "qualiopi": {
+    "badge": "Organisme certifié",
+    "title": "Certification Qualiopi",
+    "subtitle": "La certification Qualiopi atteste de la qualité du processus mis en œuvre par notre organisme pour le développement des compétences.",
+    "info": {
+      "title": "📋 Informations de certification",
+      "number": "N° Qualiopi",
+      "certifier": "Organisme certificateur",
+      "validity": "Validité",
+      "nda": "NDA",
+      "siret": "SIRET"
+    },
+    "categories": {
+      "title": "🎯 Catégories d'actions certifiées"
+    },
+    "guarantees": {
+      "title": "Ce que garantit la certification Qualiopi",
+      "items": [
+        { "icon": "💰", "title": "Éligibilité aux financements", "description": "Votre bilan peut être financé par le CPF, les OPCO, Pôle Emploi..." },
+        { "icon": "⭐", "title": "Qualité des prestations", "description": "Nos processus sont audités et conformes au référentiel national." },
+        { "icon": "📈", "title": "Amélioration continue", "description": "Nous analysons vos retours pour améliorer constamment nos services." }
+      ]
+    }
+  }
+}
