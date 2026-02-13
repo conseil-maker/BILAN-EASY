@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SpeechSettings } from '../hooks/useSpeechSynthesis';
 
 interface SpeechSettingsProps {
@@ -8,6 +9,7 @@ interface SpeechSettingsProps {
 }
 
 const SpeechSettingsComponent: React.FC<SpeechSettingsProps> = ({ voices, settings, onSettingsChange }) => {
+  const { t } = useTranslation('questionnaire');
 
   const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedVoice = voices.find(v => v.name === e.target.value) || null;
@@ -34,7 +36,7 @@ const SpeechSettingsComponent: React.FC<SpeechSettingsProps> = ({ voices, settin
   return (
     <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">Paramètres de la Voix</h4>
+        <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">{t('speech.title')}</h4>
         
         {/* Toggle Activer/Désactiver */}
         <button
@@ -44,7 +46,7 @@ const SpeechSettingsComponent: React.FC<SpeechSettingsProps> = ({ voices, settin
           }`}
           role="switch"
           aria-checked={settings.enabled}
-          aria-label="Activer la lecture vocale"
+          aria-label={t('speech.toggleLabel')}
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -61,8 +63,8 @@ const SpeechSettingsComponent: React.FC<SpeechSettingsProps> = ({ voices, settin
           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
       }`}>
         {settings.enabled 
-          ? '🔊 Lecture vocale activée - Les questions seront lues automatiquement'
-          : '🔇 Lecture vocale désactivée - Cliquez sur le toggle pour activer'
+          ? t('speech.enabled')
+          : t('speech.disabled')
         }
       </div>
 
@@ -71,7 +73,7 @@ const SpeechSettingsComponent: React.FC<SpeechSettingsProps> = ({ voices, settin
         <div className="space-y-4">
           <div>
             <label htmlFor="voice" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">
-              Voix {settings.voice?.name.toLowerCase().includes('google') && (
+              {t('speech.voice')} {settings.voice?.name.toLowerCase().includes('google') && (
                 <span className="ml-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
                   Google
                 </span>
@@ -91,14 +93,14 @@ const SpeechSettingsComponent: React.FC<SpeechSettingsProps> = ({ voices, settin
               ))}
             </select>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Les voix Google (⭐) offrent généralement une meilleure qualité
+              {t('speech.googleHint')}
             </p>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="rate" className="block text-sm font-medium text-slate-600 dark:text-slate-300">
-                Vitesse: {settings.rate.toFixed(1)}
+                {t('speech.speed')}: {settings.rate.toFixed(1)}
               </label>
               <input
                 type="range"
@@ -114,7 +116,7 @@ const SpeechSettingsComponent: React.FC<SpeechSettingsProps> = ({ voices, settin
             </div>
             <div>
               <label htmlFor="pitch" className="block text-sm font-medium text-slate-600 dark:text-slate-300">
-                Hauteur: {settings.pitch.toFixed(1)}
+                {t('speech.pitch')}: {settings.pitch.toFixed(1)}
               </label>
               <input
                 type="range"

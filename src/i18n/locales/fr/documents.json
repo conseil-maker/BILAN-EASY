@@ -1,0 +1,110 @@
+{
+  "header": {
+    "title": "Mes Documents",
+    "subtitle": "Retrouvez tous vos documents officiels conformes Qualiopi",
+    "package": "Forfait :",
+    "startDate": "Début :",
+    "endDate": "Fin :"
+  },
+  "messages": {
+    "error": "Erreur",
+    "success": "Succès",
+    "downloadSuccess": "Document \"{{name}}\" téléchargé avec succès !"
+  },
+  "sections": {
+    "qualiopi": "Documents obligatoires Qualiopi",
+    "export": "Export des données",
+    "complementary": "Documents complémentaires",
+    "legal": "Informations légales"
+  },
+  "docs": {
+    "livret": {
+      "name": "Livret d'accueil",
+      "description": "Guide complet présentant le déroulement et la méthodologie du bilan"
+    },
+    "convention": {
+      "name": "Convention de prestation",
+      "description": "Document contractuel obligatoire définissant les modalités du bilan"
+    },
+    "attestation": {
+      "name": "Attestation de présence",
+      "description": "Certificat de participation au bilan de compétences",
+      "availableMessage": "Disponible à la fin du bilan"
+    },
+    "synthese": {
+      "name": "Document de synthèse",
+      "description": "Synthèse complète conforme à l'article R.6313-8 du Code du travail",
+      "availableMessage": "Disponible après la phase de conclusion"
+    },
+    "plan": {
+      "name": "Plan d'action",
+      "description": "Feuille de route avec objectifs et échéances",
+      "availableMessage": "Disponible après la phase de conclusion"
+    }
+  },
+  "excel": {
+    "title": "Export Excel (CSV)",
+    "description": "Téléchargez toutes vos réponses et analyses au format Excel pour une exploitation personnalisée",
+    "availableMessage": "Disponible après avoir répondu à des questions",
+    "downloadButton": "Télécharger Excel",
+    "successMessage": "Export Excel téléchargé avec succès !",
+    "errorMessage": "Erreur lors de l'export Excel"
+  },
+  "buttons": {
+    "generating": "Génération...",
+    "downloadPdf": "Télécharger PDF",
+    "notAvailable": "Non disponible"
+  },
+  "legal": {
+    "confidentiality": "Conformément à l'article L.6313-10-1 du Code du travail, le document de synthèse ne peut être communiqué à un tiers qu'avec votre accord écrit.",
+    "confidentialityLabel": "Confidentialité :",
+    "conservation": "Vos documents sont conservés pendant 3 ans conformément aux exigences Qualiopi et peuvent être téléchargés à tout moment depuis votre espace.",
+    "conservationLabel": "Conservation :",
+    "rgpd": "Vous pouvez exercer vos droits d'accès, de rectification et de suppression en nous contactant à rgpd@bilan-easy.fr",
+    "rgpdLabel": "RGPD :"
+  },
+  "actionPlan": {
+    "shortTerm": "Court terme (0-3 mois)",
+    "mediumTerm": "Moyen terme (3-6 mois)",
+    "longTerm": "Long terme (6-12 mois)"
+  },
+  "viewAll": "Voir tous →",
+  "title": "Documents",
+  "library": "Bibliothèque",
+  "myDocuments": "Mes Documents",
+  "loadingInfo": "Chargement de vos informations...",
+  "loadingDocs": "Chargement des documents...",
+  "loadingLibrary": "Chargement de la bibliothèque...",
+  "loadingMyDocs": "Chargement de vos documents...",
+  "defaultUser": "Utilisateur",
+  "library": {
+    "title": "Bibliothèque de documents",
+    "subtitle": "Tous vos documents officiels et ressources au même endroit",
+    "search": "Rechercher un document...",
+    "filterAll": "Tous les documents",
+    "filterRequired": "Documents obligatoires",
+    "filterSynthesis": "Synthèse",
+    "filterResources": "Ressources",
+    "available": "Disponible",
+    "pending": "En cours",
+    "locked": "Verrouillé",
+    "lastDownload": "Dernier téléchargement",
+    "jobGuide": "Guide des métiers",
+    "jobGuideDesc": "Fiches métiers correspondant à votre profil",
+    "qualiopiTitle": "Conformité Qualiopi",
+    "qualiopiText": "Tous les documents générés sont conformes au référentiel national qualité Qualiopi et aux articles L.6313-1 et suivants du Code du travail. Ils sont acceptés par les organismes financeurs (CPF, OPCO, etc.)."
+  },
+  "qualiopi": {
+    "title": "Documents Obligatoires",
+    "subtitle": "Téléchargez vos documents officiels conformes Qualiopi",
+    "profileNotFound": "Profil utilisateur introuvable",
+    "attestationNotReady": "L'attestation ne peut être générée qu'à la fin du bilan",
+    "downloadSuccess": "Document \"{{type}}\" téléchargé avec succès !",
+    "generateError": "Erreur lors de la génération du document",
+    "importantInfo": "Informations importantes",
+    "info1": "La convention doit être signée avant le début du bilan",
+    "info2": "L'attestation sera disponible à la fin de votre parcours",
+    "info3": "Tous les documents sont conformes Qualiopi et au Code du travail",
+    "info4": "Vos données sont protégées conformément au RGPD"
+  }
+}

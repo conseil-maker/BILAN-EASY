@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   User, Briefcase, Clock, Building2, MessageCircle, Send,
   Loader2, X, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown,
@@ -32,6 +33,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
   onClose,
   onInterviewComplete
 }) => {
+  const { t } = useTranslation('career');
   const [isLoading, setIsLoading] = useState(true);
   const [interviewData, setInterviewData] = useState<JobInterviewResult | null>(null);
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
@@ -158,10 +160,9 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8">
           <div className="flex flex-col items-center justify-center space-y-4">
             <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
-            <h3 className="text-xl font-semibold text-gray-800">Préparation de l'entretien...</h3>
+            <h3 className="text-xl font-semibold text-gray-800">{t('interview.loading.title')}</h3>
             <p className="text-gray-600 text-center">
-              Notre IA prépare un professionnel virtuel expérimenté en <strong>{targetJobTitle}</strong> 
-              pour répondre à vos questions.
+              {t('interview.loading.subtitle', { job: targetJobTitle })}
             </p>
           </div>
         </div>
@@ -182,10 +183,10 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-bold">
-                Enquête Métier : {targetJobTitle}
+                {t('interview.header.title', { job: targetJobTitle })}
               </h2>
               <p className="text-green-100 text-sm">
-                Avec {interviewData.professionalPersona.name} • {interviewData.professionalPersona.yearsExperience} ans d'expérience
+                {t('interview.header.persona', { name: interviewData.professionalPersona.name, years: interviewData.professionalPersona.yearsExperience })}
               </p>
             </div>
           </div>
@@ -234,7 +235,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                       </div>
-                      <span className="text-sm">{interviewData.professionalPersona.name} écrit...</span>
+                      <span className="text-sm">{t('interview.typing', { name: interviewData.professionalPersona.name })}</span>
                     </div>
                   </div>
                 </div>
@@ -250,7 +251,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Posez votre question ou répondez..."
+                  placeholder={t('interview.placeholder')}
                   className="flex-1 p-3 border rounded-xl resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   rows={2}
                 />
@@ -271,7 +272,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
               <div className="p-4 border-b bg-gradient-to-r from-green-50 to-teal-50">
                 <h3 className="font-semibold text-gray-800 flex items-center">
                   <Lightbulb className="w-5 h-5 mr-2 text-yellow-500" />
-                  Insights de {interviewData.professionalPersona.name}
+                  {t('interview.insights', { name: interviewData.professionalPersona.name })}
                 </h3>
               </div>
 
@@ -282,7 +283,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
                     onClick={() => toggleSection('daily')}
                     className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100"
                   >
-                    <span className="font-medium text-sm">Journée type</span>
+                    <span className="font-medium text-sm">{t('interview.sections.typicalDay')}</span>
                     {expandedSection === 'daily' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
                   {expandedSection === 'daily' && (
@@ -300,7 +301,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
                   >
                     <span className="font-medium text-sm text-green-700 flex items-center">
                       <ThumbsUp className="w-4 h-4 mr-2" />
-                      Avantages
+                      {t('interview.sections.pros')}
                     </span>
                     {expandedSection === 'pros' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
@@ -326,7 +327,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
                   >
                     <span className="font-medium text-sm text-red-700 flex items-center">
                       <ThumbsDown className="w-4 h-4 mr-2" />
-                      Inconvénients
+                      {t('interview.sections.cons')}
                     </span>
                     {expandedSection === 'cons' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
@@ -352,7 +353,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
                   >
                     <span className="font-medium text-sm text-indigo-700 flex items-center">
                       <Star className="w-4 h-4 mr-2" />
-                      Conseils pour réussir
+                      {t('interview.sections.tips')}
                     </span>
                     {expandedSection === 'tips' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
@@ -362,7 +363,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
                         <p className="text-sm text-gray-600">{interviewData.careerAdvice.entryTips}</p>
                       </div>
                       <div>
-                        <h5 className="text-xs font-medium text-gray-500 mb-1">Compétences clés</h5>
+                        <h5 className="text-xs font-medium text-gray-500 mb-1">{t('interview.sections.keySkills')}</h5>
                         <div className="flex flex-wrap gap-1">
                           {interviewData.careerAdvice.mustHaveSkills.map((skill, idx) => (
                             <span key={idx} className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs">
@@ -377,13 +378,13 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
 
                 {/* Profil idéal */}
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3">
-                  <h4 className="font-medium text-sm text-purple-700 mb-2">Profil idéal</h4>
+                  <h4 className="font-medium text-sm text-purple-700 mb-2">{t('interview.sections.idealProfile')}</h4>
                   <p className="text-sm text-gray-600">{interviewData.honestOpinion.whoShouldApply}</p>
                 </div>
 
                 {/* Perspectives */}
                 <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-3">
-                  <h4 className="font-medium text-sm text-blue-700 mb-2">Perspectives d'avenir</h4>
+                  <h4 className="font-medium text-sm text-blue-700 mb-2">{t('interview.sections.futureOutlook')}</h4>
                   <p className="text-sm text-gray-600">{interviewData.honestOpinion.futureOutlook}</p>
                 </div>
               </div>
@@ -394,7 +395,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
                   onClick={handleFinishInterview}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  <span>Terminer l'enquête</span>
+                  <span>{t('interview.buttons.finish')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

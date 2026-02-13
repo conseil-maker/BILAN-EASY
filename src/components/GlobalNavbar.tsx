@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { User } from '@supabase/supabase-js';
 import { UserMenu } from './UserMenu';
 import organizationConfig from '../config/organization';
@@ -16,6 +17,7 @@ export const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
   showBackButton = false,
   title
 }) => {
+  const { t } = useTranslation('common');
   return (
     <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,7 +28,7 @@ export const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
               <a
                 href="#/"
                 className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                aria-label="Retour à l'accueil"
+                aria-label={t('nav.backToHome')}
               >
                 <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -40,7 +42,7 @@ export const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {title || 'Bilan de Compétences'}
+                  {title || t('nav.bilanTitle')}
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {organizationConfig.name}
@@ -55,26 +57,26 @@ export const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
               href="#/"
               className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              Accueil
+              {t('nav.home')}
             </a>
             <a
               href="#/mes-documents"
               className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              Documents
+              {t('nav.documents')}
             </a>
 
             <a
               href="#/rendez-vous"
               className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              Rendez-vous
+              {t('nav.appointments')}
             </a>
             <a
               href="#/about"
               className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              À propos
+              {t('nav.about')}
             </a>
           </div>
 

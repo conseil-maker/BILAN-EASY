@@ -1,0 +1,49 @@
+{
+  "loading": "Chargement du suivi...",
+  "title": "Suivi Post-Bilan",
+  "legalRef": "Conformément à l'article R.6313-4 du Code du travail",
+  "project": {
+    "title": "Votre projet professionnel",
+    "default": "Projet en cours de définition",
+    "completedOn": "Bilan terminé le {{date}}"
+  },
+  "timeline": {
+    "title": "Calendrier de suivi",
+    "scheduledFor": "Prévu le {{date}}",
+    "completed": "Complété",
+    "sent": "Envoyé",
+    "pending": "En attente"
+  },
+  "types": {
+    "email_3_months": "Suivi à 3 mois",
+    "email_6_months": "Suivi à 6 mois",
+    "survey": "Questionnaire de suivi",
+    "meeting": "Entretien de suivi"
+  },
+  "survey": {
+    "title": "Questionnaire de suivi",
+    "subtitle": "Partagez l'avancement de votre projet professionnel",
+    "fill": "Remplir",
+    "q1Label": "Où en êtes-vous dans la réalisation de votre projet ?",
+    "q1Yes": "Projet réalisé",
+    "q1Partial": "En cours",
+    "q1No": "Pas encore commencé",
+    "q1Changed": "Projet modifié",
+    "q2Label": "Décrivez votre situation actuelle",
+    "q2Placeholder": "Nouveau poste, formation en cours, recherche d'emploi...",
+    "q3Label": "Satisfaction globale par rapport à votre évolution",
+    "q4Label": "Avez-vous besoin d'un accompagnement supplémentaire ?",
+    "q4Yes": "Oui, je souhaite être recontacté(e)",
+    "q4No": "Non, tout va bien",
+    "q5Label": "Commentaires ou suggestions (optionnel)",
+    "q5Placeholder": "Vos remarques...",
+    "submit": "Envoyer mes réponses",
+    "cancel": "Annuler",
+    "thankYou": "Merci pour votre retour ! Vos réponses nous aident à améliorer notre accompagnement."
+  },
+  "legal": {
+    "title": "Conformité Qualiopi",
+    "text": "Conformément à l'article R.6313-4 du Code du travail, vous avez la possibilité de bénéficier d'un entretien de suivi avec votre conseiller en bilan de compétences. Ce suivi permet de faire le point sur l'avancement de votre projet professionnel et d'ajuster le plan d'action si nécessaire."
+  },
+  "close": "Fermer"
+}

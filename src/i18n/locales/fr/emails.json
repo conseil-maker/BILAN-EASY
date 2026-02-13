@@ -1,0 +1,12 @@
+{
+  "welcome": {
+    "subject": "Bienvenue sur Bilan de Compétences IA",
+    "greeting": "Bonjour {{name}},"
+  },
+  "reminder": {
+    "subject": "Rappel : Continuez votre bilan de compétences"
+  },
+  "completion": {
+    "subject": "Votre bilan de compétences est terminé"
+  }
+}

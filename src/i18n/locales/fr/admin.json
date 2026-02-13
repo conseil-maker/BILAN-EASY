@@ -1,0 +1,100 @@
+{
+  "title": "Bilan-Easy",
+  "subtitle": "Administration",
+  "back": "Retour",
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "users": "Utilisateurs",
+    "bilans": "Bilans",
+    "reports": "Rapports",
+    "qualiopi": "Qualiopi",
+    "settings": "Paramètres"
+  },
+  "stats": {
+    "totalUsers": "Utilisateurs totaux",
+    "completedBilans": "Bilans terminés",
+    "inProgressBilans": "Bilans en cours",
+    "revenue": "Chiffre d'affaires"
+  },
+  "charts": {
+    "bilansByMonth": "Bilans par mois",
+    "userDistribution": "Répartition des utilisateurs"
+  },
+  "activity": {
+    "title": "Activité récente"
+  },
+  "users": {
+    "table": {
+      "user": "Utilisateur",
+      "role": "Rôle",
+      "registration": "Inscription",
+      "actions": "Actions"
+    },
+    "roles": {
+      "client": "Client",
+      "consultant": "Consultant",
+      "admin": "Admin"
+    }
+  },
+  "bilans": {
+    "table": {
+      "title": "Titre",
+      "package": "Forfait",
+      "status": "Statut",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "view": "Voir"
+  },
+  "reports": {
+    "monthlyReport": "Rapport mensuel",
+    "userExport": "Export utilisateurs",
+    "qualiopiStats": "Statistiques Qualiopi"
+  },
+  "qualiopi": {
+    "indicators": "Indicateurs Qualiopi",
+    "averageSatisfaction": "Satisfaction moyenne",
+    "completionRate": "Taux de complétion",
+    "documentCompliance": "Conformité documents",
+    "sixMonthFollowUp": "Suivi à 6 mois"
+  },
+  "users": {
+    "management": "Gestion des utilisateurs",
+    "table": {
+      "user": "Utilisateur",
+      "email": "Email",
+      "name": "Nom",
+      "role": "R\u00f4le",
+      "registration": "Date d'inscription",
+      "actions": "Actions"
+    },
+    "roles": {
+      "client": "Client",
+      "consultant": "Consultant",
+      "admin": "Admin"
+    }
+  },
+  "assignments": {
+    "title": "Gestion des affectations",
+    "noAssignments": "Aucune affectation pour le moment.",
+    "consultant": "Consultant",
+    "assignDate": "Date d'affectation",
+    "remove": "Retirer",
+    "newAssignment": "Nouvelle affectation",
+    "selectClient": "S\u00e9lectionner un client",
+    "chooseClient": "Choisir un client",
+    "selectConsultant": "S\u00e9lectionner un consultant",
+    "chooseConsultant": "Choisir un consultant",
+    "cancel": "Annuler",
+    "assigning": "Affectation...",
+    "assign": "Affecter"
+  },
+  "settings": {
+    "orgInfo": "Informations de l'organisme",
+    "orgName": "Nom de l'organisme",
+    "siret": "SIRET",
+    "qualiopiNumber": "N° Qualiopi",
+    "nda": "NDA",
+    "pricing": "Tarification"
+  }
+}

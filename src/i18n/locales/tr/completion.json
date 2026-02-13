@@ -1,0 +1,72 @@
+{
+  "steps": {
+    "congratulations": "Tebrikler",
+    "synthesis": "Sentez",
+    "documents": "Belgeler",
+    "satisfaction": "Memnuniyet",
+    "final": "Tamamlandı"
+  },
+  "congratulations": {
+    "title": "Tebrikler {{name}}!",
+    "subtitle": "\"{{package}}\" yetkinlik değerlendirmenizi tamamladınız",
+    "questionsAnswered": "Yanıtlanan sorular",
+    "duration": "Süreç süresi",
+    "completed": "Tamamlandı",
+    "legalText": "Şimdi sentez belgenizi ve zorunlu sertifikalarınızı alacaksınız.",
+    "continueButton": "Sentezime devam et →"
+  },
+  "synthesis": {
+    "title": "Sentez Belgesi",
+    "subtitle": "Yetkinlik değerlendirmesi sentez raporu",
+    "importantNotice": "<strong>Önemli:</strong> Bu belge size aittir. Yazılı onayınız olmadan üçüncü şahıslara iletilemez.",
+    "generatePrompt": "Kişiselleştirilmiş sentez belgenizi oluşturmak için aşağıdaki düğmeye tıklayın.",
+    "generating": "Oluşturuluyor...",
+    "generateButton": "Sentez PDF'imi oluştur",
+    "successTitle": "Sentez başarıyla oluşturuldu!",
+    "successMessage": "Belge otomatik olarak indirildi.",
+    "viewDocuments": "Tüm belgelerimi gör →"
+  },
+  "documents": {
+    "confirmLabel": "Yetkinlik değerlendirmesi sentezimi aldığımı ve indirdiğimi onaylıyorum",
+    "confirmLegal": "Bu belge size aittir ve yazılı onayınız olmadan üçüncü şahıslara iletilemez.",
+    "continueButton": "Görüşümü bildir →",
+    "confirmFirst": "Lütfen belgelerinizi aldığınızı onaylayın"
+  },
+  "satisfaction": {
+    "title": "Görüşünüz önemli",
+    "subtitle": "Eşlik hizmetimizi geliştirmemize yardımcı olun",
+    "description": "Deneyiminizi değerlendirmenizi rica ediyoruz. Geri bildirimleriniz hizmetlerimizin sürekli iyileştirilmesi için çok değerlidir.",
+    "loading": "Anket yükleniyor...",
+    "rating": "Deneyiminizi nasıl değerlendirirsiniz?",
+    "comment": "Yorum (isteğe bağlı)",
+    "commentPlaceholder": "Deneyiminizi paylaşın...",
+    "submit": "Görüşümü gönder",
+    "thankYou": "Geri bildiriminiz için teşekkürler!"
+  },
+  "final": {
+    "title": "Tebrikler {{name}}!",
+    "subtitle": "Yetkinlik değerlendirmeniz tamamlandı.",
+    "documentsReady": "Belgeleriniz hazır!",
+    "dashboardPrompt": "Kontrol Panelinizde bulabilirsiniz:",
+    "synthesePdf": "İndirilebilir Sentez PDF'i",
+    "historyExport": "Excel/CSV olarak dışa aktarılabilir görüşme geçmişi",
+    "qualiopiDocs": "Resmi belgeler (sözleşme, katılım belgesi...)",
+    "summaryTitle": "Değerlendirme özeti",
+    "package": "Paket",
+    "endDate": "Bitiş tarihi",
+    "questionsAnswered": "Yanıtlanan sorular",
+    "satisfactionLabel": "Memnuniyet",
+    "satisfactionCompleted": "Tamamlandı",
+    "satisfactionPending": "Beklemede",
+    "accessDashboard": "Kontrol Panelime git",
+    "viewHistory": "Geçmişimi gör",
+    "startNewBilan": "Yeni bir değerlendirme başlat",
+    "contactMessage": "Sorularınız için bize ulaşın: support@bilan-easy.fr"
+  },
+  "download": {
+    "synthesis": "Sentezi indir",
+    "actionPlan": "Eylem planını indir",
+    "certificate": "Katılım belgesini indir"
+  },
+  "backToDashboard": "Kontrol paneline dön"
+}

@@ -1,0 +1,357 @@
+{
+  "title": "Anket",
+  "phase": "Aşama {{number}}: {{name}}",
+  "question": "Soru {{current}} / {{total}}",
+  "progress": {
+    "title": "İlerleme",
+    "phase": "Aşama {{current}} / {{total}}",
+    "questions": "{{count}} / {{target}} soru",
+    "percent": "{{percent}}%",
+    "label": "İlerleme: {{percent}}%"
+  },
+  "placeholder": "Cevabınızı buraya yazın...",
+  "send": "Gönder",
+  "skip": "Atla",
+  "thinking": "Düşünülüyor...",
+  "typing": "Yazıyor...",
+  "header": {
+    "dashboard": "Kontrol Paneli",
+    "dashboardTooltip": "Kontrol Paneline Dön",
+    "dashboardAriaLabel": "Kontrol paneline geri dön",
+    "help": "Yardım",
+    "helpAriaLabel": "Yardım ve ipuçlarını aç",
+    "settings": "Ses ayarları (ses, hız, ton)",
+    "settingsAriaLabel": "Gelişmiş sesli okuma ayarlarını aç",
+    "logout": "Çıkış",
+    "logoutAriaLabel": "Uygulamadan çıkış yap",
+    "lightMode": "Açık mod",
+    "darkMode": "Koyu mod",
+    "lightModeAriaLabel": "Açık modu etkinleştir",
+    "darkModeAriaLabel": "Koyu modu etkinleştir",
+    "speakerStop": "Okumayı durdur",
+    "speakerRead": "Mesajı oku",
+    "speakerEnable": "Etkinleştir ve oku",
+    "speakerStopAriaLabel": "Sesli okumayı durdur",
+    "speakerReadAriaLabel": "Son mesajı oku",
+    "speakerEnableAriaLabel": "Sesli okumayı etkinleştir",
+    "speakerTooltipStop": "Durdurmak için tıklayın",
+    "speakerTooltipRead": "Okumak için tıklayın",
+    "speakerTooltipEnable": "Etkinleştirmek için tıklayın",
+    "closeSettings": "Ayarları kapat",
+    "showPanel": "Paneli göster"
+  },
+  "chat": {
+    "welcomeMessage": "Yetkinlik değerlendirmenize hoş geldiniz. Ben yapay zeka danışmanınızım ve bu süreç boyunca size eşlik edeceğim.",
+    "inputLabel": "Cevabınızı yazın",
+    "inputPlaceholder": "Cevabınızı yazın... (Göndermek için Enter, yeni satır için Shift+Enter)",
+    "inputAriaLabel": "Cevap giriş alanı",
+    "sendButton": "Gönder",
+    "sendAriaLabel": "Cevabı gönder",
+    "micStart": "Sesli kaydı başlat",
+    "micStop": "Sesli kaydı durdur",
+    "formAriaLabel": "Cevap formu",
+    "choicesAriaLabel": "Cevap seçenekleri",
+    "choiceAriaLabel": "Seçenek {{index}}: {{choice}}"
+  },
+  "joker": {
+    "label": "Cevaplamak için yardıma ihtiyacım var",
+    "ariaLabel": "Soruyu cevaplamak için yardım iste",
+    "tooltip": "Sunulan yardımlar düşünmeye yönelik metodolojik yardımlardır. Bir analiz, yorum veya sonuç niteliği taşımazlar.",
+    "disclaimer": "Düşünmeye yönelik metodolojik yardım • Cevap niteliği taşımaz"
+  },
+  "synthesis": {
+    "confirmYes": "Evet, doğru",
+    "confirmNo": "Hayır, tam olarak değil",
+    "confirmYesAriaLabel": "Özetin doğru olduğunu onaylayın",
+    "confirmNoAriaLabel": "Özetin tam olarak doğru olmadığını belirtin",
+    "confirmYesText": "Evet, doğru.",
+    "confirmNoText": "Hayır, tam olarak değil.",
+    "groupAriaLabel": "Özet onayı"
+  },
+  "miniSynthesis": {
+    "title": "**{{count}} sorudan sonra durum değerlendirmesi**",
+    "intro": "\n\nŞimdiye kadar keşfettiklerimiz:\n",
+    "footer": "\n\nSize doğru gelmeyen bir şey varsa veya bir noktayı detaylandırmak isterseniz, bir sonraki cevabınızda bana söylemekten çekinmeyin. Devam edelim.",
+    "generating": "Özet oluşturuluyor..."
+  },
+  "phases": {
+    "preliminary": "Ön aşama",
+    "investigation": "Araştırma aşaması",
+    "conclusion": "Sonuç aşaması"
+  },
+  "phaseTransition": {
+    "title": "Aşama değişikliği",
+    "message": "Şimdi bir sonraki aşamaya geçiyorsunuz.",
+    "continue": "Devam et"
+  },
+  "summarizing": {
+    "title": "🧠 Özetiniz oluşturuluyor...",
+    "description": "Yapay zekamız kişiselleştirilmiş bir rapor oluşturmak için cevaplarınızı analiz ediyor.",
+    "analyzing": "Analiz devam ediyor...",
+    "timeEstimate": "⏱️ Bu işlem 60 saniyeye kadar sürebilir.",
+    "patience": "Sabrınız için teşekkürler!",
+    "autoSave": "💾 İlerlemeniz otomatik olarak kaydedildi"
+  },
+  "endWarning": {
+    "title": "Sona yaklaşıyoruz!",
+    "description": "Yetkinlik değerlendirmenizin yaklaşık <strong>%{{percent}}</strong>'ini tamamladınız.",
+    "hint": "💡 <strong>Birkaç soru daha</strong> profesyonel projenizin analizini tamamlamak ve kişiselleştirilmiş özetinizi hazırlamak için.",
+    "continue": "Anladım, devam edelim!"
+  },
+  "endConfirmation": {
+    "title": "Değerlendirmeniz neredeyse tamamlandı!",
+    "description": "<strong>{{count}} soruyu</strong> cevapladınız. Kişiselleştirilmiş özetinizi oluşturmak için yeterli bilgiye sahibiz.",
+    "beforeContinue": "📝 Devam etmeden önce:",
+    "deepenQuestion": "Bir şey eklemek veya düşüncenizin belirli bir noktasını derinleştirmek ister misiniz?",
+    "generateSynthesis": "✅ Özetimi oluştur",
+    "deepen": "🔍 Derinleştir"
+  },
+  "careerExploration": {
+    "title": "Kariyer yolları keşfi",
+    "hint": "💡 Yapay zeka profilinizi analiz edebilir ve yetkinliklerinize ve iş piyasasının güncel trendlerine dayalı kişiselleştirilmiş kariyer önerileri sunabilir.",
+    "accept": "Evet, kariyer yollarını keşfet",
+    "decline": "Hayır, değerlendirmeye devam et",
+    "closeMessage": "🎯 Harika! {{count}} ilginç kariyer yolu belirlediniz: {{paths}}. Bu yollar özet belgenize entegre edilecektir. Projenizi detaylandırmak için değerlendirmeye devam edelim."
+  },
+  "marketExploration": {
+    "closeMessage": "📊 {{job}} mesleği için piyasayı analiz ettim. Fizibilite puanı: {{score}}/10. {{comment}}... Bu bilgiler özetinize entegre edilecektir.",
+    "interviewCloseMessage": "💬 {{name}} ile bu görüşme için teşekkürler! {{job}} mesleğinin gerçeklerini keşfettiniz. Bu görüşmeden elde edilen bilgiler özet belgenize entegre edilecektir."
+  },
+  "outOfScope": {
+    "title": "Önemli bilgi",
+    "resources": "📚 Uygun kaynaklar:",
+    "defaultResources": {
+      "cio": "İŞKUR - Ücretsiz kariyer danışmanlığı",
+      "counselor": "Okulunuzdaki rehberlik danışmanı",
+      "parcoursup": "YÖK - Üniversite tercihleri için",
+      "onisep": "İŞKUR Meslek Bilgi Merkezi - meslekleri keşfetmek için"
+    },
+    "backToDashboard": "Kontrol paneline dön",
+    "continueAnyway": "Yine de devam et"
+  },
+  "logoutModal": {
+    "title": "Emin misiniz?",
+    "description": "İlerlemeniz otomatik olarak kaydedilecektir. Bir sonraki girişinizde kaldığınız yerden devam edebilirsiniz.",
+    "cancel": "İptal",
+    "confirm": "Çıkış yap"
+  },
+  "helpModal": {
+    "title": "Yardım & İpuçları",
+    "journey": {
+      "title": "Süreciniz",
+      "description": "Yetkinlik değerlendirmeniz 3 aşamada gerçekleşir:",
+      "phase1Title": "Aşama 1 - Araştırma:",
+      "phase1Desc": "Motivasyonlarınızın ve tutkularınızın keşfi",
+      "phase2Title": "Aşama 2 - Analiz:",
+      "phase2Desc": "Yetkinliklerinizin ve deneyimlerinizin belirlenmesi",
+      "phase3Title": "Aşama 3 - Sonuç:",
+      "phase3Desc": "Özet ve kişiselleştirilmiş eylem planı"
+    },
+    "tips": {
+      "title": "Cevaplama İpuçları",
+      "tip1": "Acele etmeyin, yanlış cevap diye bir şey yoktur",
+      "tip2": "Cevaplarınızda samimi ve dürüst olun",
+      "tip3": "Deneyimlerinizden somut örnekler verin",
+      "tip4": "İlerlemeniz otomatik olarak kaydedilir"
+    },
+    "features": {
+      "title": "Mevcut Özellikler",
+      "speechTitle": "Sesli okuma:",
+      "speechDesc": "Soruları sesli olarak dinleyin",
+      "themesTitle": "Ortaya çıkan temalar:",
+      "themesDesc": "Süreç boyunca belirlenen temaları görselleştirin",
+      "skillsTitle": "Yetkinlik analizi:",
+      "skillsDesc": "Yetkinlik radarınızı inceleyin",
+      "autoSaveTitle": "Otomatik kayıt:",
+      "autoSaveDesc": "Kaldığınız yerden devam edin"
+    },
+    "contact": {
+      "title": "Yardıma mı İhtiyacınız Var?",
+      "description": "Ekibimiz size yardımcı olmak için burada. Bize ulaşın:"
+    }
+  },
+  "saveIndicator": {
+    "saved": "Kaydedildi!",
+    "savedAgo": "{{minutes}} dk önce kaydedildi"
+  },
+  "sidePanel": {
+    "ariaLabel": "Ortaya çıkan temalar ve yetkinlik analizi kontrol paneli"
+  },
+  "completion": {
+    "title": "Tebrikler!",
+    "message": "Değerlendirmenin tüm sorularını tamamladınız.",
+    "generating": "Özetiniz oluşturuluyor..."
+  },
+  "timeElapsed": "Geçen süre: {{time}}",
+  "minutesRemaining": "dk kalan",
+  "emergingThemes": "Ortaya çıkan temalar",
+  "phase": {
+    "readyTitle": "Başlamaya hazır mısınız, {{name}}?",
+    "readySubtitle": "\"{{packageName}}\" programını seçtiniz. Değerlendirmeniz şöyle ilerleyecek.",
+    "estimatedMin": "dk tahmini",
+    "chooseCoaching": "Koçluk tarzınızı seçin",
+    "collaborative": "İşbirlikçi",
+    "collaborativeDesc": "Güçlü yönlerinize odaklanan destekleyici yaklaşım.",
+    "analytic": "Analitik",
+    "analyticDesc": "Konuları ayrıntılı incelemek için yapılandırılmış ve mantıksal yaklaşım.",
+    "creative": "Yaratıcı",
+    "creativeDesc": "Yeni yolları keşfetmek için ilham verici yaklaşım.",
+    "startBilan": "Değerlendirmeyi Başlat",
+    "changePackage": "Paketi değiştir"
+  },
+  "personalization": {
+    "title": "Hiper-Kişiselleştirme",
+    "subtitle": "Daha anlamlı bir değerlendirme için özgeçmişinizi veya profilinizi paylaşın.",
+    "qualiopiNote": "🎯 Bu bilgiler, araştırma aşamasındaki araçları, egzersizleri ve görüşmeleri uyarlamak için kullanılacaktır.",
+    "optional": "(Bu isteğe bağlıdır, bu adımı atlayabilirsiniz)",
+    "pasteText": "Metni yapıştır",
+    "uploadFile": "Dosya yükle",
+    "textPlaceholder": "Özgeçmişinizin, LinkedIn profilinizin veya mesleki geçmişinizin metnini buraya yapıştırın...",
+    "characters": "karakter",
+    "readyToAnalyze": "Analize hazır",
+    "removeFile": "Sil ve başka bir dosya seç",
+    "dropHere": "Dosyayı buraya bırakın",
+    "dragOrClick": "Sürükleyip bırakın veya seçmek için tıklayın",
+    "acceptedFormats": "Kabul edilen formatlar: PDF, Word, Metin (maks 10MB)",
+    "analyzing": "Analiz devam ediyor...",
+    "submit": "Değerlendirmeyi kişiselleştir",
+    "skip": "Bu adımı atla \u2192",
+    "confidentiality": "🔒 Verileriniz gizli ve güvenli bir şekilde işlenmektedir.",
+    "errors": {
+      "unsupportedFormat": "Desteklenmeyen dosya formatı. Lütfen PDF, Word veya metin dosyası yükleyin.",
+      "fileTooLarge": "Dosya çok büyük. Maksimum boyut: 10MB.",
+      "pasteText": "Lütfen profilinizin metnini yapıştırın.",
+      "selectFile": "Lütfen bir dosya seçin.",
+      "analysisFailed": "Üzgünüz, analiz sırasında bir hata oluştu. Bu bilgi olmadan devam edeceğiz."
+    },
+    "progress": {
+      "textExtracted": "Dosyadan metin çıkarıldı",
+      "uploading": "Özgeçmiş yükleniyor...",
+      "uploaded": "Özgeçmiş başarıyla yüklendi!",
+      "uploadFailed": "Yükleme başarısız, yerel analiz...",
+      "analyzing": "Profil analiz ediliyor...",
+      "done": "Analiz tamamlandı!"
+    }
+  },
+  "speech": {
+    "title": "Ses Ayarları",
+    "toggleLabel": "Sesli okumayı etkinleştir",
+    "enabled": "🔊 Sesli okuma etkin - Sorular otomatik olarak okunacak",
+    "disabled": "🔇 Sesli okuma devre dışı - Etkinleştirmek için düğmeye tıklayın",
+    "voice": "Ses",
+    "googleHint": "Google sesleri (⭐) genellikle daha iyi kalite sunar",
+    "speed": "Hız",
+    "pitch": "Ton"
+  },
+  "aiFeedback": {
+    "progress": "İlerleme",
+    "didYouKnow": "Biliyor muydunuz?",
+    "identifiedThemes": "Tespit edilen temalar",
+    "phaseCompleted": "Aşama tamamlandı!",
+    "bravo": "Tebrikler {{name}}! \"{{phase}}\" aşamasını tamamladınız.",
+    "continueToPhase": "{{phase}} aşamasına devam et"
+  },
+  "chatInput": {
+    "placeholder": "Cevabınızı yazın...",
+    "stopDictation": "Dikteyi durdur",
+    "startDictation": "Sesli dikte",
+    "send": "Gönder",
+    "skipQuestion": "Bu soruyu atla ({{count}} kalan)",
+    "skipQuestionPlural": "Bu soruyu atla ({{count}} kalan)",
+    "aiPreparing": "Yapay zeka bir sonraki soruyu hazırlıyor..."
+  },
+  "chatMessage": {
+    "you": "Siz",
+    "aiAssistant": "Yapay Zeka Asistanı"
+  },
+  "modals": {
+    "logout": {
+      "title": "Çıkış",
+      "unsavedWarning": "Dikkat: Kaydedilmemiş değişiklikleriniz var. Çıkış yapmak istediğinizden emin misiniz?",
+      "confirmMessage": "Çıkış yapmak istediğinizden emin misiniz? İlerlemeniz otomatik olarak kaydedilir.",
+      "cancel": "İptal",
+      "confirm": "Çıkış yap"
+    },
+    "help": {
+      "title": "Yardım",
+      "howToAnswer": "Sorulara nasıl cevap verilir?",
+      "howToAnswerDesc": "Samimi ve ayrıntılı bir şekilde cevap verin. Cevaplarınız ne kadar eksiksiz olursa, özet o kadar anlamlı olur.",
+      "jokerButton": "\"Yardıma ihtiyacım var\" düğmesi ne yapar?",
+      "jokerButtonDesc": "Soruyu daha basit bir şekilde yeniden formule eder veya düşüncenizde size rehberlik edecek bir örnek sunar.",
+      "progressSaved": "İlerlememem kaydediliyor mu?",
+      "progressSavedDesc": "Evet, ilerlemeniz otomatik olarak kaydedilir. Kaldığınız yerden istediğiniz zaman devam edebilirsiniz.",
+      "speechSynthesis": "Sesli okuma nasıl çalışır?",
+      "speechSynthesisDesc": "Soruların sesli okunmasını etkinleştirmek/devre dışı bırakmak için hoparlör simgesine tıklayın. Sesi ayarlardan özelleştirebilirsiniz.",
+      "understood": "Anladım"
+    },
+    "endConfirmation": {
+      "title": "Değerlendirmeyi bitir?",
+      "progress": "Anketin <strong>%{{percent}}</strong>'ini tamamladınız.",
+      "question": "Özetinizi şimdi oluşturmak mı yoksa bazı yönleri derinleştirmek mi istiyorsunuz?",
+      "hint": "Ne kadar derinleştirirseniz, özetiniz o kadar zengin ve kişisel olur.",
+      "deepen": "Daha fazla derinleştir",
+      "generate": "Özetimi oluştur",
+      "continue": "Ankete devam et"
+    },
+    "endWarning": {
+      "title": "Neredeyse bitti!",
+      "remaining": "Anketin sonuna yaklaşık <strong>{{count}} soru</strong> kaldı.",
+      "advice": "Bu son sorulara iyi cevap vermek için zaman ayırın, profilinizi tamamlamak için önemlidirler.",
+      "continue": "Devam et"
+    },
+    "outOfScope": {
+      "title": "Önemli bilgi",
+      "alternativeResources": "Alternatif kaynaklar:",
+      "continueAssessment": "Değerlendirmeye devam et",
+      "close": "Kapat"
+    },
+    "module": {
+      "title": "Derinleştirme önerisi",
+      "description": "Bu konuyu birkaç ek soruyla keşfetmek ister misiniz? Tamamen isteğe bağlıdır.",
+      "accept": "Evet, ilgileniyorum",
+      "decline": "Hayır, teşekkürler"
+    },
+    "satisfaction": {
+      "title": "Tamamlanan aşama hakkında görüşünüz",
+      "question": "Bu aşama size uygun geldi mi?",
+      "commentPlaceholder": "Bir yorumunuz var mı? (isteğe bağlı)",
+      "submit": "Onayla",
+      "skip": "Atla"
+    }
+  },
+  "badge": {
+    "unlocked": "Rozet kazanıldı!",
+    "completed": "Tamamladınız: {{phase}}"
+  },
+  "themes": {
+    "showThemes": "Temaları göster",
+    "title": "Ortaya Çıkan Temalar",
+    "hide": "Gizle",
+    "noThemesYet": "Temalar cevaplarınıza göre ortaya çıkacaktır.",
+    "detectedThemes": "Tespit edilen temalar",
+    "noThemesDetected": "Şu an tespit edilen tema yok",
+    "identifiedSkills": "Belirlenen yetkinlikler",
+    "skillsAnalyzing": "Yetkinlikler aşamalı olarak analiz edilecektir",
+    "note": "Bu temalar ve yetkinlikler cevaplarınızdan otomatik olarak tespit edilir. Yapay zekanın sonraki soruları kişiselleştirmesine yardımcı olurlar."
+  },
+  "questionnaireHeader": {
+    "greeting": "Merhaba {{name}}",
+    "saved": "Kaydedildi",
+    "help": "Yardım",
+    "dashboard": "Kontrol paneli",
+    "settings": "Ayarlar",
+    "lightMode": "Açık mod",
+    "darkMode": "Koyu mod",
+    "logout": "Çıkış yap"
+  },
+  "enhanced": {
+    "hidePanel": "Paneli gizle",
+    "advice": "Öneri",
+    "emergingThemes": "Ortaya Çıkan Temalar",
+    "analyzingThemes": "Temalar analiz ediliyor...",
+    "themesBuilding": "Temalar oluşturuluyor",
+    "themesBuildingDesc": "Kariyer yolunuzun anahtar temalarını görmek için birkaç soruyu yanıtlayın.",
+    "note": "Not",
+    "noteText": "Yetkinliklerinizin tam analizi nihai sentezinizde mevcut olacaktır."
+  }
+}

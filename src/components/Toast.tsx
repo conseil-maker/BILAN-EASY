@@ -59,7 +59,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, duration = 3000, onClose }
       <button
         onClick={onClose}
         className="ml-2 text-white/80 hover:text-white transition-colors"
-        aria-label="Fermer la notification"
+        aria-label="Close"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

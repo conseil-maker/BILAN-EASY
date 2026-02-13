@@ -13,6 +13,7 @@ import { User } from '@supabase/supabase-js';
 import { Package, Answer, Summary, CoachingStyle, UserProfile, Message } from '../types';
 import { loadSession, saveSession, clearSession, SessionData, QuestionData } from '../services/sessionService';
 import { PACKAGES } from '../constants';
+import i18n from '../i18n';
 
 // ============================================
 // TYPES
@@ -204,7 +205,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ user, children
           ...prev,
           isLoading: false,
           appState: 'package-selection',
-          error: 'Erreur lors du chargement de la session',
+          error: i18n.language === 'tr' ? 'Oturum yüklenirken hata oluştu' : 'Erreur lors du chargement de la session',
         }));
       }
     };
@@ -391,7 +392,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ user, children
       console.error('[SessionContext] Erreur démarrage nouveau bilan:', error);
       setState(prev => ({
         ...prev,
-        error: 'Erreur lors du démarrage d\'un nouveau bilan',
+        error: i18n.language === 'tr' ? 'Yeni değerlendirme başlatılırken hata oluştu' : 'Erreur lors du démarrage d\'un nouveau bilan',
       }));
     }
   }, [user.id]);

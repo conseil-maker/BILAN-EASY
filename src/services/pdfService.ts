@@ -1,4 +1,7 @@
 import { jsPDF } from 'jspdf';
+import i18n from '../i18n';
+
+const tPdf = (fr: string, tr: string): string => (i18n.language || 'fr') === 'tr' ? tr : fr;
 
 export interface PDFData {
   title: string;
@@ -46,7 +49,7 @@ export const pdfService = {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('Bilan de Compétences', pageWidth / 2, 25, { align: 'center' });
+    doc.text(tPdf('Bilan de Compétences', 'Yetkinlik Değerlendirmesi'), pageWidth / 2, 25, { align: 'center' });
     
     yPosition = 50;
     doc.setTextColor(0, 0, 0);
@@ -55,7 +58,7 @@ export const pdfService = {
     addText(data.title, 18, true);
     
     if (data.clientName) {
-      addText(`Client: ${data.clientName}`, 12);
+      addText(`${tPdf('Client', 'Danışan')}: ${data.clientName}`, 12);
     }
     
     addText(`Date: ${data.date}`, 12);
@@ -63,7 +66,7 @@ export const pdfService = {
 
     // Type de profil
     if (data.profileType) {
-      addText('Type de profil', 16, true);
+      addText(tPdf('Type de profil', 'Profil türü'), 16, true);
       doc.setFillColor(243, 244, 246);
       doc.rect(margin, yPosition, maxWidth, 15, 'F');
       yPosition += 10;
@@ -73,7 +76,7 @@ export const pdfService = {
 
     // Forces
     if (data.strengths && data.strengths.length > 0) {
-      addText('Forces principales', 16, true);
+      addText(tPdf('Forces principales', 'Temel güçlü yönler'), 16, true);
       data.strengths.forEach((strength, index) => {
         addText(`${index + 1}. ${strength}`, 12);
       });
@@ -82,7 +85,7 @@ export const pdfService = {
 
     // Axes de développement
     if (data.areasForDevelopment && data.areasForDevelopment.length > 0) {
-      addText('Axes de développement', 16, true);
+      addText(tPdf('Axes de développement', 'Gelişim alanları'), 16, true);
       data.areasForDevelopment.forEach((area, index) => {
         addText(`${index + 1}. ${area}`, 12);
       });
@@ -91,7 +94,7 @@ export const pdfService = {
 
     // Recommandations
     if (data.recommendations && data.recommendations.length > 0) {
-      addText('Recommandations', 16, true);
+      addText(tPdf('Recommandations', 'Öneriler'), 16, true);
       data.recommendations.forEach((rec, index) => {
         addText(`${index + 1}. ${rec}`, 12);
       });
@@ -100,7 +103,7 @@ export const pdfService = {
 
     // Plan d'action
     if (data.actionPlan && data.actionPlan.length > 0) {
-      addText('Plan d\'action', 16, true);
+      addText(tPdf("Plan d'action", 'Eylem planı'), 16, true);
       data.actionPlan.forEach((item, index) => {
         const action = typeof item === 'string' ? item : item.action;
         const timeline = typeof item === 'object' && item.timeline ? ` (${item.timeline})` : '';
@@ -115,13 +118,13 @@ export const pdfService = {
       doc.setFontSize(10);
       doc.setTextColor(128, 128, 128);
       doc.text(
-        `Page ${i} sur ${pageCount}`,
+        tPdf(`Page ${i} sur ${pageCount}`, `Sayfa ${i} / ${pageCount}`),
         pageWidth / 2,
         doc.internal.pageSize.getHeight() - 10,
         { align: 'center' }
       );
       doc.text(
-        'Bilan de Compétences IA - Confidentiel',
+        tPdf('Bilan de Compétences IA - Confidentiel', 'Yetkinlik Değerlendirmesi - Gizli'),
         margin,
         doc.internal.pageSize.getHeight() - 10
       );

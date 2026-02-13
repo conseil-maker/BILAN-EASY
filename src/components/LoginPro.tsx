@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabaseClient';
 import organizationConfig from '../config/organization';
+import LanguageSelector from './LanguageSelector';
 
 const ORGANIZATION = organizationConfig;
 
@@ -9,6 +11,7 @@ interface LoginProProps {
 }
 
 export default function LoginPro({ onToggle }: LoginProProps) {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -47,15 +50,13 @@ export default function LoginPro({ onToggle }: LoginProProps) {
       console.error('[LoginPro] Erreur de connexion:', error);
 
       if (error.message === 'timeout') {
-        setError(
-          'La connexion a pris trop de temps (>15s). Veuillez réessayer.'
-        );
+        setError(t('errors.timeout'));
       } else if (error.message?.includes('Invalid login credentials')) {
-        setError('Email ou mot de passe incorrect.');
+        setError(t('errors.invalidCredentials'));
       } else if (error.message?.includes('Email not confirmed')) {
-        setError('Veuillez confirmer votre email avant de vous connecter.');
+        setError(t('errors.emailNotConfirmed'));
       } else {
-        setError(error.message || 'Erreur lors de la connexion');
+        setError(error.message || t('errors.genericLogin'));
       }
     } finally {
       setLoading(false);
@@ -65,7 +66,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      setError('Veuillez entrer votre adresse email');
+      setError(t('errors.enterEmail'));
       return;
     }
     
@@ -80,7 +81,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
       if (error) throw error;
       setResetEmailSent(true);
     } catch (error: any) {
-      setError(error.message || "Erreur lors de l'envoi de l'email");
+      setError(error.message || t('errors.resetEmailError'));
     } finally {
       setLoading(false);
     }
@@ -96,18 +97,17 @@ export default function LoginPro({ onToggle }: LoginProProps) {
               <span className="text-2xl font-bold text-indigo-600">BC</span>
             </div>
             <div>
-              <h1 className="text-white text-xl font-bold">Bilan de Compétences</h1>
-              <p className="text-indigo-200 text-sm">Propulsé par l'IA</p>
+              <h1 className="text-white text-xl font-bold">{t('brandName')}</h1>
+              <p className="text-indigo-200 text-sm">{t('brandSubtitle')}</p>
             </div>
           </div>
           
           <div className="mt-16">
             <h2 className="text-4xl font-bold text-white mb-6">
-              Découvrez votre potentiel professionnel
+              {t('heroTitle')}
             </h2>
             <p className="text-indigo-200 text-lg mb-8">
-              Un accompagnement personnalisé pour définir votre projet professionnel 
-              et construire votre avenir.
+              {t('heroDescription')}
             </p>
             
             <div className="space-y-4">
@@ -117,7 +117,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <span className="text-white">Certification Qualiopi</span>
+                <span className="text-white">{t('features.qualiopi')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
@@ -125,7 +125,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <span className="text-white">Confidentialité garantie</span>
+                <span className="text-white">{t('features.confidentiality')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
@@ -133,7 +133,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <span className="text-white">Intelligence Artificielle avancée</span>
+                <span className="text-white">{t('features.ai')}</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
@@ -141,7 +141,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <span className="text-white">Accompagnement personnalisé</span>
+                <span className="text-white">{t('features.support')}</span>
               </div>
             </div>
           </div>
@@ -168,6 +168,11 @@ export default function LoginPro({ onToggle }: LoginProProps) {
       {/* Panneau droit - Formulaire */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
         <div className="max-w-md w-full">
+          {/* Sélecteur de langue en haut à droite */}
+          <div className="flex justify-end mb-4">
+            <LanguageSelector variant="inline" />
+          </div>
+
           {/* Logo mobile */}
           <div className="lg:hidden text-center mb-8">
             <div className="inline-flex items-center gap-3 mb-4">
@@ -175,8 +180,8 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                 <span className="text-2xl font-bold text-white">BC</span>
               </div>
               <div className="text-left">
-                <h1 className="text-xl font-bold text-gray-900">Bilan de Compétences</h1>
-                <p className="text-indigo-600 text-sm">Propulsé par l'IA</p>
+                <h1 className="text-xl font-bold text-gray-900">{t('brandName')}</h1>
+                <p className="text-indigo-600 text-sm">{t('brandSubtitle')}</p>
               </div>
             </div>
           </div>
@@ -184,12 +189,12 @@ export default function LoginPro({ onToggle }: LoginProProps) {
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">
-                {showForgotPassword ? 'Mot de passe oublié' : 'Connexion'}
+                {showForgotPassword ? t('forgotPassword.title') : t('login.title')}
               </h2>
               <p className="text-gray-600 mt-2">
                 {showForgotPassword 
-                  ? 'Entrez votre email pour réinitialiser votre mot de passe'
-                  : 'Accédez à votre espace personnel'}
+                  ? t('forgotPassword.subtitle')
+                  : t('login.subtitle')}
               </p>
             </div>
 
@@ -200,9 +205,9 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Email envoyé !</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('forgotPassword.emailSentTitle')}</h3>
                 <p className="text-gray-600 mb-6">
-                  Vérifiez votre boîte mail pour réinitialiser votre mot de passe.
+                  {t('forgotPassword.emailSentMessage')}
                 </p>
                 <button
                   onClick={() => {
@@ -211,7 +216,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                   }}
                   className="text-indigo-600 hover:text-indigo-700 font-medium"
                 >
-                  Retour à la connexion
+                  {t('forgotPassword.backToLogin')}
                 </button>
               </div>
             ) : (
@@ -224,7 +229,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Adresse email
+                    {t('login.email')}
                   </label>
                   <input
                     id="email"
@@ -233,7 +238,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                    placeholder="votre@email.com"
+                    placeholder={t('login.emailPlaceholder')}
                   />
                 </div>
 
@@ -241,14 +246,14 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        Mot de passe
+                        {t('login.password')}
                       </label>
                       <button
                         type="button"
                         onClick={() => setShowForgotPassword(true)}
                         className="text-sm text-indigo-600 hover:text-indigo-700"
                       >
-                        Mot de passe oublié ?
+                        {t('login.forgotPassword')}
                       </button>
                     </div>
                     <input
@@ -258,7 +263,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                      placeholder="••••••••"
+                      placeholder={t('login.passwordPlaceholder')}
                     />
                   </div>
                 )}
@@ -271,12 +276,12 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                   {loading ? (
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                      <span>Connexion en cours...</span>
+                      <span>{t('login.loading')}</span>
                     </div>
                   ) : showForgotPassword ? (
-                    'Envoyer le lien de réinitialisation'
+                    t('forgotPassword.submit')
                   ) : (
-                    'Se connecter'
+                    t('login.submit')
                   )}
                 </button>
 
@@ -286,7 +291,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
                     onClick={() => setShowForgotPassword(false)}
                     className="w-full text-gray-600 hover:text-gray-800 py-2 font-medium"
                   >
-                    Retour à la connexion
+                    {t('forgotPassword.backToLogin')}
                   </button>
                 )}
               </form>
@@ -295,12 +300,12 @@ export default function LoginPro({ onToggle }: LoginProProps) {
             {!showForgotPassword && !resetEmailSent && (
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
-                  Pas encore de compte ?{' '}
+                  {t('login.noAccount')}{' '}
                   <button
                     onClick={onToggle}
                     className="text-indigo-600 hover:text-indigo-700 font-medium"
                   >
-                    Créer un compte
+                    {t('login.createAccount')}
                   </button>
                 </p>
               </div>
@@ -309,17 +314,17 @@ export default function LoginPro({ onToggle }: LoginProProps) {
 
           {/* Informations légales */}
           <div className="mt-8 text-center text-xs text-gray-500">
-            <p>En vous connectant, vous acceptez nos</p>
+            <p>{t('login.acceptTerms')}</p>
             <p className="mt-1">
-              <a href="#/legal/cgu" className="text-indigo-600 hover:underline">CGU</a>
+              <a href="#/legal/cgu" className="text-indigo-600 hover:underline">{t('login.cgu')}</a>
               {' • '}
-              <a href="#/legal/privacy" className="text-indigo-600 hover:underline">Politique de confidentialité</a>
+              <a href="#/legal/privacy" className="text-indigo-600 hover:underline">{t('login.privacyPolicy')}</a>
             </p>
           </div>
 
           {/* Contact */}
           <div className="mt-6 text-center text-xs text-gray-500">
-            <p>Besoin d'aide ? Contactez-nous</p>
+            <p>{t('login.needHelp')}</p>
             <p className="mt-1">
               <a href={`mailto:${ORGANIZATION.email}`} className="text-indigo-600 hover:underline">
                 {ORGANIZATION.email}

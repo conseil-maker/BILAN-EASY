@@ -97,7 +97,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Chargement des bilans...</p>
+          <p className="text-slate-600">{t('status.loading', 'Chargement des bilans...')}</p>
         </div>
       </div>
     );
@@ -109,14 +109,14 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
         <header className="mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold text-primary-800 mb-2">Dashboard Consultant</h1>
-              <p className="text-slate-600">Suivi des bilans de vos clients</p>
+              <h1 className="text-4xl font-bold text-primary-800 mb-2">{t('title')}</h1>
+              <p className="text-slate-600">{t('overview.clientTracking', 'Suivi des bilans de vos clients')}</p>
             </div>
             <button
               onClick={onBack}
               className="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-300 transition-colors"
             >
-              ← Retour
+              {t('common:back', '← Retour')}
             </button>
           </div>
         </header>
@@ -125,26 +125,26 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-blue-600">{stats.totalClients}</div>
-            <div className="text-slate-600 mt-1">Clients assignés</div>
+            <div className="text-slate-600 mt-1">{t('clients.assigned', 'Clients assignés')}</div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-primary-600">{stats.total}</div>
-            <div className="text-slate-600 mt-1">Bilans totaux</div>
+            <div className="text-slate-600 mt-1">{t('stats.totalBilans', 'Bilans totaux')}</div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-orange-600">{stats.inProgress}</div>
-            <div className="text-slate-600 mt-1">En cours</div>
+            <div className="text-slate-600 mt-1">{t('status.inProgress')}</div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-green-600">{stats.completed}</div>
-            <div className="text-slate-600 mt-1">Complétés</div>
+            <div className="text-slate-600 mt-1">{t('status.completed')}</div>
           </div>
         </div>
 
         {/* Liste des clients assignés */}
         {clients.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">Mes clients</h2>
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">{t('clients.myClients', 'Mes clients')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {clients.map(client => (
                 <div key={client.id} className="border border-slate-200 rounded-lg p-4 hover:border-primary-400 transition-colors">
@@ -155,7 +155,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                     <div className="text-sm text-slate-500 mt-1">{client.email}</div>
                   )}
                   <div className="text-xs text-slate-400 mt-2">
-                    Assigné le {new Date(client.assignedAt).toLocaleDateString('fr-FR')}
+                    {t('clients.assignedDate')} {new Date(client.assignedAt).toLocaleDateString()}
                   </div>
                 </div>
               ))}
@@ -173,7 +173,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                 : 'bg-white text-slate-700 hover:bg-slate-100'
             }`}
           >
-            Tous ({stats.total})
+            {t('table.all', 'Tous')} ({stats.total})
           </button>
           <button
             onClick={() => setFilter('in_progress')}
@@ -183,7 +183,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                 : 'bg-white text-slate-700 hover:bg-slate-100'
             }`}
           >
-            En cours ({stats.inProgress})
+            {t('status.inProgress')} ({stats.inProgress})
           </button>
           <button
             onClick={() => setFilter('completed')}
@@ -193,19 +193,19 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                 : 'bg-white text-slate-700 hover:bg-slate-100'
             }`}
           >
-            Complétés ({stats.completed})
+            {t('status.completed')} ({stats.completed})
           </button>
         </div>
 
         {/* Liste des bilans */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="p-6 border-b border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-800">Bilans des clients</h2>
+            <h2 className="text-2xl font-bold text-slate-800">{t('clients.clientBilans', 'Bilans des clients')}</h2>
           </div>
           
           {filteredAssessments.length === 0 ? (
             <div className="p-8 text-center text-slate-600">
-              Aucun bilan à afficher pour ce filtre.
+              {t('overview.noAssessments', 'Aucun bilan à afficher pour ce filtre.')}
             </div>
           ) : (
             <div className="divide-y divide-slate-200">
@@ -218,13 +218,13 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                       </h3>
                       <div className="space-y-1 text-sm text-slate-600">
                         <p>
-                          <span className="font-medium">Style de coaching:</span>{' '}
-                          {assessment.coaching_style === 'collaborative' ? 'Collaboratif' :
-                           assessment.coaching_style === 'analytical' ? 'Analytique' :
-                           'Créatif'}
+                          <span className="font-medium">{t('detail.coachingStyle')}:</span>{' '}
+                          {assessment.coaching_style === 'collaborative' ? t('detail.collaborative') :
+                           assessment.coaching_style === 'analytical' ? t('detail.analytical') :
+                           t('detail.creative')}
                         </p>
                         <p>
-                          <span className="font-medium">Créé le:</span>{' '}
+                          <span className="font-medium">{t('detail.creationDate')}:</span>{' '}
                           {new Date(assessment.created_at).toLocaleDateString('fr-FR', {
                             year: 'numeric',
                             month: 'long',
@@ -233,7 +233,7 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                         </p>
                         {assessment.completed_at && (
                           <p>
-                            <span className="font-medium">Complété le:</span>{' '}
+                            <span className="font-medium">{t('detail.completionDate')}:</span>{' '}
                             {new Date(assessment.completed_at).toLocaleDateString('fr-FR', {
                               year: 'numeric',
                               month: 'long',
@@ -250,16 +250,16 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
                         assessment.status === 'draft' ? 'bg-slate-100 text-slate-800' :
                         'bg-slate-100 text-slate-800'
                       }`}>
-                        {assessment.status === 'completed' ? 'Complété' :
-                         assessment.status === 'in_progress' ? 'En cours' :
-                         assessment.status === 'draft' ? 'Brouillon' :
-                         'Archivé'}
+                        {assessment.status === 'completed' ? t('status.completed') :
+                         assessment.status === 'in_progress' ? t('status.inProgress') :
+                         assessment.status === 'draft' ? t('status.draft', 'Brouillon') :
+                         t('status.archived', 'Archivé')}
                       </span>
                       <button
                         onClick={() => setSelectedAssessment(assessment)}
                         className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm"
                       >
-                        Consulter
+                        {t('table.actions')}
                       </button>
                     </div>
                   </div>

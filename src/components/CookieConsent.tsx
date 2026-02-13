@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Cookie, X, Settings, Check } from 'lucide-react';
 
 interface CookiePreferences {
@@ -8,6 +9,7 @@ interface CookiePreferences {
 }
 
 export const CookieConsent: React.FC = () => {
+  const { t } = useTranslation('legal');
   const [showBanner, setShowBanner] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({
@@ -73,13 +75,13 @@ export const CookieConsent: React.FC = () => {
             <div className="flex items-center">
               <Cookie className="text-indigo-600 mr-3" size={28} />
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Gestion des cookies
+                {t('cookies.title')}
               </h2>
             </div>
             <button
               onClick={acceptNecessary}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              aria-label="Fermer"
+              aria-label={t('cookies.close')}
             >
               <X size={24} />
             </button>
@@ -89,9 +91,7 @@ export const CookieConsent: React.FC = () => {
         {/* Content */}
         <div className="p-6">
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Nous utilisons des cookies pour améliorer votre expérience sur Bilan-Easy. 
-            Certains cookies sont nécessaires au fonctionnement de la plateforme, 
-            d'autres nous aident à l'améliorer.
+            {t('cookies.description')}
           </p>
 
           {showDetails ? (
@@ -101,14 +101,14 @@ export const CookieConsent: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Cookies nécessaires
+                      {t('cookies.necessary.title')}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Indispensables au fonctionnement (authentification, préférences)
+                      {t('cookies.necessary.description')}
                     </p>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-sm text-gray-500 dark:text-gray-400 mr-2">Toujours actif</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 mr-2">{t('cookies.alwaysActive')}</span>
                     <div className="w-12 h-6 bg-indigo-600 rounded-full flex items-center justify-end px-1">
                       <div className="w-4 h-4 bg-white rounded-full" />
                     </div>
@@ -121,10 +121,10 @@ export const CookieConsent: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Cookies de performance
+                      {t('cookies.performance.title')}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Analyse de l'utilisation pour améliorer la plateforme
+                      {t('cookies.performance.description')}
                     </p>
                   </div>
                   <button
@@ -145,10 +145,10 @@ export const CookieConsent: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-white">
-                      Cookies fonctionnels
+                      {t('cookies.functional.title')}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Amélioration de l'expérience utilisateur
+                      {t('cookies.functional.description')}
                     </p>
                   </div>
                   <button
@@ -168,7 +168,7 @@ export const CookieConsent: React.FC = () => {
                 href="/legal/cookies" 
                 className="text-sm text-indigo-600 hover:underline inline-block mt-2"
               >
-                En savoir plus sur notre politique de cookies
+                {t('cookies.learnMore')}
               </a>
             </div>
           ) : (
@@ -177,7 +177,7 @@ export const CookieConsent: React.FC = () => {
               className="flex items-center text-indigo-600 hover:text-indigo-700 mb-6"
             >
               <Settings size={18} className="mr-2" />
-              Personnaliser mes choix
+              {t('cookies.customize')}
             </button>
           )}
 
@@ -187,7 +187,7 @@ export const CookieConsent: React.FC = () => {
               onClick={acceptNecessary}
               className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
-              Refuser les optionnels
+              {t('cookies.rejectOptional')}
             </button>
             
             {showDetails ? (
@@ -196,7 +196,7 @@ export const CookieConsent: React.FC = () => {
                 className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center"
               >
                 <Check size={18} className="mr-2" />
-                Enregistrer mes choix
+                {t('cookies.saveChoices')}
               </button>
             ) : (
               <button
@@ -204,7 +204,7 @@ export const CookieConsent: React.FC = () => {
                 className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center"
               >
                 <Check size={18} className="mr-2" />
-                Tout accepter
+                {t('cookies.acceptAll')}
               </button>
             )}
           </div>
@@ -213,9 +213,9 @@ export const CookieConsent: React.FC = () => {
         {/* Footer */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-4 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Conformément au RGPD et à la directive ePrivacy. 
+            {t('cookies.footer')} 
             <a href="/legal/privacy" className="text-indigo-600 hover:underline ml-1">
-              Politique de confidentialité
+              {t('cookies.privacyPolicy')}
             </a>
           </p>
         </div>

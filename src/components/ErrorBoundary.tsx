@@ -10,6 +10,12 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { handleError } from '../services/errorService';
+import i18n from '../i18n';
+
+const tErr = (key: string, fallbackFR: string, fallbackTR: string): string => {
+  const lang = i18n.language || 'fr';
+  return lang === 'tr' ? fallbackTR : fallbackFR;
+};
 
 // ============================================
 // TYPES
@@ -136,13 +142,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
             {/* Titre */}
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Oups ! Une erreur est survenue
+              {tErr('errorTitle', 'Oops ! Une erreur est survenue', 'Oops! Bir hata oluştu')}
             </h1>
 
             {/* Message */}
             <p className="text-gray-600 mb-6">
-              L'application a rencontré un problème inattendu. 
-              Nous nous excusons pour la gêne occasionnée.
+              {tErr('errorMessage', "L'application a rencontr\u00e9 un probl\u00e8me inattendu. Nous nous excusons pour la g\u00eane occasionn\u00e9e.", 'Uygulama beklenmeyen bir sorunla kar\u015fila\u015ft\u0131. Verdi\u011fimiz rahats\u0131zl\u0131k i\u00e7in \u00f6z\u00fcr dileriz.')}
             </p>
 
             {/* Détails de l'erreur (en mode développement) */}
@@ -165,25 +170,25 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 onClick={this.handleRetry}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                🔄 Réessayer
+                {tErr('retry', '🔄 R\u00e9essayer', '🔄 Tekrar dene')}
               </button>
               <button
                 onClick={this.handleGoHome}
                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               >
-                🏠 Retour à l'accueil
+                {tErr('goHome', "🏠 Retour \u00e0 l'accueil", '🏠 Ana sayfa')}
               </button>
               <button
                 onClick={this.handleReload}
                 className="px-6 py-3 bg-gray-100 text-gray-600 rounded-lg font-medium hover:bg-gray-200 transition-colors"
               >
-                ↻ Recharger la page
+                {tErr('reload', '↻ Recharger', '↻ Yenile')}
               </button>
             </div>
 
             {/* Lien support */}
             <p className="mt-6 text-sm text-gray-500">
-              Si le problème persiste, veuillez contacter le support.
+              {tErr('supportMessage', 'Si le probl\u00e8me persiste, contactez le support.', 'Sorun devam ederse destek ile ileti\u015fime ge\u00e7in.')}
             </p>
           </div>
         </div>
@@ -215,18 +220,17 @@ export const QuestionnaireErrorBoundary: React.FC<{ children: ReactNode }> = ({ 
           <span className="text-4xl">🤔</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Problème avec le questionnaire
+          {tErr('questionnaireError', 'Probl\u00e8me avec le questionnaire', 'Anket sorunu')}
         </h1>
         <p className="text-gray-600 mb-6">
-          Une erreur s'est produite pendant le questionnaire. 
-          Vos réponses ont été sauvegardées automatiquement.
+          {tErr('questionnaireErrorMessage', "Une erreur s'est produite pendant le questionnaire. Vos r\u00e9ponses ont \u00e9t\u00e9 sauvegard\u00e9es automatiquement.", 'Anket s\u0131ras\u0131nda bir hata olu\u015ftu. Yan\u0131tlar\u0131n\u0131z otomatik olarak kaydedildi.')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={() => window.location.reload()}
             className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
           >
-            🔄 Reprendre le bilan
+            {tErr('resume', '🔄 Reprendre', '🔄 Devam et')}
           </button>
           <button
             onClick={() => {
@@ -235,7 +239,7 @@ export const QuestionnaireErrorBoundary: React.FC<{ children: ReactNode }> = ({ 
             }}
             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
           >
-            📊 Aller au tableau de bord
+            {tErr('dashboard', '📊 Tableau de bord', '📊 Kontrol paneli')}
           </button>
         </div>
       </div>
@@ -260,17 +264,16 @@ export const DashboardErrorBoundary: React.FC<{ children: ReactNode }> = ({ chil
           <span className="text-4xl">📊</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Problème d'affichage du tableau de bord
+          {tErr('displayError', "Probl\u00e8me d'affichage", 'G\u00f6r\u00fcnt\u00fcleme sorunu')}
         </h1>
         <p className="text-gray-600 mb-6">
-          Nous n'avons pas pu charger votre tableau de bord. 
-          Veuillez réessayer.
+          {tErr('dashboardErrorMessage', "Nous n'avons pas pu charger votre tableau de bord. Veuillez r\u00e9essayer.", 'Kontrol paneliniz y\u00fcklenemedi. L\u00fctfen tekrar deneyin.')}
         </p>
         <button
           onClick={() => window.location.reload()}
           className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
         >
-          🔄 Recharger
+          {tErr('reload', '🔄 Recharger', '🔄 Yenile')}
         </button>
       </div>
     </div>

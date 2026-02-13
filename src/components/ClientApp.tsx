@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User } from '@supabase/supabase-js';
 import WelcomeScreen from './WelcomeScreen';
 import PackageSelector from './PackageSelector';
@@ -24,6 +25,7 @@ interface ClientAppProps {
 }
 
 const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
+  const { t } = useTranslation('common');
   const [isLoading, setIsLoading] = useState(true);
   const [sessionRestored, setSessionRestored] = useState(false);
   // Démarrer directement sur la sélection de forfait (on arrive depuis le Dashboard)
@@ -142,14 +144,14 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
               setCurrentSummary(latestBilan.summary);
               setCurrentAnswers(latestBilan.answers || session.current_answers || []);
               setAppState('completion');
-              showInfo('Reprise de votre bilan terminé');
+              showInfo(t('sessionResumed', 'Reprise de votre bilan terminé'));
             } else if ((session as any).current_summary) {
               // 2. Fallback : récupérer le summary depuis la session (filet de sécurité)
               console.log('[ClientApp] Summary récupéré depuis la session (fallback)');
               setCurrentSummary((session as any).current_summary);
               setCurrentAnswers(session.current_answers || []);
               setAppState('completion');
-              showInfo('Reprise de votre bilan terminé');
+              showInfo(t('sessionResumed', 'Reprise de votre bilan terminé'));
               
               // Tenter de sauvegarder l'assessment manquant en arrière-plan
               try {
@@ -388,7 +390,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
         await saveAssessmentToHistory(historyItem, user.id);
         console.log('[ClientApp] Assessment sauvegardé avec succès dans Supabase');
         assessmentSaved = true;
-        showSuccess('Bilan sauvegardé avec succès !');
+        showSuccess(t('bilanSaved', 'Bilan sauvegardé avec succès !'));
         break;
       } catch (error) {
         console.error(`[ClientApp] Erreur sauvegarde assessment (tentative ${attempt}/3):`, error);
@@ -401,7 +403,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
 
     if (!assessmentSaved) {
       console.error('[ClientApp] Échec de la sauvegarde de l\'assessment après 3 tentatives. Le summary est dans la session.');
-      showError('Erreur lors de la sauvegarde du bilan. Vos données sont préservées, veuillez réessayer.');
+      showError(t('bilanSaveError', 'Erreur lors de la sauvegarde du bilan. Vos données sont préservées, veuillez réessayer.'));
     }
 
     setAppState('completion');
@@ -473,7 +475,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-purple-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Chargement de votre session...</p>
+          <p className="text-slate-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -608,17 +610,17 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-primary-800 mb-3">
-              Ravi de vous revoir, {userName} !
+              {t('welcomeBack', { name: userName, defaultValue: 'Ravi de vous revoir, {{name}} !' })}
             </h2>
             <p className="text-slate-600 mb-4">
-              On peut reprendre dès que vous serez disponible.
+              {t('welcomeBackSubtitle', 'On peut reprendre dès que vous serez disponible.')}
             </p>
             <div className="bg-slate-50 rounded-xl p-4 mb-6">
               <p className="text-sm text-slate-500 mb-2">
-                Dernière session : {resumeInfo.lastUpdate}
+                {t('lastSession', 'Dernière session :')} {resumeInfo.lastUpdate}
               </p>
               <p className="text-lg font-semibold text-primary-700">
-                {resumeInfo.answersCount} question{resumeInfo.answersCount > 1 ? 's' : ''} déjà complétée{resumeInfo.answersCount > 1 ? 's' : ''}
+                {t('questionsCompleted', { count: resumeInfo.answersCount, defaultValue: '{{count}} question(s) déjà complétée(s)' })}
               </p>
             </div>
             <div className="flex gap-3">
@@ -629,7 +631,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
                 }}
                 className="flex-1 bg-primary-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-primary-700 transition-colors"
               >
-                Reprendre mon bilan
+                {t('resumeBilan', 'Reprendre mon bilan')}
               </button>
               <button
                 onClick={() => {
@@ -638,7 +640,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
                 }}
                 className="px-6 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-colors"
               >
-                Plus tard
+                {t('later', 'Plus tard')}
               </button>
             </div>
           </div>

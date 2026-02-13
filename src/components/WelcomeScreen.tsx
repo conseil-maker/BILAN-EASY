@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { assessmentService } from '../services/assessmentService';
 
 interface WelcomeScreenProps {
@@ -9,6 +10,7 @@ interface WelcomeScreenProps {
 }
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, userName, onLogout }) => {
+  const { t } = useTranslation('common');
   const [name, setName] = useState(userName || '');
   const [hasHistory, setHasHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,13 +32,13 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
 
   const validateName = (value: string): string | null => {
     if (!value.trim()) {
-      return 'Veuillez entrer votre prénom pour continuer';
+      return t('welcome.validation.required');
     }
     if (value.trim().length < 2) {
-      return 'Le prénom doit contenir au moins 2 caractères';
+      return t('welcome.validation.minLength');
     }
     if (value.trim().length > 50) {
-      return 'Le prénom ne peut pas dépasser 50 caractères';
+      return t('welcome.validation.maxLength');
     }
     return null;
   };
@@ -74,34 +76,34 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
             <button
               onClick={onLogout}
               className="text-sm text-slate-500 hover:text-red-600 transition-colors"
-              title="Se déconnecter"
+              title={t('welcome.logout')}
             >
-              🚪 Déconnexion
+              🚪 {t('welcome.logout')}
             </button>
           </div>
         )}
         
-        <h1 className="text-4xl md:text-5xl font-display font-bold text-primary-800 mb-4">Bilan de Compétences</h1>
+        <h1 className="text-4xl md:text-5xl font-display font-bold text-primary-800 mb-4">{t('welcome.title')}</h1>
         <p className="text-slate-600 mb-8 text-lg">
-          Découvrez vos forces et dessinez votre avenir professionnel.
+          {t('welcome.subtitle')}
         </p>
         
         {userName && (
           <p className="text-primary-600 mb-4 font-semibold">
-            Bienvenue, {userName} !
+            {t('welcome.greeting', { name: userName })}
           </p>
         )}
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="name" className="sr-only">Votre nom</label>
+            <label htmlFor="name" className="sr-only">{t('welcome.nameLabel')}</label>
             <input
               id="name"
               type="text"
               value={name}
               onChange={handleNameChange}
               onBlur={handleBlur}
-              placeholder="Entrez votre prénom"
+              placeholder={t('welcome.namePlaceholder')}
               className={`w-full px-4 py-3 border rounded-lg text-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
                 error && touched ? 'border-red-500 bg-red-50' : 'border-slate-300'
               }`}
@@ -123,7 +125,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
             className="w-full bg-primary-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-primary-700 transition-transform transform hover:scale-105 duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed"
             disabled={!name.trim()}
           >
-            Commencer mon bilan
+            {t('welcome.startButton')}
           </button>
         </form>
         {hasHistory && (
@@ -131,31 +133,31 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
             onClick={onShowHistory}
             className="mt-4 text-sm text-slate-500 hover:text-primary-600"
           >
-            Consulter l'historique
+            {t('welcome.viewHistory')}
           </button>
         )}
 
         {/* Accès rapides */}
         <div className="mt-8 pt-6 border-t border-slate-200">
-          <p className="text-sm text-slate-500 mb-4">Accès rapides</p>
+          <p className="text-sm text-slate-500 mb-4">{t('welcome.quickAccess')}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <a
               href="#/dashboard"
               className="px-4 py-2 bg-primary-100 hover:bg-primary-200 rounded-lg text-sm text-primary-700 transition-colors font-medium"
             >
-              🏠 Mon Dashboard
+              🏠 {t('welcome.dashboard')}
             </a>
             <a
               href="#/mes-documents"
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
             >
-              📁 Mes documents
+              📁 {t('welcome.documents')}
             </a>
             <a
               href="#/satisfaction"
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm text-slate-700 transition-colors"
             >
-              ⭐ Satisfaction
+              ⭐ {t('welcome.satisfaction')}
             </a>
           </div>
         </div>
@@ -163,7 +165,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onShowHistory, u
         {/* Badge Qualiopi */}
         <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400">
           <span className="px-2 py-1 bg-green-100 text-green-700 rounded">Qualiopi</span>
-          <span>Organisme certifié</span>
+          <span>{t('welcome.certified')}</span>
         </div>
       </div>
     </div>

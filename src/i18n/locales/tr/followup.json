@@ -1,0 +1,49 @@
+{
+  "loading": "Takip yükleniyor...",
+  "title": "Değerlendirme Sonrası Takip",
+  "legalRef": "Yasal düzenlemelere uygun olarak",
+  "project": {
+    "title": "Profesyonel projeniz",
+    "default": "Proje tanımlanıyor",
+    "completedOn": "Değerlendirme {{date}} tarihinde tamamlandı"
+  },
+  "timeline": {
+    "title": "Takip takvimi",
+    "scheduledFor": "{{date}} için planlandı",
+    "completed": "Tamamlandı",
+    "sent": "Gönderildi",
+    "pending": "Beklemede"
+  },
+  "types": {
+    "email_3_months": "3 aylık takip",
+    "email_6_months": "6 aylık takip",
+    "survey": "Takip anketi",
+    "meeting": "Takip görüşmesi"
+  },
+  "survey": {
+    "title": "Takip anketi",
+    "subtitle": "Profesyonel projenizin ilerlemesini paylaşın",
+    "fill": "Doldur",
+    "q1Label": "Projenizin gerçekleştirilmesinde neredesiniz?",
+    "q1Yes": "Proje gerçekleştirildi",
+    "q1Partial": "Devam ediyor",
+    "q1No": "Henüz başlamadı",
+    "q1Changed": "Proje değiştirildi",
+    "q2Label": "Mevcut durumunuzu açıklayın",
+    "q2Placeholder": "Yeni pozisyon, devam eden eğitim, iş arama...",
+    "q3Label": "Gelişiminizle ilgili genel memnuniyet",
+    "q4Label": "Ek desteğe ihtiyacınız var mı?",
+    "q4Yes": "Evet, benimle iletişime geçilmesini istiyorum",
+    "q4No": "Hayır, her şey yolunda",
+    "q5Label": "Yorumlar veya öneriler (isteğe bağlı)",
+    "q5Placeholder": "Görüşleriniz...",
+    "submit": "Yanıtlarımı gönder",
+    "cancel": "İptal",
+    "thankYou": "Geri bildiriminiz için teşekkürler! Yanıtlarınız hizmetimizi geliştirmemize yardımcı oluyor."
+  },
+  "legal": {
+    "title": "Yasal uyumluluk",
+    "text": "Yasal düzenlemelere uygun olarak, yetkinlik değerlendirme danışmanınızla bir takip görüşmesi yapma imkanınız bulunmaktadır. Bu takip, profesyonel projenizin ilerlemesini değerlendirmenize ve gerekirse eylem planını ayarlamanıza olanak tanır."
+  },
+  "close": "Kapat"
+}

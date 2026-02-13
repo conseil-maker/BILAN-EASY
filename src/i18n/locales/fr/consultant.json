@@ -1,0 +1,100 @@
+{
+  "title": "Espace Consultant",
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "clients": "Clients",
+    "calendar": "Calendrier",
+    "documents": "Documents"
+  },
+  "status": {
+    "completed": "Terminé",
+    "inProgress": "En cours",
+    "notStarted": "Non démarré"
+  },
+  "stats": {
+    "activeClients": "Clients actifs",
+    "completedBilans": "Bilans terminés",
+    "thisMonth": "ce mois-ci",
+    "upcomingAppointments": "RDV à venir",
+    "thisWeek": "cette semaine",
+    "satisfaction": "Satisfaction",
+    "globalAverage": "moyenne globale"
+  },
+  "overview": {
+    "urgentActions": "Actions urgentes",
+    "noUrgentActions": "Aucune action urgente",
+    "inactiveSince": "Inactif depuis 7+ jours",
+    "noAppointments": "Aucun rendez-vous prévu",
+    "latestBilans": "Derniers bilans",
+    "bilanProgress": "Progression du bilan"
+  },
+  "clients": {
+    "noClients": "Aucun client assigné",
+    "contactInfo": "Coordonnées",
+    "assignedDate": "Assigné le"
+  },
+  "calendar": {
+    "title": "Calendrier des rendez-vous",
+    "allAppointments": "Tous les rendez-vous",
+    "noAppointments": "Aucun rendez-vous planifié",
+    "newAppointment": "Nouveau rendez-vous"
+  },
+  "documents": {
+    "toValidate": "Documents à valider",
+    "synthesis": "Synthèse - Client Demo",
+    "awaitingValidation": "En attente de validation"
+  },
+  "appointmentForm": {
+    "title": "Nouveau rendez-vous",
+    "client": "Client",
+    "selectClient": "Sélectionner un client",
+    "date": "Date",
+    "time": "Heure",
+    "type": "Type",
+    "preliminary": "Phase préliminaire",
+    "investigation": "Investigation",
+    "conclusion": "Conclusion",
+    "followUp": "Suivi 6 mois",
+    "notes": "Notes"
+  },
+  "table": {
+    "client": "Client",
+    "package": "Forfait",
+    "status": "Statut",
+    "date": "Date",
+    "actions": "Actions"
+  },
+  "detail": {
+    "generalInfo": "Informations générales",
+    "bilanTitle": "Titre du bilan",
+    "coachingStyle": "Style de coaching",
+    "collaborative": "Collaboratif",
+    "analytical": "Analytique",
+    "creative": "Créatif",
+    "creationDate": "Date de création",
+    "completionDate": "Date de complétion",
+    "noCVAnalysis": "Aucune analyse de CV disponible pour ce bilan.",
+    "cvAnalysis": "Analyse du CV",
+    "experience": "Expérience professionnelle",
+    "skills": "Compétences identifiées",
+    "education": "Formation",
+    "noQuestionnaire": "Aucune réponse au questionnaire disponible pour ce bilan.",
+    "questionnaire": "Questionnaire",
+    "noSummary": "Aucune synthèse disponible pour ce bilan.",
+    "summary": "Synthèse",
+    "profileType": "Type de profil",
+    "strengths": "Forces principales",
+    "development": "Axes de développement",
+    "recommendations": "Recommandations",
+    "actionPlan": "Plan d'action"
+  },
+  "notes": {
+    "title": "Notes de suivi",
+    "addNote": "Ajouter une note",
+    "placeholder": "Écrivez vos observations...",
+    "save": "Enregistrer",
+    "noNotes": "Aucune note pour le moment.",
+    "saving": "Enregistrement...",
+    "delete": "Supprimer"
+  }
+}

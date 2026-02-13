@@ -1,0 +1,110 @@
+{
+  "header": {
+    "title": "Belgelerim",
+    "subtitle": "Tüm resmi belgelerinizi burada bulabilirsiniz",
+    "package": "Paket:",
+    "startDate": "Başlangıç:",
+    "endDate": "Bitiş:"
+  },
+  "messages": {
+    "error": "Hata",
+    "success": "Başarılı",
+    "downloadSuccess": "\"{{name}}\" belgesi başarıyla indirildi!"
+  },
+  "sections": {
+    "qualiopi": "Zorunlu resmi belgeler",
+    "export": "Veri dışa aktarımı",
+    "complementary": "Ek belgeler",
+    "legal": "Yasal bilgiler"
+  },
+  "docs": {
+    "livret": {
+      "name": "Karşılama kitapçığı",
+      "description": "Değerlendirme sürecini ve metodolojisini sunan kapsamlı rehber"
+    },
+    "convention": {
+      "name": "Hizmet sözleşmesi",
+      "description": "Değerlendirme koşullarını tanımlayan zorunlu sözleşme belgesi"
+    },
+    "attestation": {
+      "name": "Katılım belgesi",
+      "description": "Yetkinlik değerlendirmesine katılım sertifikası",
+      "availableMessage": "Değerlendirme sonunda kullanılabilir"
+    },
+    "synthese": {
+      "name": "Sentez belgesi",
+      "description": "Yetkinlik değerlendirmesi kapsamlı sentez raporu",
+      "availableMessage": "Sonuç aşamasından sonra kullanılabilir"
+    },
+    "plan": {
+      "name": "Eylem planı",
+      "description": "Hedefler ve zaman çizelgesi ile yol haritası",
+      "availableMessage": "Sonuç aşamasından sonra kullanılabilir"
+    }
+  },
+  "excel": {
+    "title": "Excel Dışa Aktarımı (CSV)",
+    "description": "Kişiselleştirilmiş kullanım için tüm yanıtlarınızı ve analizlerinizi Excel formatında indirin",
+    "availableMessage": "Sorulara yanıt verdikten sonra kullanılabilir",
+    "downloadButton": "Excel İndir",
+    "successMessage": "Excel dışa aktarımı başarıyla indirildi!",
+    "errorMessage": "Excel dışa aktarımı sırasında hata oluştu"
+  },
+  "buttons": {
+    "generating": "Oluşturuluyor...",
+    "downloadPdf": "PDF İndir",
+    "notAvailable": "Kullanılamaz"
+  },
+  "legal": {
+    "confidentiality": "Sentez belgesi yazılı onayınız olmadan üçüncü şahıslara iletilemez.",
+    "confidentialityLabel": "Gizlilik:",
+    "conservation": "Belgeleriniz 3 yıl boyunca saklanır ve hesabınızdan her zaman indirilebilir.",
+    "conservationLabel": "Saklama:",
+    "rgpd": "Erişim, düzeltme ve silme haklarınızı kullanmak için bize rgpd@bilan-easy.fr adresinden ulaşabilirsiniz.",
+    "rgpdLabel": "KVKK:"
+  },
+  "actionPlan": {
+    "shortTerm": "Kısa vadeli (0-3 ay)",
+    "mediumTerm": "Orta vadeli (3-6 ay)",
+    "longTerm": "Uzun vadeli (6-12 ay)"
+  },
+  "viewAll": "Tümünü gör →",
+  "title": "Belgeler",
+  "library": "Kütüphane",
+  "myDocuments": "Belgelerim",
+  "loadingInfo": "Bilgileriniz yükleniyor...",
+  "loadingDocs": "Belgeler yükleniyor...",
+  "loadingLibrary": "Kütüphane yükleniyor...",
+  "loadingMyDocs": "Belgeleriniz yükleniyor...",
+  "defaultUser": "Kullanıcı",
+  "library": {
+    "title": "Belge kütüphanesi",
+    "subtitle": "Tüm resmi belgeleriniz ve kaynaklarınız tek bir yerde",
+    "search": "Belge ara...",
+    "filterAll": "Tüm belgeler",
+    "filterRequired": "Zorunlu belgeler",
+    "filterSynthesis": "Sentez",
+    "filterResources": "Kaynaklar",
+    "available": "Mevcut",
+    "pending": "Devam ediyor",
+    "locked": "Kilitli",
+    "lastDownload": "Son indirme",
+    "jobGuide": "Meslek rehberi",
+    "jobGuideDesc": "Profilinize uygun meslek bilgi sayfaları",
+    "qualiopiTitle": "Yasal uyumluluk",
+    "qualiopiText": "Oluşturulan tüm belgeler yasal düzenlemelere uygundur."
+  },
+  "qualiopi": {
+    "title": "Zorunlu Belgeler",
+    "subtitle": "Resmi belgelerinizi indirin",
+    "profileNotFound": "Kullanıcı profili bulunamadı",
+    "attestationNotReady": "Katılım belgesi yalnızca değerlendirme sonunda oluşturulabilir",
+    "downloadSuccess": "\"{{type}}\" belgesi başarıyla indirildi!",
+    "generateError": "Belge oluşturulurken hata oluştu",
+    "importantInfo": "Önemli bilgiler",
+    "info1": "Sözleşme değerlendirme başlamadan önce imzalanmalıdır",
+    "info2": "Katılım belgesi sürecinizin sonunda kullanılabilir olacaktır",
+    "info3": "Tüm belgeler yasal düzenlemelere uygundur",
+    "info4": "Verileriniz KVKK kapsamında korunmaktadır"
+  }
+}

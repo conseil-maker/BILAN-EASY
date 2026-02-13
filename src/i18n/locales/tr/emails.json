@@ -1,0 +1,12 @@
+{
+  "welcome": {
+    "subject": "Yetkinlik Değerlendirmesi platformuna hoş geldiniz",
+    "greeting": "Merhaba {{name}},"
+  },
+  "reminder": {
+    "subject": "Hatırlatma: Yetkinlik değerlendirmenize devam edin"
+  },
+  "completion": {
+    "subject": "Yetkinlik değerlendirmeniz tamamlandı"
+  }
+}

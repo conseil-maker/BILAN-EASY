@@ -1,0 +1,46 @@
+{
+  "title": "Prendre rendez-vous",
+  "subtitle": "Planifiez vos entretiens avec {{consultant}}",
+  "tabs": {
+    "book": "Réserver",
+    "upcoming": "À venir",
+    "history": "Historique"
+  },
+  "types": {
+    "initial": { "label": "Entretien initial", "description": "Premier rendez-vous de découverte" },
+    "followup": { "label": "Suivi", "description": "Point d'avancement du bilan" },
+    "synthesis": { "label": "Synthèse", "description": "Présentation du document de synthèse" },
+    "phone": { "label": "Appel téléphonique", "description": "Échange rapide par téléphone" }
+  },
+  "calendar": {
+    "months": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
+    "days": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+  },
+  "steps": {
+    "chooseDate": "1. Choisissez une date",
+    "chooseType": "2. Type de rendez-vous",
+    "chooseSlot": "3. Choisissez un créneau"
+  },
+  "noSlots": "Aucun créneau disponible ce jour",
+  "notes": "Notes (optionnel)",
+  "notesPlaceholder": "Précisez l'objet de votre rendez-vous...",
+  "booking": "Réservation en cours...",
+  "confirm": "Confirmer le rendez-vous",
+  "noUpcoming": "Aucun rendez-vous à venir",
+  "bookOne": "Réserver un rendez-vous",
+  "noPast": "Aucun rendez-vous passé",
+  "at": "à",
+  "with": "Avec",
+  "confirmed": "Confirmé",
+  "pending": "En attente",
+  "completed": "Terminé",
+  "confirmModal": {
+    "title": "Rendez-vous réservé !",
+    "message": "Votre demande de rendez-vous a été envoyée. Vous recevrez une confirmation par email.",
+    "date": "Date :",
+    "time": "Heure :",
+    "type": "Type :",
+    "consultant": "Consultant :",
+    "close": "Fermer"
+  }
+}

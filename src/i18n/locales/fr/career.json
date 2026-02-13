@@ -1,0 +1,137 @@
+{
+  "exploration": {
+    "loading": {
+      "title": "Analyse de votre profil en cours...",
+      "subtitle": "L'IA explore les pistes professionnelles qui correspondent à vos compétences, motivations et aspirations.",
+      "searching": "Recherche en cours..."
+    },
+    "noResults": {
+      "title": "Aucune piste trouvée",
+      "subtitle": "Nous n'avons pas pu générer de pistes pour le moment. Continuez le bilan pour enrichir votre profil.",
+      "continueBtn": "Continuer le bilan"
+    },
+    "header": {
+      "title": "Exploration de pistes professionnelles",
+      "subtitle": "Basée sur votre profil et le marché actuel"
+    },
+    "profileSummary": "Votre profil en bref",
+    "pathsFound": "{{count}} pistes identifiées pour vous",
+    "matchScore": "{{score}}% de correspondance",
+    "trends": {
+      "growing": "En croissance",
+      "declining": "En déclin",
+      "stable": "Stable"
+    },
+    "reactions": {
+      "interested": "Intéressé",
+      "notInterested": "Pas pour moi",
+      "explore": "À explorer"
+    },
+    "sections": {
+      "matchReasons": "Pourquoi cette piste vous correspond",
+      "requiredSkills": "Compétences requises",
+      "skillsToDevelop": "À développer",
+      "salary": "Salaire indicatif",
+      "training": "Formations recommandées",
+      "nextSteps": "Prochaines étapes"
+    },
+    "reactionPrompt": "Que pensez-vous de cette piste ?",
+    "buttons": {
+      "interested": "Ça m'intéresse",
+      "questions": "J'ai des questions",
+      "notForMe": "Pas pour moi",
+      "send": "Envoyer",
+      "continue": "Continuer le bilan"
+    },
+    "followUp": {
+      "placeholder": "Votre réponse..."
+    },
+    "deeperQuestions": "Questions pour approfondir votre réflexion",
+    "footer": "Ces pistes sont des suggestions basées sur votre profil. Elles seront intégrées à votre document de synthèse."
+  },
+  "market": {
+    "loading": {
+      "title": "Analyse du marché en cours...",
+      "subtitle": "Notre IA analyse le marché de l'emploi pour le métier de {{job}} et évalue la faisabilité de votre projet.",
+      "searching": "Recherche en cours...",
+      "collecting": "Collecte des données du marché..."
+    },
+    "error": "Une erreur est survenue lors de l'analyse du marché. Veuillez réessayer.",
+    "errorTitle": "Erreur",
+    "header": {
+      "title": "📊 Exploration du Marché",
+      "subtitle": "Analyse complète pour : {{job}}"
+    },
+    "feasibility": {
+      "title": "Score de Faisabilité",
+      "subtitle": "Basé sur votre profil et le marché actuel"
+    },
+    "scores": {
+      "excellent": "Excellent",
+      "good": "Bon",
+      "moderate": "Modéré",
+      "difficult": "Difficile"
+    },
+    "labels": {
+      "demand": "Demande",
+      "trend": "Tendance",
+      "salary": "Salaire",
+      "regions": "Régions"
+    },
+    "sections": {
+      "marketAnalysis": "Analyse du Marché",
+      "hiringSectors": "Secteurs qui recrutent",
+      "skillsAnalysis": "Analyse de vos Compétences",
+      "matchingSkills": "Compétences correspondantes",
+      "skillGaps": "Compétences à développer",
+      "strengths": "Vos atouts pour ce métier",
+      "training": "Formations Recommandées",
+      "alternatives": "Métiers Alternatifs",
+      "overview": "Vue d'ensemble du marché",
+      "opportunities": "Opportunités identifiées",
+      "threats": "Points de vigilance",
+      "recommendations": "Recommandations"
+    },
+    "transition": "Transition",
+    "buttons": {
+      "close": "Fermer",
+      "continue": "Continuer le bilan",
+      "retry": "Réessayer",
+      "simulate": "Simuler une enquête métier"
+    }
+  },
+  "interview": {
+    "loading": {
+      "title": "Préparation de l'entretien...",
+      "subtitle": "Notre IA prépare un professionnel virtuel expérimenté en {{job}} pour répondre à vos questions.",
+      "searching": "Chargement en cours..."
+    },
+    "header": {
+      "title": "Enquête Métier : {{job}}",
+      "subtitle": "Préparez-vous avec des questions personnalisées",
+      "persona": "Avec {{name}} • {{years}} ans d'expérience"
+    },
+    "typing": "{{name}} écrit...",
+    "insights": "Insights de {{name}}",
+    "sections": {
+      "typicalDay": "Journée type",
+      "pros": "Avantages",
+      "cons": "Inconvénients",
+      "tips": "Conseils pour réussir",
+      "keySkills": "Compétences clés",
+      "idealProfile": "Profil idéal",
+      "futureOutlook": "Perspectives d'avenir"
+    },
+    "buttons": {
+      "send": "Envoyer",
+      "finish": "Terminer l'enquête",
+      "close": "Fermer"
+    },
+    "placeholder": "Posez votre question ou répondez...",
+    "feedback": {
+      "title": "Retour sur vos réponses",
+      "strengths": "Points forts",
+      "improvements": "Axes d'amélioration"
+    }
+  }
+}

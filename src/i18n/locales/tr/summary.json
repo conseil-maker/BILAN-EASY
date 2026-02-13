@@ -1,0 +1,66 @@
+{
+  "sourceModal": {
+    "title": "Yanıtlarınıza dayalı gerekçe",
+    "close": "Kapat"
+  },
+  "coachModal": {
+    "title": "Bir koçla görüşün",
+    "text1": "Bu özet, sertifikalı bir kariyer koçuyla derinlemesine bir görüşme için mükemmel bir başlangıç noktasıdır.",
+    "text2": "Görüşmenize hazırlanmak ve eşlik sürecinizin değerini en üst düzeye çıkarmak için bu belgeyi kullanın.",
+    "understood": "Anladım"
+  },
+  "resourceModal": {
+    "title": "İpuçları: \"{{text}}\"",
+    "intro": "İşte araştırmalarınız için bir başlangıç noktası. Amaç size rehberlik etmektir, işi sizin yerinize yapmak değil.",
+    "searching": "Aranıyor...",
+    "keywords": "Aranacak anahtar kelimeler:",
+    "resourceTypes": "Keşfedilecek kaynak türleri:",
+    "platforms": "Platform örnekleri:",
+    "noResults": "Şu anda ipucu bulunamadı.",
+    "close": "Kapat"
+  },
+  "exportModal": {
+    "title": "Verilerinizi dışa aktarın",
+    "intro": "Size uygun formatı seçin. Verileriniz size aittir.",
+    "json": "JSON",
+    "jsonDesc": "Taşınabilirlik ve teknik yeniden kullanım için idealdir.",
+    "csv": "CSV",
+    "csvDesc": "Yanıtlarınızı bir elektronik tabloda açmak için mükemmeldir.",
+    "cancel": "İptal"
+  },
+  "actionItem": {
+    "findLeads": "İpuçları bul"
+  },
+  "header": {
+    "title": "Değerlendirme Özetiniz",
+    "subtitle": "{{name}} - {{package}}"
+  },
+  "cards": {
+    "strengths": "Temel Güçlü Yönleriniz",
+    "development": "Gelişim Alanlarınız",
+    "recommendations": "Öneriler",
+    "actionPlan": "Eylem Planı",
+    "skills": "Yetkinlik Konumlandırması",
+    "why": "(Neden?)",
+    "shortTerm": "Kısa vadeli (1-3 ay)",
+    "mediumTerm": "Orta vadeli (3-6 ay)",
+    "skillsIntro": "Yanıtlarınıza dayalı yetkinlik profilinizin görselleştirmesi.",
+    "skillsLoading": "Yetkinlik analizi devam ediyor...",
+    "skillsUnavailable": "Yetkinlik verileri mevcut değil."
+  },
+  "actions": {
+    "restart": "Yeni değerlendirme yap",
+    "history": "Geçmişimi gör",
+    "historyBack": "Geçmişe dön",
+    "generatePdf": "PDF Oluştur ve İndir",
+    "exportData": "Verilerimi dışa aktar",
+    "talkCoach": "Bir koçla görüşün"
+  },
+  "pdf": {
+    "title": "Yetkinlik Değerlendirmesi - {{package}}",
+    "shortTermTimeline": "Kısa vadeli (1-3 ay)",
+    "mediumTermTimeline": "Orta vadeli (3-6 ay)",
+    "success": "PDF başarıyla oluşturuldu ve kaydedildi!",
+    "error": "PDF oluşturulurken hata oluştu"
+  }
+}

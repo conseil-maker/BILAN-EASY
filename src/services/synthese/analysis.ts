@@ -9,6 +9,9 @@ import {
   ValueAnalysis,
   RIASEC_KEYWORDS 
 } from './types';
+import i18n from '../../i18n';
+
+const tA = (fr: string, tr: string): string => (i18n.language || 'fr') === 'tr' ? tr : fr;
 
 /**
  * Extrait le profil RIASEC à partir des réponses du bénéficiaire
@@ -58,7 +61,15 @@ export function extractDetailedCompetences(
   const competences: CompetenceAnalysis[] = [];
 
   // Catégories de compétences à analyser
-  const categories = [
+  const isTr = (i18n.language || 'fr') === 'tr';
+  const categories = isTr ? [
+    { name: 'Teknik yetkinlikler', keywords: ['teknik', 'araç', 'yazılım', 'yöntem', 'süreç'] },
+    { name: 'İlişkisel yetkinlikler', keywords: ['ekip', 'iletişim', 'ilişki', 'işbirliği', 'dinleme'] },
+    { name: 'Organizasyonel yetkinlikler', keywords: ['organizasyon', 'planlama', 'yönetim', 'öncelik', 'zaman'] },
+    { name: 'Analitik yetkinlikler', keywords: ['analiz', 'çözüm', 'sorun', 'mantık', 'sentez'] },
+    { name: 'Yaratıcı yetkinlikler', keywords: ['yaratıcı', 'inovasyon', 'fikir', 'tasarım', 'dizayn'] },
+    { name: 'Yönetsel yetkinlikler', keywords: ['yönetim', 'liderlik', 'karar', 'delegasyon', 'motivasyon'] },
+  ] : [
     { name: 'Compétences techniques', keywords: ['technique', 'outil', 'logiciel', 'méthode', 'processus'] },
     { name: 'Compétences relationnelles', keywords: ['équipe', 'communication', 'relation', 'collaboration', 'écoute'] },
     { name: 'Compétences organisationnelles', keywords: ['organisation', 'planification', 'gestion', 'priorité', 'temps'] },
@@ -98,18 +109,18 @@ export function extractDetailedCompetences(
 
     // Suggestions de développement basées sur le niveau
     if (level < 3) {
-      developmentSuggestions.push(`Formation recommandée en ${category.name.toLowerCase()}`);
-      developmentSuggestions.push('Recherche de missions permettant de développer ces compétences');
+      developmentSuggestions.push(tA(`Formation recommandée en ${category.name.toLowerCase()}`, `${category.name.toLowerCase()} alanında eğitim önerilir`));
+      developmentSuggestions.push(tA('Recherche de missions permettant de développer ces compétences', 'Bu yetkinlikleri geliştirmeye yönelik görev arayışı'));
     } else if (level < 5) {
-      developmentSuggestions.push('Perfectionnement par la pratique et le mentorat');
-      developmentSuggestions.push('Partage d\'expertise avec les collègues');
+      developmentSuggestions.push(tA('Perfectionnement par la pratique et le mentorat', 'Uygulama ve mentorluk yoluyla gelişim'));
+      developmentSuggestions.push(tA('Partage d\'expertise avec les collègues', 'Meslektaşlarla uzmanlık paylaşımı'));
     }
 
     if (level > 0 || examples.length > 0) {
       competences.push({
         category: category.name,
         level,
-        examples: examples.length > 0 ? examples : ['Compétence identifiée dans le parcours'],
+        examples: examples.length > 0 ? examples : [tA('Compétence identifiée dans le parcours', 'Süreçte belirlenen yetkinlik')],
         developmentSuggestions,
       });
     }
@@ -125,8 +136,8 @@ export function extractDetailedCompetences(
         competences.push({
           category: comp,
           level: 3,
-          examples: ['Identifié lors de l\'analyse du parcours'],
-          developmentSuggestions: ['Continuer à développer cette compétence'],
+          examples: [tA('Identifié lors de l\'analyse du parcours', 'Süreç analizi sırasında belirlendi')],
+          developmentSuggestions: [tA('Continuer à développer cette compétence', 'Bu yetkinliği geliştirmeye devam edin')],
         });
       }
     });
@@ -141,7 +152,19 @@ export function extractDetailedCompetences(
 export function extractDetailedValues(answers: Answer[]): ValueAnalysis[] {
   const values: ValueAnalysis[] = [];
 
-  const valueKeywords = {
+  const isTr = (i18n.language || 'fr') === 'tr';
+  const valueKeywords = isTr ? {
+    'Otonomi': ['otonom', 'bağımsız', 'özgürlük', 'tek başına', 'karar vermek'],
+    'Güvenlik': ['istikrar', 'güvenlik', 'kalıcı', 'garanti', 'düzenli'],
+    'Tanınma': ['tanınmış', 'değer verilen', 'takdir edilen', 'hak', 'ödül'],
+    'Yaratıcılık': ['yaratmak', 'inovasyon', 'icat', 'orijinal', 'yeni'],
+    'İnsan ilişkileri': ['ekip', 'meslektaş', 'ortam', 'dayanışma', 'samimi'],
+    'Başarı': ['başarmak', 'gerçekleştirmek', 'hedef', 'zorluk', 'meydan okuma'],
+    'İş-yaşam dengesi': ['denge', 'aile', 'boş zaman', 'esneklik', 'uzaktan çalışma'],
+    'Ücret': ['maaş', 'ücret', 'para', 'gelir', 'finansal'],
+    'İşin anlamı': ['anlam', 'fayda', 'etki', 'katkı', 'değer'],
+    'Gelişim': ['gelişmek', 'ilerlemek', 'kariyer', 'terfi', 'gelişim'],
+  } : {
     'Autonomie': ['autonome', 'indépendant', 'liberté', 'seul', 'décider'],
     'Sécurité': ['stable', 'sécurité', 'pérenne', 'garanti', 'régulier'],
     'Reconnaissance': ['reconnu', 'valorisé', 'apprécié', 'mérite', 'récompense'],
@@ -206,7 +229,7 @@ export function extractDetailedValues(answers: Answer[]): ValueAnalysis[] {
     values.push({
       value,
       importance,
-      manifestation: data.manifestations[0] || `Valeur importante dans le parcours professionnel`,
+      manifestation: data.manifestations[0] || tA('Valeur importante dans le parcours professionnel', 'Mesleki süreçte önemli değer'),
     });
   });
 

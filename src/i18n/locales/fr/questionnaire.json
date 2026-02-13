@@ -1,0 +1,357 @@
+{
+  "title": "Questionnaire",
+  "phase": "Phase {{number}}: {{name}}",
+  "question": "Question {{current}} sur {{total}}",
+  "progress": {
+    "title": "Progression",
+    "phase": "Phase {{current}} / {{total}}",
+    "questions": "{{count}} / {{target}} questions",
+    "percent": "{{percent}}%",
+    "label": "Progression: {{percent}}%"
+  },
+  "placeholder": "Tapez votre réponse ici...",
+  "send": "Envoyer",
+  "skip": "Passer",
+  "thinking": "Réflexion en cours...",
+  "typing": "En train d'écrire...",
+  "header": {
+    "dashboard": "Dashboard",
+    "dashboardTooltip": "Retour au Dashboard",
+    "dashboardAriaLabel": "Retourner au tableau de bord",
+    "help": "Aide",
+    "helpAriaLabel": "Ouvrir l'aide et les conseils",
+    "settings": "Paramètres vocaux (voix, vitesse, tonalité)",
+    "settingsAriaLabel": "Ouvrir les paramètres avancés de lecture vocale",
+    "logout": "Déconnexion",
+    "logoutAriaLabel": "Se déconnecter de l'application",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "lightModeAriaLabel": "Activer le mode clair",
+    "darkModeAriaLabel": "Activer le mode sombre",
+    "speakerStop": "Arrêter la lecture",
+    "speakerRead": "Lire le message",
+    "speakerEnable": "Activer et lire",
+    "speakerStopAriaLabel": "Arrêter la lecture vocale",
+    "speakerReadAriaLabel": "Lire le dernier message",
+    "speakerEnableAriaLabel": "Activer la lecture vocale",
+    "speakerTooltipStop": "Cliquez pour arrêter",
+    "speakerTooltipRead": "Cliquez pour lire",
+    "speakerTooltipEnable": "Cliquez pour activer",
+    "closeSettings": "Fermer les paramètres",
+    "showPanel": "Afficher le panneau"
+  },
+  "chat": {
+    "welcomeMessage": "Bienvenue dans votre bilan de compétences. Je suis votre conseiller IA et je vais vous accompagner tout au long de ce parcours.",
+    "inputLabel": "Écrivez votre réponse",
+    "inputPlaceholder": "Écrivez votre réponse... (Entrée pour envoyer, Shift+Entrée pour nouvelle ligne)",
+    "inputAriaLabel": "Champ de saisie de votre réponse",
+    "sendButton": "Envoyer",
+    "sendAriaLabel": "Envoyer la réponse",
+    "micStart": "Démarrer l'enregistrement vocal",
+    "micStop": "Arrêter l'enregistrement vocal",
+    "formAriaLabel": "Formulaire de réponse",
+    "choicesAriaLabel": "Choix de réponse",
+    "choiceAriaLabel": "Choix {{index}}: {{choice}}"
+  },
+  "joker": {
+    "label": "J'ai besoin d'aide pour répondre",
+    "ariaLabel": "Demander de l'aide pour répondre à la question",
+    "tooltip": "Les aides proposées sont des aides méthodologiques à la réflexion. Elles ne constituent ni une analyse, ni une interprétation, ni une conclusion.",
+    "disclaimer": "Aide méthodologique à la réflexion • Ne constitue pas une réponse"
+  },
+  "synthesis": {
+    "confirmYes": "Oui, c'est exact",
+    "confirmNo": "Non, pas tout à fait",
+    "confirmYesAriaLabel": "Confirmer que la synthèse est exacte",
+    "confirmNoAriaLabel": "Indiquer que la synthèse n'est pas tout à fait exacte",
+    "confirmYesText": "Oui, c'est exact.",
+    "confirmNoText": "Non, pas tout à fait.",
+    "groupAriaLabel": "Confirmation de la synthèse"
+  },
+  "miniSynthesis": {
+    "title": "**Point d'étape après {{count}} questions**",
+    "intro": "\n\nVoici ce que nous avons exploré jusqu'ici :\n",
+    "footer": "\n\nSi quelque chose ne vous semble pas juste ou si vous souhaitez nuancer un point, n'hésitez pas à me le dire dans votre prochaine réponse. Continuons.",
+    "generating": "Génération de la synthèse en cours..."
+  },
+  "phases": {
+    "preliminary": "Phase préliminaire",
+    "investigation": "Phase d'investigation",
+    "conclusion": "Phase de conclusion"
+  },
+  "phaseTransition": {
+    "title": "Changement de phase",
+    "message": "Vous passez maintenant à la phase suivante.",
+    "continue": "Continuer"
+  },
+  "summarizing": {
+    "title": "🧠 Génération de votre synthèse...",
+    "description": "Notre IA analyse vos réponses pour créer un rapport personnalisé.",
+    "analyzing": "Analyse en cours...",
+    "timeEstimate": "⏱️ Cela peut prendre jusqu'à 60 secondes.",
+    "patience": "Merci de votre patience !",
+    "autoSave": "💾 Votre progression est automatiquement sauvegardée"
+  },
+  "endWarning": {
+    "title": "Nous approchons de la fin !",
+    "description": "Vous avez parcouru environ <strong>{{percent}}%</strong> de votre bilan de compétences.",
+    "hint": "💡 <strong>Encore quelques questions</strong> pour finaliser l'analyse de votre projet professionnel et préparer votre synthèse personnalisée.",
+    "continue": "Compris, continuons !"
+  },
+  "endConfirmation": {
+    "title": "Votre bilan est presque terminé !",
+    "description": "Vous avez répondu à <strong>{{count}} questions</strong>. Nous avons suffisamment d'éléments pour générer votre synthèse personnalisée.",
+    "beforeContinue": "📝 Avant de continuer :",
+    "deepenQuestion": "Souhaitez-vous ajouter quelque chose ou approfondir un point particulier de votre réflexion ?",
+    "generateSynthesis": "✅ Générer ma synthèse",
+    "deepen": "🔍 Approfondir"
+  },
+  "careerExploration": {
+    "title": "Exploration de pistes professionnelles",
+    "hint": "💡 L'IA peut analyser votre profil et vous proposer des pistes de métiers personnalisées, basées sur vos compétences et les tendances actuelles du marché du travail.",
+    "accept": "Oui, explorer des pistes",
+    "decline": "Non, continuer le bilan",
+    "closeMessage": "🎯 Excellent ! Vous avez identifié {{count}} piste(s) intéressante(s) : {{paths}}. Ces pistes seront intégrées à votre document de synthèse. Continuons le bilan pour affiner votre projet."
+  },
+  "marketExploration": {
+    "closeMessage": "📊 J'ai analysé le marché pour le métier de {{job}}. Score de faisabilité : {{score}}/10. {{comment}}... Ces informations seront intégrées à votre synthèse.",
+    "interviewCloseMessage": "💬 Merci pour cet échange avec {{name}} ! Vous avez découvert les réalités du métier de {{job}}. Les insights de cette enquête seront intégrés à votre document de synthèse."
+  },
+  "outOfScope": {
+    "title": "Information importante",
+    "resources": "📚 Ressources adaptées :",
+    "defaultResources": {
+      "cio": "CIO (Centre d'Information et d'Orientation) - Gratuit",
+      "counselor": "Conseiller d'orientation scolaire de votre établissement",
+      "parcoursup": "Parcoursup pour l'orientation post-bac",
+      "onisep": "ONISEP - onisep.fr pour explorer les métiers"
+    },
+    "backToDashboard": "Retour au tableau de bord",
+    "continueAnyway": "Continuer quand même"
+  },
+  "logoutModal": {
+    "title": "Êtes-vous sûr ?",
+    "description": "Votre progression sera sauvegardée automatiquement. Vous pourrez reprendre là où vous vous êtes arrêté lors de votre prochaine connexion.",
+    "cancel": "Annuler",
+    "confirm": "Se déconnecter"
+  },
+  "helpModal": {
+    "title": "Aide & Conseils",
+    "journey": {
+      "title": "Votre Parcours",
+      "description": "Votre bilan de compétences se déroule en 3 phases :",
+      "phase1Title": "Phase 1 - Investigation :",
+      "phase1Desc": "Découverte de vos motivations et passions",
+      "phase2Title": "Phase 2 - Analyse :",
+      "phase2Desc": "Identification de vos compétences et expériences",
+      "phase3Title": "Phase 3 - Conclusion :",
+      "phase3Desc": "Synthèse et plan d'action personnalisé"
+    },
+    "tips": {
+      "title": "Conseils pour Répondre",
+      "tip1": "Prenez votre temps, il n'y a pas de mauvaise réponse",
+      "tip2": "Soyez authentique et honnête dans vos réponses",
+      "tip3": "Donnez des exemples concrets de votre expérience",
+      "tip4": "Votre progression est sauvegardée automatiquement"
+    },
+    "features": {
+      "title": "Fonctionnalités Disponibles",
+      "speechTitle": "Lecture vocale :",
+      "speechDesc": "Écoutez les questions lues à haute voix",
+      "themesTitle": "Thèmes émergents :",
+      "themesDesc": "Visualisez les thèmes identifiés au fil du parcours",
+      "skillsTitle": "Analyse des compétences :",
+      "skillsDesc": "Consultez votre radar de compétences",
+      "autoSaveTitle": "Sauvegarde automatique :",
+      "autoSaveDesc": "Reprenez là où vous vous êtes arrêté"
+    },
+    "contact": {
+      "title": "Besoin d'Aide ?",
+      "description": "Notre équipe est là pour vous accompagner. Contactez-nous à"
+    }
+  },
+  "saveIndicator": {
+    "saved": "Sauvegardé !",
+    "savedAgo": "Sauvegardé il y a {{minutes}} min"
+  },
+  "sidePanel": {
+    "ariaLabel": "Tableau de bord avec thèmes émergents et analyse des compétences"
+  },
+  "completion": {
+    "title": "Félicitations !",
+    "message": "Vous avez terminé toutes les questions du bilan.",
+    "generating": "Génération de votre synthèse en cours..."
+  },
+  "timeElapsed": "Temps écoulé: {{time}}",
+  "minutesRemaining": "min restantes",
+  "emergingThemes": "Thèmes émergents",
+  "phase": {
+    "readyTitle": "Prêt à commencer, {{name}} ?",
+    "readySubtitle": "Vous avez choisi le parcours \"{{packageName}}\". Voici comment va se dérouler votre bilan.",
+    "estimatedMin": "min estimées",
+    "chooseCoaching": "Choisissez votre style de coaching",
+    "collaborative": "Collaboratif",
+    "collaborativeDesc": "Approche bienveillante, centrée sur vos forces.",
+    "analytic": "Analytique",
+    "analyticDesc": "Approche structurée et logique pour décortiquer les sujets.",
+    "creative": "Créatif",
+    "creativeDesc": "Approche inspirante pour explorer de nouvelles pistes.",
+    "startBilan": "Commencer le Bilan",
+    "changePackage": "Changer de forfait"
+  },
+  "personalization": {
+    "title": "Hyper-Personnalisation",
+    "subtitle": "Pour un bilan encore plus pertinent, partagez votre CV ou profil.",
+    "qualiopiNote": "🎯 Ces informations serviront à adapter les outils, exercices et échanges de la phase d'investigation.",
+    "optional": "(C'est optionnel, vous pouvez passer cette étape)",
+    "pasteText": "Coller le texte",
+    "uploadFile": "Uploader un fichier",
+    "textPlaceholder": "Collez ici le texte de votre CV, profil LinkedIn, ou description de votre parcours professionnel...",
+    "characters": "caractères",
+    "readyToAnalyze": "Prêt à analyser",
+    "removeFile": "Supprimer et choisir un autre fichier",
+    "dropHere": "Déposez le fichier ici",
+    "dragOrClick": "Glissez-déposez ou cliquez pour sélectionner",
+    "acceptedFormats": "Formats acceptés: PDF, Word, Texte (max 10MB)",
+    "analyzing": "Analyse en cours...",
+    "submit": "Personnaliser le bilan",
+    "skip": "Passer cette étape \u2192",
+    "confidentiality": "🔒 Vos données sont traitées de manière confidentielle et sécurisée.",
+    "errors": {
+      "unsupportedFormat": "Format de fichier non supporté. Veuillez uploader un PDF, Word ou fichier texte.",
+      "fileTooLarge": "Le fichier est trop volumineux. Taille maximale: 10MB.",
+      "pasteText": "Veuillez coller le texte de votre profil.",
+      "selectFile": "Veuillez sélectionner un fichier.",
+      "analysisFailed": "Désolé, une erreur est survenue lors de l'analyse. Nous allons continuer sans cette information."
+    },
+    "progress": {
+      "textExtracted": "Texte extrait du fichier",
+      "uploading": "Upload du CV en cours...",
+      "uploaded": "CV uploadé avec succès!",
+      "uploadFailed": "Upload échoué, analyse locale...",
+      "analyzing": "Analyse du profil en cours...",
+      "done": "Analyse terminée!"
+    }
+  },
+  "speech": {
+    "title": "Paramètres de la Voix",
+    "toggleLabel": "Activer la lecture vocale",
+    "enabled": "🔊 Lecture vocale activée - Les questions seront lues automatiquement",
+    "disabled": "🔇 Lecture vocale désactivée - Cliquez sur le toggle pour activer",
+    "voice": "Voix",
+    "googleHint": "Les voix Google (⭐) offrent généralement une meilleure qualité",
+    "speed": "Vitesse",
+    "pitch": "Hauteur"
+  },
+  "aiFeedback": {
+    "progress": "Progression",
+    "didYouKnow": "Le saviez-vous ?",
+    "identifiedThemes": "Thèmes identifiés",
+    "phaseCompleted": "Phase terminée !",
+    "bravo": "Bravo {{name}} ! Vous avez complété la phase \"{{phase}}\".",
+    "continueToPhase": "Continuer vers {{phase}}"
+  },
+  "chatInput": {
+    "placeholder": "Tapez votre réponse...",
+    "stopDictation": "Arrêter la dictée",
+    "startDictation": "Dictée vocale",
+    "send": "Envoyer",
+    "skipQuestion": "Passer cette question ({{count}} restant)",
+    "skipQuestionPlural": "Passer cette question ({{count}} restants)",
+    "aiPreparing": "L'IA prépare la prochaine question..."
+  },
+  "chatMessage": {
+    "you": "Vous",
+    "aiAssistant": "Assistant IA"
+  },
+  "modals": {
+    "logout": {
+      "title": "Déconnexion",
+      "unsavedWarning": "Attention : Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir vous déconnecter ?",
+      "confirmMessage": "Êtes-vous sûr de vouloir vous déconnecter ? Votre progression est automatiquement sauvegardée.",
+      "cancel": "Annuler",
+      "confirm": "Se déconnecter"
+    },
+    "help": {
+      "title": "Aide",
+      "howToAnswer": "Comment répondre aux questions ?",
+      "howToAnswerDesc": "Répondez de manière authentique et détaillée. Plus vos réponses sont complètes, plus la synthèse sera pertinente.",
+      "jokerButton": "Que fait le bouton \"J'ai besoin d'aide\" ?",
+      "jokerButtonDesc": "Il reformule la question de manière plus simple ou propose un exemple pour vous guider dans votre réflexion.",
+      "progressSaved": "Ma progression est-elle sauvegardée ?",
+      "progressSavedDesc": "Oui, votre progression est automatiquement sauvegardée. Vous pouvez reprendre à tout moment là où vous vous êtes arrêté.",
+      "speechSynthesis": "Comment fonctionne la synthèse vocale ?",
+      "speechSynthesisDesc": "Cliquez sur l'icône de haut-parleur pour activer/désactiver la lecture vocale des questions. Vous pouvez personnaliser la voix dans les paramètres.",
+      "understood": "Compris"
+    },
+    "endConfirmation": {
+      "title": "Terminer le bilan ?",
+      "progress": "Vous avez complété <strong>{{percent}}%</strong> du questionnaire.",
+      "question": "Souhaitez-vous générer votre synthèse maintenant ou approfondir certains aspects ?",
+      "hint": "Plus vous approfondissez, plus votre synthèse sera riche et personnalisée.",
+      "deepen": "Approfondir encore",
+      "generate": "Générer ma synthèse",
+      "continue": "Continuer le questionnaire"
+    },
+    "endWarning": {
+      "title": "Bientôt terminé !",
+      "remaining": "Il vous reste environ <strong>{{count}} questions</strong> avant la fin du questionnaire.",
+      "advice": "Prenez le temps de bien répondre à ces dernières questions, elles sont importantes pour finaliser votre profil.",
+      "continue": "Continuer"
+    },
+    "outOfScope": {
+      "title": "Information importante",
+      "alternativeResources": "Ressources alternatives :",
+      "continueAssessment": "Continuer le bilan",
+      "close": "Fermer"
+    },
+    "module": {
+      "title": "Approfondissement proposé",
+      "description": "Souhaitez-vous explorer ce sujet avec quelques questions supplémentaires ? C'est entièrement optionnel.",
+      "accept": "Oui, je suis intéressé(e)",
+      "decline": "Non, merci"
+    },
+    "satisfaction": {
+      "title": "Votre avis sur la phase terminée",
+      "question": "Cette phase vous a-t-elle semblé pertinente ?",
+      "commentPlaceholder": "Un commentaire ? (optionnel)",
+      "submit": "Valider",
+      "skip": "Passer"
+    }
+  },
+  "badge": {
+    "unlocked": "Badge débloqué !",
+    "completed": "Vous avez terminé : {{phase}}"
+  },
+  "themes": {
+    "showThemes": "Afficher les thèmes",
+    "title": "Thèmes Émergents",
+    "hide": "Masquer",
+    "noThemesYet": "Les thèmes apparaîtront au fur et à mesure de vos réponses.",
+    "detectedThemes": "Thèmes détectés",
+    "noThemesDetected": "Aucun thème détecté pour l'instant",
+    "identifiedSkills": "Compétences identifiées",
+    "skillsAnalyzing": "Les compétences seront analysées progressivement",
+    "note": "Ces thèmes et compétences sont détectés automatiquement à partir de vos réponses. Ils aident l'IA à personnaliser les questions suivantes."
+  },
+  "questionnaireHeader": {
+    "greeting": "Bonjour {{name}}",
+    "saved": "Sauvegardé",
+    "help": "Aide",
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "logout": "Se déconnecter"
+  },
+  "enhanced": {
+    "hidePanel": "Masquer le panneau",
+    "advice": "Conseil",
+    "emergingThemes": "Thèmes Émergents",
+    "analyzingThemes": "Analyse des thèmes...",
+    "themesBuilding": "Thèmes en construction",
+    "themesBuildingDesc": "Répondez à quelques questions pour voir apparaître les thèmes clés de votre parcours.",
+    "note": "Note",
+    "noteText": "L'analyse complète de vos compétences sera disponible dans votre synthèse finale."
+  }
+}

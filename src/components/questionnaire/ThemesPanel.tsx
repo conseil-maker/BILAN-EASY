@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { DashboardData } from '../../types';
 
 interface ThemesPanelProps {
@@ -24,14 +25,16 @@ const ThemesPanel: React.FC<ThemesPanelProps> = ({
   isVisible = true,
   onToggle,
 }) => {
+  const { t } = useTranslation('questionnaire');
+
   if (!isVisible) {
     return (
       <button
         onClick={onToggle}
         className="fixed right-0 top-1/2 -translate-y-1/2 bg-primary-600 text-white px-2 py-4 rounded-l-lg shadow-lg hover:bg-primary-700 transition-colors z-40"
-        title="Afficher les thèmes"
+        title={t('themes.showThemes')}
       >
-        <span className="writing-mode-vertical">📊 Thèmes</span>
+        <span className="writing-mode-vertical">📊 {t('themes.title')}</span>
       </button>
     );
   }
@@ -41,13 +44,13 @@ const ThemesPanel: React.FC<ThemesPanelProps> = ({
       {/* En-tête */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-bold text-lg text-primary-800 font-display">
-          📊 Thèmes Émergents
+          📊 {t('themes.title')}
         </h2>
         {onToggle && (
           <button
             onClick={onToggle}
             className="p-1 text-slate-400 hover:text-slate-600 rounded"
-            title="Masquer"
+            title={t('themes.hide')}
           >
             ✕
           </button>
@@ -66,7 +69,7 @@ const ThemesPanel: React.FC<ThemesPanelProps> = ({
         <div className="text-center py-8 text-slate-500">
           <p className="text-4xl mb-2">🔍</p>
           <p className="text-sm">
-            Les thèmes apparaîtront au fur et à mesure de vos réponses.
+            {t('themes.noThemesYet')}
           </p>
         </div>
       )}
@@ -77,7 +80,7 @@ const ThemesPanel: React.FC<ThemesPanelProps> = ({
           {/* Nuage de thèmes */}
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-slate-600 mb-3">
-              Thèmes détectés
+              {t('themes.detectedThemes')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {dashboardData.themes.length > 0 ? (
@@ -96,7 +99,7 @@ const ThemesPanel: React.FC<ThemesPanelProps> = ({
                 ))
               ) : (
                 <p className="text-sm text-slate-400 italic">
-                  Aucun thème détecté pour l'instant
+                  {t('themes.noThemesDetected')}
                 </p>
               )}
             </div>
@@ -105,7 +108,7 @@ const ThemesPanel: React.FC<ThemesPanelProps> = ({
           {/* Compétences */}
           <div>
             <h3 className="text-sm font-semibold text-slate-600 mb-3">
-              Compétences identifiées
+              {t('themes.identifiedSkills')}
             </h3>
             <div className="space-y-2">
               {dashboardData.skills.length > 0 ? (
@@ -131,7 +134,7 @@ const ThemesPanel: React.FC<ThemesPanelProps> = ({
                 ))
               ) : (
                 <p className="text-sm text-slate-400 italic">
-                  Les compétences seront analysées progressivement
+                  {t('themes.skillsAnalyzing')}
                 </p>
               )}
             </div>
@@ -140,9 +143,7 @@ const ThemesPanel: React.FC<ThemesPanelProps> = ({
           {/* Note explicative */}
           <div className="mt-6 p-3 bg-slate-50 rounded-lg">
             <p className="text-xs text-slate-500">
-              💡 Ces thèmes et compétences sont détectés automatiquement 
-              à partir de vos réponses. Ils aident l'IA à personnaliser 
-              les questions suivantes.
+              💡 {t('themes.note')}
             </p>
           </div>
         </>

@@ -1,0 +1,72 @@
+{
+  "steps": {
+    "congratulations": "Félicitations",
+    "synthesis": "Synthèse",
+    "documents": "Documents",
+    "satisfaction": "Satisfaction",
+    "final": "Terminé"
+  },
+  "congratulations": {
+    "title": "Félicitations {{name}} !",
+    "subtitle": "Vous avez terminé votre bilan de compétences \"{{package}}\"",
+    "questionsAnswered": "Questions répondues",
+    "duration": "Durée du parcours",
+    "completed": "Complété",
+    "legalText": "Conformément à l'article L.6313-4 du Code du travail, vous allez maintenant recevoir votre document de synthèse et les attestations obligatoires.",
+    "continueButton": "Continuer vers ma synthèse →"
+  },
+  "synthesis": {
+    "title": "Document de Synthèse",
+    "subtitle": "Conforme à l'article R.6313-8 du Code du travail",
+    "importantNotice": "<strong>Important :</strong> Ce document vous appartient. Conformément à l'article L.6313-10-1, il ne peut être communiqué à un tiers qu'avec votre accord écrit.",
+    "generatePrompt": "Cliquez sur le bouton ci-dessous pour générer votre document de synthèse personnalisé.",
+    "generating": "Génération en cours...",
+    "generateButton": "Générer ma synthèse PDF",
+    "successTitle": "Synthèse générée avec succès !",
+    "successMessage": "Le document a été téléchargé automatiquement.",
+    "viewDocuments": "Voir tous mes documents →"
+  },
+  "documents": {
+    "confirmLabel": "Je confirme avoir reçu et téléchargé ma synthèse de bilan de compétences",
+    "confirmLegal": "Conformément à l'article R.6313-8 du Code du travail, ce document vous appartient et ne peut être communiqué à un tiers qu'avec votre accord écrit.",
+    "continueButton": "Donner mon avis →",
+    "confirmFirst": "Veuillez confirmer la réception de vos documents"
+  },
+  "satisfaction": {
+    "title": "Votre avis compte",
+    "subtitle": "Aidez-nous à améliorer notre accompagnement",
+    "description": "Conformément aux exigences Qualiopi, nous vous invitons à évaluer votre expérience. Vos retours sont précieux pour l'amélioration continue de nos services.",
+    "loading": "Chargement du questionnaire...",
+    "rating": "Votre note",
+    "comment": "Votre commentaire",
+    "commentPlaceholder": "Partagez votre expérience...",
+    "submit": "Envoyer mon avis",
+    "thankYou": "Merci pour votre retour !"
+  },
+  "final": {
+    "title": "Félicitations {{name}} !",
+    "subtitle": "Votre bilan de compétences est terminé.",
+    "documentsReady": "Vos documents sont prêts !",
+    "dashboardPrompt": "Retrouvez dans votre Dashboard :",
+    "synthesePdf": "Synthèse PDF de votre bilan téléchargeable",
+    "historyExport": "Historique des échanges exportable en Excel/CSV",
+    "qualiopiDocs": "Documents Qualiopi (convention, attestation...)",
+    "summaryTitle": "Récapitulatif de votre bilan",
+    "package": "Forfait",
+    "endDate": "Date de fin",
+    "questionsAnswered": "Questions répondues",
+    "satisfactionLabel": "Satisfaction",
+    "satisfactionCompleted": "Complété",
+    "satisfactionPending": "En attente",
+    "accessDashboard": "Accéder à mon Dashboard",
+    "viewHistory": "Voir mon historique",
+    "startNewBilan": "Commencer un nouveau bilan",
+    "contactMessage": "Pour toute question, contactez-nous à support@bilan-easy.fr"
+  },
+  "download": {
+    "synthesis": "Télécharger la synthèse",
+    "actionPlan": "Télécharger le plan d'action",
+    "certificate": "Télécharger l'attestation"
+  },
+  "backToDashboard": "Retour au tableau de bord"
+}

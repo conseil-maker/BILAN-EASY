@@ -1,0 +1,87 @@
+{
+  "title": "Bilan-Easy",
+  "subtitle": "Yönetim",
+  "back": "Geri",
+  "tabs": {
+    "overview": "Genel Bakış",
+    "users": "Kullanıcılar",
+    "bilans": "Değerlendirmeler",
+    "reports": "Raporlar",
+    "qualiopi": "Qualiopi",
+    "settings": "Ayarlar"
+  },
+  "stats": {
+    "totalUsers": "Toplam kullanıcılar",
+    "completedBilans": "Tamamlanan değerlendirmeler",
+    "inProgressBilans": "Devam eden değerlendirmeler",
+    "revenue": "Gelir"
+  },
+  "charts": {
+    "bilansByMonth": "Aylık değerlendirmeler",
+    "userDistribution": "Kullanıcı dağılımı"
+  },
+  "activity": {
+    "title": "Son aktiviteler"
+  },
+  "users": {
+    "management": "Kullanıcı yönetimi",
+    "table": {
+      "user": "Kullanıcı",
+      "email": "E-posta",
+      "name": "Ad",
+      "role": "Rol",
+      "registration": "Kayıt tarihi",
+      "actions": "İşlemler"
+    },
+    "roles": {
+      "client": "Danışan",
+      "consultant": "Danışman",
+      "admin": "Yönetici"
+    }
+  },
+  "bilans": {
+    "table": {
+      "title": "Başlık",
+      "package": "Paket",
+      "status": "Durum",
+      "date": "Tarih",
+      "actions": "İşlemler"
+    },
+    "view": "Görüntüle"
+  },
+  "reports": {
+    "monthlyReport": "Aylık rapor",
+    "userExport": "Kullanıcı dışa aktarımı",
+    "qualiopiStats": "Qualiopi istatistikleri"
+  },
+  "qualiopi": {
+    "indicators": "Qualiopi göstergeleri",
+    "averageSatisfaction": "Ortalama memnuniyet",
+    "completionRate": "Tamamlanma oranı",
+    "documentCompliance": "Belge uygunluğu",
+    "sixMonthFollowUp": "6 aylık takip"
+  },
+  "assignments": {
+    "title": "Atama yönetimi",
+    "noAssignments": "Şu anda atama bulunmamaktadır.",
+    "consultant": "Danışman",
+    "assignDate": "Atama tarihi",
+    "remove": "Kaldır",
+    "newAssignment": "Yeni atama",
+    "selectClient": "Danışan seçin",
+    "chooseClient": "Danışan seçin",
+    "selectConsultant": "Danışman seçin",
+    "chooseConsultant": "Danışman seçin",
+    "cancel": "İptal",
+    "assigning": "Atama yapılıyor...",
+    "assign": "Ata"
+  },
+  "settings": {
+    "orgInfo": "Kuruluş bilgileri",
+    "orgName": "Kuruluş adı",
+    "siret": "SIRET",
+    "qualiopiNumber": "Qualiopi No",
+    "nda": "NDA",
+    "pricing": "Fiyatlandırma"
+  }
+}

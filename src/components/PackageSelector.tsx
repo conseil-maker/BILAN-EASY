@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Package } from '../types';
 
 interface PackageSelectorProps {
@@ -14,12 +15,13 @@ const CheckIcon = () => (
 
 
 const PackageSelector: React.FC<PackageSelectorProps> = ({ packages, onSelect }) => {
+  const { t } = useTranslation('packages');
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
         <header className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-primary-800 mb-3">Choisissez Votre Parcours</h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">Sélectionnez le forfait d'évaluation qui correspond le mieux à vos objectifs de carrière.</p>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-primary-800 mb-3">{t('title')}</h1>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">{t('subtitle')}</p>
         </header>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {packages.map((pkg) => (
@@ -28,7 +30,7 @@ const PackageSelector: React.FC<PackageSelectorProps> = ({ packages, onSelect })
               <p className="text-slate-500 mt-2 mb-6 flex-grow">{pkg.description}</p>
               
               <div className="mb-8">
-                <p className="text-4xl font-bold text-slate-800">{pkg.totalHours} <span className="text-xl font-medium text-slate-500">heures</span></p>
+                <p className="text-4xl font-bold text-slate-800">{pkg.totalHours} <span className="text-xl font-medium text-slate-500">{t('hours')}</span></p>
               </div>
 
               <ul className="space-y-3 mb-8">
@@ -44,7 +46,7 @@ const PackageSelector: React.FC<PackageSelectorProps> = ({ packages, onSelect })
                 onClick={() => onSelect(pkg)}
                 className="mt-auto w-full bg-primary-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors duration-300"
               >
-                Sélectionner ce Forfait
+                {t('select')}
               </button>
             </div>
           ))}

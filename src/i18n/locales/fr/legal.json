@@ -1,0 +1,96 @@
+{
+  "cgu": {
+    "title": "Conditions Générales d'Utilisation",
+    "lastUpdate": "Dernière mise à jour :",
+    "acceptance": "En utilisant la plateforme Bilan-Easy, vous reconnaissez avoir lu, compris et accepté les présentes Conditions Générales d'Utilisation."
+  },
+  "cgv": {
+    "title": "Conditions Générales de Vente",
+    "lastUpdate": "Dernière mise à jour :",
+    "qualiopi": "Certification Qualiopi : Bilan-Easy est certifié Qualiopi pour les actions de bilan de compétences, garantissant la qualité de nos prestations et leur éligibilité aux financements publics et mutualisés."
+  },
+  "privacy": {
+    "title": "Politique de Confidentialité",
+    "lastUpdate": "Dernière mise à jour :",
+    "confidentiality": "Engagement de confidentialité : Conformément à l'article L.6313-10-1 du Code du travail, les résultats de votre bilan de compétences sont strictement confidentiels. Ils ne peuvent être communiqués à un tiers qu'avec votre consentement écrit explicite."
+  },
+  "cookiesPolicy": {
+    "title": "Politique de Cookies",
+    "lastUpdate": "Dernière mise à jour :"
+  },
+  "close": "Fermer",
+  "understood": "J'ai compris",
+  "cookies": {
+    "title": "Gestion des cookies",
+    "close": "Fermer",
+    "description": "Nous utilisons des cookies pour améliorer votre expérience sur Bilan-Easy. Certains cookies sont nécessaires au fonctionnement de la plateforme, d'autres nous aident à l'améliorer.",
+    "necessary": {
+      "title": "Cookies nécessaires",
+      "description": "Indispensables au fonctionnement (authentification, préférences)"
+    },
+    "alwaysActive": "Toujours actif",
+    "performance": {
+      "title": "Cookies de performance",
+      "description": "Analyse de l'utilisation pour améliorer la plateforme"
+    },
+    "functional": {
+      "title": "Cookies fonctionnels",
+      "description": "Amélioration de l'expérience utilisateur"
+    },
+    "learnMore": "En savoir plus sur notre politique de cookies",
+    "customize": "Personnaliser mes choix",
+    "rejectOptional": "Refuser les optionnels",
+    "saveChoices": "Enregistrer mes choix",
+    "acceptAll": "Tout accepter",
+    "footer": "Conformément au RGPD et à la directive ePrivacy.",
+    "privacyPolicy": "Politique de confidentialité"
+  },
+  "sections": {
+    "object": "Objet",
+    "definitions": "Définitions",
+    "access": "Accès à la plateforme",
+    "services": "Services proposés",
+    "obligations": "Obligations de l'utilisateur",
+    "intellectualProperty": "Propriété intellectuelle",
+    "personalData": "Données personnelles",
+    "confidentiality": "Confidentialité",
+    "responsibility": "Responsabilité",
+    "termination": "Résiliation",
+    "modification": "Modification des CGU",
+    "applicableLaw": "Droit applicable et juridiction",
+    "contact": "Contact",
+    "scope": "Champ d'application",
+    "pricing": "Tarifs",
+    "order": "Commande et convention",
+    "payment": "Modalités de paiement",
+    "withdrawal": "Délai de rétractation",
+    "cancellation": "Annulation et interruption",
+    "providerObligations": "Obligations du prestataire",
+    "beneficiaryObligations": "Obligations du bénéficiaire",
+    "complaints": "Réclamations et médiation",
+    "forceMajeure": "Force majeure",
+    "acceptance": "Acceptation des CGV",
+    "whatIsCookie": "Qu'est-ce qu'un cookie ?",
+    "cookieTypes": "Types de cookies utilisés",
+    "cookieManagement": "Gestion des cookies",
+    "refusalConsequences": "Conséquences du refus",
+    "introduction": "Introduction",
+    "dataController": "Responsable du traitement",
+    "dataCollected": "Données collectées",
+    "processingPurposes": "Finalités du traitement",
+    "legalBasis": "Base légale du traitement",
+    "dataRecipients": "Destinataires des données",
+    "transfersOutsideEU": "Transferts hors UE",
+    "retentionPeriod": "Durée de conservation",
+    "dataSecurity": "Sécurité des données",
+    "yourRights": "Vos droits",
+    "cookiesSection": "Cookies",
+    "modifications": "Modifications",
+    "table": {
+      "name": "Nom",
+      "purpose": "Finalité",
+      "duration": "Durée",
+      "dataType": "Type de données"
+    }
+  }
+}

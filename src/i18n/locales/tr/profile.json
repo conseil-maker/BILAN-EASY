@@ -1,0 +1,72 @@
+{
+  "title": "Profilim",
+  "subtitle": "Kişisel bilgilerinizi yönetin",
+  "back": "Geri",
+  "tabs": {
+    "info": "Bilgiler",
+    "security": "Güvenlik",
+    "data": "Verilerim"
+  },
+  "fields": {
+    "fullName": "Ad Soyad",
+    "fullNamePlaceholder": "Ahmet Yılmaz",
+    "email": "E-posta",
+    "emailNote": "E-posta değiştirilemez",
+    "phone": "Telefon",
+    "phonePlaceholder": "0532 123 45 67",
+    "birthDate": "Doğum tarihi",
+    "profession": "Mevcut meslek",
+    "professionPlaceholder": "Geliştirici, Yönetici, vb.",
+    "company": "Şirket",
+    "companyPlaceholder": "Şirket adı",
+    "address": "Adres",
+    "addressPlaceholder": "Atatürk Caddesi No: 123",
+    "postalCode": "Posta kodu",
+    "postalCodePlaceholder": "34000",
+    "city": "Şehir",
+    "cityPlaceholder": "İstanbul"
+  },
+  "buttons": {
+    "saving": "Kaydediliyor...",
+    "save": "Değişiklikleri kaydet"
+  },
+  "security": {
+    "changePassword": "Şifre değiştir",
+    "newPassword": "Yeni şifre",
+    "confirmPassword": "Yeni şifreyi onayla",
+    "changingPassword": "Değiştiriliyor...",
+    "changePasswordBtn": "Şifreyi değiştir",
+    "activeSessions": "Aktif oturumlar",
+    "activeSessionsDesc": "Şu anda bu cihazdan bağlısınız.",
+    "signOut": "Çıkış yap"
+  },
+  "data": {
+    "exportTitle": "Verilerimi dışa aktar",
+    "exportDesc": "KVKK kapsamında tüm kişisel verilerinizin bir kopyasını indirebilirsiniz.",
+    "exportBtn": "Verilerimi indir",
+    "deleteTitle": "Hesabımı sil",
+    "deleteDesc": "Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecektir.",
+    "deleteBtn": "Hesabımı sil",
+    "deleteConfirmText": "Silme işlemini onaylamak için aşağıya <strong>SİL</strong> yazın:",
+    "deleteConfirmWord": "SİL",
+    "deleteConfirmBtn": "Silmeyi onayla",
+    "cancelBtn": "İptal"
+  },
+  "messages": {
+    "profileLoaded": "Profil yüklendi",
+    "profileLoadError": "Profil yüklenirken hata oluştu",
+    "profileSaved": "Profil başarıyla güncellendi",
+    "profileSaveError": "Kaydetme sırasında hata oluştu",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "passwordTooShort": "Şifre en az 6 karakter olmalıdır",
+    "passwordChanged": "Şifre başarıyla değiştirildi",
+    "passwordChangeError": "Şifre değiştirilirken hata oluştu",
+    "deleteConfirmError": "Onaylamak için lütfen SİL yazın",
+    "accountDeleted": "Hesap başarıyla silindi",
+    "accountDeleteError": "Hesap silinirken hata oluştu",
+    "dataExported": "Veriler başarıyla dışa aktarıldı",
+    "dataExportError": "Veriler dışa aktarılırken hata oluştu"
+  },
+  "rgpdNote": "Verileriniz KVKK kapsamında korunmaktadır.",
+  "learnMore": "Daha fazla bilgi"
+}

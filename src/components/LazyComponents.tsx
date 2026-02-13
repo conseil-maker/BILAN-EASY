@@ -8,7 +8,7 @@
 import React, { Suspense, lazy, ComponentType } from 'react';
 
 // Composant de chargement
-export const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Chargement...' }) => (
+export const LoadingSpinner: React.FC<{ message?: string }> = ({ message = '' }) => (
   <div className="flex flex-col items-center justify-center min-h-[200px] p-8">
     <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4" />
     <p className="text-gray-600 dark:text-gray-400 text-sm">{message}</p>
@@ -16,7 +16,7 @@ export const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Char
 );
 
 // Composant de chargement pleine page
-export const FullPageLoader: React.FC<{ message?: string }> = ({ message = 'Chargement...' }) => (
+export const FullPageLoader: React.FC<{ message?: string }> = ({ message = '' }) => (
   <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">
     <div className="text-center">
       <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4 mx-auto" />
@@ -128,19 +128,19 @@ export const LazyAboutPage = lazy(() =>
 // EXPORTS AVEC SUSPENSE PRÉ-CONFIGURÉ
 // ============================================
 
-export const AdminDashboardLazy = withSuspense(LazyAdminDashboard, <LoadingSpinner message="Chargement du dashboard admin..." />);
-export const AdminDashboardProLazy = withSuspense(LazyAdminDashboardPro, <LoadingSpinner message="Chargement du dashboard admin..." />);
-export const ConsultantDashboardLazy = withSuspense(LazyConsultantDashboard, <LoadingSpinner message="Chargement du dashboard consultant..." />);
-export const ConsultantDashboardProLazy = withSuspense(LazyConsultantDashboardPro, <LoadingSpinner message="Chargement du dashboard consultant..." />);
-export const DocumentsQualiopiLazy = withSuspense(LazyDocumentsQualiopi, <LoadingSpinner message="Chargement des documents..." />);
-export const DocumentLibraryLazy = withSuspense(LazyDocumentLibrary, <LoadingSpinner message="Chargement de la bibliothèque..." />);
-export const MyDocumentsLazy = withSuspense(LazyMyDocuments, <LoadingSpinner message="Chargement de vos documents..." />);
-export const SatisfactionSurveyLazy = withSuspense(LazySatisfactionSurvey, <LoadingSpinner message="Chargement du questionnaire..." />);
-export const AppointmentSystemLazy = withSuspense(LazyAppointmentSystem, <LoadingSpinner message="Chargement des rendez-vous..." />);
-export const CGULazy = withSuspense(LazyCGU, <LoadingSpinner message="Chargement..." />);
-export const CGVLazy = withSuspense(LazyCGV, <LoadingSpinner message="Chargement..." />);
-export const PrivacyLazy = withSuspense(LazyPrivacy, <LoadingSpinner message="Chargement..." />);
-export const CookiesPolicyLazy = withSuspense(LazyCookiesPolicy, <LoadingSpinner message="Chargement..." />);
-export const ClientAppLazy = withSuspense(LazyClientApp, <FullPageLoader message="Chargement de l'application..." />);
-export const ClientDashboardLazy = withSuspense(LazyClientDashboard, <LoadingSpinner message="Chargement du tableau de bord..." />);
-export const AboutPageLazy = withSuspense(LazyAboutPage, <LoadingSpinner message="Chargement..." />);
+export const AdminDashboardLazy = withSuspense(LazyAdminDashboard, <LoadingSpinner />);
+export const AdminDashboardProLazy = withSuspense(LazyAdminDashboardPro, <LoadingSpinner />);
+export const ConsultantDashboardLazy = withSuspense(LazyConsultantDashboard, <LoadingSpinner />);
+export const ConsultantDashboardProLazy = withSuspense(LazyConsultantDashboardPro, <LoadingSpinner />);
+export const DocumentsQualiopiLazy = withSuspense(LazyDocumentsQualiopi, <LoadingSpinner />);
+export const DocumentLibraryLazy = withSuspense(LazyDocumentLibrary, <LoadingSpinner />);
+export const MyDocumentsLazy = withSuspense(LazyMyDocuments, <LoadingSpinner />);
+export const SatisfactionSurveyLazy = withSuspense(LazySatisfactionSurvey, <LoadingSpinner />);
+export const AppointmentSystemLazy = withSuspense(LazyAppointmentSystem, <LoadingSpinner />);
+export const CGULazy = withSuspense(LazyCGU, <LoadingSpinner />);
+export const CGVLazy = withSuspense(LazyCGV, <LoadingSpinner />);
+export const PrivacyLazy = withSuspense(LazyPrivacy, <LoadingSpinner />);
+export const CookiesPolicyLazy = withSuspense(LazyCookiesPolicy, <LoadingSpinner />);
+export const ClientAppLazy = withSuspense(LazyClientApp, <FullPageLoader />);
+export const ClientDashboardLazy = withSuspense(LazyClientDashboard, <LoadingSpinner />);
+export const AboutPageLazy = withSuspense(LazyAboutPage, <LoadingSpinner />);

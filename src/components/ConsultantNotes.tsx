@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
 import { authService } from '../services/authService';
@@ -15,6 +16,7 @@ interface ConsultantNotesProps {
 }
 
 export const ConsultantNotes: React.FC<ConsultantNotesProps> = ({ assessmentId }) => {
+  const { t } = useTranslation('consultant');
   const { showError } = useToast();
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState('');
@@ -115,14 +117,14 @@ export const ConsultantNotes: React.FC<ConsultantNotesProps> = ({ assessmentId }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-bold text-slate-800 mb-4">Notes du consultant</h3>
+      <h3 className="text-xl font-bold text-slate-800 mb-4">{t('notes.title')}</h3>
       
       {/* Formulaire d'ajout de note */}
       <div className="mb-6">
         <textarea
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
-          placeholder="Ajouter une note privée sur ce bilan..."
+          placeholder={t('notes.placeholder')}
           className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none resize-none"
           rows={4}
         />
@@ -132,14 +134,14 @@ export const ConsultantNotes: React.FC<ConsultantNotesProps> = ({ assessmentId }
             disabled={!newNote.trim() || saving}
             className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed"
           >
-            {saving ? 'Enregistrement...' : 'Ajouter une note'}
+            {saving ? t('notes.saving') : t('notes.addNote')}
           </button>
         </div>
       </div>
 
       {/* Liste des notes */}
       {notes.length === 0 ? (
-        <p className="text-slate-500 text-center py-4">Aucune note pour le moment.</p>
+        <p className="text-slate-500 text-center py-4">{t('notes.noNotes')}</p>
       ) : (
         <div className="space-y-4">
           {notes.map((note) => (
@@ -158,7 +160,7 @@ export const ConsultantNotes: React.FC<ConsultantNotesProps> = ({ assessmentId }
                   onClick={() => handleDeleteNote(note.id)}
                   className="text-red-600 hover:text-red-800 text-sm"
                 >
-                  Supprimer
+                  {t('notes.delete')}
                 </button>
               </div>
               <p className="text-slate-700 whitespace-pre-wrap">{note.content}</p>

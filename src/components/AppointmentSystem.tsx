@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabaseClient';
 import { organizationConfig } from '../config/organization';
 
@@ -38,12 +39,8 @@ interface AppointmentSystemProps {
 }
 
 // Constantes
-const APPOINTMENT_TYPES = [
-  { id: 'initial', label: 'Entretien initial', duration: 60, description: 'Premier rendez-vous de découverte' },
-  { id: 'followup', label: 'Suivi', duration: 45, description: 'Point d\'avancement du bilan' },
-  { id: 'synthesis', label: 'Synthèse', duration: 90, description: 'Présentation du document de synthèse' },
-  { id: 'phone', label: 'Appel téléphonique', duration: 30, description: 'Échange rapide par téléphone' },
-];
+const APPOINTMENT_TYPE_IDS = ['initial', 'followup', 'synthesis', 'phone'] as const;
+const APPOINTMENT_DURATIONS: Record<string, number> = { initial: 60, followup: 45, synthesis: 90, phone: 30 };
 
 const WORKING_HOURS = {
   start: 9,
@@ -149,10 +146,8 @@ const Calendar: React.FC<{
     );
   }
   
-  const monthNames = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-  ];
+  const { t } = useTranslation('appointments');
+  const monthNames = (t('calendar.months', { returnObjects: true }) as string[]);
   
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
@@ -175,7 +170,7 @@ const Calendar: React.FC<{
       </div>
       
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
+        {(t('calendar.days', { returnObjects: true }) as string[]).map(day => (
           <div key={day} className="h-8 flex items-center justify-center text-xs text-gray-500 font-medium">
             {day}
           </div>
@@ -197,6 +192,13 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
   mode,
   onAppointmentBooked
 }) => {
+  const { t, i18n } = useTranslation('appointments');
+  const APPOINTMENT_TYPES = APPOINTMENT_TYPE_IDS.map(id => ({
+    id,
+    label: t(`types.${id}.label`),
+    duration: APPOINTMENT_DURATIONS[id],
+    description: t(`types.${id}.description`),
+  }));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [selectedType, setSelectedType] = useState(APPOINTMENT_TYPES[0]);
@@ -271,18 +273,18 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 mb-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">📅 Prendre rendez-vous</h1>
+        <h1 className="text-2xl font-bold mb-2">📅 {t('title')}</h1>
         <p className="opacity-90">
-          Planifiez vos entretiens avec {organizationConfig.defaultConsultant.name}
+          {t('subtitle', { consultant: organizationConfig.defaultConsultant.name })}
         </p>
       </div>
 
       {/* Onglets */}
       <div className="flex gap-2 mb-6">
         {[
-          { id: 'book', label: 'Réserver', icon: '📅' },
-          { id: 'upcoming', label: 'À venir', icon: '⏰', count: upcomingAppointments.length },
-          { id: 'history', label: 'Historique', icon: '📋' },
+          { id: 'book', label: t('tabs.book'), icon: '📅' },
+          { id: 'upcoming', label: t('tabs.upcoming'), icon: '⏰', count: upcomingAppointments.length },
+          { id: 'history', label: t('tabs.history'), icon: '📋' },
         ].map(tab => (
           <button
             key={tab.id}
@@ -312,7 +314,7 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
           {/* Calendrier */}
           <div>
             <h3 className="font-semibold text-gray-800 dark:text-white mb-3">
-              1. Choisissez une date
+              {t('steps.chooseDate')}
             </h3>
             <Calendar
               selectedDate={selectedDate}
@@ -325,7 +327,7 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
           <div>
             {/* Type de rendez-vous */}
             <h3 className="font-semibold text-gray-800 dark:text-white mb-3">
-              2. Type de rendez-vous
+              {t('steps.chooseType')}
             </h3>
             <div className="space-y-2 mb-6">
               {APPOINTMENT_TYPES.map(type => (
@@ -353,7 +355,7 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
             {selectedDate && (
               <>
                 <h3 className="font-semibold text-gray-800 dark:text-white mb-3">
-                  3. Choisissez un créneau
+                  {t('steps.chooseSlot')}
                 </h3>
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
                   {timeSlots.filter(slot => slot.isAvailable).map(slot => (
@@ -373,7 +375,7 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
                   ))}
                   {timeSlots.filter(slot => slot.isAvailable).length === 0 && (
                     <p className="col-span-3 text-center text-gray-500 py-4">
-                      Aucun créneau disponible ce jour
+                      {t('noSlots')}
                     </p>
                   )}
                 </div>
@@ -384,12 +386,12 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
             {selectedSlot && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notes (optionnel)
+                  {t('notes')}
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Précisez l'objet de votre rendez-vous..."
+                  placeholder={t('notesPlaceholder')}
                   className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                 />
@@ -403,7 +405,7 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
                 disabled={isLoading}
                 className="w-full mt-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50"
               >
-                {isLoading ? 'Réservation en cours...' : 'Confirmer le rendez-vous'}
+                {isLoading ? t('booking') : t('confirm')}
               </button>
             )}
           </div>
@@ -415,12 +417,12 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
           {upcomingAppointments.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-xl">
               <span className="text-4xl mb-4 block">📅</span>
-              <p className="text-gray-500">Aucun rendez-vous à venir</p>
+              <p className="text-gray-500">{t('noUpcoming')}</p>
               <button
                 onClick={() => setActiveTab('book')}
                 className="mt-4 text-indigo-600 font-medium hover:underline"
               >
-                Réserver un rendez-vous
+                {t('bookOne')}
               </button>
             </div>
           ) : (
@@ -432,18 +434,18 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
                       {APPOINTMENT_TYPES.find(t => t.id === apt.type)?.label}
                     </h4>
                     <p className="text-gray-600">
-                      {new Date(apt.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                      {' à '}{apt.time}
+                      {new Date(apt.date).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                      {' '}{t('at')}{' '}{apt.time}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
-                      Avec {apt.consultantName} • {apt.duration} min
+                      {t('with')} {apt.consultantName} • {apt.duration} min
                     </p>
                   </div>
                   <span className={`
                     px-3 py-1 rounded-full text-xs font-medium
                     ${apt.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}
                   `}>
-                    {apt.status === 'confirmed' ? 'Confirmé' : 'En attente'}
+                    {apt.status === 'confirmed' ? t('confirmed') : t('pending')}
                   </span>
                 </div>
               </div>
@@ -457,7 +459,7 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
           {pastAppointments.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-xl">
               <span className="text-4xl mb-4 block">📋</span>
-              <p className="text-gray-500">Aucun rendez-vous passé</p>
+              <p className="text-gray-500">{t('noPast')}</p>
             </div>
           ) : (
             pastAppointments.map(apt => (
@@ -468,11 +470,11 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
                       {APPOINTMENT_TYPES.find(t => t.id === apt.type)?.label}
                     </h4>
                     <p className="text-gray-500 text-sm">
-                      {new Date(apt.date).toLocaleDateString('fr-FR')} à {apt.time}
+                      {new Date(apt.date).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'fr-FR')} {t('at')} {apt.time}
                     </p>
                   </div>
                   <span className="px-3 py-1 bg-gray-200 text-gray-600 rounded-full text-xs">
-                    Terminé
+                    {t('completed')}
                   </span>
                 </div>
               </div>
@@ -489,23 +491,23 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
               <span className="text-3xl">✓</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Rendez-vous réservé !
+              {t('confirmModal.title')}
             </h2>
             <p className="text-gray-600 mb-4">
-              Votre demande de rendez-vous a été envoyée. Vous recevrez une confirmation par email.
+              {t('confirmModal.message')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
               <p className="text-sm text-gray-600">
-                <strong>Date :</strong> {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                <strong>{t('confirmModal.date')}</strong> {selectedDate?.toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Heure :</strong> {selectedSlot?.time}
+                <strong>{t('confirmModal.time')}</strong> {selectedSlot?.time}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Type :</strong> {selectedType.label}
+                <strong>{t('confirmModal.type')}</strong> {selectedType.label}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Consultant :</strong> {organizationConfig.defaultConsultant.name}
+                <strong>{t('confirmModal.consultant')}</strong> {organizationConfig.defaultConsultant.name}
               </p>
             </div>
             <button
@@ -515,7 +517,7 @@ export const AppointmentSystem: React.FC<AppointmentSystemProps> = ({
               }}
               className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700"
             >
-              Fermer
+              {t('confirmModal.close')}
             </button>
           </div>
         </div>

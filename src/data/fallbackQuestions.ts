@@ -7,6 +7,8 @@
  */
 
 import { Question, QuestionType } from '../types-ai-studio';
+import { FALLBACK_TRANSLATIONS_TR } from './fallbackQuestions-tr';
+import { getCurrentLanguage } from '../services/aiTranslationHelper';
 
 // Type interne pour les questions de fallback avec champs additionnels
 interface FallbackQuestion extends Question {
@@ -734,7 +736,31 @@ export function countFallbackQuestions(): number {
 }
 
 /**
+ * Traduit une question de fallback selon la langue courante
+ */
+function translateFallbackQuestion(question: FallbackQuestion): FallbackQuestion {
+  const lang = getCurrentLanguage();
+  if (lang === 'fr') return question; // Déjà en français
+  
+  if (lang === 'tr') {
+    const translation = FALLBACK_TRANSLATIONS_TR[question.id];
+    if (translation) {
+      return {
+        ...question,
+        title: translation.title,
+        description: translation.description,
+        theme: translation.theme || question.theme,
+        category: translation.category || question.category,
+      };
+    }
+  }
+  
+  return question; // Fallback: retourner la version française
+}
+
+/**
  * Sélectionne une question de fallback appropriée selon le contexte
+ * Supporte le multilangue via les fichiers de traduction
  */
 export function selectFallbackQuestion(
   categoryId: string,
@@ -771,12 +797,15 @@ export function selectFallbackQuestion(
     if (availableQuestions.length === 0) {
       // Si toutes les questions ont été posées, en sélectionner une au hasard
       const randomQuestion = phaseQuestions[Math.floor(Math.random() * phaseQuestions.length)];
+      if (!randomQuestion) return null;
       console.log(`[selectFallbackQuestion] Toutes les questions posées, sélection aléatoire: ${randomQuestion.id}`);
-      return randomQuestion;
+      return translateFallbackQuestion(randomQuestion);
     }
     
-    console.log(`[selectFallbackQuestion] Question sélectionnée: ${availableQuestions[0].id}`);
-    return availableQuestions[0];
+    const firstAvailable = availableQuestions[0];
+    if (!firstAvailable) return null;
+    console.log(`[selectFallbackQuestion] Question sélectionnée: ${firstAvailable.id}`);
+    return translateFallbackQuestion(firstAvailable);
   }
   
   // Sélectionner une question de la catégorie non encore posée
@@ -789,10 +818,13 @@ export function selectFallbackQuestion(
   if (availableQuestions.length === 0) {
     // Si toutes les questions de la catégorie ont été posées, en sélectionner une au hasard
     const randomQuestion = categoryQuestions[Math.floor(Math.random() * categoryQuestions.length)];
+    if (!randomQuestion) return null;
     console.log(`[selectFallbackQuestion] Toutes les questions de la catégorie posées, sélection aléatoire: ${randomQuestion.id}`);
-    return randomQuestion;
+    return translateFallbackQuestion(randomQuestion);
   }
   
-  console.log(`[selectFallbackQuestion] Question sélectionnée: ${availableQuestions[0].id}`);
-  return availableQuestions[0];
+  const firstCategoryAvailable = availableQuestions[0];
+  if (!firstCategoryAvailable) return null;
+  console.log(`[selectFallbackQuestion] Question sélectionnée: ${firstCategoryAvailable.id}`);
+  return translateFallbackQuestion(firstCategoryAvailable);
 }

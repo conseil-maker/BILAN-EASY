@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Package, CoachingStyle } from '../types-ai-studio';
 import { QUESTION_CATEGORIES } from '../constants';
 import { CheckCircle, AlertCircle, FileText, Clock, Target, Shield, ChevronRight, ChevronDown } from 'lucide-react';
@@ -96,6 +97,7 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
   coachingStyle,
   setCoachingStyle
 }) => {
+  const { t, i18n } = useTranslation('preliminary');
   const [currentStep, setCurrentStep] = useState(0);
   const [expandedSection, setExpandedSection] = useState<string | null>('objectives');
   const [legalModalType, setLegalModalType] = useState<LegalDocumentType>(null);
@@ -149,10 +151,10 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Bienvenue {userName} !
+                {t('step0.title', { name: userName })}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Avant de commencer votre bilan de compétences, prenons le temps de bien comprendre vos objectifs.
+                {t('step0.subtitle')}
               </p>
             </div>
 
@@ -160,42 +162,42 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
             <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
               <h3 className="font-bold text-indigo-900 dark:text-indigo-300 mb-4 flex items-center">
                 <Target className="mr-2" size={24} />
-                Objectifs du bilan de compétences
+                {t('step0.objectivesTitle')}
               </h3>
               <p className="text-indigo-800 dark:text-indigo-300 mb-4">
-                Conformément à l'article L.6313-4 du Code du travail, le bilan de compétences a pour objectif de vous permettre :
+                {t('step0.objectivesIntro')}
               </p>
               <ul className="space-y-2 text-indigo-800 dark:text-indigo-300">
                 <li className="flex items-start">
                   <CheckCircle className="mr-2 flex-shrink-0 mt-0.5 text-green-600" size={18} />
-                  D'analyser vos compétences professionnelles et personnelles
+                  {t('step0.objective1')}
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="mr-2 flex-shrink-0 mt-0.5 text-green-600" size={18} />
-                  D'identifier vos aptitudes et motivations
+                  {t('step0.objective2')}
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="mr-2 flex-shrink-0 mt-0.5 text-green-600" size={18} />
-                  De définir un projet professionnel ou de formation
+                  {t('step0.objective3')}
                 </li>
                 <li className="flex items-start">
                   <CheckCircle className="mr-2 flex-shrink-0 mt-0.5 text-green-600" size={18} />
-                  D'élaborer un plan d'action concret
+                  {t('step0.objective4')}
                 </li>
               </ul>
             </div>
 
             {/* Votre parcours */}
-            <InfoCard icon={<Clock size={24} />} title={`Votre parcours : ${pkg.name}`}>
-              <p className="mb-2">Durée totale : <strong>{pkg.totalHours} heures</strong></p>
-              <p>Ce parcours comprend les trois phases réglementaires du bilan de compétences.</p>
+            <InfoCard icon={<Clock size={24} />} title={t('step0.pathTitle', { package: pkg.name })}>
+              <p className="mb-2" dangerouslySetInnerHTML={{ __html: t('step0.pathDuration', { hours: pkg.totalHours }) }} />
+              <p>{t('step0.pathDescription')}</p>
             </InfoCard>
 
             <ConsentCheckbox
               checked={consent.objectivesUnderstood}
               onChange={(checked) => updateConsent('objectivesUnderstood', checked)}
-              label="J'ai compris les objectifs du bilan de compétences"
-              description="Je comprends que ce bilan vise à m'aider à définir mon projet professionnel."
+              label={t('step0.consentObjectives')}
+              description={t('step0.consentObjectivesDesc')}
             />
           </div>
         );
@@ -205,106 +207,53 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Déroulement du bilan
+                {t('step1.title')}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Votre bilan se déroule en trois phases obligatoires
+                {t('step1.subtitle')}
               </p>
             </div>
 
             {/* Les 3 phases */}
             <div className="space-y-4">
-              <div 
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden cursor-pointer"
-                onClick={() => setExpandedSection(expandedSection === 'phase1' ? null : 'phase1')}
-              >
-                <div className="p-4 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mr-4">1</div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white">Phase préliminaire</h3>
-                      <p className="text-sm text-gray-500">~17% du temps total</p>
+              {(['phase1', 'phase2', 'phase3'] as const).map((phase, idx) => (
+                <div 
+                  key={phase}
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden cursor-pointer"
+                  onClick={() => setExpandedSection(expandedSection === phase ? null : phase)}
+                >
+                  <div className="p-4 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className={`w-10 h-10 ${idx === 0 ? 'bg-blue-600' : idx === 1 ? 'bg-orange-600' : 'bg-green-600'} text-white rounded-full flex items-center justify-center font-bold mr-4`}>{idx + 1}</div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 dark:text-white">{t(`step1.${phase}.title`)}</h3>
+                        <p className="text-sm text-gray-500">{t(`step1.${phase}.time`)}</p>
+                      </div>
                     </div>
+                    {expandedSection === phase ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                   </div>
-                  {expandedSection === 'phase1' ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                </div>
-                {expandedSection === 'phase1' && (
-                  <div className="px-4 pb-4 text-gray-600 dark:text-gray-400 text-sm border-t border-gray-100 dark:border-gray-700 pt-4">
-                    <p className="mb-2"><strong>Objectif :</strong> Analyser votre demande et définir vos besoins</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>Analyse de votre situation actuelle</li>
-                      <li>Définition de vos attentes et objectifs</li>
-                      <li>Présentation de la méthodologie</li>
-                      <li>Validation du consentement éclairé</li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div 
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden cursor-pointer"
-                onClick={() => setExpandedSection(expandedSection === 'phase2' ? null : 'phase2')}
-              >
-                <div className="p-4 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold mr-4">2</div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white">Phase d'investigation</h3>
-                      <p className="text-sm text-gray-500">~50% du temps total</p>
+                  {expandedSection === phase && (
+                    <div className="px-4 pb-4 text-gray-600 dark:text-gray-400 text-sm border-t border-gray-100 dark:border-gray-700 pt-4">
+                      <p className="mb-2"><strong>{t(`step1.${phase}.objectiveTitle`)}</strong> {t(`step1.${phase}.objective`)}</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {(t(`step1.${phase}.items`, { returnObjects: true }) as string[]).map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-                  {expandedSection === 'phase2' ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  )}
                 </div>
-                {expandedSection === 'phase2' && (
-                  <div className="px-4 pb-4 text-gray-600 dark:text-gray-400 text-sm border-t border-gray-100 dark:border-gray-700 pt-4">
-                    <p className="mb-2"><strong>Objectif :</strong> Explorer et construire votre projet</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>Analyse de votre parcours professionnel</li>
-                      <li>Identification de vos compétences</li>
-                      <li>Exploration de vos valeurs et motivations</li>
-                      <li>Recherche de pistes professionnelles</li>
-                      <li>Confrontation au marché de l'emploi</li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div 
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden cursor-pointer"
-                onClick={() => setExpandedSection(expandedSection === 'phase3' ? null : 'phase3')}
-              >
-                <div className="p-4 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mr-4">3</div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white">Phase de conclusion</h3>
-                      <p className="text-sm text-gray-500">~17% du temps total</p>
-                    </div>
-                  </div>
-                  {expandedSection === 'phase3' ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                </div>
-                {expandedSection === 'phase3' && (
-                  <div className="px-4 pb-4 text-gray-600 dark:text-gray-400 text-sm border-t border-gray-100 dark:border-gray-700 pt-4">
-                    <p className="mb-2"><strong>Objectif :</strong> Finaliser et planifier</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>Synthèse des résultats</li>
-                      <li>Validation du projet professionnel</li>
-                      <li>Élaboration du plan d'action</li>
-                      <li>Remise du document de synthèse</li>
-                    </ul>
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
 
             {/* Style de coaching */}
             <div className="mt-8">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">Choisissez votre style d'accompagnement</h3>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-4">{t('step1.coachingTitle')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  { id: 'collaborative', title: 'Collaboratif', desc: 'Approche bienveillante centrée sur vos forces' },
-                  { id: 'analytic', title: 'Analytique', desc: 'Approche structurée et méthodique' },
-                  { id: 'creative', title: 'Créatif', desc: 'Approche inspirante et exploratoire' }
+                  { id: 'collaborative', title: t('step1.styles.collaborative.title'), desc: t('step1.styles.collaborative.desc') },
+                  { id: 'analytic', title: t('step1.styles.analytic.title'), desc: t('step1.styles.analytic.desc') },
+                  { id: 'creative', title: t('step1.styles.creative.title'), desc: t('step1.styles.creative.desc') }
                 ].map(style => (
                   <button
                     key={style.id}
@@ -327,8 +276,8 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
             <ConsentCheckbox
               checked={consent.methodologyAccepted}
               onChange={(checked) => updateConsent('methodologyAccepted', checked)}
-              label="J'accepte la méthodologie proposée"
-              description="Je comprends le déroulement des trois phases du bilan."
+              label={t('step1.consentMethodology')}
+              description={t('step1.consentMethodologyDesc')}
             />
           </div>
         );
@@ -338,28 +287,23 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Consentement éclairé
+                {t('step2.title')}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Conformément au Code du travail et au RGPD
+                {t('step2.subtitle')}
               </p>
             </div>
 
             {/* Informations légales */}
-            <InfoCard icon={<Shield size={24} />} title="Confidentialité garantie">
-              <p>
-                Conformément à l'article L.6313-10-1 du Code du travail, les résultats de votre bilan sont 
-                <strong> strictement confidentiels</strong>. Ils ne peuvent être communiqués à un tiers 
-                (employeur, financeur, etc.) qu'avec votre accord écrit explicite.
-              </p>
+            <InfoCard icon={<Shield size={24} />} title={t('step2.confidentialityTitle')}>
+              <p dangerouslySetInnerHTML={{ __html: t('step2.confidentialityText') }} />
             </InfoCard>
 
-            <InfoCard icon={<FileText size={24} />} title="Vos droits">
+            <InfoCard icon={<FileText size={24} />} title={t('step2.rightsTitle')}>
               <ul className="space-y-1">
-                <li>• Vous pouvez interrompre le bilan à tout moment</li>
-                <li>• Vous êtes propriétaire des résultats</li>
-                <li>• Vous avez accès à vos données (RGPD)</li>
-                <li>• Vous pouvez demander la suppression de vos données</li>
+                {(t('step2.rights', { returnObjects: true }) as string[]).map((right, i) => (
+                  <li key={i}>• {right}</li>
+                ))}
               </ul>
             </InfoCard>
 
@@ -367,29 +311,29 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
               <ConsentCheckbox
                 checked={consent.informedConsent}
                 onChange={(checked) => updateConsent('informedConsent', checked)}
-                label="Je donne mon consentement éclairé"
-                description="J'ai reçu toutes les informations nécessaires sur le bilan de compétences."
+                label={t('step2.consentInformed')}
+                description={t('step2.consentInformedDesc')}
               />
 
               <ConsentCheckbox
                 checked={consent.voluntaryParticipation}
                 onChange={(checked) => updateConsent('voluntaryParticipation', checked)}
-                label="Je participe volontairement"
-                description="Ma participation est libre et volontaire, sans aucune contrainte."
+                label={t('step2.consentVoluntary')}
+                description={t('step2.consentVoluntaryDesc')}
               />
 
               <ConsentCheckbox
                 checked={consent.confidentialityAcknowledged}
                 onChange={(checked) => updateConsent('confidentialityAcknowledged', checked)}
-                label="J'ai compris les règles de confidentialité"
-                description="Je comprends que les résultats m'appartiennent et ne seront pas communiqués sans mon accord."
+                label={t('step2.consentConfidentiality')}
+                description={t('step2.consentConfidentialityDesc')}
               />
 
               <ConsentCheckbox
                 checked={consent.dataProcessingConsent}
                 onChange={(checked) => updateConsent('dataProcessingConsent', checked)}
-                label="J'accepte le traitement de mes données"
-                description="Conformément au RGPD, j'autorise le traitement de mes données pour la réalisation du bilan."
+                label={t('step2.consentData')}
+                description={t('step2.consentDataDesc')}
               />
             </div>
 
@@ -397,10 +341,10 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
               <div className="flex items-start">
                 <AlertCircle className="text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0 mt-0.5" size={20} />
                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                  En validant ces conditions, vous confirmez avoir lu et compris les informations ci-dessus. 
-                  Vous pouvez consulter nos <button onClick={() => setLegalModalType('cgu')} className="underline hover:text-yellow-600 cursor-pointer font-medium">CGU</button>, 
-                  <button onClick={() => setLegalModalType('cgv')} className="underline ml-1 hover:text-yellow-600 cursor-pointer font-medium">CGV</button> et 
-                  <button onClick={() => setLegalModalType('privacy')} className="underline ml-1 hover:text-yellow-600 cursor-pointer font-medium">Politique de confidentialité</button>.
+                  {t('step2.warningText')}{' '}
+                  <button onClick={() => setLegalModalType('cgu')} className="underline hover:text-yellow-600 cursor-pointer font-medium">{t('step2.cgu')}</button>,{' '}
+                  <button onClick={() => setLegalModalType('cgv')} className="underline hover:text-yellow-600 cursor-pointer font-medium">{t('step2.cgv')}</button> {t('step2.and')}{' '}
+                  <button onClick={() => setLegalModalType('privacy')} className="underline hover:text-yellow-600 cursor-pointer font-medium">{t('step2.privacy')}</button>.
                 </p>
               </div>
             </div>
@@ -412,31 +356,31 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Récapitulatif
+                {t('step3.title')}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Vérifiez les informations avant de commencer
+                {t('step3.subtitle')}
               </p>
             </div>
 
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">Votre bilan de compétences</h3>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-4">{t('step3.bilanTitle')}</h3>
               
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Bénéficiaire</p>
+                  <p className="text-gray-500 dark:text-gray-400">{t('step3.beneficiary')}</p>
                   <p className="font-medium text-gray-900 dark:text-white">{userName}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Parcours</p>
+                  <p className="text-gray-500 dark:text-gray-400">{t('step3.path')}</p>
                   <p className="font-medium text-gray-900 dark:text-white">{pkg.name}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Durée</p>
-                  <p className="font-medium text-gray-900 dark:text-white">{pkg.totalHours} heures</p>
+                  <p className="text-gray-500 dark:text-gray-400">{t('step3.duration')}</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{t('step3.hours', { hours: pkg.totalHours })}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Style d'accompagnement</p>
+                  <p className="text-gray-500 dark:text-gray-400">{t('step3.coachingStyle')}</p>
                   <p className="font-medium text-gray-900 dark:text-white capitalize">{coachingStyle}</p>
                 </div>
               </div>
@@ -445,38 +389,20 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
               <h3 className="font-bold text-green-900 dark:text-green-300 mb-4 flex items-center">
                 <CheckCircle className="mr-2" size={24} />
-                Consentements validés
+                {t('step3.consentsTitle')}
               </h3>
               <ul className="space-y-2 text-green-800 dark:text-green-300 text-sm">
-                <li className="flex items-center">
-                  <CheckCircle className="mr-2 flex-shrink-0" size={16} />
-                  Objectifs du bilan compris
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="mr-2 flex-shrink-0" size={16} />
-                  Méthodologie acceptée
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="mr-2 flex-shrink-0" size={16} />
-                  Consentement éclairé donné
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="mr-2 flex-shrink-0" size={16} />
-                  Participation volontaire confirmée
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="mr-2 flex-shrink-0" size={16} />
-                  Confidentialité comprise
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="mr-2 flex-shrink-0" size={16} />
-                  Traitement des données accepté
-                </li>
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <li key={i} className="flex items-center">
+                    <CheckCircle className="mr-2 flex-shrink-0" size={16} />
+                    {t(`step3.consent${i}`)}
+                  </li>
+                ))}
               </ul>
             </div>
 
             <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-              Date de signature : {new Date().toLocaleDateString('fr-FR', { 
+              {t('step3.signatureDate')} {new Date().toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'fr-FR', { 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric',
@@ -505,13 +431,12 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
               onClick={currentStep === 0 ? onGoBack : handlePrevious}
               className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
-              {currentStep === 0 ? 'Changer de forfait' : 'Précédent'}
+              {currentStep === 0 ? t('nav.changePackage') : t('nav.previous')}
             </button>
 
             {currentStep < totalSteps - 1 ? (
               <button
                 onClick={(e) => {
-                  // Double vérification de la validation avant navigation
                   const isCurrentStepValid = 
                     (currentStep === 0 && isStep1Valid) ||
                     (currentStep === 1 && isStep2Valid) ||
@@ -536,7 +461,7 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
                     : 'bg-indigo-600 text-white hover:bg-indigo-700'
                 }`}
               >
-                Suivant
+                {t('nav.next')}
                 <ChevronRight size={20} className="ml-2" />
               </button>
             ) : (
@@ -545,7 +470,7 @@ const PhasePreliminaireQualiopi: React.FC<PhasePreliminaireQualiopiProps> = ({
                 disabled={!isAllValid}
                 className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-bold"
               >
-                Commencer mon bilan
+                {t('nav.start')}
               </button>
             )}
           </div>

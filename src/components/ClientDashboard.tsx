@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
+import { useTranslation } from 'react-i18next';
 import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
 import { calculateProgression } from '../services/progressionService';
@@ -38,6 +39,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   onContinueBilan,
   onViewHistory,
 }) => {
+  const { t, i18n } = useTranslation('dashboard');
   const { showError, showSuccess } = useToast();
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [stats, setStats] = useState<BilanStats>({
@@ -76,7 +78,6 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // Charger le profil (utiliser maybeSingle pour éviter les erreurs si le profil n'existe pas)
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -84,14 +85,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         .maybeSingle();
       setProfile(profileData);
 
-      // Charger l'historique des bilans
       const { data: assessments } = await supabase
         .from('assessments')
         .select('*')
         .eq('client_id', user.id)
         .order('created_at', { ascending: false });
 
-      // Variable pour suivre le bilan en cours depuis assessments
       let inProgressBilan: any = null;
 
       if (assessments) {
@@ -105,7 +104,6 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         }));
         setHistory(historyItems);
 
-        // Calculer les stats
         const completed = assessments.filter(a => a.status === 'completed').length;
         const inProgress = assessments.filter(a => a.status === 'in_progress').length;
         const totalHours = assessments.reduce((sum, a) => sum + (a.duration_hours || 0), 0);
@@ -118,15 +116,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           lastActivity: assessments[0]?.updated_at || null,
         });
 
-        // Vérifier s'il y a un bilan en cours dans assessments
         inProgressBilan = assessments.find(a => a.status === 'in_progress');
         if (inProgressBilan) {
           setCurrentBilan(inProgressBilan);
         }
       }
 
-      // Charger aussi la session en cours depuis user_sessions
-      // Utiliser maybeSingle() au lieu de single() pour éviter l'erreur PGRST116 si aucune session n'existe
       const { data: sessionData, error: sessionError } = await supabase
         .from('user_sessions')
         .select('*')
@@ -135,13 +130,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
       console.log('[Dashboard] Session data:', sessionData, 'Error:', sessionError);
 
-      // Si pas de bilan en cours dans assessments mais une session active
       if (!inProgressBilan && sessionData && sessionData.current_answers?.length > 0) {
-        // Récupérer le package depuis les constantes
         const pkg = PACKAGES.find(p => p.id === sessionData.selected_package_id);
         const packageName = pkg?.name || 'Bilan en cours';
         
-        // Calculer la progression réelle basée sur le nombre de questions
         const progressionInfo = calculateProgression(
           sessionData.current_answers || [],
           sessionData.selected_package_id || 'test',
@@ -161,7 +153,6 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         });
       }
 
-      // Charger les documents récents
       const { data: documents } = await supabase
         .from('document_downloads')
         .select('*')
@@ -184,7 +175,6 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     }
   };
 
-  // Fonctions pour l'édition du profil
   const startEditingProfile = () => {
     setEditedProfile({
       first_name: profile?.first_name || '',
@@ -204,7 +194,6 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const saveProfile = async () => {
     setSavingProfile(true);
     try {
-      // Construire le full_name à partir de first_name et last_name
       const fullName = [editedProfile.first_name, editedProfile.last_name].filter(Boolean).join(' ');
       
       const { error } = await supabase
@@ -220,10 +209,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
       setProfile({ ...profile, ...editedProfile, full_name: fullName });
       setIsEditingProfile(false);
-      showSuccess('Profil mis à jour avec succès');
+      showSuccess(t('profile.saveSuccess'));
     } catch (err) {
       console.error('Erreur sauvegarde profil:', err);
-      showError('Erreur lors de la sauvegarde du profil');
+      showError(t('profile.saveError'));
     } finally {
       setSavingProfile(false);
     }
@@ -231,11 +220,11 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
   const handleChangePassword = async () => {
     if (passwordData.new !== passwordData.confirm) {
-      showError('Les mots de passe ne correspondent pas');
+      showError(t('security.passwordMismatch'));
       return;
     }
     if (passwordData.new.length < 6) {
-      showError('Le mot de passe doit contenir au moins 6 caractères');
+      showError(t('security.passwordTooShort'));
       return;
     }
     
@@ -247,25 +236,22 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
       if (error) throw error;
 
-      showSuccess('Mot de passe modifié avec succès');
+      showSuccess(t('security.passwordSuccess'));
       setShowPasswordModal(false);
       setPasswordData({ current: '', new: '', confirm: '' });
     } catch (err: any) {
       console.error('Erreur changement mot de passe:', err);
-      showError(err.message || 'Erreur lors du changement de mot de passe');
+      showError(err.message || t('security.passwordError'));
     } finally {
       setChangingPassword(false);
     }
   };
 
-  // Gestion du clic sur "Nouveau bilan" avec vérification du bilan en cours
   const handleNewBilanClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (currentBilan && currentBilan.progress < 100) {
-      // Un bilan est en cours, afficher la modale de confirmation
       setShowNewBilanModal(true);
     } else {
-      // Pas de bilan en cours, naviguer directement
       window.location.hash = '#/bilan?new=true';
     }
   };
@@ -281,14 +267,16 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   };
 
   const tabs = [
-    { id: 'overview', label: 'Vue d\'ensemble', icon: '📊' },
-    { id: 'history', label: 'Historique', icon: '📜' },
-    { id: 'documents', label: 'Documents', icon: '📁' },
-    { id: 'profile', label: 'Profil', icon: '👤' },
+    { id: 'overview', label: t('tabs.overview'), icon: '📊' },
+    { id: 'history', label: t('tabs.history'), icon: '📜' },
+    { id: 'documents', label: t('tabs.documents'), icon: '📁' },
+    { id: 'profile', label: t('tabs.profile'), icon: '👤' },
   ];
 
+  const locale = i18n.language === 'tr' ? 'tr-TR' : 'fr-FR';
+
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString(locale, {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -301,23 +289,21 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 0) return 'Aujourd\'hui';
-    if (diffDays === 1) return 'Hier';
-    if (diffDays < 7) return `Il y a ${diffDays} jours`;
-    if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} semaines`;
+    if (diffDays === 0) return t('relativeTime.today');
+    if (diffDays === 1) return t('relativeTime.yesterday');
+    if (diffDays < 7) return t('relativeTime.daysAgo', { count: diffDays });
+    if (diffDays < 30) return t('relativeTime.weeksAgo', { count: Math.floor(diffDays / 7) });
     return formatDate(dateString);
   };
 
-  // Télécharger la synthèse PDF d'un bilan (utilise syntheseService pour un vrai PDF Qualiopi)
   const handleDownloadPDF = async (item: HistoryItem) => {
     try {
-      // Préparer les données pour la synthèse
       const syntheseData: SyntheseData = {
         userName: item.userName,
         userEmail: user.email || '',
         packageName: item.packageName,
         startDate: formatDate(item.date),
-        endDate: new Date().toLocaleDateString('fr-FR'),
+        endDate: new Date().toLocaleDateString(locale),
         consultantName: organizationConfig.defaultConsultant.name,
         organizationName: organizationConfig.name,
         summary: item.summary || {
@@ -329,10 +315,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         answers: item.answers || [],
       };
 
-      // Générer le PDF avec syntheseService
       const blob = syntheseService.generateSynthese(syntheseData);
       
-      // Télécharger le fichier
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -342,19 +326,18 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      showSuccess('Synthèse PDF téléchargée avec succès !');
+      showSuccess(t('toasts.pdfSuccess'));
     } catch (error) {
       console.error('Erreur lors du téléchargement PDF:', error);
-      showError('Une erreur est survenue lors du téléchargement du PDF.');
+      showError(t('toasts.pdfError'));
     }
   };
 
-  // Exporter l'historique en Excel
   const handleExportExcel = () => {
     try {
-      // Préparer les données pour Excel
+      const headers = t('documents.excelHeaders', { returnObjects: true }) as any;
       const data: string[][] = [
-        ['Date', 'Forfait', 'Question', 'Réponse', 'Catégorie']
+        [headers.date, headers.package, headers.question, headers.answer, headers.category]
       ];
       
       history.forEach(item => {
@@ -371,12 +354,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         }
       });
 
-      // Créer le contenu Excel (format TSV compatible)
       const excelContent = data.map(row => 
         row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join('\t')
       ).join('\n');
       
-      // Télécharger le fichier
       const blob = new Blob([`\uFEFF${excelContent}`], { type: 'application/vnd.ms-excel;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -388,16 +369,15 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Erreur lors de l\'export Excel:', error);
-      showError('Une erreur est survenue lors de l\'export Excel.');
+      showError(t('toasts.excelError'));
     }
   };
 
-  // Exporter l'historique en CSV
   const handleExportCSV = () => {
     try {
-      // Préparer les données pour CSV
+      const headers = t('documents.excelHeaders', { returnObjects: true }) as any;
       const data: string[][] = [
-        ['Date', 'Forfait', 'Question', 'Réponse', 'Catégorie']
+        [headers.date, headers.package, headers.question, headers.answer, headers.category]
       ];
       
       history.forEach(item => {
@@ -414,12 +394,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         }
       });
 
-      // Créer le contenu CSV
       const csvContent = data.map(row => 
         row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(',')
       ).join('\n');
       
-      // Télécharger le fichier
       const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -431,7 +409,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Erreur lors de l\'export CSV:', error);
-      showError('Une erreur est survenue lors de l\'export CSV.');
+      showError(t('toasts.csvError'));
     }
   };
 
@@ -440,7 +418,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Chargement de votre espace...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('loading')}</p>
         </div>
       </div>
     );
@@ -454,27 +432,26 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">
-                Bonjour {profile?.full_name || user.email?.split('@')[0]} 👋
+                {t('greeting', { name: profile?.full_name || user.email?.split('@')[0] })}
               </h1>
               <p className="text-indigo-100 mt-1">
-                Bienvenue dans votre espace personnel Bilan-Easy
+                {t('subtitle')}
               </p>
             </div>
             <div className="flex gap-3">
-              {/* Afficher "Continuer" seulement si le bilan n'est pas terminé (< 100%) */}
               {currentBilan && currentBilan.progress < 100 && onContinueBilan && (
                 <button
                   onClick={onContinueBilan}
                   className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-medium transition-colors"
                 >
-                  Continuer mon bilan
+                  {t('actions.continueBilan')}
                 </button>
               )}
               <button
                 onClick={handleNewBilanClick}
                 className="px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition-colors"
               >
-                {stats.totalBilans === 0 ? 'Commencer mon bilan' : 'Nouveau bilan'}
+                {stats.totalBilans === 0 ? t('actions.startBilan') : t('actions.newBilan')}
               </button>
             </div>
           </div>
@@ -483,19 +460,19 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white/10 rounded-xl p-4">
               <p className="text-3xl font-bold">{stats.totalBilans}</p>
-              <p className="text-sm text-indigo-100">Bilans réalisés</p>
+              <p className="text-sm text-indigo-100">{t('stats.totalBilans')}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-4">
               <p className="text-3xl font-bold">{stats.completedBilans}</p>
-              <p className="text-sm text-indigo-100">Bilans terminés</p>
+              <p className="text-sm text-indigo-100">{t('stats.completedBilans')}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-4">
               <p className="text-3xl font-bold">{stats.totalHours}h</p>
-              <p className="text-sm text-indigo-100">Heures d'accompagnement</p>
+              <p className="text-sm text-indigo-100">{t('stats.totalHours')}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-4">
               <p className="text-3xl font-bold">{recentDocuments.length}</p>
-              <p className="text-sm text-indigo-100">Documents générés</p>
+              <p className="text-sm text-indigo-100">{t('stats.documentsGenerated')}</p>
             </div>
           </div>
         </div>
@@ -526,19 +503,17 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         {/* Vue d'ensemble */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* Bilan en cours - Ne pas afficher si 100% complété */}
             {currentBilan && currentBilan.progress < 100 && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="font-semibold text-amber-800 dark:text-amber-200 flex items-center text-lg">
                       <span className="mr-2">⏳</span>
-                      Bilan en cours
+                      {t('currentBilan.title')}
                     </h3>
                     <p className="text-amber-700 dark:text-amber-300 mt-1">
-                      {currentBilan.package_name || 'Bilan de compétences'} - Commencé le {formatDate(currentBilan.created_at)}
+                      {currentBilan.package_name || 'Bilan de compétences'} - {t('currentBilan.startedOn', { date: formatDate(currentBilan.created_at) })}
                     </p>
-                    {/* Afficher la progression si disponible */}
                     {(currentBilan.answers_count || currentBilan.progress) && (
                       <div className="mt-3">
                         <div className="flex items-center gap-4 text-sm text-amber-600 dark:text-amber-400">
@@ -547,7 +522,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                               </svg>
-                              {currentBilan.answers_count} réponses
+                              {t('currentBilan.answers', { count: currentBilan.answers_count })}
                             </span>
                           )}
                           {currentBilan.progress > 0 && (
@@ -555,11 +530,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                               </svg>
-                              {Math.round(currentBilan.progress)}% complété
+                              {t('currentBilan.completed', { percent: Math.round(currentBilan.progress) })}
                             </span>
                           )}
                         </div>
-                        {/* Barre de progression */}
                         <div className="mt-2 h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300"
@@ -574,7 +548,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                       onClick={onContinueBilan}
                       className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
                     >
-                      Continuer →
+                      {t('actions.continue')}
                     </button>
                   )}
                 </div>
@@ -588,9 +562,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
               >
                 <span className="text-3xl mb-3 block">📁</span>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Mes Documents</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('quickAccess.documents')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Téléchargez vos documents officiels
+                  {t('quickAccess.documentsDesc')}
                 </p>
               </a>
               
@@ -599,9 +573,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
               >
                 <span className="text-3xl mb-3 block">📅</span>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Mes Rendez-vous</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('quickAccess.appointments')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Planifiez vos entretiens
+                  {t('quickAccess.appointmentsDesc')}
                 </p>
               </a>
               
@@ -610,18 +584,17 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                 className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
               >
                 <span className="text-3xl mb-3 block">⭐</span>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Donner mon avis</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('quickAccess.feedback')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Évaluez votre expérience
+                  {t('quickAccess.feedbackDesc')}
                 </p>
               </a>
             </div>
 
-            {/* Dernière activité */}
             {stats.lastActivity && (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
-                  Dernière activité
+                  {t('lastActivity')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   {formatRelativeTime(stats.lastActivity)}
@@ -635,19 +608,18 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         {activeTab === 'history' && (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Historique de mes bilans
+              {t('history.title')}
             </h2>
 
-            {/* Section Bilan en cours - Ne pas afficher si 100% complété */}
             {currentBilan && currentBilan.progress < 100 && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl">⏳</span>
                   <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200">
-                    Bilan en cours
+                    {t('currentBilan.title')}
                   </h3>
                   <span className="px-2 py-1 bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 text-xs font-medium rounded-full">
-                    Actif
+                    {t('currentBilan.active')}
                   </span>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
@@ -657,9 +629,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         {currentBilan.package_name || 'Bilan de compétences'}
                       </h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Commencé le {formatDate(currentBilan.created_at)}
+                        {t('currentBilan.startedOn', { date: formatDate(currentBilan.created_at) })}
                       </p>
-                      {/* Progression */}
                       <div className="mt-3 space-y-2">
                         <div className="flex items-center flex-wrap gap-4 text-sm">
                           {currentBilan.answers_count > 0 && (
@@ -667,7 +638,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                               </svg>
-                              {currentBilan.answers_count}{currentBilan.questions_target ? ` / ${currentBilan.questions_target}` : ''} question{currentBilan.answers_count > 1 ? 's' : ''}
+                              {currentBilan.questions_target 
+                                ? t('currentBilan.answersWithTarget', { count: currentBilan.answers_count, target: currentBilan.questions_target })
+                                : t('currentBilan.answers', { count: currentBilan.answers_count })}
                             </span>
                           )}
                           {currentBilan.progress >= 0 && (
@@ -675,7 +648,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                               </svg>
-                              {Math.round(currentBilan.progress)}% complété
+                              {t('currentBilan.completed', { percent: Math.round(currentBilan.progress) })}
                             </span>
                           )}
                           {currentBilan.current_phase && (
@@ -683,13 +656,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                               </svg>
-                              {currentBilan.current_phase === 'phase1' ? 'Phase Préliminaire' : 
-                               currentBilan.current_phase === 'phase2' ? "Phase d'Investigation" : 
-                               'Phase de Conclusion'}
+                              {currentBilan.current_phase === 'phase1' ? t('currentBilan.phase1') : 
+                               currentBilan.current_phase === 'phase2' ? t('currentBilan.phase2') : 
+                               t('currentBilan.phase3')}
                             </span>
                           )}
                         </div>
-                        {/* Barre de progression */}
                         <div className="h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
@@ -706,7 +678,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Reprendre
+                      {t('actions.resume')}
                     </a>
                   </div>
                 </div>
@@ -716,19 +688,19 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
             {/* Section Bilans terminés */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <span>✅</span> Bilans terminés
+                <span>✅</span> {t('history.completedTitle')}
               </h3>
               
               {history.length === 0 ? (
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
                   <span className="text-4xl mb-4 block">📋</span>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                    Aucun bilan terminé
+                    {t('history.noCompleted')}
                   </h4>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
                     {currentBilan 
-                      ? "Terminez votre bilan en cours pour le voir apparaître ici."
-                      : "Commencez votre premier bilan de compétences pour voir votre historique ici."
+                      ? t('history.noCompletedWithCurrent')
+                      : t('history.noCompletedNoCurrent')
                     }
                   </p>
                   {!currentBilan && (
@@ -736,7 +708,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                       href="#/bilan"
                       className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors inline-block"
                     >
-                      Commencer mon bilan
+                      {t('actions.startBilan')}
                     </a>
                   )}
                 </div>
@@ -765,7 +737,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         onClick={() => onViewHistory(item)}
                         className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                       >
-                        Voir les résultats
+                        {t('actions.viewResults')}
                       </button>
                     </div>
                   </div>
@@ -780,14 +752,13 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         {activeTab === 'documents' && (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Mes documents
+              {t('documents.title')}
             </h2>
             
-            {/* Section Bilans terminés avec synthèse */}
             {history.filter(h => h.summary).length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <span>📊</span> Synthèses de vos bilans
+                  <span>📊</span> {t('documents.synthesisTitle')}
                 </h3>
                 <div className="space-y-3">
                   {history.filter(h => h.summary).map((item) => (
@@ -796,7 +767,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         <span className="text-2xl">📄</span>
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            Synthèse - {item.packageName}
+                            {t('documents.synthesisItem', { name: item.packageName })}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
                             {formatDate(item.date)}
@@ -810,7 +781,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        Télécharger PDF
+                        {t('documents.downloadPdf')}
                       </button>
                     </div>
                   ))}
@@ -818,14 +789,13 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               </div>
             )}
 
-            {/* Section Export historique */}
             {history.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <span>📝</span> Historique des échanges
+                  <span>📝</span> {t('documents.exchangeHistory')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Exportez l'historique complet de vos échanges avec l'IA au format Excel.
+                  {t('documents.exchangeDesc')}
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <button
@@ -835,7 +805,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Exporter en Excel
+                    {t('documents.exportExcel')}
                   </button>
                   <button
                     onClick={() => handleExportCSV()}
@@ -844,24 +814,23 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Exporter en CSV
+                    {t('documents.exportCsv')}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Documents récents */}
             {recentDocuments.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span>📁</span> Documents récents
+                    <span>📁</span> {t('documents.recentDocs')}
                   </h3>
                   <a
                     href="#/mes-documents"
                     className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm"
                   >
-                    Voir tous →
+                    {t('documents.viewAll')}
                   </a>
                 </div>
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -887,21 +856,20 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               </div>
             )}
 
-            {/* Message si aucun document */}
             {history.length === 0 && recentDocuments.length === 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
                 <span className="text-4xl mb-4 block">📄</span>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                  Aucun document disponible
+                  {t('documents.noDocuments')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Terminez votre premier bilan pour obtenir votre synthèse PDF et l'historique de vos échanges.
+                  {t('documents.noDocumentsDesc')}
                 </p>
                 <a
                   href="#/bilan"
                   className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
-                  Commencer mon bilan
+                  {t('actions.startBilan')}
                 </a>
               </div>
             )}
@@ -913,21 +881,20 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Mon profil
+                {t('profile.title')}
               </h2>
               {!isEditingProfile && (
                 <button
                   onClick={startEditingProfile}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
                 >
-                  <span>✏️</span> Modifier
+                  <span>✏️</span> {t('profile.edit')}
                 </button>
               )}
             </div>
             
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
               {!isEditingProfile ? (
-                // Mode lecture
                 <>
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-2xl">
@@ -935,7 +902,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
-                        {profile?.full_name || 'Non renseigné'}
+                        {profile?.full_name || t('profile.notProvided')}
                       </h3>
                       <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
                     </div>
@@ -944,39 +911,39 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
-                        Email
+                        {t('profile.fields.email')}
                       </label>
                       <p className="text-gray-900 dark:text-white">{user.email}</p>
                     </div>
                     <div>
                       <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
-                        Téléphone
+                        {t('profile.fields.phone')}
                       </label>
-                      <p className="text-gray-900 dark:text-white">{profile?.phone || 'Non renseigné'}</p>
+                      <p className="text-gray-900 dark:text-white">{profile?.phone || t('profile.notProvided')}</p>
                     </div>
                     <div>
                       <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
-                        Profession actuelle
+                        {t('profile.fields.profession')}
                       </label>
-                      <p className="text-gray-900 dark:text-white">{profile?.profession || 'Non renseigné'}</p>
+                      <p className="text-gray-900 dark:text-white">{profile?.profession || t('profile.notProvided')}</p>
                     </div>
                     <div>
                       <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
-                        Adresse
+                        {t('profile.fields.address')}
                       </label>
-                      <p className="text-gray-900 dark:text-white">{profile?.address || 'Non renseigné'}</p>
+                      <p className="text-gray-900 dark:text-white">{profile?.address || t('profile.notProvided')}</p>
                     </div>
                     <div>
                       <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
-                        Date de naissance
+                        {t('profile.fields.birthDate')}
                       </label>
                       <p className="text-gray-900 dark:text-white">
-                        {profile?.birth_date ? formatDate(profile.birth_date) : 'Non renseigné'}
+                        {profile?.birth_date ? formatDate(profile.birth_date) : t('profile.notProvided')}
                       </p>
                     </div>
                     <div>
                       <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">
-                        Membre depuis
+                        {t('profile.fields.memberSince')}
                       </label>
                       <p className="text-gray-900 dark:text-white">
                         {formatDate(user.created_at)}
@@ -985,60 +952,59 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   </div>
                 </>
               ) : (
-                // Mode édition
                 <div className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Prénom *
+                        {t('profile.fields.firstName')}
                       </label>
                       <input
                         type="text"
                         value={editedProfile.first_name}
                         onChange={(e) => setEditedProfile({ ...editedProfile, first_name: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Votre prénom"
+                        placeholder={t('profile.placeholders.firstName')}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Nom *
+                        {t('profile.fields.lastName')}
                       </label>
                       <input
                         type="text"
                         value={editedProfile.last_name}
                         onChange={(e) => setEditedProfile({ ...editedProfile, last_name: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Votre nom"
+                        placeholder={t('profile.placeholders.lastName')}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Téléphone
+                        {t('profile.fields.phone')}
                       </label>
                       <input
                         type="tel"
                         value={editedProfile.phone}
                         onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="06 12 34 56 78"
+                        placeholder={t('profile.placeholders.phone')}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Profession actuelle
+                        {t('profile.fields.profession')}
                       </label>
                       <input
                         type="text"
                         value={editedProfile.profession}
                         onChange={(e) => setEditedProfile({ ...editedProfile, profession: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Votre profession"
+                        placeholder={t('profile.placeholders.profession')}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Date de naissance
+                        {t('profile.fields.birthDate')}
                       </label>
                       <input
                         type="date"
@@ -1049,14 +1015,14 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Adresse
+                        {t('profile.fields.address')}
                       </label>
                       <input
                         type="text"
                         value={editedProfile.address}
                         onChange={(e) => setEditedProfile({ ...editedProfile, address: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Votre adresse complète"
+                        placeholder={t('profile.placeholders.address')}
                       />
                     </div>
                   </div>
@@ -1066,7 +1032,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                       onClick={cancelEditingProfile}
                       className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                     >
-                      Annuler
+                      {t('profile.cancel')}
                     </button>
                     <button
                       onClick={saveProfile}
@@ -1075,11 +1041,11 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     >
                       {savingProfile ? (
                         <>
-                          <span className="animate-spin">⏳</span> Enregistrement...
+                          <span className="animate-spin">⏳</span> {t('profile.saving')}
                         </>
                       ) : (
                         <>
-                          <span>✔️</span> Enregistrer
+                          <span>✔️</span> {t('profile.save')}
                         </>
                       )}
                     </button>
@@ -1091,26 +1057,25 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
             {/* Section Sécurité */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <span>🔒</span> Sécurité
+                <span>🔒</span> {t('security.title')}
               </h3>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-900 dark:text-white font-medium">Mot de passe</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Modifiez votre mot de passe de connexion</p>
+                  <p className="text-gray-900 dark:text-white font-medium">{t('security.password')}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t('security.passwordDesc')}</p>
                 </div>
                 <button
                   onClick={() => setShowPasswordModal(true)}
                   className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                  Modifier
+                  {t('security.change')}
                 </button>
               </div>
             </div>
 
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
               <p className="text-blue-800 dark:text-blue-200 text-sm">
-                <strong>RGPD :</strong> Vous pouvez demander l'accès, la rectification ou la suppression 
-                de vos données personnelles en nous contactant à rgpd@bilan-easy.fr
+                <strong>{t('rgpd.label')} :</strong> {t('rgpd.message')}
               </p>
             </div>
           </div>
@@ -1127,7 +1092,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Vous avez un bilan en cours
+                  {t('confirmNewBilan.title')}
                 </h3>
               </div>
 
@@ -1136,18 +1101,16 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   <span className="text-xl mt-0.5">⏳</span>
                   <div>
                     <p className="font-medium text-amber-800 dark:text-amber-200">
-                      {currentBilan?.package_name || 'Bilan de comp\u00e9tences'}
+                      {currentBilan?.package_name || 'Bilan de compétences'}
                     </p>
                     <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                      {currentBilan?.answers_count || 0} r\u00e9ponse{(currentBilan?.answers_count || 0) > 1 ? 's' : ''} \u2022 {Math.round(currentBilan?.progress || 0)}% compl\u00e9t\u00e9
+                      {t('confirmNewBilan.answers', { count: currentBilan?.answers_count || 0 })} • {t('confirmNewBilan.percentCompleted', { percent: Math.round(currentBilan?.progress || 0) })}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-                Si vous commencez un nouveau bilan, <strong className="text-red-600 dark:text-red-400">toutes les r\u00e9ponses de votre bilan en cours seront d\u00e9finitivement perdues</strong>. Cette action est irr\u00e9versible.
-              </p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-6" dangerouslySetInnerHTML={{ __html: t('confirmNewBilan.warningMessage') }} />
 
               <div className="flex flex-col gap-3">
                 <button
@@ -1158,19 +1121,19 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Reprendre mon bilan en cours
+                  {t('confirmNewBilan.resumeCurrent')}
                 </button>
                 <button
                   onClick={handleConfirmNewBilan}
                   className="w-full px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
                 >
-                  Abandonner et commencer un nouveau bilan
+                  {t('confirmNewBilan.abandonAndRestart')}
                 </button>
                 <button
                   onClick={() => setShowNewBilanModal(false)}
                   className="w-full px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors text-sm"
                 >
-                  Annuler
+                  {t('confirmNewBilan.cancel')}
                 </button>
               </div>
             </div>
@@ -1182,31 +1145,31 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Changer le mot de passe
+                {t('security.changePassword')}
               </h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nouveau mot de passe
+                    {t('security.newPassword')}
                   </label>
                   <input
                     type="password"
                     value={passwordData.new}
                     onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                    placeholder="Minimum 6 caractères"
+                    placeholder={t('security.newPasswordPlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Confirmer le mot de passe
+                    {t('security.confirmPassword')}
                   </label>
                   <input
                     type="password"
                     value={passwordData.confirm}
                     onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                    placeholder="Confirmez le mot de passe"
+                    placeholder={t('security.confirmPasswordPlaceholder')}
                   />
                 </div>
               </div>
@@ -1218,14 +1181,14 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   }}
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                  Annuler
+                  {t('profile.cancel')}
                 </button>
                 <button
                   onClick={handleChangePassword}
                   disabled={changingPassword || !passwordData.new || !passwordData.confirm}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
                 >
-                  {changingPassword ? 'Modification...' : 'Modifier'}
+                  {changingPassword ? t('security.changing') : t('security.change')}
                 </button>
               </div>
             </div>

@@ -1,0 +1,137 @@
+{
+  "exploration": {
+    "loading": {
+      "title": "Profiliniz analiz ediliyor...",
+      "subtitle": "Yapay zeka, yetkinliklerinize, motivasyonlarınıza ve hedeflerinize uygun kariyer yollarını araştırıyor.",
+      "searching": "Aranıyor..."
+    },
+    "noResults": {
+      "title": "Hiçbir yol bulunamadı",
+      "subtitle": "Şu anda öneriler oluşturamadık. Profilinizi zenginleştirmek için değerlendirmeye devam edin.",
+      "continueBtn": "Değerlendirmeye devam et"
+    },
+    "header": {
+      "title": "Kariyer yolları keşfi",
+      "subtitle": "Profilinize ve güncel pazara dayalı"
+    },
+    "profileSummary": "Profilinizin özeti",
+    "pathsFound": "Sizin için {{count}} yol belirlendi",
+    "matchScore": "%{{score}} uyumluluk",
+    "trends": {
+      "growing": "Büyüyen",
+      "declining": "Gerileyen",
+      "stable": "Durağan"
+    },
+    "reactions": {
+      "interested": "İlgilendim",
+      "notInterested": "Benim için değil",
+      "explore": "Keşfedilecek"
+    },
+    "sections": {
+      "matchReasons": "Bu yol neden size uygun",
+      "requiredSkills": "Gerekli yetkinlikler",
+      "skillsToDevelop": "Geliştirilecek",
+      "salary": "Tahmini maaş",
+      "training": "Önerilen eğitimler",
+      "nextSteps": "Sonraki adımlar"
+    },
+    "reactionPrompt": "Bu yol hakkında ne düşünüyorsunuz?",
+    "buttons": {
+      "interested": "İlgilendim",
+      "questions": "Sorularım var",
+      "notForMe": "Benim için değil",
+      "send": "Gönder",
+      "continue": "Değerlendirmeye devam et"
+    },
+    "followUp": {
+      "placeholder": "Yanıtınız..."
+    },
+    "deeperQuestions": "Düşüncenizi derinleştirmek için sorular",
+    "footer": "Bu yollar profilinize dayalı önerilerdir. Sentez belgenize dahil edilecektir."
+  },
+  "market": {
+    "loading": {
+      "title": "Pazar analizi yapılıyor...",
+      "subtitle": "Yapay zekamız {{job}} mesleği için iş piyasasını analiz ediyor ve projenizin uygulanabilirliğini değerlendiriyor.",
+      "searching": "Aranıyor...",
+      "collecting": "Pazar verileri toplanıyor..."
+    },
+    "error": "Pazar analizi sırasında bir hata oluştu. Lütfen tekrar deneyin.",
+    "errorTitle": "Hata",
+    "header": {
+      "title": "📊 Pazar Keşfi",
+      "subtitle": "{{job}} için kapsamlı analiz"
+    },
+    "feasibility": {
+      "title": "Uygulanabilirlik Puanı",
+      "subtitle": "Profilinize ve güncel pazara dayalı"
+    },
+    "scores": {
+      "excellent": "Mükemmel",
+      "good": "İyi",
+      "moderate": "Orta",
+      "difficult": "Zor"
+    },
+    "labels": {
+      "demand": "Talep",
+      "trend": "Eğilim",
+      "salary": "Maaş",
+      "regions": "Bölgeler"
+    },
+    "sections": {
+      "marketAnalysis": "Pazar Analizi",
+      "hiringSectors": "İşe alan sektörler",
+      "skillsAnalysis": "Yetkinlik Analiziniz",
+      "matchingSkills": "Eşleşen yetkinlikler",
+      "skillGaps": "Geliştirilecek yetkinlikler",
+      "strengths": "Bu meslek için güçlü yönleriniz",
+      "training": "Önerilen Eğitimler",
+      "alternatives": "Alternatif Meslekler",
+      "overview": "Pazar genel görünümü",
+      "opportunities": "Belirlenen fırsatlar",
+      "threats": "Dikkat edilecek noktalar",
+      "recommendations": "Öneriler"
+    },
+    "transition": "Geçiş",
+    "buttons": {
+      "close": "Kapat",
+      "continue": "Değerlendirmeye devam et",
+      "retry": "Tekrar dene",
+      "simulate": "Meslek araştırması simülasyonu"
+    }
+  },
+  "interview": {
+    "loading": {
+      "title": "Mülakat hazırlanıyor...",
+      "subtitle": "Yapay zekamız {{job}} alanında deneyimli bir sanal profesyonel hazırlıyor.",
+      "searching": "Yükleniyor..."
+    },
+    "header": {
+      "title": "Meslek Araştırması: {{job}}",
+      "subtitle": "Kişiselleştirilmiş sorularla hazırlanın",
+      "persona": "{{name}} ile • {{years}} yıl deneyim"
+    },
+    "typing": "{{name}} yazıyor...",
+    "insights": "{{name}} tarafından içgörüler",
+    "sections": {
+      "typicalDay": "Tipik bir gün",
+      "pros": "Avantajlar",
+      "cons": "Dezavantajlar",
+      "tips": "Başarı için ipuçları",
+      "keySkills": "Temel yetkinlikler",
+      "idealProfile": "İdeal profil",
+      "futureOutlook": "Gelecek perspektifleri"
+    },
+    "buttons": {
+      "send": "Gönder",
+      "finish": "Araştırmayı bitir",
+      "close": "Kapat"
+    },
+    "placeholder": "Sorunuzu sorun veya yanıtlayın...",
+    "feedback": {
+      "title": "Yanıtlarınız hakkında geri bildirim",
+      "strengths": "Güçlü yönler",
+      "improvements": "Geliştirilecek alanlar"
+    }
+  }
+}

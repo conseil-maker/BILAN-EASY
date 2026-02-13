@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
 import { emailTemplates } from '../services/emailService';
 import { gmailTemplates } from '../services/gmailService';
@@ -18,6 +19,7 @@ const emailTypeLabels: Record<EmailType, string> = {
 };
 
 export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
+  const { t } = useTranslation('admin');
   const [selectedType, setSelectedType] = useState<EmailType>('welcome');
   const [viewMode, setViewMode] = useState<'html' | 'text'>('html');
 
@@ -67,8 +69,8 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">📧 Prévisualisation des emails</h2>
-            <p className="text-sm opacity-80">Templates automatiques</p>
+            <h2 className="text-xl font-bold">{t('emails.preview', '📧 Prévisualisation des emails')}</h2>
+            <p className="text-sm opacity-80">{t('emails.templates', 'Templates automatiques')}</p>
           </div>
           <button
             onClick={onClose}
@@ -85,7 +87,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
           {/* Type selector */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Type d'email
+              {t('emails.type', "Type d'email")}
             </label>
             <select
               value={selectedType}
@@ -122,7 +124,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                 }`}
               >
-                Texte
+                {t('emails.text', 'Texte')}
               </button>
             </div>
           </div>
@@ -130,7 +132,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
 
         {/* Subject */}
         <div className="p-4 bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700">
-          <span className="text-sm text-gray-500 dark:text-gray-400">Objet : </span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">{t('emails.subject', 'Objet')} : </span>
           <span className="font-medium text-gray-800 dark:text-white">{template.subject}</span>
         </div>
 
@@ -152,7 +154,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
         <div className="p-4 border-t dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-lg">📧</span>
-            <span className="font-medium text-blue-800 dark:text-blue-300">Version Gmail (texte brut)</span>
+            <span className="font-medium text-blue-800 dark:text-blue-300">{t('emails.gmailVersion', 'Version Gmail (texte brut)')}</span>
           </div>
           <pre className="whitespace-pre-wrap font-mono text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 p-3 rounded-lg max-h-32 overflow-auto">
             {(() => {
@@ -173,13 +175,13 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ onClose }) => {
         {/* Footer */}
         <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            💡 Emails envoyés via Gmail / Google Workspace
+            💡 {t('emails.sentVia', 'Emails envoyés via Gmail / Google Workspace')}
           </p>
           <button
             onClick={onClose}
             className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
-            Fermer
+            {t('emails.close', 'Fermer')}
           </button>
         </div>
       </div>

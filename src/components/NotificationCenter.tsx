@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { notificationService, Notification, Reminder } from '../services/notificationService';
 
 interface NotificationCenterProps {
@@ -6,6 +7,7 @@ interface NotificationCenterProps {
 }
 
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }) => {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -102,10 +104,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'À l\'instant';
-    if (minutes < 60) return `Il y a ${minutes} min`;
-    if (hours < 24) return `Il y a ${hours}h`;
-    if (days < 7) return `Il y a ${days}j`;
+    if (minutes < 1) return t('notifications.justNow', 'À l\'instant');
+    if (minutes < 60) return t('notifications.minutesAgo', 'Il y a {{count}} min', { count: minutes });
+    if (hours < 24) return t('notifications.hoursAgo', 'Il y a {{count}}h', { count: hours });
+    if (days < 7) return t('notifications.daysAgo', 'Il y a {{count}}j', { count: days });
     return date.toLocaleDateString('fr-FR');
   };
 
@@ -115,10 +117,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
     const diff = date.getTime() - now.getTime();
     const days = Math.floor(diff / 86400000);
 
-    if (days < 0) return 'En retard';
-    if (days === 0) return 'Aujourd\'hui';
-    if (days === 1) return 'Demain';
-    if (days < 7) return `Dans ${days} jours`;
+    if (days < 0) return t('notifications.overdue', 'En retard');
+    if (days === 0) return t('notifications.today', 'Aujourd\'hui');
+    if (days === 1) return t('notifications.tomorrow', 'Demain');
+    if (days < 7) return t('notifications.inDays', 'Dans {{count}} jours', { count: days });
     return date.toLocaleDateString('fr-FR');
   };
 
@@ -145,13 +147,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
           {/* Header */}
           <div className="p-4 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-slate-900 dark:text-white">Notifications</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-white">{t('notifications.title', 'Notifications')}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllAsRead}
                   className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
                 >
-                  Tout marquer comme lu
+                  {t('notifications.markAllRead', 'Tout marquer comme lu')}
                 </button>
               )}
             </div>
@@ -166,7 +168,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
                     : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                Notifications
+                {t('notifications.title', 'Notifications')}
                 {unreadCount > 0 && (
                   <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
                     {unreadCount}
@@ -181,7 +183,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
                     : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                Rappels
+                {t('notifications.reminders', 'Rappels')}
                 {reminders.length > 0 && (
                   <span className="ml-2 bg-orange-500 text-white text-xs rounded-full px-2 py-0.5">
                     {reminders.length}
@@ -200,7 +202,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
                     <svg className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                     </svg>
-                    <p>Aucune notification</p>
+                    <p>{t('notifications.noNotifications', 'Aucune notification')}</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -242,7 +244,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
                                     onClick={() => handleMarkAsRead(notification.id)}
                                     className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
                                   >
-                                    Marquer comme lu
+                                    {t('notifications.markAsRead', 'Marquer comme lu')}
                                   </button>
                                 )}
                                 {notification.actionUrl && (
@@ -250,7 +252,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
                                     href={notification.actionUrl}
                                     className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-medium"
                                   >
-                                    {notification.actionLabel || 'Voir'}
+                                    {notification.actionLabel || t('notifications.view', 'Voir')}
                                   </a>
                                 )}
                               </div>
@@ -271,7 +273,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
                     <svg className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p>Aucun rappel à venir</p>
+                    <p>{t('notifications.noReminders', 'Aucun rappel à venir')}</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -308,7 +310,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
-                                Marquer comme fait
+                                {t('notifications.markAsDone', 'Marquer comme fait')}
                               </button>
                             </div>
                           </div>
@@ -327,7 +329,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }
               href="#/notifications"
               className="block text-center text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-medium"
             >
-              Voir toutes les notifications
+              {t('notifications.viewAll', 'Voir toutes les notifications')}
             </a>
           </div>
         </div>

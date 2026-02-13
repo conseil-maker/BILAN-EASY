@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Confetti from '../Confetti';
 
 interface BadgeNotificationProps {
@@ -17,6 +18,7 @@ interface BadgeNotificationProps {
 }
 
 const BadgeNotification: React.FC<BadgeNotificationProps> = ({ phaseName, onClose }) => {
+  const { t } = useTranslation('questionnaire');
   const [showConfetti, setShowConfetti] = useState(true);
   
   useEffect(() => {
@@ -32,8 +34,8 @@ const BadgeNotification: React.FC<BadgeNotificationProps> = ({ phaseName, onClos
     <>
       {showConfetti && <Confetti duration={3000} />}
       <div className="fixed top-5 right-5 bg-gradient-to-r from-secondary to-primary-600 text-white p-6 rounded-xl shadow-2xl animate-fade-in-down z-50 border-2 border-white/30">
-        <p className="font-bold text-xl mb-1">🎉 Badge débloqué !</p>
-        <p className="text-white/90">Vous avez terminé : {phaseName}</p>
+        <p className="font-bold text-xl mb-1">🎉 {t('badge.unlocked')}</p>
+        <p className="text-white/90">{t('badge.completed', { phase: phaseName })}</p>
       </div>
     </>
   );

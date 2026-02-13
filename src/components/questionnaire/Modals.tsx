@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ModalProps {
   isOpen: boolean;
@@ -57,12 +58,13 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({
   onConfirm,
   hasUnsavedChanges = false 
 }) => {
+  const { t } = useTranslation('questionnaire');
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Déconnexion">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('modals.logout.title')}>
       <p className="text-slate-600 dark:text-slate-300 mb-6">
         {hasUnsavedChanges 
-          ? "Attention : Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir vous déconnecter ?"
-          : "Êtes-vous sûr de vouloir vous déconnecter ? Votre progression est automatiquement sauvegardée."
+          ? t('modals.logout.unsavedWarning')
+          : t('modals.logout.confirmMessage')
         }
       </p>
       <div className="flex gap-3 justify-end">
@@ -70,13 +72,13 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({
           onClick={onClose}
           className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
         >
-          Annuler
+          {t('modals.logout.cancel')}
         </button>
         <button
           onClick={onConfirm}
           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
-          Se déconnecter
+          {t('modals.logout.confirm')}
         </button>
       </div>
     </Modal>
@@ -92,46 +94,43 @@ interface HelpModalProps {
 }
 
 export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation('questionnaire');
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Aide">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('modals.help.title')}>
       <div className="space-y-4 text-slate-600 dark:text-slate-300">
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">
-            Comment répondre aux questions ?
+            {t('modals.help.howToAnswer')}
           </h3>
           <p className="text-sm">
-            Répondez de manière authentique et détaillée. Plus vos réponses sont complètes, 
-            plus la synthèse sera pertinente.
+            {t('modals.help.howToAnswerDesc')}
           </p>
         </div>
         
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">
-            Que fait le bouton "J'ai besoin d'aide" ?
+            {t('modals.help.jokerButton')}
           </h3>
           <p className="text-sm">
-            Il reformule la question de manière plus simple ou propose un exemple 
-            pour vous guider dans votre réflexion.
+            {t('modals.help.jokerButtonDesc')}
           </p>
         </div>
         
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">
-            Ma progression est-elle sauvegardée ?
+            {t('modals.help.progressSaved')}
           </h3>
           <p className="text-sm">
-            Oui, votre progression est automatiquement sauvegardée. Vous pouvez 
-            reprendre à tout moment là où vous vous êtes arrêté.
+            {t('modals.help.progressSavedDesc')}
           </p>
         </div>
         
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">
-            Comment fonctionne la synthèse vocale ?
+            {t('modals.help.speechSynthesis')}
           </h3>
           <p className="text-sm">
-            Cliquez sur l'icône de haut-parleur pour activer/désactiver la lecture 
-            vocale des questions. Vous pouvez personnaliser la voix dans les paramètres.
+            {t('modals.help.speechSynthesisDesc')}
           </p>
         </div>
       </div>
@@ -140,7 +139,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         onClick={onClose}
         className="mt-6 w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
       >
-        Compris
+        {t('modals.help.understood')}
       </button>
     </Modal>
   );
@@ -164,20 +163,21 @@ export const EndConfirmationModal: React.FC<EndConfirmationModalProps> = ({
   onDeepen,
   progressPercentage 
 }) => {
+  const { t } = useTranslation('questionnaire');
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Terminer le bilan ?">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('modals.endConfirmation.title')}>
       <div className="space-y-4">
-        <p className="text-slate-600 dark:text-slate-300">
-          Vous avez complété <span className="font-bold text-primary-600">{progressPercentage}%</span> du questionnaire.
-        </p>
+        <p className="text-slate-600 dark:text-slate-300" dangerouslySetInnerHTML={{
+          __html: t('modals.endConfirmation.progress', { percent: progressPercentage })
+        }} />
         
         <p className="text-slate-600 dark:text-slate-300">
-          Souhaitez-vous générer votre synthèse maintenant ou approfondir certains aspects ?
+          {t('modals.endConfirmation.question')}
         </p>
         
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
           <p className="text-sm text-amber-800 dark:text-amber-200">
-            💡 Plus vous approfondissez, plus votre synthèse sera riche et personnalisée.
+            💡 {t('modals.endConfirmation.hint')}
           </p>
         </div>
       </div>
@@ -187,19 +187,19 @@ export const EndConfirmationModal: React.FC<EndConfirmationModalProps> = ({
           onClick={onDeepen}
           className="w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
-          Approfondir encore
+          {t('modals.endConfirmation.deepen')}
         </button>
         <button
           onClick={onConfirm}
           className="w-full px-4 py-3 border border-primary-600 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
         >
-          Générer ma synthèse
+          {t('modals.endConfirmation.generate')}
         </button>
         <button
           onClick={onClose}
           className="w-full px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors text-sm"
         >
-          Continuer le questionnaire
+          {t('modals.endConfirmation.continue')}
         </button>
       </div>
     </Modal>
@@ -220,17 +220,16 @@ export const EndWarningModal: React.FC<EndWarningModalProps> = ({
   onClose, 
   remainingQuestions 
 }) => {
+  const { t } = useTranslation('questionnaire');
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Bientôt terminé !">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('modals.endWarning.title')}>
       <div className="space-y-4">
-        <p className="text-slate-600 dark:text-slate-300">
-          Il vous reste environ <span className="font-bold text-primary-600">{remainingQuestions} questions</span> avant 
-          la fin du questionnaire.
-        </p>
+        <p className="text-slate-600 dark:text-slate-300" dangerouslySetInnerHTML={{
+          __html: t('modals.endWarning.remaining', { count: remainingQuestions })
+        }} />
         
         <p className="text-slate-600 dark:text-slate-300">
-          Prenez le temps de bien répondre à ces dernières questions, elles sont importantes 
-          pour finaliser votre profil.
+          {t('modals.endWarning.advice')}
         </p>
       </div>
       
@@ -238,7 +237,7 @@ export const EndWarningModal: React.FC<EndWarningModalProps> = ({
         onClick={onClose}
         className="mt-6 w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
       >
-        Continuer
+        {t('modals.endWarning.continue')}
       </button>
     </Modal>
   );
@@ -262,15 +261,16 @@ export const OutOfScopeModal: React.FC<OutOfScopeModalProps> = ({
   alternativeResources,
   onContinue 
 }) => {
+  const { t } = useTranslation('questionnaire');
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Information importante">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('modals.outOfScope.title')}>
       <div className="space-y-4">
         <p className="text-slate-600 dark:text-slate-300">{message}</p>
         
         {alternativeResources && alternativeResources.length > 0 && (
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
             <p className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">
-              Ressources alternatives :
+              {t('modals.outOfScope.alternativeResources')}
             </p>
             <ul className="text-sm text-blue-700 dark:text-blue-300 list-disc list-inside space-y-1">
               {alternativeResources.map((resource, index) => (
@@ -287,14 +287,14 @@ export const OutOfScopeModal: React.FC<OutOfScopeModalProps> = ({
             onClick={onContinue}
             className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
           >
-            Continuer le bilan
+            {t('modals.outOfScope.continueAssessment')}
           </button>
         )}
         <button
           onClick={onClose}
           className={`${onContinue ? 'flex-1' : 'w-full'} px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors`}
         >
-          Fermer
+          {t('modals.outOfScope.close')}
         </button>
       </div>
     </Modal>

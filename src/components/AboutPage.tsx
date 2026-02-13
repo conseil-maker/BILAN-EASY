@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { organizationConfig } from '../config/organization';
 
 // Types
@@ -112,6 +113,7 @@ const values = [
 ];
 
 export const AboutPage: React.FC = () => {
+  const { t } = useTranslation('about');
   const [activeTab, setActiveTab] = useState<'equipe' | 'methode' | 'valeurs' | 'qualiopi'>('equipe');
 
   return (
@@ -124,19 +126,19 @@ export const AboutPage: React.FC = () => {
               {organizationConfig.name}
             </h1>
             <p className="text-xl opacity-90 mb-6">
-              Votre partenaire pour réussir votre transition professionnelle
+              {t('hero.subtitle')}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                <span className="text-sm opacity-80">Certification</span>
+                <span className="text-sm opacity-80">{t('hero.certification')}</span>
                 <p className="font-bold">Qualiopi</p>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                <span className="text-sm opacity-80">N° Qualiopi</span>
+                <span className="text-sm opacity-80">{t('hero.qualiopiNumber')}</span>
                 <p className="font-bold">{organizationConfig.qualiopi}</p>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                <span className="text-sm opacity-80">Validité</span>
+                <span className="text-sm opacity-80">{t('hero.validity')}</span>
                 <p className="font-bold">{organizationConfig.qualiopiValidity}</p>
               </div>
             </div>
@@ -149,10 +151,10 @@ export const AboutPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex overflow-x-auto">
             {[
-              { id: 'equipe', label: 'Notre équipe', icon: '👥' },
-              { id: 'methode', label: 'Notre méthode', icon: '📋' },
-              { id: 'valeurs', label: 'Nos valeurs', icon: '💎' },
-              { id: 'qualiopi', label: 'Certification Qualiopi', icon: '🏆' },
+              { id: 'equipe', label: t('tabs.team'), icon: '👥' },
+              { id: 'methode', label: t('tabs.method'), icon: '📋' },
+              { id: 'valeurs', label: t('tabs.values'), icon: '💎' },
+              { id: 'qualiopi', label: t('tabs.qualiopi'), icon: '🏆' },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -177,7 +179,7 @@ export const AboutPage: React.FC = () => {
         {activeTab === 'equipe' && (
           <div>
             <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">
-              Notre équipe à votre service
+              {t('team.title')}
             </h2>
             <div className="grid md:grid-cols-2 gap-8">
               {teamMembers.map((member, index) => (
@@ -216,18 +218,18 @@ export const AboutPage: React.FC = () => {
 
             {/* Contact */}
             <div className="mt-12 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-white text-center">
-              <h3 className="text-2xl font-bold mb-4">Contactez-nous</h3>
+              <h3 className="text-2xl font-bold mb-4">{t('team.contact')}</h3>
               <div className="flex flex-wrap justify-center gap-8">
                 <div>
-                  <p className="opacity-80 text-sm">Téléphone</p>
+                  <p className="opacity-80 text-sm">{t('team.phone')}</p>
                   <p className="text-xl font-bold">{organizationConfig.phone}</p>
                 </div>
                 <div>
-                  <p className="opacity-80 text-sm">Email</p>
+                  <p className="opacity-80 text-sm">{t('team.email')}</p>
                   <p className="text-xl font-bold">{organizationConfig.email}</p>
                 </div>
                 <div>
-                  <p className="opacity-80 text-sm">Adresse</p>
+                  <p className="opacity-80 text-sm">{t('team.address')}</p>
                   <p className="text-xl font-bold">{organizationConfig.address.city}</p>
                 </div>
               </div>
@@ -239,11 +241,10 @@ export const AboutPage: React.FC = () => {
         {activeTab === 'methode' && (
           <div>
             <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4 text-center">
-              Notre méthodologie
+              {t('method.title')}
             </h2>
             <p className="text-gray-600 dark:text-gray-300 text-center mb-12 max-w-2xl mx-auto">
-              Un accompagnement structuré en 3 phases, conforme au Code du travail (art. L.6313-4), 
-              pour vous aider à construire un projet professionnel réaliste et réalisable.
+              {t('method.subtitle')}
             </p>
 
             <div className="relative">
@@ -303,12 +304,12 @@ export const AboutPage: React.FC = () => {
 
             {/* Durée totale */}
             <div className="mt-8 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl p-6 text-center">
-              <p className="text-gray-600 dark:text-gray-300">Durée totale du bilan</p>
+              <p className="text-gray-600 dark:text-gray-300">{t('method.totalDuration')}</p>
               <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-                18 à 24 heures
+                {t('method.totalHours')}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                Réparties sur 2 à 3 mois selon votre rythme
+                {t('method.totalSpread')}
               </p>
             </div>
           </div>
@@ -318,7 +319,7 @@ export const AboutPage: React.FC = () => {
         {activeTab === 'valeurs' && (
           <div>
             <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">
-              Nos valeurs
+              {t('values.title')}
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {values.map((value, index) => (
@@ -340,7 +341,7 @@ export const AboutPage: React.FC = () => {
             {/* Engagements */}
             <div className="mt-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
               <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">
-                Nos engagements qualité
+                {t('values.commitments.title')}
               </h3>
               <div className="grid md:grid-cols-2 gap-6">
                 {[
@@ -368,14 +369,13 @@ export const AboutPage: React.FC = () => {
           <div>
             <div className="text-center mb-12">
               <div className="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-full text-sm font-medium mb-4">
-                Organisme certifié
+                {t('qualiopi.badge')}
               </div>
               <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
-                Certification Qualiopi
+                {t('qualiopi.title')}
               </h2>
               <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                La certification Qualiopi atteste de la qualité du processus mis en œuvre 
-                par notre organisme pour le développement des compétences.
+                {t('qualiopi.subtitle')}
               </p>
             </div>
 
@@ -383,27 +383,27 @@ export const AboutPage: React.FC = () => {
               {/* Informations certification */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                  📋 Informations de certification
+                  {t('qualiopi.info.title')}
                 </h3>
                 <div className="space-y-4">
                   <div className="flex justify-between py-2 border-b dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400">N° Qualiopi</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('qualiopi.info.number')}</span>
                     <span className="font-bold text-gray-800 dark:text-white">{organizationConfig.qualiopi}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400">Organisme certificateur</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('qualiopi.info.certifier')}</span>
                     <span className="font-bold text-gray-800 dark:text-white">{organizationConfig.certificateur}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400">Validité</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('qualiopi.info.validity')}</span>
                     <span className="font-bold text-gray-800 dark:text-white">{organizationConfig.qualiopiValidity}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400">NDA</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('qualiopi.info.nda')}</span>
                     <span className="font-bold text-gray-800 dark:text-white">{organizationConfig.nda}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-gray-600 dark:text-gray-400">SIRET</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('qualiopi.info.siret')}</span>
                     <span className="font-bold text-gray-800 dark:text-white">{organizationConfig.siret}</span>
                   </div>
                 </div>
@@ -412,7 +412,7 @@ export const AboutPage: React.FC = () => {
               {/* Catégories d'actions */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                  🎯 Catégories d'actions certifiées
+                  {t('qualiopi.categories.title')}
                 </h3>
                 <div className="space-y-4">
                   {organizationConfig.qualiopiCategories.map((category, i) => (
@@ -433,7 +433,7 @@ export const AboutPage: React.FC = () => {
             {/* Ce que garantit Qualiopi */}
             <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8">
               <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-6 text-center">
-                Ce que garantit la certification Qualiopi
+                {t('qualiopi.guarantees.title')}
               </h3>
               <div className="grid md:grid-cols-3 gap-6">
                 {[

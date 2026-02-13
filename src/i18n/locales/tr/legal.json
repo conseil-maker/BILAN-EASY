@@ -1,0 +1,96 @@
+{
+  "cgu": {
+    "title": "Kullanım Koşulları",
+    "lastUpdate": "Son güncelleme:",
+    "acceptance": "Bilan-Easy platformunu kullanarak, bu Kullanım Koşullarını okuduğunuzu, anladığınızı ve kabul ettiğinizi onaylarsınız."
+  },
+  "cgv": {
+    "title": "Genel Satış Koşulları",
+    "lastUpdate": "Son güncelleme:",
+    "qualiopi": "Qualiopi Sertifikası: Bilan-Easy, yetkinlik değerlendirmesi hizmetleri için Qualiopi sertifikasına sahiptir ve hizmetlerimizin kalitesini ve kamu finansmanına uygunluğunu garanti eder."
+  },
+  "privacy": {
+    "title": "Gizlilik Politikası",
+    "lastUpdate": "Son güncelleme:",
+    "confidentiality": "Gizlilik taahhüdü: İş Kanunu'nun L.6313-10-1 maddesi uyarınca, yetkinlik değerlendirmenizin sonuçları kesinlikle gizlidir. Açık yazılı onayınız olmadan üçüncü taraflara iletilemez."
+  },
+  "cookiesPolicy": {
+    "title": "Çerez Politikası",
+    "lastUpdate": "Son güncelleme:"
+  },
+  "close": "Kapat",
+  "understood": "Anladım",
+  "cookies": {
+    "title": "Çerez yönetimi",
+    "close": "Kapat",
+    "description": "Bilan-Easy'deki deneyiminizi geliştirmek için çerezler kullanıyoruz. Bazı çerezler platformun çalışması için gereklidir, diğerleri platformu geliştirmemize yardımcı olur.",
+    "necessary": {
+      "title": "Gerekli çerezler",
+      "description": "Çalışma için vazgeçilmez (kimlik doğrulama, tercihler)"
+    },
+    "alwaysActive": "Her zaman aktif",
+    "performance": {
+      "title": "Performans çerezleri",
+      "description": "Platformu geliştirmek için kullanım analizi"
+    },
+    "functional": {
+      "title": "İşlevsel çerezler",
+      "description": "Kullanıcı deneyiminin iyileştirilmesi"
+    },
+    "learnMore": "Çerez politikamız hakkında daha fazla bilgi edinin",
+    "customize": "Seçimlerimi özelleştir",
+    "rejectOptional": "İsteğe bağlı olanları reddet",
+    "saveChoices": "Seçimlerimi kaydet",
+    "acceptAll": "Tümünü kabul et",
+    "footer": "KVKK ve eGizlilik yönergesine uygun olarak.",
+    "privacyPolicy": "Gizlilik politikası"
+  },
+  "sections": {
+    "object": "Amaç",
+    "definitions": "Tanımlar",
+    "access": "Platforma erişim",
+    "services": "Sunulan hizmetler",
+    "obligations": "Kullanıcı yükümlülükleri",
+    "intellectualProperty": "Fikri mülkiyet",
+    "personalData": "Kişisel veriler",
+    "confidentiality": "Gizlilik",
+    "responsibility": "Sorumluluk",
+    "termination": "Fesih",
+    "modification": "Kullanım Koşullarının değiştirilmesi",
+    "applicableLaw": "Uygulanacak hukuk ve yetki alanı",
+    "contact": "İletişim",
+    "scope": "Uygulama alanı",
+    "pricing": "Fiyatlar",
+    "order": "Sipariş ve sözleşme",
+    "payment": "Ödeme koşulları",
+    "withdrawal": "Cayma süresi",
+    "cancellation": "İptal ve kesinti",
+    "providerObligations": "Hizmet sağlayıcı yükümlülükleri",
+    "beneficiaryObligations": "Yararlanıcı yükümlülükleri",
+    "complaints": "Şikayetler ve arabuluculuk",
+    "forceMajeure": "Mücbir sebep",
+    "acceptance": "Satış Koşullarının kabulü",
+    "whatIsCookie": "Çerez nedir?",
+    "cookieTypes": "Kullanılan çerez türleri",
+    "cookieManagement": "Çerez yönetimi",
+    "refusalConsequences": "Reddin sonuçları",
+    "introduction": "Giriş",
+    "dataController": "Veri sorumlusu",
+    "dataCollected": "Toplanan veriler",
+    "processingPurposes": "İşleme amaçları",
+    "legalBasis": "İşlemenin yasal dayanağı",
+    "dataRecipients": "Veri alıcıları",
+    "transfersOutsideEU": "AB dışı transferler",
+    "retentionPeriod": "Saklama süresi",
+    "dataSecurity": "Veri güvenliği",
+    "yourRights": "Haklarınız",
+    "cookiesSection": "Çerezler",
+    "modifications": "Değişiklikler",
+    "table": {
+      "name": "Ad",
+      "purpose": "Amaç",
+      "duration": "Süre",
+      "dataType": "Veri türü"
+    }
+  }
+}

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Package, Answer, Question, QuestionType, Message, CurrentPhaseInfo, Summary, UserProfile, DashboardData, CoachingStyle } from '../types';
 import { generateQuestion, generateSummary, generateSynthesis, analyzeThemesAndSkills, suggestOptionalModule, detectCareerExplorationNeed, CareerPath, ExplorationNeedResult, analyzeResponseScope, ResponseAnalysisResult, exploreJobMarket, MarketExplorationResult, JobInterviewResult } from '../services/geminiService';
 import { CareerExploration } from './CareerExploration';
@@ -53,6 +54,7 @@ interface QuestionnaireProps {
 }
 
 const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfile, coachingStyle, onComplete, onDashboard, onAnswersUpdate, onLastAiMessageUpdate, initialAnswers, initialLastAiMessage }) => {
+    const { t, i18n } = useTranslation('questionnaire');
     const [messages, setMessages] = useState<Message[]>([]);
     const [answers, setAnswers] = useState<Answer[]>(initialAnswers || []);
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -111,7 +113,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     const chatEndRef = useRef<HTMLDivElement>(null);
     const SESSION_STORAGE_KEY = `autosave-${userName}-${pkg.id}`;
     const { isSpeaking, isSupported: speechSynthSupported, voices, settings, speak, cancel, onSettingsChange } = useSpeechSynthesis();
-    const { isListening, isSupported: speechRecSupported, interimTranscript, finalTranscript, startListening, stopListening, clearTranscript } = useSpeechRecognition({ lang: 'fr-FR' });
+    const { isListening, isSupported: speechRecSupported, interimTranscript, finalTranscript, startListening, stopListening, clearTranscript } = useSpeechRecognition({ lang: i18n.language === 'tr' ? 'tr-TR' : 'fr-FR' });
     const { isDarkMode, toggleDarkMode } = useDarkMode();
     const { showSuccess, showError, showInfo } = useToast();
     const [userId, setUserId] = useState<string | undefined>(undefined);
@@ -550,7 +552,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             
             const synthMessage: Message = {
                 sender: 'ai',
-                text: `**Point d'étape après ${currentAnswers.length} questions** \n\nVoici ce que nous avons exploré jusqu'ici :\n${uniqueThemes.map(t => `• ${t}`).join('\n')}\n\nSi quelque chose ne vous semble pas juste ou si vous souhaitez nuancer un point, n'hésitez pas à me le dire dans votre prochaine réponse. Continuons.`,
+                text: `${t('miniSynthesis.title', { count: currentAnswers.length })} ${t('miniSynthesis.intro')}${uniqueThemes.map(th => `• ${th}`).join('\n')}${t('miniSynthesis.footer')}`,
                 isSynthesis: true
             };
             setMessages(prev => [...prev, synthMessage]);
@@ -725,7 +727,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     
     const handleSynthesisConfirmation = (confirmed: boolean) => {
         setIsAwaitingSynthesisConfirmation(false);
-        setMessages(prev => [...prev, { sender: 'user', text: confirmed ? "Oui, c'est exact." : "Non, pas tout à fait." }]);
+        setMessages(prev => [...prev, { sender: 'user', text: confirmed ? t('synthesis.confirmYesText') : t('synthesis.confirmNoText') }]);
         setSynthesisConfirmed(confirmed);
     };
     
@@ -785,7 +787,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             const pathNames = validatedCareerPaths.map(p => p.title).join(', ');
             setMessages(prev => [...prev, {
                 sender: 'ai',
-                text: `🎯 Excellent ! Vous avez identifié ${validatedCareerPaths.length} piste(s) intéressante(s) : ${pathNames}. Ces pistes seront intégrées à votre document de synthèse. Continuons le bilan pour affiner votre projet.`
+                text: t('careerExploration.closeMessage', { count: validatedCareerPaths.length, paths: pathNames })
             }]);
         }
         fetchNextQuestion({}, 0, answers);
@@ -826,7 +828,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             // Ajouter un message récapitulatif
             setMessages(prev => [...prev, {
                 sender: 'ai',
-                text: `\ud83d\udcca J'ai analysé le marché pour le métier de ${selectedJobForInterview}. Score de faisabilité : ${result.feasibilityAnalysis.overallScore}/10. ${result.feasibilityAnalysis.feasibilityComment.substring(0, 150)}... Ces informations seront intégrées à votre synthèse.`
+                text: t('marketExploration.closeMessage', { job: selectedJobForInterview, score: result.feasibilityAnalysis.overallScore, comment: result.feasibilityAnalysis.feasibilityComment.substring(0, 150) })
             }]);
         }
         fetchNextQuestion({}, 0, answers);
@@ -849,7 +851,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         // Ajouter un message récapitulatif
         setMessages(prev => [...prev, {
             sender: 'ai',
-            text: `\ud83d\udcac Merci pour cet échange avec ${result.professionalPersona.name} ! Vous avez découvert les réalités du métier de ${selectedJobForInterview}. Les insights de cette enquête seront intégrés à votre document de synthèse.`
+            text: t('marketExploration.interviewCloseMessage', { name: result.professionalPersona.name, job: selectedJobForInterview })
         }]);
         fetchNextQuestion({}, 0, answers);
     };
@@ -896,23 +898,23 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     </svg>
                 </div>
                 <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-4">
-                    🧠 Génération de votre synthèse...
+                    {t('summarizing.title')}
                 </h2>
                 <p className="text-slate-600 dark:text-slate-300 mb-6">
-                    Notre IA analyse vos réponses pour créer un rapport personnalisé.
+                    {t('summarizing.description')}
                 </p>
                 <div className="bg-white dark:bg-slate-700 rounded-xl p-6 shadow-lg">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm text-slate-600 dark:text-slate-300">Analyse en cours...</span>
+                        <span className="text-sm text-slate-600 dark:text-slate-300">{t('summarizing.analyzing')}</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                        ⏱️ Cela peut prendre jusqu'à 60 secondes.<br/>
-                        Merci de votre patience !
+                        {t('summarizing.timeEstimate')}<br/>
+                        {t('summarizing.patience')}
                     </p>
                 </div>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-6">
-                    💾 Votre progression est automatiquement sauvegardée
+                    {t('summarizing.autoSave')}
                 </p>
             </div>
         </div>
@@ -933,20 +935,16 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 <span className="text-3xl">🎯</span>
                             </div>
                             <h2 className="text-2xl font-bold font-display text-amber-800 dark:text-amber-200 mb-2">
-                                Nous approchons de la fin !
+                                {t('endWarning.title')}
                             </h2>
                         </div>
-                        <p className="text-slate-600 dark:text-slate-300 mb-4 text-center">
-                            Vous avez parcouru environ <strong>{calculateProgression(answers, pkg.id, userProfile).globalProgress}%</strong> de votre bilan de compétences.
-                        </p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
-                            💡 <strong>Encore quelques questions</strong> pour finaliser l'analyse de votre projet professionnel et préparer votre synthèse personnalisée.
-                        </p>
+                        <p className="text-slate-600 dark:text-slate-300 mb-4 text-center" dangerouslySetInnerHTML={{ __html: t('endWarning.description', { percent: calculateProgression(answers, pkg.id, userProfile).globalProgress }) }} />
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800" dangerouslySetInnerHTML={{ __html: t('endWarning.hint') }} />
                         <button 
                             onClick={() => setShowEndWarning(false)} 
                             className="w-full bg-amber-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-700 transition-colors"
                         >
-                            Compris, continuons !
+                            {t('endWarning.continue')}
                         </button>
                     </div>
                 </div>
@@ -961,18 +959,16 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 <span className="text-3xl">✅</span>
                             </div>
                             <h2 className="text-2xl font-bold font-display text-green-800 dark:text-green-200 mb-2">
-                                Votre bilan est presque terminé !
+                                {t('endConfirmation.title')}
                             </h2>
                         </div>
-                        <p className="text-slate-600 dark:text-slate-300 mb-4 text-center">
-                            Vous avez répondu à <strong>{answers.length} questions</strong>. Nous avons suffisamment d'éléments pour générer votre synthèse personnalisée.
-                        </p>
+                        <p className="text-slate-600 dark:text-slate-300 mb-4 text-center" dangerouslySetInnerHTML={{ __html: t('endConfirmation.description', { count: answers.length }) }} />
                         <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg mb-6">
                             <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">
-                                <strong>📝 Avant de continuer :</strong>
+                                <strong>{t('endConfirmation.beforeContinue')}</strong>
                             </p>
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Souhaitez-vous ajouter quelque chose ou approfondir un point particulier de votre réflexion ?
+                                {t('endConfirmation.deepenQuestion')}
                             </p>
                         </div>
                         <div className="flex gap-4">
@@ -984,7 +980,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 }} 
                                 className="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors"
                             >
-                                ✅ Générer ma synthèse
+                                {t('endConfirmation.generateSynthesis')}
                             </button>
                             <button 
                                 onClick={() => {
@@ -995,7 +991,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 }} 
                                 className="w-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                             >
-                                🔍 Approfondir
+                                {t('endConfirmation.deepen')}
                             </button>
                         </div>
                     </div>
@@ -1013,28 +1009,27 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 </svg>
                             </div>
                             <h2 className="text-2xl font-bold font-display text-primary-800 dark:text-white mb-2">
-                                Exploration de pistes professionnelles
+                                {t('careerExploration.title')}
                             </h2>
                         </div>
                         <p className="text-slate-600 dark:text-slate-300 mb-4">
                             {explorationNeedResult.reason}
                         </p>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
-                            💡 L'IA peut analyser votre profil et vous proposer des pistes de métiers personnalisées, 
-                            basées sur vos compétences et les tendances actuelles du marché du travail.
+                            {t('careerExploration.hint')}
                         </p>
                         <div className="flex gap-4">
                             <button 
                                 onClick={handleCareerExplorationAccept} 
                                 className="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors"
                             >
-                                Oui, explorer des pistes
+                                {t('careerExploration.accept')}
                             </button>
                             <button 
                                 onClick={handleCareerExplorationDecline} 
                                 className="w-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-6 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                             >
-                                Non, continuer le bilan
+                                {t('careerExploration.decline')}
                             </button>
                         </div>
                     </div>
@@ -1089,7 +1084,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </div>
-                            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Information importante</h3>
+                            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">{t('outOfScope.title')}</h3>
                             <p className="text-slate-600 dark:text-slate-300 mb-6 text-left">
                                 {outOfScopeAnalysis.message}
                             </p>
@@ -1097,7 +1092,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             {/* Ressources alternatives dynamiques */}
                             {outOfScopeAnalysis.alternativeResources && outOfScopeAnalysis.alternativeResources.length > 0 && (
                                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6 text-left">
-                                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">📚 Ressources adaptées :</h4>
+                                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{t('outOfScope.resources')}</h4>
                                     <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
                                         {outOfScopeAnalysis.alternativeResources.map((resource, idx) => (
                                             <li key={idx}>• {resource}</li>
@@ -1109,12 +1104,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             {/* Ressources par défaut pour les mineurs si pas de ressources dynamiques */}
                             {outOfScopeAnalysis.issueType === 'age_inappropriate' && (!outOfScopeAnalysis.alternativeResources || outOfScopeAnalysis.alternativeResources.length === 0) && (
                                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6 text-left">
-                                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">📚 Ressources adaptées :</h4>
+                                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{t('outOfScope.resources')}</h4>
                                     <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
-                                        <li>• <strong>CIO</strong> (Centre d'Information et d'Orientation) - Gratuit</li>
-                                        <li>• <strong>Conseiller d'orientation scolaire</strong> de votre établissement</li>
-                                        <li>• <strong>Parcoursup</strong> pour l'orientation post-bac</li>
-                                        <li>• <strong>ONISEP</strong> - onisep.fr pour explorer les métiers</li>
+                                        <li>• {t('outOfScope.defaultResources.cio')}</li>
+                                        <li>• {t('outOfScope.defaultResources.counselor')}</li>
+                                        <li>• {t('outOfScope.defaultResources.parcoursup')}</li>
+                                        <li>• {t('outOfScope.defaultResources.onisep')}</li>
                                     </ul>
                                 </div>
                             )}
@@ -1130,7 +1125,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     }}
                                     className="flex-1 px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                                 >
-                                    Retour au tableau de bord
+                                    {t('outOfScope.backToDashboard')}
                                 </button>
                                 {outOfScopeAnalysis.severity !== 'critical' && (
                                     <button
@@ -1142,7 +1137,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                         }}
                                         className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors"
                                     >
-                                        Continuer quand même
+                                        {t('outOfScope.continueAnyway')}
                                     </button>
                                 )}
                             </div>
@@ -1160,20 +1155,20 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                 </svg>
                             </div>
-                            <h3 className="text-2xl font-bold text-slate-800 mb-2">Êtes-vous sûr ?</h3>
-                            <p className="text-slate-600 mb-6">Votre progression sera sauvegardée automatiquement. Vous pourrez reprendre là où vous vous êtes arrêté lors de votre prochaine connexion.</p>
+                            <h3 className="text-2xl font-bold text-slate-800 mb-2">{t('logoutModal.title')}</h3>
+                            <p className="text-slate-600 mb-6">{t('logoutModal.description')}</p>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowLogoutModal(false)}
                                     className="flex-1 px-6 py-3 bg-slate-200 text-slate-700 rounded-xl font-semibold hover:bg-slate-300 transition-colors"
                                 >
-                                    Annuler
+                                    {t('logoutModal.cancel')}
                                 </button>
                                 <button
                                     onClick={confirmLogout}
                                     className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
                                 >
-                                    Se déconnecter
+                                    {t('logoutModal.confirm')}
                                 </button>
                             </div>
                         </div>
@@ -1190,7 +1185,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-2xl font-bold text-slate-800">Aide & Conseils</h3>
+                                <h3 className="text-2xl font-bold text-slate-800">{t('helpModal.title')}</h3>
                             </div>
                             <button onClick={() => setShowHelpModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1206,21 +1201,21 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                                     </svg>
-                                    Votre Parcours
+                                    {t('helpModal.journey.title')}
                                 </h4>
-                                <p className="text-slate-600 mb-3">Votre bilan de compétences se déroule en 3 phases :</p>
+                                <p className="text-slate-600 mb-3">{t('helpModal.journey.description')}</p>
                                 <ul className="space-y-2 text-slate-600">
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-600 font-bold mt-0.5">•</span>
-                                        <span><strong>Phase 1 - Investigation :</strong> Découverte de vos motivations et passions</span>
+                                        <span><strong>{t('helpModal.journey.phase1Title')}</strong> {t('helpModal.journey.phase1Desc')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-600 font-bold mt-0.5">•</span>
-                                        <span><strong>Phase 2 - Analyse :</strong> Identification de vos compétences et expériences</span>
+                                        <span><strong>{t('helpModal.journey.phase2Title')}</strong> {t('helpModal.journey.phase2Desc')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-600 font-bold mt-0.5">•</span>
-                                        <span><strong>Phase 3 - Conclusion :</strong> Synthèse et plan d'action personnalisé</span>
+                                        <span><strong>{t('helpModal.journey.phase3Title')}</strong> {t('helpModal.journey.phase3Desc')}</span>
                                     </li>
                                 </ul>
                             </div>
@@ -1231,24 +1226,24 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                     </svg>
-                                    Conseils pour Répondre
+                                    {t('helpModal.tips.title')}
                                 </h4>
                                 <ul className="space-y-2 text-slate-600">
                                     <li className="flex items-start gap-2">
                                         <span className="text-green-600 font-bold mt-0.5">✓</span>
-                                        <span>Prenez votre temps, il n'y a pas de mauvaise réponse</span>
+                                        <span>{t('helpModal.tips.tip1')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-green-600 font-bold mt-0.5">✓</span>
-                                        <span>Soyez authentique et honnête dans vos réponses</span>
+                                        <span>{t('helpModal.tips.tip2')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-green-600 font-bold mt-0.5">✓</span>
-                                        <span>Donnez des exemples concrets de votre expérience</span>
+                                        <span>{t('helpModal.tips.tip3')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-green-600 font-bold mt-0.5">✓</span>
-                                        <span>Votre progression est sauvegardée automatiquement</span>
+                                        <span>{t('helpModal.tips.tip4')}</span>
                                     </li>
                                 </ul>
                             </div>
@@ -1259,24 +1254,24 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                                     </svg>
-                                    Fonctionnalités Disponibles
+                                    {t('helpModal.features.title')}
                                 </h4>
                                 <ul className="space-y-2 text-slate-600">
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-600 font-bold mt-0.5">•</span>
-                                        <span><strong>Lecture vocale :</strong> Écoutez les questions lues à haute voix</span>
+                                        <span><strong>{t('helpModal.features.speechTitle')}</strong> {t('helpModal.features.speechDesc')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-600 font-bold mt-0.5">•</span>
-                                        <span><strong>Thèmes émergents :</strong> Visualisez les thèmes identifiés au fil du parcours</span>
+                                        <span><strong>{t('helpModal.features.themesTitle')}</strong> {t('helpModal.features.themesDesc')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-600 font-bold mt-0.5">•</span>
-                                        <span><strong>Analyse des compétences :</strong> Consultez votre radar de compétences</span>
+                                        <span><strong>{t('helpModal.features.skillsTitle')}</strong> {t('helpModal.features.skillsDesc')}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-600 font-bold mt-0.5">•</span>
-                                        <span><strong>Sauvegarde automatique :</strong> Reprenez là où vous vous êtes arrêté</span>
+                                        <span><strong>{t('helpModal.features.autoSaveTitle')}</strong> {t('helpModal.features.autoSaveDesc')}</span>
                                     </li>
                                 </ul>
                             </div>
@@ -1287,9 +1282,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
-                                    Besoin d'Aide ?
+                                    {t('helpModal.contact.title')}
                                 </h4>
-                                <p className="text-slate-600">Notre équipe est là pour vous accompagner. Contactez-nous à <a href="mailto:support@bilancompetences.com" className="text-primary-600 hover:text-primary-700 font-medium">support@bilancompetences.com</a></p>
+                                <p className="text-slate-600">{t('helpModal.contact.description')} <a href="mailto:support@bilancompetences.com" className="text-primary-600 hover:text-primary-700 font-medium">support@bilancompetences.com</a></p>
                             </div>
                         </div>
                     </div>
@@ -1302,7 +1297,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
-                        <span>Sauvegardé !</span>
+                        <span>{t('saveIndicator.saved')}</span>
                     </div>
                 ) : lastSaveTime && (
                     <div className="bg-slate-700 text-white px-3 py-1.5 rounded-full text-xs shadow-md flex items-center gap-2 opacity-75 hover:opacity-100 transition-opacity">
@@ -1311,7 +1306,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                         </svg>
                         <span>
-                            Sauvegardé il y a {Math.floor((new Date().getTime() - lastSaveTime.getTime()) / 1000 / 60) || '< 1'} min
+                            {t('saveIndicator.savedAgo', { minutes: Math.floor((new Date().getTime() - lastSaveTime.getTime()) / 1000 / 60) || '< 1' })}
                         </span>
                     </div>
                 )}
@@ -1346,7 +1341,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                         {progressionInfo.globalProgress}%
                                     </div>
                                     <div className="text-xs text-slate-500 dark:text-slate-400">
-                                        {progressionInfo.questionsAnswered} / {progressionInfo.questionsTarget} questions
+                                        {t('progress.questions', { count: progressionInfo.questionsAnswered, target: progressionInfo.questionsTarget })}
                                     </div>
                                 </div>
                             );
@@ -1356,13 +1351,13 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <button 
                                 onClick={onDashboard} 
                             className="flex items-center gap-2 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800/50 transition-colors text-sm font-medium"
-                            title="Retour au Dashboard"
-                            aria-label="Retourner au tableau de bord"
+                            title={t('header.dashboardTooltip')}
+                            aria-label={t('header.dashboardAriaLabel')}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
-                            Dashboard
+                            {t('header.dashboard')}
                         </button>
                         {speechSynthSupported && (
                             <div className="relative group">
@@ -1384,8 +1379,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                             ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30' 
                                             : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
                                     } ${isSpeaking ? 'animate-pulse' : ''}`}
-                                    title={settings.enabled ? (isSpeaking ? 'Arrêter la lecture' : 'Lire le message') : 'Activer et lire'}
-                                    aria-label={settings.enabled ? (isSpeaking ? 'Arrêter la lecture vocale' : 'Lire le dernier message') : 'Activer la lecture vocale'}
+                                    title={settings.enabled ? (isSpeaking ? t('header.speakerStop') : t('header.speakerRead')) : t('header.speakerEnable')}
+                                    aria-label={settings.enabled ? (isSpeaking ? t('header.speakerStopAriaLabel') : t('header.speakerReadAriaLabel')) : t('header.speakerEnableAriaLabel')}
                                 >
                                     <SpeakerIcon active={isSpeaking} />
                                     {/* Indicateur d'état */}
@@ -1395,11 +1390,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 </button>
                                 {/* Tooltip au survol */}
                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
-                                    {settings.enabled ? (isSpeaking ? 'Cliquez pour arrêter' : 'Cliquez pour lire') : 'Cliquez pour activer'}
+                                    {settings.enabled ? (isSpeaking ? t('header.speakerTooltipStop') : t('header.speakerTooltipRead')) : t('header.speakerTooltipEnable')}
                                 </div>
                             </div>
                         )}
-                        <button onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300" title={isDarkMode ? 'Mode clair' : 'Mode sombre'} aria-label={isDarkMode ? 'Activer le mode clair' : 'Activer le mode sombre'}>
+                        <button onClick={toggleDarkMode} className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300" title={isDarkMode ? t('header.lightMode') : t('header.darkMode')} aria-label={isDarkMode ? t('header.lightModeAriaLabel') : t('header.darkModeAriaLabel')}>
                             {isDarkMode ? (
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -1414,8 +1409,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         <button 
                             onClick={() => setShowHelpModal(true)} 
                             className="text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-1" 
-                            title="Aide"
-                            aria-label="Ouvrir l'aide et les conseils"
+                            title={t('header.help')}
+                            aria-label={t('header.helpAriaLabel')}
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1426,8 +1421,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <button 
                                 onClick={() => setShowSettings(!showSettings)} 
                                 className={`text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-1 ${showSettings ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : ''}`}
-                                title="Paramètres vocaux (voix, vitesse, tonalité)"
-                                aria-label="Ouvrir les paramètres avancés de lecture vocale"
+                                title={t('header.settings')}
+                                aria-label={t('header.settingsAriaLabel')}
                             >
                                 <SettingsIcon />
                             </button>
@@ -1435,8 +1430,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         <button 
                             onClick={handleLogout} 
                             className="text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none rounded-lg p-1" 
-                            title="Déconnexion"
-                            aria-label="Se déconnecter de l'application"
+                            title={t('header.logout')}
+                            aria-label={t('header.logoutAriaLabel')}
                         >
                             <LogoutIcon />
                             </button>
@@ -1451,7 +1446,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <button 
                                 onClick={() => setShowSettings(false)}
                                 className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 z-10"
-                                aria-label="Fermer les paramètres"
+                                aria-label={t('header.closeSettings')}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1472,25 +1467,25 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                     <div className={`max-w-[85%] p-4 rounded-2xl transition-all duration-300 hover:shadow-lg break-words ${msg.sender === 'user' ? 'bg-primary-600 dark:bg-primary-500 text-white rounded-br-none' : 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-none'}`}>
                                         <p>{msg.text}</p>
                                         {msg.isSynthesis && (
-                                            <div className="mt-4 flex gap-2" role="group" aria-label="Confirmation de la synthèse">
+                                            <div className="mt-4 flex gap-2" role="group" aria-label={t('synthesis.groupAriaLabel')}>
                                                 <button 
                                                     onClick={() => handleSynthesisConfirmation(true)} 
                                                     className="bg-white/20 px-3 py-1 rounded-full text-xs hover:bg-white/30 focus:ring-2 focus:ring-white focus:outline-none transition-all"
-                                                    aria-label="Confirmer que la synthèse est exacte"
+                                                    aria-label={t('synthesis.confirmYesAriaLabel')}
                                                 >
-                                                    Oui, c'est exact
+                                                    {t('synthesis.confirmYes')}
                                                 </button>
                                                 <button 
                                                     onClick={() => handleSynthesisConfirmation(false)} 
                                                     className="bg-white/20 px-3 py-1 rounded-full text-xs hover:bg-white/30 focus:ring-2 focus:ring-white focus:outline-none transition-all"
-                                                    aria-label="Indiquer que la synthèse n'est pas tout à fait exacte"
+                                                    aria-label={t('synthesis.confirmNoAriaLabel')}
                                                 >
-                                                    Non, pas tout à fait
+                                                    {t('synthesis.confirmNo')}
                                                 </button>
                                             </div>
                                         )}
                                         {msg.question?.type === QuestionType.MULTIPLE_CHOICE && msg.question.choices && (
-                                            <div className="mt-4 space-y-2" role="radiogroup" aria-label="Choix de réponse">
+                                            <div className="mt-4 space-y-2" role="radiogroup" aria-label={t('chat.choicesAriaLabel')}>
                                                 {msg.question.choices.map((choice, choiceIndex) => (
                                                     <button 
                                                         key={choice} 
@@ -1498,7 +1493,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                                         className="w-full text-left bg-primary-50 dark:bg-primary-900/20 text-primary-800 dark:text-primary-200 p-3 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all focus:ring-2 focus:ring-primary-500 focus:outline-none"
                                                         role="radio"
                                                         aria-checked="false"
-                                                        aria-label={`Choix ${choiceIndex + 1}: ${choice}`}
+                                                        aria-label={t('chat.choiceAriaLabel', { index: choiceIndex + 1, choice })}
                                                     >
                                                         {choice}
                                                     </button>
@@ -1514,8 +1509,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
 
                         <div className="p-4 border-t bg-white dark:bg-slate-800 rounded-b-xl transition-colors duration-300">
                             {currentQuestion && currentQuestion.type !== QuestionType.MULTIPLE_CHOICE && (
-                                <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-end gap-2" role="form" aria-label="Formulaire de réponse">
-                                    <label htmlFor="answer-input" className="sr-only">Écrivez votre réponse</label>
+                                <form onSubmit={e => { e.preventDefault(); handleAnswerSubmit(textInput); }} className="flex items-end gap-2" role="form" aria-label={t('chat.formAriaLabel')}>
+                                    <label htmlFor="answer-input" className="sr-only">{t('chat.inputLabel')}</label>
                                     <textarea 
                                         id="answer-input"
                                         value={textInput} 
@@ -1533,10 +1528,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                                 // Le form onSubmit sera déclenché automatiquement
                                             }
                                         }}
-                                        placeholder="Écrivez votre réponse... (Entrée pour envoyer, Shift+Entrée pour nouvelle ligne)" 
+                                        placeholder={t('chat.inputPlaceholder')} 
                                         className="flex-1 w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none transition-colors duration-300 resize-none min-h-[48px] max-h-[200px] overflow-y-auto" 
                                         disabled={isLoading || isAwaitingSynthesisConfirmation}
-                                        aria-label="Champ de saisie de votre réponse"
+                                        aria-label={t('chat.inputAriaLabel')}
                                         aria-required="true"
                                         rows={1}
                                     />
@@ -1545,7 +1540,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                             type="button" 
                                             onClick={() => isListening ? stopListening() : startListening()} 
                                             className="p-3 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg transition-colors"
-                                            aria-label={isListening ? 'Arrêter l\'enregistrement vocal' : 'Démarrer l\'enregistrement vocal'}
+                                            aria-label={isListening ? t('chat.micStop') : t('chat.micStart')}
                                             aria-pressed={isListening}
                                         >
                                             <MicIcon active={isListening} />
@@ -1555,7 +1550,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                         type="submit" 
                                         className="bg-primary-600 text-white p-3 rounded-lg hover:bg-primary-700 disabled:bg-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none transition-all" 
                                         disabled={isLoading || !textInput.trim() || isAwaitingSynthesisConfirmation}
-                                        aria-label="Envoyer la réponse"
+                                        aria-label={t('chat.sendAriaLabel')}
                                     >
                                         <SendIcon />
                                     </button>
@@ -1565,14 +1560,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                                 onClick={handleJoker} 
                                 className="mt-2 text-xs text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center justify-center w-full disabled:opacity-50 focus:ring-2 focus:ring-primary-500 focus:outline-none rounded-lg p-2 transition-colors" 
                                 disabled={isLoading || isAwaitingSynthesisConfirmation}
-                                aria-label="Demander de l'aide pour répondre à la question"
-                                title="Les aides proposées sont des aides méthodologiques à la réflexion. Elles ne constituent ni une analyse, ni une interprétation, ni une conclusion."
+                                aria-label={t('joker.ariaLabel')}
+                                title={t('joker.tooltip')}
                             >
-                                <JokerIcon/> J'ai besoin d'aide pour répondre
+                                <JokerIcon/> {t('joker.label')}
                             </button>
                             {/* Cadrage IA pour Qualiopi */}
                             <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center mt-1 italic">
-                                Aide méthodologique à la réflexion • Ne constitue pas une réponse
+                                {t('joker.disclaimer')}
                             </p>
                         </div>
                     </div>
@@ -1581,7 +1576,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         <aside 
                             className="hidden lg:flex flex-col flex-shrink-0 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-4 transition-all duration-300 overflow-hidden"
                             role="complementary"
-                            aria-label="Tableau de bord avec thèmes émergents et analyse des compétences"
+                            aria-label={t('sidePanel.ariaLabel')}
                         >
                             <EnhancedDashboard 
                                 data={dashboardData} 
@@ -1595,7 +1590,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <button
                                 onClick={() => setShowSidePanel(true)}
                                 className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all"
-                                title="Afficher le panneau"
+                                title={t('header.showPanel')}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
