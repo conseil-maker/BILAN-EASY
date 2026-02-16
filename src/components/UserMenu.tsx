@@ -47,7 +47,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ user, userRole }) => {
   };
 
   const getInitials = (email: string) => {
-    const name = email.split('@')[0];
+    const name = email.split('@')[0] || '';
     return name.substring(0, 2).toUpperCase();
   };
 

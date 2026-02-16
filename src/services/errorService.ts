@@ -281,8 +281,8 @@ export const handleError = (
 /**
  * Gère une erreur réseau
  */
-export const handleNetworkError = (error: unknown, context: string): ProcessedError => {
-  return handleError(error, context, { category: 'network' });
+export const handleNetworkError = (error: unknown, context: string, options?: { showToast?: boolean; userMessage?: string }): ProcessedError => {
+  return handleError(error, context, { category: 'network', ...options });
 };
 
 /**

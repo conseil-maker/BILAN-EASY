@@ -14,6 +14,11 @@ export interface Question {
   type: QuestionType;
   theme: string;
   choices?: string[];
+  options?: string[];
+  category?: string;
+  phase?: string;
+  isRequired?: boolean;
+  order?: number;
   required: boolean;
 }
 
@@ -21,6 +26,7 @@ export interface Answer {
   questionId: string;
   questionTitle?: string; // Titre de la question pour éviter les répétitions
   value: string;
+  text?: string; // Alias de value pour compatibilité
   complexity?: QuestionComplexity;
   categoryId?: string;
   timestamp?: number;
@@ -71,6 +77,8 @@ export interface Package {
     phase3: QuestionEstimate;
     total: QuestionEstimate;
   };
+  price?: number;
+  priceLabel?: string;
 }
 
 export interface Message {
@@ -99,6 +107,9 @@ export interface ActionPlanItem {
   id: string;
   text: string;
   completed: boolean;
+  findLeadsLabel?: string;
+  priority?: string;
+  deadline?: string;
 }
 
 export interface Summary {
@@ -121,6 +132,7 @@ export interface Summary {
     mediumTerm: ActionPlanItem[];
     longTerm?: ActionPlanItem[]; // Actions à long terme (optionnel)
   };
+  competences?: string[]; // Compétences identifiées
 }
 
 export interface HistoryItem {
@@ -130,6 +142,7 @@ export interface HistoryItem {
   packageName: string;
   summary: Summary;
   answers: Answer[];
+  status?: 'in_progress' | 'completed' | 'draft';
 }
 
 export interface WordCloudItem {

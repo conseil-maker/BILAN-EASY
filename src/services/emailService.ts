@@ -623,6 +623,87 @@ export const sendFollowUp6MonthsEmail = async (
   });
 };
 
+// Notification au consultant pour une nouvelle demande de RDV
+export const sendAppointmentRequestNotification = async (
+  clientName: string,
+  clientEmail: string,
+  reason: string,
+  preferredDate?: string,
+  preferredTime?: string,
+  message?: string
+): Promise<boolean> => {
+  const consultantEmail = organizationConfig.defaultConsultant.email;
+  const consultantName = organizationConfig.defaultConsultant.name;
+  const dashboardUrl = `${organizationConfig.website}/#/consultant-dashboard`;
+  
+  const dateInfo = preferredDate 
+    ? `${preferredDate}${preferredTime ? ` (${preferredTime})` : ''}` 
+    : 'Non précisée';
+  
+  const template: EmailTemplate = {
+    subject: `Nouvelle demande de RDV - ${clientName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+          .request-box { background: white; border: 2px solid #f59e0b; border-radius: 10px; padding: 20px; margin: 20px 0; }
+          .button { display: inline-block; background: #f59e0b; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 10px 0; font-weight: bold; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+          .message-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 15px 0; font-style: italic; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📅 Nouvelle demande de rendez-vous</h1>
+          </div>
+          <div class="content">
+            <p>Bonjour ${consultantName},</p>
+            <p>Un client a fait une nouvelle demande de rendez-vous sur la plateforme Bilan-Easy.</p>
+            
+            <div class="request-box">
+              <h3 style="margin-top: 0;">📋 Détails de la demande</h3>
+              <p><strong>Client :</strong> ${clientName}</p>
+              <p><strong>Email :</strong> <a href="mailto:${clientEmail}">${clientEmail}</a></p>
+              <p><strong>Motif :</strong> ${reason}</p>
+              <p><strong>Date souhaitée :</strong> ${dateInfo}</p>
+            </div>
+            
+            ${message ? `<div class="message-box"><strong>Message du client :</strong><br/>"${message}"</div>` : ''}
+            
+            <p>Merci de contacter le client dans les meilleurs délais.</p>
+            
+            <p style="text-align: center;">
+              <a href="${dashboardUrl}" class="button">Voir dans le dashboard</a>
+            </p>
+            
+            <p style="text-align: center;">
+              <a href="mailto:${clientEmail}?subject=Votre demande de rendez-vous - ${organizationConfig.name}" style="color: #f59e0b;">Répondre par email au client</a>
+            </p>
+          </div>
+          <div class="footer">
+            <p>Cet email a été envoyé automatiquement par la plateforme ${organizationConfig.name}.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Nouvelle demande de rendez-vous\n\nBonjour ${consultantName},\n\nUn client a fait une nouvelle demande de rendez-vous.\n\nClient : ${clientName}\nEmail : ${clientEmail}\nMotif : ${reason}\nDate souhaitée : ${dateInfo}\n${message ? `Message : ${message}\n` : ''}\nMerci de contacter le client dans les meilleurs délais.\n\nVoir dans le dashboard : ${dashboardUrl}`
+  };
+  
+  return sendEmail({
+    to: { email: consultantEmail, name: consultantName },
+    template,
+    variables: { clientName, clientEmail, reason }
+  });
+};
+
 export default {
   emailTemplates,
   sendEmail,
@@ -631,4 +712,5 @@ export default {
   sendAppointmentReminder,
   sendBilanCompletedEmail,
   sendFollowUp6MonthsEmail,
+  sendAppointmentRequestNotification,
 };

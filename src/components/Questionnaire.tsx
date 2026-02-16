@@ -223,6 +223,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 
                 for (let i = 0; i < phaseCategories.length; i++) {
                     const cat = phaseCategories[i];
+                    if (!cat) continue;
                     const questionsAsked = categoryProgress.get(cat.id) || 0;
                     
                     // Si la catégorie n'a pas atteint son minimum, la sélectionner
@@ -236,7 +237,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     const timeBudget = getTimeBudget(pkg.id, answersToUse);
                     const phaseTimeRemaining = timeBudget[`phase${info.phase}Remaining` as 'phase1Remaining' | 'phase2Remaining' | 'phase3Remaining'];
                     
-                    if (shouldDeepenCategory(cat.id, phaseKey, questionsAsked, phaseTimeRemaining)) {
+                    if (cat && shouldDeepenCategory(cat.id, phaseKey, questionsAsked, phaseTimeRemaining)) {
                         selectedCategory = cat;
                         categoryIndex = i;
                         break;
@@ -247,6 +248,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 if (!selectedCategory) {
                     for (let i = 0; i < phaseCategories.length; i++) {
                         const cat = phaseCategories[i];
+                        if (!cat) continue;
                         const questionsAsked = categoryProgress.get(cat.id) || 0;
                         if (questionsAsked < cat.maxQuestions) {
                             selectedCategory = cat;
@@ -263,19 +265,19 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 }
                 
                 // console.log('[fetchNextQuestion] Selected category:', selectedCategory.id, 'at index:', categoryIndex);
-                setCurrentCategoryId(selectedCategory.id);
+                if (selectedCategory) setCurrentCategoryId(selectedCategory.id);
                 
                 // Déterminer la complexité optimale
                 const timeBudget = getTimeBudget(pkg.id, answersToUse);
                 // console.log('[fetchNextQuestion] Time budget:', timeBudget);
                 const phaseTimeRemaining = timeBudget[`phase${info.phase}Remaining` as 'phase1Remaining' | 'phase2Remaining' | 'phase3Remaining'];
-                const questionsAskedInCategory = categoryProgress.get(selectedCategory.id) || 0;
-                const complexity = determineQuestionComplexity(selectedCategory.id, phaseKey, phaseTimeRemaining, questionsAskedInCategory);
+                const questionsAskedInCategory = categoryProgress.get(selectedCategory?.id || '') || 0;
+                const complexity = determineQuestionComplexity(selectedCategory?.id || '', phaseKey, phaseTimeRemaining, questionsAskedInCategory);
                 // console.log('[fetchNextQuestion] Complexity:', complexity, 'for category:', selectedCategory.id);
                 
-                let genOptions: any = { useJoker: options.useJoker, targetComplexity: complexity, categoryId: selectedCategory.id };
-                if (info.phase === 2 && answersToUse.length > 0 && answersToUse[answersToUse.length - 1].value.length > 3) {
-                    genOptions.useGoogleSearch = true; genOptions.searchTopic = answersToUse[answersToUse.length - 1].value;
+                let genOptions: any = { useJoker: options.useJoker, targetComplexity: complexity, categoryId: selectedCategory?.id || '' };
+                if (info.phase === 2 && answersToUse.length > 0 && answersToUse[answersToUse.length - 1]?.value?.length > 3) {
+                    genOptions.useGoogleSearch = true; genOptions.searchTopic = answersToUse[answersToUse.length - 1]?.value || '';
                 }
                 // console.log('[fetchNextQuestion] Calling generateQuestion with:', { phaseKey, categoryIndex, answersCount: answersToUse.length, userName, coachingStyle, hasProfile: !!userProfile, genOptions });
                 // Toujours passer le userProfile pour personnaliser les questions avec le contexte du CV

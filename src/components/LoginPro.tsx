@@ -156,7 +156,7 @@ export default function LoginPro({ onToggle }: LoginProProps) {
           </p>
           <div className="flex items-center gap-4 mt-3">
             <span className="px-2 py-1 bg-green-500/20 text-green-300 rounded text-xs font-medium">
-              Qualiopi {ORGANIZATION.qualiopi.number}
+              Qualiopi {ORGANIZATION.qualiopi}
             </span>
             <span className="text-indigo-300 text-xs">
               NDA: {ORGANIZATION.nda}

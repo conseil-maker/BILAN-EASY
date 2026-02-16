@@ -112,7 +112,7 @@ export const ConsultantDashboardPro: React.FC<ConsultantDashboardProProps> = ({ 
           id: '1',
           clientId: 'demo',
           clientName: 'Client Demo',
-          date: new Date().toISOString().split('T')[0],
+          date: new Date().toISOString().split('T')[0] || '',
           time: '14:00',
           type: 'preliminary',
           notes: 'Premier entretien'

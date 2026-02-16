@@ -386,6 +386,7 @@ export const generateQuestion = async (
     let conversationContext = "";
     if (previousAnswers.length > 0) {
         const lastAnswer = previousAnswers[previousAnswers.length - 1];
+        if (!lastAnswer) return '';
         const keyElements = extractKeyElements(lastAnswer.value);
         
         // Extraire des citations spécifiques de la dernière réponse pour forcer la personnalisation
@@ -541,7 +542,7 @@ Exemple: "${userName}, avant de plonger dans le bilan, j'aimerais vous connaîtr
             complexityGuidance = getAITranslation(`prompts.questionGeneration.complexity.${options.targetComplexity}`);
         }
         
-        taskDescription = `${getAITranslation('prompts.questionGeneration.phase')}: ${phaseInfo.name} | ${getAITranslation('prompts.questionGeneration.category')}: ${category.name}
+        taskDescription = `${getAITranslation('prompts.questionGeneration.phase')}: ${phaseInfo.name} | ${getAITranslation('prompts.questionGeneration.category')}: ${category?.name || ''}
 ${complexityGuidance}
 ${getAITranslation('prompts.questionGeneration.generateExplore')}`;
     }

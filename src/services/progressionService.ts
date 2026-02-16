@@ -41,6 +41,10 @@ export interface ProgressionInfo {
   
   // Réduction due au CV
   cvReductionApplied: number; // Pourcentage de réduction (0-30%)
+  
+  // Alias pour compatibilité
+  percentage?: number;
+  progressPercent?: number;
 }
 
 /**

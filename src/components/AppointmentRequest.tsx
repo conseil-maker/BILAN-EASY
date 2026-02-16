@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { Calendar, Send, Clock, CheckCircle, XCircle, MessageSquare, Loader2 } from 'lucide-react';
+import { sendAppointmentRequestNotification } from '../services/emailService';
 
 // ============================================
 // TYPES
@@ -100,6 +101,21 @@ const AppointmentRequest: React.FC<AppointmentRequestProps> = ({ user, userName 
 
       if (error) throw error;
 
+      // Envoyer une notification email au consultant
+      const reasonLabel = reasons.find(r => r.value === reason)?.label || reason;
+      try {
+        await sendAppointmentRequestNotification(
+          userName || user.email?.split('@')[0] || 'Client',
+          user.email || '',
+          reasonLabel,
+          preferredDate || undefined,
+          preferredTime || undefined,
+          message.trim() || undefined
+        );
+      } catch (emailErr) {
+        console.warn('Email notification failed (non-blocking):', emailErr);
+      }
+
       setSubmitSuccess(true);
       setReason('');
       setPreferredDate('');
@@ -127,7 +143,8 @@ const AppointmentRequest: React.FC<AppointmentRequestProps> = ({ user, userName 
       completed: { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400', icon: <CheckCircle size={14} />, label: t('status.completed') },
       cancelled: { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: <XCircle size={14} />, label: t('status.cancelled') },
     };
-    const c = config[status] || config.pending;
+    const c = config[status] || config.pending!;
+    if (!c) return null;
     return (
       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${c.color}`}>
         {c.icon} {c.label}

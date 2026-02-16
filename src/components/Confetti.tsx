@@ -32,7 +32,7 @@ const Confetti: React.FC<ConfettiProps> = ({ duration = 3000 }) => {
       left: Math.random() * 100,
       delay: Math.random() * 0.5,
       duration: 2 + Math.random() * 1,
-      color: colors[Math.floor(Math.random() * colors.length)],
+      color: colors[Math.floor(Math.random() * colors.length)] || '#FF6B6B',
     }));
 
     setPieces(newPieces);

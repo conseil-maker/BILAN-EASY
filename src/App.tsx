@@ -333,7 +333,7 @@ const App: React.FC = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title={t('userMenu.appointments', 'Mes Rendez-vous')} />
           <Suspense fallback={<LoadingSpinner message={t('loadingAppointments')} />}>
-            <AppointmentRequest userId={user.id} />
+            <AppointmentRequest user={user} userName={user.email?.split('@')[0] || ''} />
           </Suspense>
         </div>
       );

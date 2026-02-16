@@ -273,6 +273,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
       const interval = setInterval(saveCurrentSession, 60000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [appState, saveCurrentSession, sessionRestored]);
 
   // Sauvegarder à chaque changement d'état (seulement après restauration complète)
@@ -297,11 +298,11 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
   useEffect(() => {
     if (selectedPackage && currentAnswers.length > 0) {
       const progressionInfo: ProgressionInfo = calculateProgression(
-        currentAnswers.length,
-        selectedPackage.timeBudget.total,
-        selectedPackage.id
+        currentAnswers,
+        selectedPackage.id,
+        null
       );
-      setProgress(progressionInfo.percentage);
+      setProgress(progressionInfo.globalProgress);
     }
   }, [currentAnswers.length, selectedPackage]);
 

@@ -73,7 +73,7 @@ const formatEmailContent = (
     content += `${organizationConfig.phone}\n`;
     content += `${organizationConfig.email}\n`;
     content += `${organizationConfig.address.street}, ${organizationConfig.address.postalCode} ${organizationConfig.address.city}\n`;
-    content += `\nOrganisme certifié Qualiopi - ${organizationConfig.qualiopi.number}`;
+    content += `\nOrganisme certifié Qualiopi - ${organizationConfig.qualiopi}`;
   }
   
   return content;
@@ -97,7 +97,7 @@ export const gmailTemplates = {
 3. Planifiez vos entretiens avec votre consultant`,
         `Accédez à votre espace : ${organizationConfig.website}`,
         `🏆 ORGANISME CERTIFIÉ QUALIOPI
-N° ${organizationConfig.qualiopi.number}
+N° ${organizationConfig.qualiopi}
 Votre bilan est éligible au financement CPF et OPCO.`,
       ]
     ),

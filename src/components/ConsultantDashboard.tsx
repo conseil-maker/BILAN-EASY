@@ -9,7 +9,7 @@ import { Calendar, Clock, CheckCircle, XCircle, MessageSquare, Phone, Users, Fil
 
 interface ConsultantDashboardProps {
   onBack: () => void;
-  onViewAssessment: (assessment: Assessment) => void;
+  onViewAssessment?: (assessment: Assessment) => void;
 }
 
 interface ClientInfo {
@@ -167,7 +167,8 @@ export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack
       completed: { color: 'bg-green-100 text-green-800', icon: <CheckCircle size={14} />, label: t('appointments:status.completed', 'Terminé') },
       cancelled: { color: 'bg-red-100 text-red-800', icon: <XCircle size={14} />, label: t('appointments:status.cancelled', 'Annulé') },
     };
-    const c = config[status] || config.pending;
+    const c = config[status] || config.pending!;
+    if (!c) return null;
     return (
       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${c.color}`}>
         {c.icon} {c.label}

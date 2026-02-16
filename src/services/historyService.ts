@@ -23,7 +23,7 @@ const generateUUID = (): string => {
  */
 const assessmentToHistoryItem = (assessment: Assessment): HistoryItem => {
   const titleMatch = assessment.title?.match(/Bilan (.+?) - /);
-  const userName = titleMatch ? titleMatch[1] : 'Utilisateur';
+  const userName: string = titleMatch?.[1] || 'Utilisateur';
   
   return {
     id: assessment.id,

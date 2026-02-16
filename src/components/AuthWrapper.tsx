@@ -35,8 +35,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         .from('profiles')
         .select('role, preferred_language')
         .eq('id', userId)
-        .maybeSingle()
-        .abortSignal(controller.signal);
+        .maybeSingle();
 
       clearTimeout(timeout);
 

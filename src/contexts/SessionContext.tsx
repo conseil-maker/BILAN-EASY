@@ -240,6 +240,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ user, children
 
       return () => clearTimeout(saveDebounced);
     }
+    return undefined;
   }, [
     user.id,
     state.appState,

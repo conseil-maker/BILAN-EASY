@@ -253,6 +253,7 @@ function buildConversationContext(
 
   const lang = getCurrentLanguage();
   const lastAnswer = previousAnswers[previousAnswers.length - 1];
+  if (!lastAnswer) return buildFirstQuestionContext(userName, userProfile);
   const keyElements = extractKeyElements(lastAnswer.value);
   
   const sentences = lastAnswer.value.split(/[.!?]+/).filter(s => s.trim().length > 20);
@@ -511,10 +512,10 @@ function buildTaskDescription(
   }
   
   return lang === 'tr'
-    ? `Aşama: ${phaseInfo.name} | Kategori: ${category.name}
+    ? `A\u015fama: ${phaseInfo.name} | Kategori: ${category?.name || ''}
 ${complexityGuidance}
-Önceki yanıtlara değinerek bu kategoriyi keşfeden bir soru oluştur.`
-    : `Phase: ${phaseInfo.name} | Catégorie: ${category.name}
+\u00d6nceki yan\u0131tlara de\u011finerek bu kategoriyi ke\u015ffeden bir soru olu\u015ftur.`
+    : `Phase: ${phaseInfo.name} | Catégorie: ${category?.name || ''}
 ${complexityGuidance}
 Génère une question qui explore cette catégorie tout en rebondissant sur les réponses précédentes.`;
 }
@@ -613,9 +614,12 @@ function processQuestionResponse(
     title: (questionData.title as string) || '',
     description: (questionData.description as string) || '',
     type: ((questionData.type as string) || 'open') as QuestionType,
+    theme: (questionData.category as string) || 'general',
+    choices: (questionData.options as string[]) || undefined,
     options: (questionData.options as string[]) || undefined,
     category: (questionData.category as string) || 'general',
     phase: (questionData.phase as string) || 'phase1',
+    required: true,
     isRequired: true,
     order: previousAnswers.length + 1,
   };

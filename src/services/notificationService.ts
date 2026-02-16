@@ -248,9 +248,9 @@ class NotificationService {
     body: string
   ): Promise<boolean> {
     try {
-      const { callEmailProxy } = await import('./edgeFunctionClient');
-      const result = await callEmailProxy({
-        to: email,
+      const { sendEmail } = await import('./edgeFunctionClient');
+      const result = await sendEmail({
+        to: [email],
         subject,
         html: body,
       });
