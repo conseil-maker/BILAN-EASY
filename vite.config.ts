@@ -31,11 +31,17 @@ export default defineConfig(({ mode }) => {
         // Séparation intelligente des chunks
         // IMPORTANT: lucide-react doit être avec React pour éviter la dépendance circulaire
         manualChunks: (id) => {
-          // Vendors React + lucide-react (même chunk pour éviter dépendance circulaire)
+          // Vendors React + lucide-react + i18n (même chunk pour éviter dépendance circulaire)
+          // use-sync-external-store et react-i18next dépendent de React,
+          // donc ils doivent être dans le même chunk que React
           if (id.includes('node_modules/react') || 
               id.includes('node_modules/react-dom') ||
               id.includes('node_modules/scheduler') ||
-              id.includes('node_modules/lucide-react')) {
+              id.includes('node_modules/lucide-react') ||
+              id.includes('node_modules/react-i18next') ||
+              id.includes('node_modules/i18next') ||
+              id.includes('node_modules/use-sync-external-store') ||
+              id.includes('node_modules/i18next-browser-languagedetector')) {
             return 'vendor-react';
           }
           
