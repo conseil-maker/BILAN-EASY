@@ -4,6 +4,7 @@ import { useToast } from './ToastProvider';
 import { HistoryItem } from '../types';
 import { getAssessmentHistory, deleteAssessmentFromSupabase } from '../services/historyService';
 import { supabase } from '../lib/supabaseClient';
+import { translatePackageNameFromFrench } from '../utils/packageTranslations';
 
 interface HistoryScreenProps {
     onViewRecord: (record: HistoryItem) => void;
@@ -89,7 +90,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ onViewRecord, onBack }) =
                             <div key={item.id} className="bg-white p-4 sm:p-6 rounded-lg shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                 <div className="flex-grow">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-bold text-primary-800">{item.packageName}</p>
+                                        <p className="font-bold text-primary-800">{translatePackageNameFromFrench(item.packageName)}</p>
                                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                                             {t('history.saved')}
                                         </span>

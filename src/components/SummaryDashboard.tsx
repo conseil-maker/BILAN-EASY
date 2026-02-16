@@ -217,7 +217,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
         try {
             // Préparer les données pour le PDF
             const pdfData = {
-                title: `Bilan de Compétences - ${packageName}`,
+                title: `${t('pdfTitle', 'Bilan de Compétences')} - ${packageName}`,
                 clientName: userName,
                 date: new Date().toLocaleDateString('fr-FR', {
                     year: 'numeric',

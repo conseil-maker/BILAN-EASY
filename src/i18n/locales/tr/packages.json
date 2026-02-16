@@ -14,5 +14,58 @@
   "synthesis": "Kapsamlı özet",
   "actionPlan": "Eylem planı",
   "certificate": "Katılım belgesi",
-  "support": "Kişiselleştirilmiş rehberlik"
+  "support": "Kişiselleştirilmiş rehberlik",
+  "items": {
+    "test": {
+      "name": "Test Paketi",
+      "description": "Uygulamayı geliştirmek ve test etmek için test paketi. Kısa ve eksiksiz bir yolculuk.",
+      "features": [
+        "Yoğunlaştırılmış tam yolculuk",
+        "Tüm aşamaların kısa versiyonu",
+        "Uygulamayı test etmek için ideal",
+        "Yaklaşık 30-40 soru"
+      ]
+    },
+    "essentiel": {
+      "name": "Temel Değerlendirme",
+      "description": "Yetkinliklerinizi değerlendirmek ve profesyonel projenizi tanımlamak için kapsamlı bir değerlendirme.",
+      "features": [
+        "Yetkinliklerinizin derinlemesine analizi",
+        "Motivasyonlarınızın belirlenmesi",
+        "Profesyonel yolların keşfi",
+        "Kişiselleştirilmiş eylem planı",
+        "Yaklaşık 75-100 soru"
+      ]
+    },
+    "approfondi": {
+      "name": "Derinlemesine Değerlendirme",
+      "description": "Profesyonel gelişiminiz için temel konuların derinlemesine incelenmesiyle eksiksiz bir keşif.",
+      "features": [
+        "Temel Değerlendirmenin tamamı",
+        "Transfere edilebilir yetkinliklerin derinleştirilmesi",
+        "İş piyasası analizi",
+        "İş arama stratejisi",
+        "Profesyonel ağ geliştirme",
+        "Yaklaşık 110-140 soru"
+      ]
+    },
+    "strategique": {
+      "name": "Stratejik Eşlik",
+      "description": "Büyük bir kariyer değişikliği veya üst düzey bir pozisyon hedefleyen profesyoneller için premium eşlik.",
+      "features": [
+        "Derinlemesine Değerlendirmenin tamamı",
+        "Derinlemesine kişiselleştirilmiş koçluk",
+        "Liderlik gelişimi",
+        "Kişisel marka stratejisi",
+        "Üst düzey mülakatlara hazırlık",
+        "Sürekli eşlik",
+        "Yaklaşık 150-190 soru"
+      ]
+    }
+  },
+  "phaseNames": {
+    "phase1": "Ön Aşama",
+    "phase2": "Araştırma Aşaması",
+    "phase3": "Sonuç Aşaması"
+  }
 }

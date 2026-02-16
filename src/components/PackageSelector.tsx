@@ -24,32 +24,41 @@ const PackageSelector: React.FC<PackageSelectorProps> = ({ packages, onSelect })
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">{t('subtitle')}</p>
         </header>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {packages.map((pkg) => (
-            <div key={pkg.id} className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col p-8 transform hover:-translate-y-2">
-              <h2 className="text-2xl font-bold font-display text-primary-700">{pkg.name}</h2>
-              <p className="text-slate-500 mt-2 mb-6 flex-grow">{pkg.description}</p>
-              
-              <div className="mb-8">
-                <p className="text-4xl font-bold text-slate-800">{pkg.totalHours} <span className="text-xl font-medium text-slate-500">{t('hours')}</span></p>
-              </div>
+          {packages.map((pkg) => {
+            // Utiliser les traductions i18n pour le nom, la description et les features
+            const pkgName = t(`items.${pkg.id}.name`, { defaultValue: pkg.name });
+            const pkgDescription = t(`items.${pkg.id}.description`, { defaultValue: pkg.description });
+            const pkgFeatures: string[] = t(`items.${pkg.id}.features`, { returnObjects: true, defaultValue: pkg.features }) as string[];
+            // Fallback: si returnObjects ne retourne pas un tableau, utiliser les features du package
+            const features = Array.isArray(pkgFeatures) ? pkgFeatures : pkg.features;
 
-              <ul className="space-y-3 mb-8">
-                {pkg.features.map(feature => (
-                    <li key={feature} className="flex items-center text-slate-600">
-                        <CheckIcon />
-                        <span>{feature}</span>
-                    </li>
-                ))}
-              </ul>
-              
-              <button
-                onClick={() => onSelect(pkg)}
-                className="mt-auto w-full bg-primary-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors duration-300"
-              >
-                {t('select')}
-              </button>
-            </div>
-          ))}
+            return (
+              <div key={pkg.id} className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col p-8 transform hover:-translate-y-2">
+                <h2 className="text-2xl font-bold font-display text-primary-700">{pkgName}</h2>
+                <p className="text-slate-500 mt-2 mb-6 flex-grow">{pkgDescription}</p>
+                
+                <div className="mb-8">
+                  <p className="text-4xl font-bold text-slate-800">{pkg.totalHours} <span className="text-xl font-medium text-slate-500">{t('hours')}</span></p>
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {features.map((feature, index) => (
+                      <li key={index} className="flex items-center text-slate-600">
+                          <CheckIcon />
+                          <span>{feature}</span>
+                      </li>
+                  ))}
+                </ul>
+                
+                <button
+                  onClick={() => onSelect(pkg)}
+                  className="mt-auto w-full bg-primary-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors duration-300"
+                >
+                  {t('select')}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

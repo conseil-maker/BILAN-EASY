@@ -20,6 +20,7 @@ import { supabase } from '../lib/supabaseClient';
 import { saveAssessmentToHistory } from '../services/historyService';
 // useAutoSave supprimé - session gérée par Supabase dans ClientApp
 import { useToast } from './ToastProvider';
+import { getTranslatedPackageName, translatePhaseNameFromFrench } from '../utils/packageTranslations';
 import { 
   sendLocalNotification, 
   notifications, 
@@ -459,11 +460,21 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
             // Vérifier si on change de phase
             if (info.phase !== prevInfo.phase) {
                 // console.log(`[runNextStep] Transition de phase: ${prevInfo.phase} -> ${info.phase}`);
-                setUnlockedBadge(`Phase ${prevInfo.phase} : ${prevInfo.name}`);
+                setUnlockedBadge(`Phase ${prevInfo.phase} : ${translatePhaseNameFromFrench(prevInfo.name)}`);
                 
                 // === MESSAGE DE TRANSITION DE PHASE ===
                 // Ajouter un message explicite pour annoncer le passage à la nouvelle phase
-                const transitionMessages: Record<string, { recap: string; intro: string }> = {
+                const isTurkish = i18n.language === 'tr';
+                const transitionMessages: Record<string, { recap: string; intro: string }> = isTurkish ? {
+                    '1_to_2': {
+                        recap: `${userName}, **Ön Aşama**'yı tamamladık. Artık mevcut durumunuz, bu değerlendirme için motivasyonlarınız ve beklentileriniz hakkında iyi bir anlayışa sahibim.`,
+                        intro: `Şimdi **Araştırma Aşaması**'na geçiyoruz — değerlendirmenin kalbi. Yetkinliklerinizi, mesleki değerlerinizi, motivasyonlarınızı ve gelişim olanaklarınızı derinlemesine keşfedeceğiz. Bu aşama daha kapsamlıdır, her soru üzerinde düşünmek için zaman ayırın.`
+                    },
+                    '2_to_3': {
+                        recap: `${userName}, **Araştırma Aşaması** tamamlandı. Temel yetkinliklerinizi, değerlerinizi, motivasyonlarınızı belirledik ve çeşitli kariyer yollarını keşfettik.`,
+                        intro: `Şimdi **Sonuç Aşaması**'na giriyoruz. Hedeflerinizi gerçeklikle yüzleştirmenin, kariyer projenizi doğrulamanın ve somut bir eylem planı oluşturmanın zamanı geldi.`
+                    }
+                } : {
                     '1_to_2': {
                         recap: `${userName}, nous avons terminé la **Phase Préliminaire**. J'ai maintenant une bonne compréhension de votre situation actuelle, de vos motivations pour ce bilan et de vos attentes.`,
                         intro: `Nous passons maintenant à la **Phase d'Investigation** — le cœur du bilan. Nous allons explorer en profondeur vos compétences, vos valeurs professionnelles, vos motivations et les possibilités d'évolution. Cette phase est plus approfondie, prenez le temps de réfléchir à chaque question.`
@@ -1329,8 +1340,8 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     
                     <div className="p-4 flex justify-between items-center">
                         <div>
-                            <h1 className="font-bold text-lg text-primary-800 dark:text-primary-300 font-display transition-colors duration-300">{pkg.name}</h1>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">{currentPhaseInfo?.name}</p>
+                            <h1 className="font-bold text-lg text-primary-800 dark:text-primary-300 font-display transition-colors duration-300">{getTranslatedPackageName(pkg.id, pkg.name)}</h1>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">{currentPhaseInfo ? translatePhaseNameFromFrench(currentPhaseInfo.name) : ''}</p>
                         </div>
                         {currentPhaseInfo && (() => {
                             const progressionInfo = calculateProgression(answers, pkg.id, userProfile);

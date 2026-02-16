@@ -8,6 +8,7 @@ import { PACKAGES } from '../constants';
 import { HistoryItem } from '../types-ai-studio';
 import { syntheseService, SyntheseData } from '../services/syntheseService';
 import { organizationConfig } from '../config/organization';
+import { getTranslatedPackageName, translatePackageNameFromFrench } from '../utils/packageTranslations';
 
 interface ClientDashboardProps {
   user: User;
@@ -132,7 +133,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
       if (!inProgressBilan && sessionData && sessionData.current_answers?.length > 0) {
         const pkg = PACKAGES.find(p => p.id === sessionData.selected_package_id);
-        const packageName = pkg?.name || 'Bilan en cours';
+        const packageName = pkg ? getTranslatedPackageName(pkg.id, pkg.name) : t('bilanInProgress', 'Bilan en cours');
         
         const progressionInfo = calculateProgression(
           sessionData.current_answers || [],
@@ -301,7 +302,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       const syntheseData: SyntheseData = {
         userName: item.userName,
         userEmail: user.email || '',
-        packageName: item.packageName,
+        packageName: translatePackageNameFromFrench(item.packageName),
         startDate: formatDate(item.date),
         endDate: new Date().toLocaleDateString(locale),
         consultantName: organizationConfig.defaultConsultant.name,
@@ -345,7 +346,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           item.answers.forEach(answer => {
             data.push([
               formatDate(item.date),
-              item.packageName,
+              translatePackageNameFromFrench(item.packageName),
               answer.questionTitle || answer.questionId || '',
               answer.value || '',
               answer.categoryId || ''
@@ -385,7 +386,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           item.answers.forEach(answer => {
             data.push([
               formatDate(item.date),
-              item.packageName,
+              translatePackageNameFromFrench(item.packageName),
               answer.questionTitle || answer.questionId || '',
               answer.value || '',
               answer.categoryId || ''
@@ -626,7 +627,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 dark:text-white">
-                        {currentBilan.package_name || 'Bilan de compétences'}
+                        {translatePackageNameFromFrench(currentBilan.package_name) || t('bilanDeCompetences', 'Bilan de compétences')}
                       </h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {t('currentBilan.startedOn', { date: formatDate(currentBilan.created_at) })}
@@ -722,7 +723,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold text-gray-900 dark:text-white">
-                          {item.packageName}
+                          {translatePackageNameFromFrench(item.packageName)}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           {formatDate(item.date)}
@@ -767,7 +768,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                         <span className="text-2xl">📄</span>
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {t('documents.synthesisItem', { name: item.packageName })}
+                            {t('documents.synthesisItem', { name: translatePackageNameFromFrench(item.packageName) })}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
                             {formatDate(item.date)}

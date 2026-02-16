@@ -14,5 +14,58 @@
   "synthesis": "Synthèse complète",
   "actionPlan": "Plan d'action",
   "certificate": "Attestation de présence",
-  "support": "Accompagnement personnalisé"
+  "support": "Accompagnement personnalisé",
+  "items": {
+    "test": {
+      "name": "Forfait Test",
+      "description": "Forfait de test pour développer et tester l'application. Parcours court et complet.",
+      "features": [
+        "Parcours complet condensé",
+        "Toutes les phases en version courte",
+        "Idéal pour tester l'application",
+        "Environ 30-40 questions"
+      ]
+    },
+    "essentiel": {
+      "name": "Bilan Essentiel",
+      "description": "Un bilan complet pour faire le point sur vos compétences et définir votre projet professionnel.",
+      "features": [
+        "Analyse approfondie de vos compétences",
+        "Identification de vos motivations",
+        "Exploration de pistes professionnelles",
+        "Plan d'action personnalisé",
+        "Environ 75-100 questions"
+      ]
+    },
+    "approfondi": {
+      "name": "Bilan Approfondi",
+      "description": "Une exploration complète avec approfondissement des thématiques clés pour votre évolution professionnelle.",
+      "features": [
+        "Tout du Bilan Essentiel",
+        "Approfondissement des compétences transversales",
+        "Analyse du marché du travail",
+        "Stratégie de recherche d'emploi",
+        "Développement du réseau professionnel",
+        "Environ 110-140 questions"
+      ]
+    },
+    "strategique": {
+      "name": "Accompagnement Stratégique",
+      "description": "Un accompagnement premium pour les professionnels visant une transition de carrière majeure ou un poste à haute responsabilité.",
+      "features": [
+        "Tout du Bilan Approfondi",
+        "Coaching personnalisé approfondi",
+        "Développement du leadership",
+        "Stratégie de personal branding",
+        "Préparation aux entretiens de haut niveau",
+        "Accompagnement sur la durée",
+        "Environ 150-190 questions"
+      ]
+    }
+  },
+  "phaseNames": {
+    "phase1": "Phase Préliminaire",
+    "phase2": "Phase d'Investigation",
+    "phase3": "Phase de Conclusion"
+  }
 }

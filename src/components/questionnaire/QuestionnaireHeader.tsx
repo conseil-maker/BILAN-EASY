@@ -11,6 +11,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Package, CurrentPhaseInfo } from '../../types';
 import { ProgressionInfo } from '../../services/progressionService';
+import { getTranslatedPackageName, translatePhaseNameFromFrench } from '../../utils/packageTranslations';
 
 // Icônes
 const SettingsIcon = () => (
@@ -75,7 +76,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
         <div className="flex items-center gap-4">
           <div>
             <h1 className="text-lg font-bold text-primary-800 font-display">
-              {pkg.name}
+              {getTranslatedPackageName(pkg.id, pkg.name)}
             </h1>
             <p className="text-sm text-slate-500">
               {t('questionnaireHeader.greeting', { name: userName })}
@@ -86,7 +87,7 @@ const QuestionnaireHeader: React.FC<QuestionnaireHeaderProps> = ({
           {currentPhaseInfo && (
             <div className="hidden md:block px-3 py-1 bg-primary-50 rounded-full">
               <span className="text-sm font-medium text-primary-700">
-                {currentPhaseInfo.name}
+                {translatePhaseNameFromFrench(currentPhaseInfo.name)}
               </span>
             </div>
           )}

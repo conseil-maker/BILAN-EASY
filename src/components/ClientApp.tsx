@@ -17,6 +17,7 @@ import { saveSession, loadSession, clearSession } from '../services/sessionServi
 import { calculateProgression, ProgressionInfo } from '../services/progressionService';
 import { useToast } from './ToastProvider';
 import { supabase } from '../lib/supabaseClient';
+import { getTranslatedPackageName, translatePackageNameFromFrench } from '../utils/packageTranslations';
 
 type AppState = 'welcome' | 'package-selection' | 'preliminary-phase' | 'personalization-step' | 'questionnaire' | 'completion' | 'summary' | 'history' | 'view-history-record';
 
@@ -545,7 +546,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             userId={user.id}
             userName={userName}
             userEmail={user.email || ''}
-            packageName={selectedPackage.name}
+            packageName={getTranslatedPackageName(selectedPackage.id, selectedPackage.name)}
             packageDuration={selectedPackage.totalHours}
             packagePrice={selectedPackage.price || 0}
             summary={currentSummary}
@@ -567,7 +568,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             summary={currentSummary}
             answers={currentAnswers}
             userName={userName}
-            packageName={selectedPackage.name}
+            packageName={getTranslatedPackageName(selectedPackage.id, selectedPackage.name)}
             onRestart={handleRestart}
             onViewHistory={handleShowHistory}
           />
@@ -586,7 +587,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
             summary={viewingRecord.summary}
             answers={viewingRecord.answers}
             userName={viewingRecord.userName}
-            packageName={viewingRecord.packageName}
+            packageName={translatePackageNameFromFrench(viewingRecord.packageName)}
             onRestart={handleRestart}
             onViewHistory={handleBackToHistory}
             isHistoryView={true}
@@ -651,7 +652,7 @@ const ClientApp: React.FC<ClientAppProps> = ({ user }) => {
       <EnhancedNavigation
         currentPhase={mapStateToBilanPhase(appState)}
         userName={userName}
-        packageName={selectedPackage?.name}
+        packageName={selectedPackage ? getTranslatedPackageName(selectedPackage.id, selectedPackage.name) : undefined}
         progress={progress}
         timeSpent={timeSpent}
         totalTime={selectedPackage ? selectedPackage.timeBudget.total : 120}
