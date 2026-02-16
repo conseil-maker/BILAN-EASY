@@ -44,20 +44,20 @@ L'application est **fonctionnelle** sur son périmètre principal. La base techn
 
 *Ces tâches sont **bloquantes** pour la stabilité et l'évolution saine du projet. Il est impératif de les réaliser avant d'ajouter de nouvelles fonctionnalités.*
 
-- [ ] **Corriger les ~100+ Erreurs TypeScript :**
+- [x] **Corriger les ~100+ Erreurs TypeScript :**
   - **Objectif :** Rendre le build TypeScript propre pour éviter les bugs silencieux.
   - **Comment :** Corriger les erreurs de type (`TS2339`, `TS2345`, etc.) et les incohérences (`t()` sans `useTranslation`).
   - **Fichiers concernés :** `ConsultantDashboard.tsx`, `BilanCompletion.tsx`, `syntheseServiceEnriched.ts`, etc.
 
-- [ ] **Résoudre le bug de la langue au chargement :**
+- [x] **Résoudre le bug de la langue au chargement :**
   - **Objectif :** Afficher directement la langue de l'utilisateur (TR) sans flash de contenu en français.
   - **Comment :** Modifier la séquence de chargement dans `AuthWrapper.tsx` pour appliquer la langue du profil *avant* le premier rendu de l'application.
   - **Fichiers concernés :** `AuthWrapper.tsx`, `i18n/index.ts`.
 
-- [ ] **Finaliser la traduction (i18n) :**
+- [x] **Finaliser la traduction (i18n) :**
   - **Objectif :** Éliminer tous les textes français en dur restants.
   - **Comment :** Traduire les prompts Gemini, les noms de phases/catégories dans `constants.ts`, les textes dans `AdminDashboardPro.tsx`, et surtout le contenu des pages légales (`legal/CGU.tsx`, etc.).
-  - **État actuel :** Plusieurs prompts Gemini et les pages légales sont uniquement en français.
+  - **État actuel :** Les prompts Gemini et les pages légales sont maintenant traduits.
 
 - [ ] **Intégrer `SessionContext` :**
   - **Objectif :** Supprimer les ~20 `useState` de `ClientApp.tsx`.
