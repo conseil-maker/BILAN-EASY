@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supportedLanguages, type SupportedLanguage } from '../i18n';
+import { supabase } from '../lib/supabaseClient';
 
 interface LanguageSelectorProps {
   variant?: 'dropdown' | 'inline';
@@ -25,10 +26,25 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ variant = 'dropdown
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const changeLanguage = (lang: SupportedLanguage) => {
+  const changeLanguage = async (lang: SupportedLanguage) => {
     i18n.changeLanguage(lang);
     localStorage.setItem('bilan-easy-language', lang);
     setIsOpen(false);
+
+    // Sauvegarder dans Supabase si l'utilisateur est connecté
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('profiles')
+          .update({ preferred_language: lang })
+          .eq('id', user.id);
+        console.log('[LanguageSelector] Langue sauvegardée dans le profil:', lang);
+      }
+    } catch (err) {
+      // Non-bloquant : la langue est déjà sauvegardée dans localStorage
+      console.warn('[LanguageSelector] Impossible de sauvegarder la langue dans Supabase:', err);
+    }
   };
 
   if (variant === 'inline') {

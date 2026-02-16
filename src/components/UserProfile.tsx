@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { useToast } from './ToastProvider';
+import LanguageSelector from './LanguageSelector';
 
 interface UserProfileProps {
   user: User;
@@ -346,6 +347,13 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, onBack }) => {
                     placeholder={t('fields.companyPlaceholder')}
                   />
                 </div>
+              </div>
+
+              {/* Sélecteur de langue */}
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('fields.language')}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{t('fields.languageNote')}</p>
+                <LanguageSelector variant="inline" />
               </div>
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-6">

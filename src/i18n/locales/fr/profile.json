@@ -24,7 +24,9 @@
     "postalCode": "Code postal",
     "postalCodePlaceholder": "75001",
     "city": "Ville",
-    "cityPlaceholder": "Paris"
+    "cityPlaceholder": "Paris",
+    "language": "Langue de l'application",
+    "languageNote": "Choisissez la langue dans laquelle vous souhaitez utiliser l'application."
   },
   "buttons": {
     "saving": "Enregistrement...",

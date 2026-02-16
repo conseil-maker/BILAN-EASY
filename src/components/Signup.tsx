@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabaseClient';
 import LanguageSelector from './LanguageSelector';
+import i18n from '../i18n';
 
 interface SignupProps {
   onToggle: () => void;
@@ -46,6 +47,23 @@ export default function Signup({ onToggle }: SignupProps) {
 
       // Le profil est créé automatiquement par un trigger Postgres
       // après l'inscription dans auth.users
+      
+      // Sauvegarder la langue préférée dans le profil
+      const currentLang = i18n.language?.substring(0, 2) || 'fr';
+      if (data?.user?.id) {
+        // Attendre un court instant pour que le trigger crée le profil
+        setTimeout(async () => {
+          try {
+            await supabase
+              .from('profiles')
+              .update({ preferred_language: currentLang })
+              .eq('id', data.user.id);
+            console.log('[Signup] Langue préférée sauvegardée:', currentLang);
+          } catch (err) {
+            console.warn('[Signup] Impossible de sauvegarder la langue:', err);
+          }
+        }, 1500);
+      }
       
       // Si la confirmation d'email est activée, data.session sera null
       // Sinon, l'utilisateur est automatiquement connecté

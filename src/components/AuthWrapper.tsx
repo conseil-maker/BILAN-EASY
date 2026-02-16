@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import LoginPro from './LoginPro';
 import Signup from './Signup';
+import i18n from '../i18n';
 
 interface AuthWrapperProps {
   children: (user: User, userRole: string) => React.ReactNode;
@@ -32,7 +33,7 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       // Essayer de récupérer le profil existant
       const { data, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, preferred_language')
         .eq('id', userId)
         .maybeSingle()
         .abortSignal(controller.signal);
@@ -44,9 +45,15 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         return 'client';
       }
 
-      // Si le profil existe, retourner le rôle
+      // Si le profil existe, appliquer la langue préférée et retourner le rôle
       if (data?.role) {
         console.log('[AuthWrapper] Profil existant trouvé, rôle:', data.role);
+        // Appliquer la langue préférée de l'utilisateur
+        if (data.preferred_language && data.preferred_language !== i18n.language?.substring(0, 2)) {
+          console.log('[AuthWrapper] Application de la langue préférée:', data.preferred_language);
+          i18n.changeLanguage(data.preferred_language);
+          localStorage.setItem('bilan-easy-language', data.preferred_language);
+        }
         return data.role;
       }
 

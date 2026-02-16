@@ -24,7 +24,9 @@
     "postalCode": "Posta kodu",
     "postalCodePlaceholder": "34000",
     "city": "Şehir",
-    "cityPlaceholder": "İstanbul"
+    "cityPlaceholder": "İstanbul",
+    "language": "Uygulama dili",
+    "languageNote": "Uygulamayı kullanmak istediğiniz dili seçin."
   },
   "buttons": {
     "saving": "Kaydediliyor...",
