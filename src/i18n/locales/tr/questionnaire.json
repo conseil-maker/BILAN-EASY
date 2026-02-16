@@ -244,6 +244,11 @@
     "pitch": "Ton"
   },
   "aiFeedback": {
+    "phaseNames": {
+      "phase1": "Araştırma",
+      "phase2": "Yetkinlik analizi",
+      "phase3": "Mesleki proje"
+    },
     "progress": "İlerleme",
     "didYouKnow": "Biliyor muydunuz?",
     "identifiedThemes": "Tespit edilen temalar",
@@ -346,6 +351,35 @@
   },
   "enhanced": {
     "hidePanel": "Paneli gizle",
+    "quotes": [
+      { "text": "Başarı mutluluğun anahtarı değildir. Mutluluk başarının anahtarıdır.", "author": "Albert Schweitzer", "theme": "motivasyon" },
+      { "text": "Sevdiğiniz bir iş seçin ve hayatınızda bir gün bile çalışmak zorunda kalmayacaksınız.", "author": "Konfüçyüs", "theme": "kariyer" },
+      { "text": "İyi iş yapmanın tek yolu yaptığınız işi sevmektir.", "author": "Steve Jobs", "theme": "tutku" },
+      { "text": "Zamanınız sınırlı, başkasının hayatını yaşayarak onu boşa harcamayın.", "author": "Steve Jobs", "theme": "otantiklik" },
+      { "text": "Yetenek maçları kazanır, ama takım çalışması şampiyonlukları kazanır.", "author": "Michael Jordan", "theme": "takım" },
+      { "text": "Yaratıcılık, eğlenen zekadır.", "author": "Albert Einstein", "theme": "yaratıcılık" },
+      { "text": "Daha iyiye ulaşmak için iyiden vazgeçmekten korkmayın.", "author": "John D. Rockefeller", "theme": "değişim" },
+      { "text": "Liderlik, insanlara işe yarayan fikirleri yaymaları için bir platform verme sanatıdır.", "author": "Seth Godin", "theme": "liderlik" },
+      { "text": "Bilgi deneyimle kazanılır, gerisi sadece bilgidir.", "author": "Albert Einstein", "theme": "deneyim" },
+      { "text": "İşler zor olduğu için cesaret edemiyoruz değil, cesaret edemediğimiz için zor oluyorlar.", "author": "Seneca", "theme": "cesaret" },
+      { "text": "Bir ağaç dikmek için en iyi zaman 20 yıl öncesiydi. İkinci en iyi zaman şimdiki andır.", "author": "Çin atasözü", "theme": "eylem" },
+      { "text": "Yetkinlikleriniz kapıları açar, ama sizi orada tutan karakterinizdir.", "author": "Anonim", "theme": "yetkinlikler" },
+      { "text": "Başarısızlık, bu sefer daha akıllıca yeniden başlama fırsatıdır.", "author": "Henry Ford", "theme": "dayanıklılık" },
+      { "text": "İletişim öğrenebileceğiniz bir beceridir. Bisiklet sürmek gibidir.", "author": "Brian Tracy", "theme": "iletişim" },
+      { "text": "Büyük şeyler asla tek bir kişi tarafından yapılmaz. Bir takım tarafından yapılır.", "author": "Steve Jobs", "theme": "işbirliği" }
+    ],
+    "tips": {
+      "yetkinlikler": { "icon": "💡", "tip": "Bu yetkinliği başarıyla kullandığınız somut durumları düşünün." },
+      "değerler": { "icon": "❤️", "tip": "Değerleriniz mesleki tatmininizin temelidir. Üzerine düşünmek için zaman ayırın." },
+      "motivasyon": { "icon": "🔥", "tip": "Sizi motive eden şeyler genellikle doğal yeteneklerinizi ve derin isteklerinizi ortaya koyar." },
+      "proje": { "icon": "🎯", "tip": "Başarılı bir mesleki proje yetkinliklerinizi, değerlerinizi ve isteklerinizi hizalar." },
+      "kariyer": { "icon": "🛤️", "tip": "Kariyerinizdeki her deneyim size benzersiz yetkinlikler kazandırmıştır." },
+      "değişim": { "icon": "🌱", "tip": "Değişim bir büyüme fırsatıdır. Merakla karşılayın." },
+      "takım": { "icon": "🤝", "tip": "Bir takımdaki doğal rolünüzü düşünün: lider, arabulucu, yaratıcı, organizatör?" },
+      "eğitim": { "icon": "📚", "tip": "Sürekli öğrenme, mesleki uyum sağlamanın anahtarıdır." },
+      "stres": { "icon": "🧘", "tip": "Stres kaynaklarınızı belirlemek onları daha iyi yönetmenizi ve enerjinizi korumanızı sağlar." },
+      "default": { "icon": "💭", "tip": "Düşünmek için zaman ayırın. Yanlış cevap yoktur, sadece sizin gerçeğiniz vardır." }
+    },
     "advice": "Öneri",
     "emergingThemes": "Ortaya Çıkan Temalar",
     "analyzingThemes": "Temalar analiz ediliyor...",

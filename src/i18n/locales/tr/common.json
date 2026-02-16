@@ -99,10 +99,15 @@
   "questionsCompleted": "{{count}} soru zaten tamamlandı",
   "resumeBilan": "Değerlendirmeme devam et",
   "later": "Daha sonra",
+  "redirectToDashboard": "Kontrol panelinize yönlendiriliyorsunuz...",
   "footer": {
     "rights": "Tüm hakları saklıdır",
     "legal": "Yasal bilgiler",
-    "privacy": "Gizlilik"
+    "privacy": "Gizlilik politikası",
+    "cgu": "Kullanım Koşulları",
+    "cgv": "Satış Koşulları",
+    "cookies": "Çerezler",
+    "certified": "Qualiopi sertifikalı kurum"
   },
   "userMenu": {
     "user": "Kullanıcı",

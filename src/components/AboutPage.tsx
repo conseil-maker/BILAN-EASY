@@ -2,119 +2,43 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { organizationConfig } from '../config/organization';
 
-// Types
-interface TeamMember {
-  name: string;
-  role: string;
-  description: string;
-  expertise: string[];
-  photo?: string;
-}
-
-interface MethodStep {
-  phase: string;
-  title: string;
-  duration: string;
-  description: string;
-  activities: string[];
-}
-
-// Données de l'équipe
-const teamMembers: TeamMember[] = [
-  {
-    name: 'Mikail LEKESIZ',
-    role: 'Président - Consultant en Bilan de Compétences',
-    description: 'Fort de plusieurs années d\'expérience dans l\'accompagnement professionnel, Mikail accompagne les bénéficiaires dans leur réflexion de carrière avec une approche personnalisée et bienveillante.',
-    expertise: [
-      'Bilan de compétences',
-      'Accompagnement au changement',
-      'Reconversion professionnelle',
-      'Développement personnel',
-    ],
-  },
-  {
-    name: 'Bahtisen AKINET',
-    role: 'Assistante Administrative et Formatrice',
-    description: 'Bahtisen assure le suivi administratif des dossiers et contribue à la qualité de l\'accueil des bénéficiaires. Elle intervient également en tant que formatrice sur les modules bureautiques.',
-    expertise: [
-      'Gestion administrative',
-      'Accueil et orientation',
-      'Formation bureautique',
-      'Suivi des dossiers CPF/OPCO',
-    ],
-  },
-];
-
-// Méthodologie du bilan
-const methodologySteps: MethodStep[] = [
-  {
-    phase: 'Phase 1',
-    title: 'Phase préliminaire',
-    duration: '2-3 heures',
-    description: 'Cette phase permet de définir vos besoins, de vous informer sur le déroulement du bilan et de confirmer votre engagement.',
-    activities: [
-      'Entretien de découverte',
-      'Présentation de la méthodologie',
-      'Définition des objectifs personnalisés',
-      'Signature de la convention',
-    ],
-  },
-  {
-    phase: 'Phase 2',
-    title: 'Phase d\'investigation',
-    duration: '12-16 heures',
-    description: 'C\'est le cœur du bilan. Nous explorons ensemble votre parcours, vos compétences, vos motivations et vos aspirations.',
-    activities: [
-      'Analyse du parcours professionnel',
-      'Identification des compétences',
-      'Exploration des motivations et valeurs',
-      'Tests et questionnaires',
-      'Recherche documentaire sur les métiers',
-      'Entretiens de validation',
-    ],
-  },
-  {
-    phase: 'Phase 3',
-    title: 'Phase de conclusion',
-    duration: '4-6 heures',
-    description: 'Nous construisons ensemble votre projet professionnel et définissons un plan d\'action concret.',
-    activities: [
-      'Synthèse des résultats',
-      'Élaboration du projet professionnel',
-      'Construction du plan d\'action',
-      'Remise du document de synthèse',
-      'Entretien de clôture',
-    ],
-  },
-];
-
-// Valeurs de l'organisme
-const values = [
-  {
-    icon: '🎯',
-    title: 'Personnalisation',
-    description: 'Chaque bilan est unique, adapté à votre parcours et vos objectifs.',
-  },
-  {
-    icon: '🤝',
-    title: 'Bienveillance',
-    description: 'Un accompagnement dans le respect et l\'écoute active.',
-  },
-  {
-    icon: '🔒',
-    title: 'Confidentialité',
-    description: 'Vos informations sont strictement confidentielles.',
-  },
-  {
-    icon: '✨',
-    title: 'Excellence',
-    description: 'Une démarche qualité certifiée Qualiopi.',
-  },
-];
-
 export const AboutPage: React.FC = () => {
   const { t } = useTranslation('about');
   const [activeTab, setActiveTab] = useState<'equipe' | 'methode' | 'valeurs' | 'qualiopi'>('equipe');
+
+  // Données de l'équipe depuis les traductions
+  const teamMembers = [
+    {
+      name: 'Mikail LEKESIZ',
+      role: t('team.members.mikail.role'),
+      description: t('team.members.mikail.description'),
+      expertise: t('team.members.mikail.expertise', { returnObjects: true }) as string[],
+    },
+    {
+      name: 'Bahtisen AKINET',
+      role: t('team.members.bahtisen.role'),
+      description: t('team.members.bahtisen.description'),
+      expertise: t('team.members.bahtisen.expertise', { returnObjects: true }) as string[],
+    },
+  ];
+
+  // Méthodologie depuis les traductions
+  const methodologySteps = ['phase1', 'phase2', 'phase3'].map(key => ({
+    phase: t(`method.steps.${key}.phase`),
+    title: t(`method.steps.${key}.title`),
+    duration: t(`method.steps.${key}.duration`),
+    description: t(`method.steps.${key}.description`),
+    activities: t(`method.steps.${key}.activities`, { returnObjects: true }) as string[],
+  }));
+
+  // Valeurs depuis les traductions
+  const values = t('values.items', { returnObjects: true }) as Array<{ icon: string; title: string; description: string }>;
+
+  // Engagements depuis les traductions
+  const commitments = t('values.commitments.items', { returnObjects: true }) as string[];
+
+  // Garanties Qualiopi depuis les traductions
+  const guarantees = t('qualiopi.guarantees.items', { returnObjects: true }) as Array<{ icon: string; title: string; description: string }>;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -202,7 +126,7 @@ export const AboutPage: React.FC = () => {
                       {member.description}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {member.expertise.map((skill, i) => (
+                      {Array.isArray(member.expertise) && member.expertise.map((skill, i) => (
                         <span 
                           key={i}
                           className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm"
@@ -286,7 +210,7 @@ export const AboutPage: React.FC = () => {
                         {step.description}
                       </p>
                       <ul className="space-y-2">
-                        {step.activities.map((activity, i) => (
+                        {Array.isArray(step.activities) && step.activities.map((activity, i) => (
                           <li key={i} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <span className="text-green-500">✓</span>
                             {activity}
@@ -322,7 +246,7 @@ export const AboutPage: React.FC = () => {
               {t('values.title')}
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {values.map((value, index) => (
+              {Array.isArray(values) && values.map((value, index) => (
                 <div 
                   key={index}
                   className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow"
@@ -344,14 +268,7 @@ export const AboutPage: React.FC = () => {
                 {t('values.commitments.title')}
               </h3>
               <div className="grid md:grid-cols-2 gap-6">
-                {[
-                  'Réponse sous 48h à toute demande',
-                  'Entretien de découverte gratuit et sans engagement',
-                  'Accompagnement personnalisé tout au long du bilan',
-                  'Documents de synthèse remis dans les délais',
-                  'Suivi à 6 mois post-bilan',
-                  'Amélioration continue basée sur vos retours',
-                ].map((engagement, i) => (
+                {Array.isArray(commitments) && commitments.map((engagement, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <span className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600">
                       ✓
@@ -436,23 +353,7 @@ export const AboutPage: React.FC = () => {
                 {t('qualiopi.guarantees.title')}
               </h3>
               <div className="grid md:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: 'Éligibilité aux financements',
-                    description: 'Votre bilan peut être financé par le CPF, les OPCO, Pôle Emploi...',
-                    icon: '💰',
-                  },
-                  {
-                    title: 'Qualité des prestations',
-                    description: 'Nos processus sont audités et conformes au référentiel national.',
-                    icon: '⭐',
-                  },
-                  {
-                    title: 'Amélioration continue',
-                    description: 'Nous analysons vos retours pour améliorer constamment nos services.',
-                    icon: '📈',
-                  },
-                ].map((item, i) => (
+                {Array.isArray(guarantees) && guarantees.map((item, i) => (
                   <div key={i} className="text-center">
                     <div className="text-4xl mb-3">{item.icon}</div>
                     <h4 className="font-bold text-gray-800 dark:text-white mb-2">{item.title}</h4>

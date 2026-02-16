@@ -127,9 +127,9 @@ export const PhaseTransition: React.FC<PhaseTransitionProps> = ({
 }) => {
   const { t } = useTranslation('questionnaire');
   const phaseNames: Record<string, string> = {
-    'phase1': 'Investigation',
-    'phase2': 'Analyse des compétences',
-    'phase3': 'Projet professionnel',
+    'phase1': t('aiFeedback.phaseNames.phase1'),
+    'phase2': t('aiFeedback.phaseNames.phase2'),
+    'phase3': t('aiFeedback.phaseNames.phase3'),
   };
 
   const phaseIcons: Record<string, string> = {

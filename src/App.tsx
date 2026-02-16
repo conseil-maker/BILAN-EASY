@@ -16,9 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 // Composants principaux
 const ClientApp = lazy(() => import('./components/ClientApp'));
-const ClientAppRefactored = lazy(() => import('./components/ClientAppRefactored'));
 const ClientAppWithSession = lazy(() => import('./components/ClientAppWithSession'));
-const ClientAppRefactoredWithSession = lazy(() => import('./components/ClientAppRefactoredWithSession'));
 
 // Dashboards Admin/Consultant
 const AdminDashboard = lazy(() => 
@@ -50,12 +48,7 @@ const DocumentsQualiopi = lazy(() =>
 const DocumentLibrary = lazy(() => 
   import('./components/DocumentLibrary').then(m => ({ default: m.DocumentLibrary }))
 );
-const SupabaseTest = lazy(() => 
-  import('./pages/SupabaseTest').then(m => ({ default: m.default }))
-);
-const RawFetchTest = lazy(() => 
-  import('./pages/RawFetchTest').then(m => ({ default: m.default }))
-);
+
 
 const MyDocuments = lazy(() => 
   import('./components/MyDocuments').then(m => ({ default: m.MyDocuments }))
@@ -101,32 +94,35 @@ const useHashRouter = () => {
 // COMPOSANTS UI
 // ============================================
 
-const Footer: React.FC = () => (
-  <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-6 mt-auto">
-    <div className="max-w-7xl mx-auto px-4">
-      <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-        <a href="#/legal/cgu" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-          CGU
-        </a>
-        <span className="text-gray-300 dark:text-gray-700">|</span>
-        <a href="#/legal/cgv" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-          CGV
-        </a>
-        <span className="text-gray-300 dark:text-gray-700">|</span>
-        <a href="#/legal/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-          Politique de confidentialité
-        </a>
-        <span className="text-gray-300 dark:text-gray-700">|</span>
-        <a href="#/legal/cookies" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-          Cookies
-        </a>
+const Footer: React.FC = () => {
+  const { t: tCommon } = useTranslation('common');
+  return (
+    <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-6 mt-auto">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <a href="#/legal/cgu" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            {tCommon('footer.cgu', 'CGU')}
+          </a>
+          <span className="text-gray-300 dark:text-gray-700">|</span>
+          <a href="#/legal/cgv" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            {tCommon('footer.cgv', 'CGV')}
+          </a>
+          <span className="text-gray-300 dark:text-gray-700">|</span>
+          <a href="#/legal/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            {tCommon('footer.privacy', 'Politique de confidentialité')}
+          </a>
+          <span className="text-gray-300 dark:text-gray-700">|</span>
+          <a href="#/legal/cookies" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            {tCommon('footer.cookies', 'Cookies')}
+          </a>
+        </div>
+        <div className="text-center mt-4 text-xs text-gray-500 dark:text-gray-500">
+          © {new Date().getFullYear()} Bilan-Easy - {tCommon('footer.certified', 'Organisme certifié Qualiopi')}
+        </div>
       </div>
-      <div className="text-center mt-4 text-xs text-gray-500 dark:text-gray-500">
-        © {new Date().getFullYear()} Bilan-Easy - Organisme certifié Qualiopi
-      </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 const BackButton: React.FC = () => {
   const { t } = useTranslation('common');
@@ -212,27 +208,6 @@ const App: React.FC = () => {
     );
   }
 
-  // Page de test Supabase
-  if (route === '/supabase-test') {
-    return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-        <Suspense fallback={<LoadingSpinner />}>
-          <SupabaseTest />
-        </Suspense>
-      </div>
-    );
-  }
-
-  // Page de test Raw Fetch (Claude Sonnet 4.5 recommendation)
-  if (route === '/raw-fetch-test') {
-    return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-        <Suspense fallback={<LoadingSpinner />}>
-          <RawFetchTest />
-        </Suspense>
-      </div>
-    );
-  }
 
   // Page À propos
   if (route === '/about') {
@@ -425,7 +400,7 @@ const App: React.FC = () => {
         // Rediriger vers le dashboard si on est sur la route racine
         if (route === '/' || route === '') {
           window.location.hash = '#/dashboard';
-          return <FullPageLoader message="Redirection vers votre tableau de bord..." />;
+          return <FullPageLoader message={t('redirectToDashboard', 'Redirection vers votre tableau de bord...')} />;
         }
         return (
           <Suspense fallback={<FullPageLoader message={t('loadingApp')} />}>

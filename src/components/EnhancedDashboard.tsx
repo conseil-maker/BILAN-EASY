@@ -15,128 +15,16 @@ interface EnhancedDashboardProps {
   onCollapse?: () => void;
 }
 
-// Citations inspirantes pour le développement professionnel
-const INSPIRATIONAL_QUOTES = [
-  {
-    text: "Le succès n'est pas la clé du bonheur. Le bonheur est la clé du succès.",
-    author: "Albert Schweitzer",
-    theme: "motivation"
-  },
-  {
-    text: "Choisissez un travail que vous aimez et vous n'aurez pas à travailler un seul jour de votre vie.",
-    author: "Confucius",
-    theme: "carrière"
-  },
-  {
-    text: "La seule façon de faire du bon travail est d'aimer ce que vous faites.",
-    author: "Steve Jobs",
-    theme: "passion"
-  },
-  {
-    text: "Votre temps est limité, ne le gâchez pas en vivant la vie de quelqu'un d'autre.",
-    author: "Steve Jobs",
-    theme: "authenticité"
-  },
-  {
-    text: "Le talent gagne des matchs, mais le travail d'équipe gagne des championnats.",
-    author: "Michael Jordan",
-    theme: "équipe"
-  },
-  {
-    text: "La créativité, c'est l'intelligence qui s'amuse.",
-    author: "Albert Einstein",
-    theme: "créativité"
-  },
-  {
-    text: "N'ayez pas peur de renoncer au bon pour aller vers le meilleur.",
-    author: "John D. Rockefeller",
-    theme: "changement"
-  },
-  {
-    text: "Le leadership, c'est l'art de donner aux gens une plateforme pour répandre des idées qui fonctionnent.",
-    author: "Seth Godin",
-    theme: "leadership"
-  },
-  {
-    text: "La connaissance s'acquiert par l'expérience, tout le reste n'est que de l'information.",
-    author: "Albert Einstein",
-    theme: "expérience"
-  },
-  {
-    text: "Ce n'est pas parce que les choses sont difficiles que nous n'osons pas, c'est parce que nous n'osons pas qu'elles sont difficiles.",
-    author: "Sénèque",
-    theme: "courage"
-  },
-  {
-    text: "Le meilleur moment pour planter un arbre était il y a 20 ans. Le deuxième meilleur moment est maintenant.",
-    author: "Proverbe chinois",
-    theme: "action"
-  },
-  {
-    text: "Vos compétences vous ouvrent des portes, mais c'est votre caractère qui vous y maintient.",
-    author: "Anonyme",
-    theme: "compétences"
-  },
-  {
-    text: "L'échec est simplement l'opportunité de recommencer, cette fois plus intelligemment.",
-    author: "Henry Ford",
-    theme: "résilience"
-  },
-  {
-    text: "La communication est une compétence que vous pouvez apprendre. C'est comme faire du vélo.",
-    author: "Brian Tracy",
-    theme: "communication"
-  },
-  {
-    text: "Les grandes choses ne sont jamais faites par une seule personne. Elles sont faites par une équipe.",
-    author: "Steve Jobs",
-    theme: "collaboration"
-  }
-];
+interface Quote {
+  text: string;
+  author: string;
+  theme: string;
+}
 
-// Conseils contextuels basés sur les mots-clés
-const CONTEXTUAL_TIPS: Record<string, { icon: string; tip: string }> = {
-  compétences: {
-    icon: "💡",
-    tip: "Pensez à des situations concrètes où vous avez utilisé cette compétence avec succès."
-  },
-  valeurs: {
-    icon: "❤️",
-    tip: "Vos valeurs sont le socle de votre épanouissement professionnel. Prenez le temps d'y réfléchir."
-  },
-  motivation: {
-    icon: "🔥",
-    tip: "Ce qui vous motive révèle souvent vos talents naturels et vos aspirations profondes."
-  },
-  projet: {
-    icon: "🎯",
-    tip: "Un projet professionnel réussi aligne vos compétences, vos valeurs et vos aspirations."
-  },
-  parcours: {
-    icon: "🛤️",
-    tip: "Chaque expérience de votre parcours vous a apporté des compétences uniques."
-  },
-  changement: {
-    icon: "🌱",
-    tip: "Le changement est une opportunité de croissance. Accueillez-le avec curiosité."
-  },
-  équipe: {
-    icon: "🤝",
-    tip: "Réfléchissez à votre rôle naturel dans une équipe : leader, médiateur, créatif, organisateur ?"
-  },
-  formation: {
-    icon: "📚",
-    tip: "L'apprentissage continu est la clé de l'adaptabilité professionnelle."
-  },
-  stress: {
-    icon: "🧘",
-    tip: "Identifier vos sources de stress permet de mieux les gérer et de préserver votre énergie."
-  },
-  default: {
-    icon: "💭",
-    tip: "Prenez le temps de réfléchir. Il n'y a pas de mauvaise réponse, seulement votre vérité."
-  }
-};
+interface Tip {
+  icon: string;
+  tip: string;
+}
 
 const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
   data,
@@ -145,16 +33,24 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
   onCollapse,
 }) => {
   const { t } = useTranslation('questionnaire');
-  const [currentQuote, setCurrentQuote] = useState(INSPIRATIONAL_QUOTES[0]);
-  const [contextualTip, setContextualTip] = useState(CONTEXTUAL_TIPS.default);
+
+  // Charger les citations et conseils depuis les traductions
+  const quotes: Quote[] = t('enhanced.quotes', { returnObjects: true }) as Quote[];
+  const tips: Record<string, Tip> = t('enhanced.tips', { returnObjects: true }) as Record<string, Tip>;
+
+  const defaultTip = tips?.default || { icon: '💭', tip: '' };
+  const [currentQuote, setCurrentQuote] = useState<Quote>(quotes?.[0] || { text: '', author: '', theme: '' });
+  const [contextualTip, setContextualTip] = useState<Tip>(defaultTip);
 
   // Changer la citation et le conseil en fonction de la question
   useEffect(() => {
+    if (!quotes || !Array.isArray(quotes)) return;
+
     if (lastQuestion) {
       const questionLower = lastQuestion.toLowerCase();
       
       // Trouver une citation pertinente
-      const relevantQuotes = INSPIRATIONAL_QUOTES.filter(q => 
+      const relevantQuotes = quotes.filter(q => 
         questionLower.includes(q.theme) || 
         q.text.toLowerCase().includes(questionLower.split(' ').find(w => w.length > 5) || '')
       );
@@ -163,20 +59,22 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
         setCurrentQuote(relevantQuotes[Math.floor(Math.random() * relevantQuotes.length)]);
       } else {
         // Citation aléatoire si aucune correspondance
-        setCurrentQuote(INSPIRATIONAL_QUOTES[Math.floor(Math.random() * INSPIRATIONAL_QUOTES.length)]);
+        setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)]);
       }
 
       // Trouver un conseil contextuel
-      let foundTip = false;
-      for (const [keyword, tip] of Object.entries(CONTEXTUAL_TIPS)) {
-        if (keyword !== 'default' && questionLower.includes(keyword)) {
-          setContextualTip(tip);
-          foundTip = true;
-          break;
+      if (tips) {
+        let foundTip = false;
+        for (const [keyword, tip] of Object.entries(tips)) {
+          if (keyword !== 'default' && questionLower.includes(keyword)) {
+            setContextualTip(tip);
+            foundTip = true;
+            break;
+          }
         }
-      }
-      if (!foundTip) {
-        setContextualTip(CONTEXTUAL_TIPS.default);
+        if (!foundTip) {
+          setContextualTip(defaultTip);
+        }
       }
     }
   }, [lastQuestion]);

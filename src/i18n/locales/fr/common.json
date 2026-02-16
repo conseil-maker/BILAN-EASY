@@ -99,10 +99,15 @@
   "questionsCompleted": "{{count}} question(s) déjà complétée(s)",
   "resumeBilan": "Reprendre mon bilan",
   "later": "Plus tard",
+  "redirectToDashboard": "Redirection vers votre tableau de bord...",
   "footer": {
     "rights": "Tous droits réservés",
     "legal": "Mentions légales",
-    "privacy": "Confidentialité"
+    "privacy": "Politique de confidentialité",
+    "cgu": "CGU",
+    "cgv": "CGV",
+    "cookies": "Cookies",
+    "certified": "Organisme certifié Qualiopi"
   },
   "userMenu": {
     "user": "Utilisateur",

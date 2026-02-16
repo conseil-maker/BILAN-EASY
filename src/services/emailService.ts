@@ -13,6 +13,7 @@
 
 import { organizationConfig } from '../config/organization';
 import { emailConfig, isEmailConfigured } from '../config/email';
+import { supabase } from '../lib/supabaseClient';
 import i18n from '../i18n';
 
 const isTR = (): boolean => (i18n.language || 'fr') === 'tr';
@@ -513,13 +514,16 @@ export const sendEmail = async (emailData: EmailData): Promise<boolean> => {
     return true;
   }
   
-  // Mode production : envoi réel via Resend
+  // Mode production : envoi réel via Edge Function email-proxy (clé API côté serveur)
   try {
-    const response = await fetch('https://api.resend.com/emails', {
+    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/email-proxy`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${emailConfig.apiKey}`,
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || ''}`,
       },
       body: JSON.stringify({
         from: `${emailConfig.fromName} <${emailConfig.fromEmail}>`,
@@ -532,7 +536,7 @@ export const sendEmail = async (emailData: EmailData): Promise<boolean> => {
     
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('❌ Erreur Resend:', errorData);
+      console.error('❌ Erreur email-proxy:', errorData);
       return false;
     }
     
