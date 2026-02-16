@@ -6,6 +6,7 @@
 import { Answer } from '../../types';
 import { geminiProxy } from '../geminiServiceProxy';
 import { Type } from './schemas';
+import { getCurrentLanguage, getLangInstruction } from './utils';
 
 const ai = geminiProxy;
 
@@ -227,12 +228,39 @@ export const exploreJobMarket = async (
   userName: string
 ): Promise<MarketExplorationResult> => {
   console.log('[exploreJobMarket] Starting market exploration for:', targetJobTitle);
+  const lang = getCurrentLanguage();
   
   const profileSummary = answers.slice(-20).map(a => 
     `Q: ${a.questionTitle}\nR: ${a.text}`
   ).join('\n\n');
   
-  const prompt = `Tu es un expert en orientation professionnelle et en analyse du marché de l'emploi français.
+  const prompt = lang === 'tr'
+    ? `Sen bir kariyer danışmanlığı ve iş piyasası analizi uzmanısın.
+
+YARARLANICI PROFİLİ (${userName}):
+${profileSummary}
+
+HEDEFLENMİŞ MESLEK: ${targetJobTitle}
+
+GÖREV:
+Bu meslek için iş piyasasının kapsamlı bir analizini yap, yararlanıcının profilini dikkate alarak.
+
+TALİMATLAR:
+1. **Meslek Kartı**: Mesleği faaliyetleri ve gerekli yetkinlikleriyle tanımla
+2. **Piyasa Analizi**: Talebi, eğilimleri, maaşları ve coğrafi fırsatları değerlendir
+3. **Fizibilite Analizi**: Yararlanıcının profilini mesleğin gereksinimleriyle karşılaştır
+   - 1'den 10'a kadar puan (10 = mükemmel uyum)
+   - Eşleşen yetkinlikleri VE kapatılması gereken açıkları belirle
+4. **Önerilen Eğitimler**: Açıkları kapatmak için eğitimler öner
+5. **Alternatifler**: Ana meslek zor görünüyorsa 2-3 alternatif meslek öner
+
+ÖNEMLİ:
+- Analizini güncel iş piyasası gerçeklerine dayandır
+- Dürüst ve gerçekçi ol, aşırı iyimser olma
+- Analizi yararlanıcının özel profiline göre kişiselleştir
+
+${getLangInstruction()}`
+    : `Tu es un expert en orientation professionnelle et en analyse du marché de l'emploi français.
 
 PROFIL DU BÉNÉFICIAIRE (${userName}):
 ${profileSummary}
@@ -257,7 +285,7 @@ IMPORTANT:
 - Personnalise l'analyse en fonction du profil spécifique du bénéficiaire
 - Les formations doivent être concrètes et accessibles en France
 
-Langue: Français.`;
+${getLangInstruction()}`;
 
   try {
     const response = await ai.models.generateContent({
@@ -287,12 +315,37 @@ export const simulateJobInterview = async (
   userName: string
 ): Promise<JobInterviewResult> => {
   console.log('[simulateJobInterview] Starting simulated interview for:', targetJobTitle);
+  const lang = getCurrentLanguage();
   
   const profileSummary = answers.slice(-15).map(a => 
     `Q: ${a.questionTitle}\nR: ${a.text}`
   ).join('\n\n');
   
-  const prompt = `Tu es un expert en orientation professionnelle. Tu vas créer une simulation d'entretien avec un professionnel expérimenté du métier ciblé.
+  const prompt = lang === 'tr'
+    ? `Sen bir kariyer danışmanlığı uzmanısın. Hedeflenen meslekte deneyimli bir profesyonelle simüle edilmiş bir görüşme oluşturacaksın.
+
+YARARLANICI PROFİLİ (${userName}):
+${profileSummary}
+
+HEDEFLENMİŞ MESLEK: ${targetJobTitle}
+
+GÖREV:
+Bu mesleği yıllardır yapan gerçekçi ama kurgusal bir profesyonel oluştur ve dürüst deneyimini paylaştır.
+
+TALİMATLAR:
+1. **Persona**: Gerçekçi bir geçmişe sahip inandırıcı bir profesyonel oluştur
+2. **Günlük Gerçeklik**: İyi ve kötü yanlarıyla tipik bir günü anlat
+3. **Kariyer Tavsiyeleri**: Mesleğe girmek için pratik tavsiyeler paylaş
+4. **Dürüst Görüş**: Mesleğin gerçek avantajlarını VE dezavantajlarını ver
+5. **İnteraktif Sorular**: Yararlanıcının düşünmesine yardımcı olacak sorular sor
+
+ÖNEMLİ:
+- Profesyonel otantik ve dengeli olmalı (ne çok pozitif ne çok negatif)
+- İş ilanlarının bahsetmediği yönleri de dahil et
+- Sorular yararlanıcının bu mesleğin kendisine uygun olup olmadığını doğrulamasına yardımcı olmalı
+
+${getLangInstruction()}`
+    : `Tu es un expert en orientation professionnelle. Tu vas créer une simulation d'entretien avec un professionnel expérimenté du métier ciblé.
 
 PROFIL DU BÉNÉFICIAIRE (${userName}):
 ${profileSummary}
@@ -311,11 +364,10 @@ INSTRUCTIONS:
 
 IMPORTANT:
 - Le professionnel doit être authentique et nuancé (pas trop positif ni négatif)
-- Les conseils doivent être pratiques et applicables
 - Inclure des aspects que les descriptions de poste ne mentionnent pas
 - Les questions doivent aider le bénéficiaire à vérifier si ce métier lui correspond vraiment
 
-Langue: Français.`;
+${getLangInstruction()}`;
 
   try {
     const response = await ai.models.generateContent({
@@ -346,7 +398,26 @@ export const generateInterviewFollowUp = async (
   beneficiaryAnswer: string,
   context: string
 ): Promise<string> => {
-  const prompt = `Tu es ${professionalName}, un(e) professionnel(le) expérimenté(e) en tant que ${jobTitle}.
+  const lang = getCurrentLanguage();
+  
+  const prompt = lang === 'tr'
+    ? `Sen ${professionalName}, ${jobTitle} olarak deneyimli bir profesyonelsin.
+
+Yararlanıcı sorunuza yanıt verdi:
+Soru: "${previousQuestion}"
+Yanıt: "${beneficiaryAnswer}"
+
+Görüşme bağlamı: ${context}
+
+GÖREV:
+${professionalName} olarak, bu yanıta tepki ver ve şunlar için uygun bir takip sorusu sor:
+- Yararlanıcının düşüncesini derinleştirmek
+- Mesleğe somut olarak kendini yansıtmasına yardımcı olmak
+- Beklentilerinin gerçeklikle uyuşup uyuşmadığını doğrulamak
+
+Doğal ve destekleyici bir şekilde yanıt ver, gerçek bir sohbet gibi.
+${getLangInstruction()}`
+    : `Tu es ${professionalName}, un(e) professionnel(le) expérimenté(e) en tant que ${jobTitle}.
 
 Le bénéficiaire vient de répondre à ta question :
 Question : "${previousQuestion}"
@@ -361,17 +432,21 @@ En tant que ${professionalName}, réagis à cette réponse et pose une question 
 - Vérifier si ses attentes correspondent à la réalité
 
 Réponds de manière naturelle et bienveillante, comme dans une vraie conversation.
-Langue: Français.`;
+${getLangInstruction()}`;
+
+  const fallbackMsg = lang === 'tr'
+    ? "Bu meslekte sizi en çok ne çekiyor?"
+    : "Qu'est-ce qui vous attire le plus dans ce métier ?";
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
     });
-    return response.text?.trim() ?? "Qu'est-ce qui vous attire le plus dans ce métier ?";
+    return response.text?.trim() ?? fallbackMsg;
   } catch (error) {
     console.error('[generateInterviewFollowUp] Error:', error);
-    return "Qu'est-ce qui vous attire le plus dans ce métier ?";
+    return fallbackMsg;
   }
 };
 
@@ -383,7 +458,34 @@ export const generateFeasibilityReport = async (
   interviewResult: JobInterviewResult,
   userName: string
 ): Promise<string> => {
-  const prompt = `Tu es un expert en orientation professionnelle. Génère un rapport de faisabilité synthétique et actionnable.
+  const lang = getCurrentLanguage();
+  
+  const prompt = lang === 'tr'
+    ? `Sen bir kariyer danışmanlığı uzmanısın. Kısa ve eyleme dönüştürülebilir bir fizibilite raporu oluştur.
+
+ANALİZ VERİLERİ:
+Hedeflenen meslek: ${marketResult.targetJob.title}
+Fizibilite puanı: ${marketResult.feasibilityAnalysis.overallScore}/10
+Eşleşen yetkinlikler: ${marketResult.feasibilityAnalysis.matchingSkills.join(', ')}
+Kapatılması gereken açıklar: ${marketResult.feasibilityAnalysis.skillGaps.join(', ')}
+Talep düzeyi: ${marketResult.marketAnalysis.demandLevel}
+Eğilim: ${marketResult.marketAnalysis.demandTrend}
+
+PROFESYONELİN GERİ BİLDİRİMİ (${interviewResult.professionalPersona.name}):
+Olumlu noktalar: ${interviewResult.honestOpinion.prosOfJob.join(', ')}
+Olumsuz noktalar: ${interviewResult.honestOpinion.consOfJob.join(', ')}
+Ana tavsiye: ${interviewResult.careerAdvice.entryTips}
+
+GÖREV:
+${userName} için 300-400 kelimelik bir fizibilite raporu oluştur:
+1. Bu meslekteki başarı şansını özetle
+2. Yapılması gereken 3 öncelikli eylemi belirle
+3. Gerçekçi bir geçiş takvimi öner
+4. Proje çok zor görünüyorsa alternatifleri belirt
+
+Ton cesaretlendirici ama gerçekçi olmalı.
+${getLangInstruction()}`
+    : `Tu es un expert en orientation professionnelle. Génère un rapport de faisabilité synthétique et actionnable.
 
 DONNÉES D'ANALYSE:
 Métier ciblé: ${marketResult.targetJob.title}
@@ -406,16 +508,23 @@ Génère un rapport de faisabilité de 300-400 mots pour ${userName} qui :
 4. Mentionne les alternatives si le projet s'avère trop difficile
 
 Le ton doit être encourageant mais réaliste.
-Langue: Français.`;
+${getLangInstruction()}`;
+
+  const fallbackMsg = lang === 'tr'
+    ? "Fizibilite raporu oluşturulamadı."
+    : "Rapport de faisabilité non disponible.";
+  const errorMsg = lang === 'tr'
+    ? "Fizibilite raporu oluşturulurken hata oluştu."
+    : "Erreur lors de la génération du rapport de faisabilité.";
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
     });
-    return response.text?.trim() ?? "Rapport de faisabilité non disponible.";
+    return response.text?.trim() ?? fallbackMsg;
   } catch (error) {
     console.error('[generateFeasibilityReport] Error:', error);
-    return "Erreur lors de la génération du rapport de faisabilité.";
+    return errorMsg;
   }
 };

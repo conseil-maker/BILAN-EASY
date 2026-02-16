@@ -50,7 +50,14 @@ export const generateSummary = async (
   pkg: Package, 
   userName: string
 ): Promise<Summary> => {
-  const systemInstruction = `Tu es un expert en bilan de compétences certifié Qualiopi. 
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
+
+  const systemInstruction = lang === 'tr'
+    ? `Sen Qualiopi sertifikalı bir yetkinlik değerlendirme uzmanısın.
+Profesyonel, yapılandırılmış ve kişiselleştirilmiş sentezler yazıyorsun.
+Her nokta, yararlanıcının yanıtlarından somut unsurlarla desteklenmelidir.`
+    : `Tu es un expert en bilan de compétences certifié Qualiopi. 
 Tu rédiges des synthèses professionnelles, structurées et personnalisées.
 Chaque point doit être étayé par des éléments concrets issus des réponses du bénéficiaire.`;
 
@@ -59,7 +66,49 @@ Chaque point doit être étayé par des éléments concrets issus des réponses 
     `[Q${i + 1}] ${a.questionTitle || a.questionId}\n[R${i + 1}] ${a.value}`
   ).join('\n\n---\n\n');
 
-  const prompt = `Tu es un expert en bilan de compétences. Génère une synthèse complète et professionnelle.
+  const prompt = lang === 'tr'
+    ? `Sen bir yetkinlik değerlendirme uzmanısın. Kapsamlı ve profesyonel bir sentez oluştur.
+
+Bağlam:
+- Yararlanıcı: ${userName}
+- Paket: ${pkg.name}
+- Yanıt sayısı: ${answers.length}
+
+Değerlendirmenin tam transkripsiyonu:
+${fullTranscript}
+
+MİSYON: Qualiopi gereksinimlerine uygun kapsamlı ve profesyonel bir sentez oluştur.
+
+DURUŞ KURALLARI:
+- Profesyonel ve ölçülü bir ton kullan, abartılı övgülerden kaçın
+- Her iddia yanıtlardan somut unsurlarla desteklenmeli
+- Güçlü yönleri VE sınırları dengeli bir şekilde sun
+
+ÖNEMLİ TALİMATLAR:
+1. 'keyStrengths' ve 'areasForDevelopment': Her nokta, yararlanıcının yanıtlarından 1-3 doğrudan alıntı içeren bir 'sources' dizisi İÇERMELİDİR.
+
+2. 'strengths' ve 'skills': Basit metin dizisi (her biri 3-5 öğe) - bunlar belirlenen MESLEKİ yetkinliklerdir.
+
+3. 'motivations' ve 'values': İçsel motivasyonları ve mesleki değerleri belirle (her biri 3-5 öğe).
+
+4. 'areasToImprove': Gelişim eksenleri listesi (2-4 öğe).
+
+5. 'projectProfessionnel': 
+   - Belirlenen mesleki projeyi tanımlayan 3-5 cümlelik bir paragraf yaz
+   - ZORUNLU: Tek bir yön değil, 2-4 ALTERNATİF MESLEKİ YOL sun
+   - Her yol için: hedef pozisyon, aktarılabilir yetkinlikler, geliştirilecek yetkinlikler
+   - Her yol için piyasa gerçeklerini belirt (büyüyen sektörler, tahmini maaş seviyeleri, beklentiler)
+
+6. 'actionPlan': SOMUT ve GERÇEKÇİ bir eylem planı oluştur:
+   - shortTerm (1-3 ay): 2-3 acil ve spesifik eylem
+   - mediumTerm (3-6 ay): 2-3 gelişim eylemi
+   - longTerm (6+ ay): 1-2 uzun vadeli hedef (isteğe bağlı)
+
+7. 'recommendations': 3-4 kişiselleştirilmiş ve eyleme dönüştürülebilir öneri.
+
+Yanıt, sağlanan şemaya uygun geçerli bir JSON nesnesi OLMALIDIR.
+${langInstruction}`
+    : `Tu es un expert en bilan de compétences. Génère une synthèse complète et professionnelle.
 
 Contexte:
 - Bénéficiaire: ${userName}
@@ -102,7 +151,8 @@ INSTRUCTIONS IMPORTANTES:
    - Inclure au moins une recommandation de validation marché (enquête métier, réseau professionnel, sites d'emploi)
    - Inclure au moins une recommandation qui adresse un risque ou une limite identifiée
 
-La réponse DOIT être un objet JSON valide en français, conforme au schéma fourni.`;
+La réponse DOIT être un objet JSON valide en français, conforme au schéma fourni.
+${langInstruction}`;
 
   const response = await ai.models.generateContent({ 
     model: 'gemini-2.5-pro', 
@@ -123,14 +173,26 @@ La réponse DOIT être un objet JSON valide en français, conforme au schéma fo
 export const findResourceLeads = async (
   developmentPoint: string
 ): Promise<{ resources: string[]; actions: string[] }> => {
-  const prompt = `Pour le point de développement suivant: "${developmentPoint}"
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
+
+  const prompt = lang === 'tr'
+    ? `Şu gelişim noktası için: "${developmentPoint}"
+    
+Öner:
+1. 3-5 somut kaynak (eğitimler, kitaplar, online kurslar, sertifikalar)
+2. 3-5 uygulanabilir pratik eylem
+
+"resources" (metin dizisi) ve "actions" (metin dizisi) alanlarıyla JSON olarak yanıtla.
+${langInstruction}`
+    : `Pour le point de développement suivant: "${developmentPoint}"
     
 Suggère:
 1. 3-5 ressources concrètes (formations, livres, MOOCs, certifications)
 2. 3-5 actions pratiques à mettre en place
 
 Réponds en JSON avec les champs "resources" (array de strings) et "actions" (array de strings).
-Langue: Français.`;
+${langInstruction}`;
 
   const schema = {
     type: Type.OBJECT,
@@ -150,10 +212,10 @@ Langue: Français.`;
     return parseJsonResponse<{ resources: string[]; actions: string[] }>(response.text ?? '', 'findResourceLeads');
   } catch (error) {
     console.error('[findResourceLeads] Error:', error);
-    return {
-      resources: ["Formation en ligne recommandée", "Livre de référence sur le sujet"],
-      actions: ["Identifier un mentor", "Pratiquer régulièrement"]
-    };
+    const fallback = lang === 'tr'
+      ? { resources: ["Önerilen online eğitim", "Konuyla ilgili referans kitap"], actions: ["Bir mentor bul", "Düzenli olarak pratik yap"] }
+      : { resources: ["Formation en ligne recommandée", "Livre de référence sur le sujet"], actions: ["Identifier un mentor", "Pratiquer régulièrement"] };
+    return fallback;
   }
 };
 
@@ -211,11 +273,10 @@ ${langInstruction}`;
     return parseJsonResponse(response.text ?? '', 'generateIntermediateSummary');
   } catch (error) {
     console.error('[generateIntermediateSummary] Error:', error);
-    return {
-      themes: ["Parcours professionnel", "Compétences", "Aspirations"],
-      insights: ["Analyse en cours..."],
-      progress: Math.min(90, Math.round((answers.length / 30) * 100))
-    };
+    const fallback = lang === 'tr'
+      ? { themes: ["Mesleki geçmiş", "Yetkinlikler", "Hedefler"], insights: ["Analiz devam ediyor..."], progress: Math.min(90, Math.round((answers.length / 30) * 100)) }
+      : { themes: ["Parcours professionnel", "Compétences", "Aspirations"], insights: ["Analyse en cours..."], progress: Math.min(90, Math.round((answers.length / 30) * 100)) };
+    return fallback;
   }
 };
 
@@ -226,7 +287,23 @@ export const generatePersonalizedRecommendations = async (
   summary: Summary,
   userName: string
 ): Promise<string[]> => {
-  const prompt = `Basé sur cette synthèse de bilan de compétences pour ${userName}:
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
+
+  const prompt = lang === 'tr'
+    ? `${userName} için bu yetkinlik değerlendirmesi sentezine dayanarak:
+
+Güçlü yönler: ${summary.strengths?.join(', ')}
+Yetkinlikler: ${summary.skills?.join(', ')}
+Gelişim eksenleri: ${summary.areasToImprove?.join(', ')}
+Mesleki proje: ${summary.projectProfessionnel}
+
+${userName}'ın hedeflerine ulaşmasına yardımcı olacak 5 kişiselleştirilmiş ve somut öneri oluştur.
+Her öneri eyleme dönüştürülebilir ve spesifik olmalı.
+
+"recommendations" metin dizisi içeren JSON olarak yanıtla.
+${langInstruction}`
+    : `Basé sur cette synthèse de bilan de compétences pour ${userName}:
 
 Points forts: ${summary.strengths?.join(', ')}
 Compétences: ${summary.skills?.join(', ')}
@@ -237,7 +314,7 @@ Génère 5 recommandations personnalisées et concrètes pour aider ${userName} 
 Chaque recommandation doit être actionnable et spécifique.
 
 Réponds en JSON avec un tableau "recommendations" de strings.
-Langue: Français.`;
+${langInstruction}`;
 
   const schema = {
     type: Type.OBJECT,

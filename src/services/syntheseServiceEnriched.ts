@@ -320,7 +320,7 @@ export const syntheseServiceEnriched = {
     doc.setTextColor(100, 100, 100);
     doc.text(`${tE('Organisme', 'Kuruluş')} : ${data.organizationName}`, margin + 5, y);
     doc.text(`${tE('Adresse', 'Adres')} : ${getFullAddress()}`, margin + 5, y + 10);
-    doc.text(`${tE('Certifié Qualiopi', 'Qualiopi sertifikalı')} - ${organizationConfig.qualipiNumber}`, margin + 5, y + 20);
+    doc.text(`${tE('Certifié Qualiopi', 'Qualiopi sertifikalı')} - ${organizationConfig.qualiopi}`, margin + 5, y + 20);
     doc.setTextColor(0, 0, 0);
 
     // ========== TABLE DES MATIÈRES ==========

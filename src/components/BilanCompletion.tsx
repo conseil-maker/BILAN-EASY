@@ -164,77 +164,29 @@ export const BilanCompletion: React.FC<BilanCompletionProps> = ({
         longTermActions = safeMap(actionPlan.longTerm, (a) => typeof a === 'string' ? a : a?.text || '');
       }
 
-      // Préparer les données pour la synthèse avec les champs enrichis
-      const data: SyntheseData = {
-        beneficiaire: {
-          nom: userName,
-          email: userEmail,
-          dateNaissance: '',
-          situationActuelle: summary.profileType || 'Non spécifié',
-        },
-        bilan: {
-          dateDebut: startDate,
-          dateFin: new Date().toLocaleDateString('fr-FR'),
-          dureeHeures: packageDuration,
-          forfait: packageName,
-          consultant: 'Consultant Bilan-Easy',
-        },
-        parcoursProfessionnel: {
-          resume: projectPro,
-          experiencesCles: answers
-            .filter(a => (a as any).category === 'parcours')
-            .map(a => (a as any).text || a.value || '')
-            .slice(0, 5),
-        },
-        competences: {
-          techniques: skillTexts.length > 0 ? skillTexts.slice(0, 3) : strengthTexts.slice(0, 3),
-          transversales: skillTexts.length > 3 ? skillTexts.slice(3, 6) : devAreaTexts.slice(0, 3),
-          personnelles: strengthTexts.slice(0, 3),
-        },
-        interetsMotivations: {
-          valeurs: valueTexts,
-          interetsProfessionnels: recommendationTexts.slice(0, 3),
-          facteursMotivation: motivationTexts,
-        },
-        projetProfessionnel: {
-          projetPrincipal: projectPro,
-          projetAlternatif: '',
-          coherenceAnalysis: summary.maturityLevel || recommendationTexts[0] || '',
-        },
-        planAction: {
-          courtTerme: shortTermActions,
-          moyenTerme: mediumTermActions,
-          longTerme: longTermActions,
-        },
-        conclusion: {
-          syntheseGlobale: `${userName} a complété son bilan de compétences avec succès. ${summary.maturityLevel || `Les résultats montrent un profil ${summary.profileType || 'riche et diversifié'}.`}`,
-          recommandationsFinales: recommendationTexts,
-        },
-      };
-
-      setSyntheseData(data);
-      
-      // Préparer les données pour le PDF
-      const syntheseParams = {
-        userName: data.beneficiaire.nom,
-        userEmail: data.beneficiaire.email,
-        packageName: data.bilan.forfait,
-        startDate: data.bilan.dateDebut,
-        endDate: data.bilan.dateFin,
-        consultantName: data.bilan.consultant,
+      // Préparer les données pour le PDF au format SyntheseData
+      const syntheseParams: SyntheseData = {
+        userName,
+        userEmail,
+        packageName,
+        startDate,
+        endDate: new Date().toLocaleDateString('fr-FR'),
+        consultantName: 'Consultant Bilan-Easy',
         organizationName: 'Bilan-Easy',
-        summary: summary,
-        answers: answers,
-        projectProfessionnel: data.projetProfessionnel.projetPrincipal,
-        metiersVises: [] as string[],
-        formationsRecommandees: [] as string[],
-        planAction: data.planAction.courtTerme.map((a, i) => ({
+        summary,
+        answers,
+        projectProfessionnel: projectPro,
+        metiersVises: [],
+        formationsRecommandees: [],
+        planAction: shortTermActions.map((a) => ({
           action: a,
           echeance: 'Court terme',
           priorite: 'haute' as const,
           statut: 'a_faire' as const,
         })),
       };
+
+      setSyntheseData(syntheseParams);
       
       // Utiliser le service enrichi pour les forfaits complets (12h+), sinon le service standard
       const isFullPackage = packageDuration >= 12;

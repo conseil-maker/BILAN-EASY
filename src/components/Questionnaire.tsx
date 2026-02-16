@@ -455,7 +455,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
         if (currentAnswers.length > 0) {
             const info = getPhaseInfo(currentAnswers);
             const prevAnswers = currentAnswers.slice(0, -1);
-            const prevInfo = prevAnswers.length > 0 ? getPhaseInfo(prevAnswers) : { phase: 1, name: '', satisfactionActive: false };
+            const prevInfo = prevAnswers.length > 0 ? getPhaseInfo(prevAnswers) : { phase: 1, name: '', positionInPhase: 0, totalInPhase: 0, satisfactionActive: false };
             
             // Vérifier si on change de phase
             if (info.phase !== prevInfo.phase) {
@@ -609,10 +609,10 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                     setCurrentPhaseInfo(info);
                     setCurrentQuestion({
                         id: `restored-${Date.now()}`,
-                        text: initialLastAiMessage,
-                        type: 'text' as QuestionType,
-                        category: 'general',
-                        phase: info.phase
+                        title: initialLastAiMessage,
+                        type: QuestionType.PARAGRAPH,
+                        theme: 'general',
+                        required: true
                     });
                 } else {
                     setMessages(restoredMessages);
@@ -658,7 +658,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 const scopeAnalysis = await analyzeResponseScope(
                     value,
                     answers,
-                    currentQuestion.title || currentQuestion.text || '',
+                    currentQuestion.title || '',
                     userName
                 );
                 
@@ -884,7 +884,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                         packageName: pkg.name,
                         status: 'in_progress',
                         answers: answers,
-                        summary: null,
+                        summary: null as any, // Brouillon sans summary
                     }, user.id);
                     // console.log('Brouillon sauvegardé avant déconnexion');
                 }
@@ -934,7 +934,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
     return (
         <>
             {unlockedBadge && <BadgeNotification phaseName={unlockedBadge} onClose={() => setUnlockedBadge(null)} />}
-            {showSatisfactionModal && satisfactionPhaseInfo && <SatisfactionModal phaseName={satisfactionPhaseInfo.name} onSubmit={handleSatisfactionSubmit} />}
+            {showSatisfactionModal && satisfactionPhaseInfo && <SatisfactionModal phaseName={translatePhaseNameFromFrench(satisfactionPhaseInfo.name)} onSubmit={handleSatisfactionSubmit} />}
             {suggestedModule && <ModuleModal reason={suggestedModule.reason} onAccept={handleModuleAccept} onDecline={handleModuleDecline} />}
             
             {/* Modal d'avertissement de fin de bilan (à 80%) */}
@@ -1592,7 +1592,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                             <EnhancedDashboard 
                                 data={dashboardData} 
                                 isLoading={isDashboardLoading}
-                                lastQuestion={currentQuestion?.title || currentQuestion?.text || ''}
+                                lastQuestion={currentQuestion?.title || ''}
                                 onCollapse={() => setShowSidePanel(false)}
                             />
                         </aside>

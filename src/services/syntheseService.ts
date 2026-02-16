@@ -82,7 +82,7 @@ export const syntheseService = {
     const pageWidth = doc.internal.pageSize.getWidth();
     const maxWidth = pageWidth - 2 * margin;
 
-    const addText = (text: string, fontSize: number = 11, isBold: boolean = false, color: number[] = [0, 0, 0]) => {
+    const addText = (text: string, fontSize: number = 11, isBold: boolean = false, color: [number, number, number] = [0, 0, 0]) => {
       doc.setFontSize(fontSize);
       doc.setFont('helvetica', isBold ? 'bold' : 'normal');
       doc.setTextColor(color[0], color[1], color[2]);
@@ -477,7 +477,7 @@ export const syntheseService = {
       let xPos = margin + 2;
       headers.forEach((header, i) => {
         doc.text(header, xPos, tableTop + 5);
-        xPos += colWidths[i];
+        xPos += colWidths[i] ?? 30;
       });
       
       y = tableTop + 10;
@@ -490,18 +490,18 @@ export const syntheseService = {
           y = 20;
         }
         
-        const rowColor = index % 2 === 0 ? [255, 255, 255] : [245, 245, 255];
+        const rowColor: [number, number, number] = index % 2 === 0 ? [255, 255, 255] : [245, 245, 255];
         doc.setFillColor(rowColor[0], rowColor[1], rowColor[2]);
         doc.rect(margin, y - 4, maxWidth, 10, 'F');
         
         xPos = margin + 2;
-        const actionLines = doc.splitTextToSize(item.action, colWidths[0] - 4);
-        doc.text(actionLines[0], xPos, y + 2);
-        xPos += colWidths[0];
+        const actionLines = doc.splitTextToSize(item.action, (colWidths[0] ?? 60) - 4);
+        doc.text(actionLines[0] ?? '', xPos, y + 2);
+        xPos += colWidths[0] ?? 60;
         doc.text(item.echeance, xPos, y + 2);
-        xPos += colWidths[1];
+        xPos += colWidths[1] ?? 30;
         doc.text(item.priorite, xPos, y + 2);
-        xPos += colWidths[2];
+        xPos += colWidths[2] ?? 25;
         doc.text(item.statut.replace('_', ' '), xPos, y + 2);
         
         y += 10;
@@ -657,20 +657,20 @@ export const syntheseService = {
       const sections = [
         {
           title: tSyn('Court terme (0-3 mois)', 'Kısa vade (0-3 ay)'),
-          color: [220, 38, 38] as number[],
-          bgColor: [254, 242, 242] as number[],
+          color: [220, 38, 38] as [number, number, number],
+          bgColor: [254, 242, 242] as [number, number, number],
           items: data.planAction.filter(a => a.priorite === 'haute'),
         },
         {
           title: tSyn('Moyen terme (3-6 mois)', 'Orta vade (3-6 ay)'),
-          color: [234, 179, 8] as number[],
-          bgColor: [254, 252, 232] as number[],
+          color: [234, 179, 8] as [number, number, number],
+          bgColor: [254, 252, 232] as [number, number, number],
           items: data.planAction.filter(a => a.priorite === 'moyenne'),
         },
         {
           title: tSyn('Long terme (6-12 mois)', 'Uzun vade (6-12 ay)'),
-          color: [34, 197, 94] as number[],
-          bgColor: [240, 253, 244] as number[],
+          color: [34, 197, 94] as [number, number, number],
+          bgColor: [240, 253, 244] as [number, number, number],
           items: data.planAction.filter(a => a.priorite === 'basse'),
         },
       ];

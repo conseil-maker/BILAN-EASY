@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { assessmentService } from '../services/assessmentService';
 import { assignmentService } from '../services/assignmentService';
 import { Assessment } from '../lib/supabaseClient';
@@ -18,6 +19,7 @@ interface ClientInfo {
 }
 
 export const ConsultantDashboard: React.FC<ConsultantDashboardProps> = ({ onBack, onViewAssessment }) => {
+  const { t } = useTranslation('consultant');
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [clients, setClients] = useState<ClientInfo[]>([]);
   const [loading, setLoading] = useState(true);

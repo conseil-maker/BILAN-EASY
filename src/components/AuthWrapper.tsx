@@ -124,17 +124,12 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
         console.log('[AuthWrapper] Session récupérée:', !!session);
 
         if (session?.user && mounted) {
-          // D'abord résoudre avec le rôle par défaut pour débloquer l'UI
-          resolveAuth(session.user, 'client');
-          
-          // Puis charger le vrai rôle en arrière-plan
-          fetchOrCreateUserProfile(session.user.id, session.user.email || '')
-            .then(role => {
-              if (mounted && role !== 'client') {
-                console.log('[AuthWrapper] Mise à jour du rôle:', role);
-                setUserRole(role);
-              }
-            });
+          // Charger le profil (langue + rôle) AVANT de résoudre l'auth
+          // pour éviter le flash de langue française
+          const role = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
+          if (mounted) {
+            resolveAuth(session.user, role);
+          }
         } else if (mounted) {
           console.log('[AuthWrapper] Pas de session, affichage du login');
           loadingResolvedRef.current = true;
@@ -164,17 +159,11 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
               justSignedInRef.current = true;
               signedInTimestampRef.current = Date.now();
               
-              // Résoudre IMMÉDIATEMENT avec le rôle par défaut
-              resolveAuth(session.user, 'client');
-              
-              // Charger le vrai rôle en arrière-plan
-              fetchOrCreateUserProfile(session.user.id, session.user.email || '')
-                .then(role => {
-                  if (mounted && role !== 'client') {
-                    console.log('[AuthWrapper] Mise à jour du rôle après SIGNED_IN:', role);
-                    setUserRole(role);
-                  }
-                });
+              // Charger le profil (langue + rôle) AVANT de résoudre
+              const signInRole = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
+              if (mounted) {
+                resolveAuth(session.user, signInRole);
+              }
             }
             break;
           
@@ -209,13 +198,10 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
             console.log('[AuthWrapper] INITIAL_SESSION:', !!session);
             // Géré par initializeAuth, mais si initializeAuth n'a pas encore résolu...
             if (session?.user && mounted && !loadingResolvedRef.current) {
-              resolveAuth(session.user, 'client');
-              fetchOrCreateUserProfile(session.user.id, session.user.email || '')
-                .then(role => {
-                  if (mounted && role !== 'client') {
-                    setUserRole(role);
-                  }
-                });
+              const initialRole = await fetchOrCreateUserProfile(session.user.id, session.user.email || '');
+              if (mounted && !loadingResolvedRef.current) {
+                resolveAuth(session.user, initialRole);
+              }
             }
             break;
           

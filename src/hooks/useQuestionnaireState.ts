@@ -3,7 +3,7 @@
  * Centralise la logique d'état complexe du composant Questionnaire
  */
 
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   Answer, 
   Question, 

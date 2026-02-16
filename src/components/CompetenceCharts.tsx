@@ -193,6 +193,7 @@ export const CompetenceScoreCard: React.FC<CompetenceScoreProps> = ({
   competences,
   title = 'Profil de compétences'
 }) => {
+  const { t } = useTranslation('questionnaire');
   const radarData = competences.map(c => ({
     label: c.category,
     value: c.score,

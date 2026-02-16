@@ -852,6 +852,7 @@ export interface CareerPath {
     salaryRange: string;
     trainingPath: string[];
     nextSteps: string[];
+    sector?: string; // Secteur d'activité
 }
 
 /**

@@ -24,6 +24,7 @@ export interface Answer {
   complexity?: QuestionComplexity;
   categoryId?: string;
   timestamp?: number;
+  question?: string; // Texte de la question (utilisé dans syntheseServiceEnriched)
 }
 
 export interface Phase {
@@ -114,6 +115,7 @@ export interface Summary {
   values?: string[]; // Valeurs professionnelles
   areasToImprove?: string[]; // Axes de développement (liste simple)
   projectProfessionnel?: string; // Description du projet professionnel
+  transferableSkills?: string[]; // Compétences transférables
   actionPlan: {
     shortTerm: ActionPlanItem[];
     mediumTerm: ActionPlanItem[];
@@ -133,16 +135,25 @@ export interface HistoryItem {
 export interface WordCloudItem {
   text: string;
   weight: number;
+  name?: string; // Nom du thème (utilisé dans pdfGenerator)
+  description?: string; // Description du thème
+  keywords?: string[]; // Mots-clés associés
 }
 
 export interface RadarSkill {
   label: string;
   score: number;
+  name?: string; // Nom de la compétence (utilisé dans pdfGenerator)
+  level?: number; // Niveau (alias de score)
+  description?: string; // Description de la compétence
 }
 
 export interface DashboardData {
   themes: WordCloudItem[];
   skills: RadarSkill[];
+  summary?: Summary | null;
+  wordCloud?: WordCloudItem[];
+  radarData?: RadarSkill[];
 }
 
 export interface UserProfile {
@@ -150,4 +161,9 @@ export interface UserProfile {
   currentRole: string;
   keySkills: string[];
   pastExperiences: string[];
+  cvText?: string;
+  profession?: string;
+  yearsExperience?: number;
+  education?: string;
+  skills?: string[];
 }
