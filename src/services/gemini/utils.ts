@@ -5,6 +5,40 @@
 import { CoachingStyle } from '../../types';
 
 /**
+ * Retourne la langue courante de l'utilisateur ('fr' ou 'tr')
+ * Lit directement depuis le localStorage pour éviter une dépendance circulaire avec i18n/react-i18next
+ */
+export const getCurrentLanguage = (): 'fr' | 'tr' => {
+  try {
+    const stored = localStorage.getItem('bilan-easy-language');
+    if (stored === 'tr') return 'tr';
+  } catch {
+    // localStorage non disponible (SSR, etc.)
+  }
+  return 'fr';
+};
+
+/**
+ * Retourne l'instruction de langue pour les prompts Gemini
+ * Pour les échanges avec le bénéficiaire (questions, feedback, exploration)
+ */
+export const getLangInstruction = (): string => {
+  const lang = getCurrentLanguage();
+  if (lang === 'tr') {
+    return `IMPORTANT - DİL TALİMATI: Tüm yanıtlarını TÜRKÇE olarak ver. Soru, açıklama, geri bildirim ve tüm metinler Türkçe olmalıdır.`;
+  }
+  return `IMPORTANT - INSTRUCTION LANGUE: Toutes tes réponses doivent être en FRANÇAIS.`;
+};
+
+/**
+ * Retourne l'instruction de langue pour les documents officiels Qualiopi
+ * Toujours en français pour la conformité
+ */
+export const getDocLangInstruction = (): string => {
+  return `IMPORTANT: La réponse DOIT être en FRANÇAIS (conformité Qualiopi).`;
+};
+
+/**
  * Parse une réponse JSON de l'API Gemini
  */
 export const parseJsonResponse = <T>(jsonString: string, functionName: string): T => {
@@ -19,8 +53,45 @@ export const parseJsonResponse = <T>(jsonString: string, functionName: string): 
 
 /**
  * Génère l'instruction système selon le style de coaching
+ * Adapté à la langue de l'utilisateur
  */
 export const getCoachingStyleInstruction = (style: CoachingStyle): string => {
+  const lang = getCurrentLanguage();
+  
+  if (lang === 'tr') {
+    switch (style) {
+      case 'empathetic':
+        return `Sen yardımsever ve empatik bir koçsun. Sıcak ve profesyonel bir ton kullanıyorsun.
+Kullanıcının duygularını tanıyor ve aşırıya kaçmadan anlayış gösteriyorsun.
+Kişisel düşünceye davet eden açık uçlu sorular soruyorsun.
+İlerlemeyi ölçülü ifadelerle belirtiyorsun ("bu profiliniz için önemli bir nokta", "bu kariyerinizde güçlü bir eğilimi doğruluyor") abartılı ifadeler yerine.`;
+      
+      case 'directive':
+        return `Sen doğrudan ve sonuç odaklı bir koçsun. Konuya hemen giriyorsun.
+Somut yanıtlar gerektiren kesin sorular soruyorsun.
+Kullanıcıyı yapıcı bir şekilde zorluyorsun.
+Net ve ölçülebilir eylemler öneriyorsun.`;
+      
+      case 'analytical':
+        return `Sen analitik ve metodik bir koçsun. Sorularını mantıksal bir şekilde yapılandırıyorsun.
+Kullanıcının deneyimlerini objektif bir şekilde analiz etmesine yardımcı oluyorsun.
+Derinlemesine düşünmeye davet eden sorular soruyorsun.
+Uygun olduğunda çerçeveler ve analiz ızgaraları kullanıyorsun.`;
+      
+      case 'creative':
+        return `Sen yaratıcı ve ilham verici bir koçsun. Farklı düşünmeyi teşvik ediyorsun.
+Yeni bakış açıları açan sorular soruyorsun.
+Düşünceyi canlandırmak için metaforlar ve benzetmeler kullanıyorsun.
+Kullanıcıyı yeni olasılıklar hayal etmeye davet ediyorsun.`;
+      
+      default:
+        return `Sen dengeli ve profesyonel bir koçsun. Yaklaşımını ihtiyaçlara göre uyarlıyorsun.
+Empati ve pragmatizmi birleştiriyorsun.
+Farklı yönleri kapsayan çeşitli sorular soruyorsun.`;
+    }
+  }
+  
+  // Français (défaut)
   switch (style) {
     case 'empathetic':
       return `Tu es un coach bienveillant et empathique. Tu utilises un ton chaleureux et professionnel.
@@ -61,8 +132,12 @@ export const formatAnswersForContext = (
   maxAnswers: number = 10
 ): string => {
   const recentAnswers = answers.slice(-maxAnswers);
+  const lang = getCurrentLanguage();
+  const qLabel = lang === 'tr' ? 'S' : 'Q';
+  const aLabel = lang === 'tr' ? 'C' : 'R';
+  const themeLabel = lang === 'tr' ? 'Tema' : 'Thème';
   return recentAnswers
-    .map((a, i) => `Q${i + 1}: ${a.question}\nR${i + 1}: ${a.answer}${a.theme ? ` [Thème: ${a.theme}]` : ''}`)
+    .map((a, i) => `${qLabel}${i + 1}: ${a.question}\n${aLabel}${i + 1}: ${a.answer}${a.theme ? ` [${themeLabel}: ${a.theme}]` : ''}`)
     .join('\n\n');
 };
 

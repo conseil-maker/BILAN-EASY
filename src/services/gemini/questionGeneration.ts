@@ -6,7 +6,7 @@
 import { Answer, Question, QuestionType, UserProfile, CoachingStyle } from '../../types';
 import { QUESTION_CATEGORIES } from '../../constants';
 import { geminiProxy } from '../geminiServiceProxy';
-import { parseJsonResponse, getCoachingStyleInstruction } from './utils';
+import { parseJsonResponse, getCoachingStyleInstruction, getCurrentLanguage, getLangInstruction } from './utils';
 import { questionSchema, optionalModuleSchema, Type } from './schemas';
 import { selectFallbackQuestion } from '../../data/fallbackQuestions';
 import { generateSmartQuestion, generateOpeningQuestion } from '../smartQuestionGenerator';
@@ -20,15 +20,15 @@ const extractKeyElements = (answer: string): string[] => {
   const elements: string[] = [];
   
   // Extraire les noms propres (personnes, entreprises, lieux)
-  const properNouns = answer.match(/[A-Z][a-zéèêëàâäùûüôöîï]+(?:\s+[A-Z][a-zéèêëàâäùûüôöîï]+)*/g);
+  const properNouns = answer.match(/[A-Z][a-zéèêëàâäùûüôöîïçğışöü]+(?:\s+[A-Z][a-zéèêëàâäùûüôöîïçğışöü]+)*/g);
   if (properNouns) elements.push(...properNouns.slice(0, 3));
   
   // Extraire les chiffres significatifs (années, durées, montants)
-  const numbers = answer.match(/\d+\s*(?:ans?|mois|années?|€|euros?|%)/gi);
+  const numbers = answer.match(/\d+\s*(?:ans?|mois|années?|yıl|ay|€|euros?|%)/gi);
   if (numbers) elements.push(...numbers.slice(0, 2));
   
-  // Extraire les mots émotionnels
-  const emotionPatterns = /(?:fier|frustré|passionné|motivé|déçu|heureux|stressé|épanoui|inquiet|confiant|satisfait|insatisfait)/gi;
+  // Extraire les mots émotionnels (FR + TR)
+  const emotionPatterns = /(?:fier|frustré|passionné|motivé|déçu|heureux|stressé|épanoui|inquiet|confiant|satisfait|insatisfait|gurur|motive|hayal kırıklığı|mutlu|stresli|endişeli|güvenen|memnun)/gi;
   const emotions = answer.match(emotionPatterns);
   if (emotions) elements.push(...emotions.map(e => e.toLowerCase()));
   
@@ -39,7 +39,37 @@ const extractKeyElements = (answer: string): string[] => {
  * Génère l'instruction système selon le style de coaching
  */
 const getSystemInstruction = (style: CoachingStyle): string => {
-  const baseInstruction = `Tu es un conseiller expert en bilan de compétences, certifié et expérimenté. 
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
+  
+  const baseInstruction = lang === 'tr' 
+    ? `Sen sertifikalı ve deneyimli bir yetkinlik değerlendirme danışmanısın.
+Bir yararlanıcıyla kariyerini değerlendirmek için derinlemesine bir görüşme yürütüyorsun.
+Genel bir anket değil, özgün ve kişiselleştirilmiş bir diyalog oluşturmalısın.
+
+=== PROFESYONEL DURUŞ KURALLARI ===
+1. YARDIMSEVER TARAFSIZLIK: Yararlanıcının yanıtlarını aşırıya kaçmadan değerlendiriyorsun.
+   - YASAK: abartılı övgüler ("parlak", "olağanüstü", "muhteşem", "etkileyici")
+   - TERCİH ET: pohpohlamadan tanıyan profesyonel ifadeler:
+     * "Bu profilinizin yapılandırıcı bir noktası"
+     * "Bu yetkinlik açıkça aktarılabilir"
+     * "Bu, kariyerinizde güçlü bir eğilimi doğruluyor"
+     * "Bu projeniz için somut bir avantaj"
+     * "Bu alandaki deneyiminiz önemli"
+   - Dalkavukluk yapmadan ilgi ve aktif dinleme gösterebilirsin.
+
+2. SORU FORMATI:
+   - BİR soru = BİR hedef = BİR beklenen yanıt
+   - Aynı soruda ASLA birden fazla alt soru birleştirme
+   - YASAK: "Güçlü yönleriniz neler VE bunları nasıl kullanıyorsunuz VE ne geliştirmek istersiniz?"
+   - TERCİH ET: Bağlam gerektirse bile tek ve net bir hedefli soru
+   - Sorudan önce bağlam veya geçiş cümlesi verebilirsin, ama soru tek ve net olmalı
+
+3. ELEŞTİREL DENGE:
+   - Belirlenen her güçlü yön için sınırları veya rahatsızlık alanlarını da keşfet
+   - Düzenli olarak nüansa davet eden sorular sor: "Bunu engelleyebilecek ne olabilir...", "Risk ne olurdu...", "Bunda kaybedebileceğiniz ne..."
+   - Yararlanıcının seçimlerini sistematik olarak onaylama: onları sorgulamasına yardımcı ol`
+    : `Tu es un conseiller expert en bilan de compétences, certifié et expérimenté. 
 Tu mènes un entretien approfondi avec un bénéficiaire pour l'aider à faire le point sur sa carrière.
 Tu dois créer un dialogue authentique et personnalisé, pas un questionnaire générique.
 
@@ -66,7 +96,7 @@ Tu dois créer un dialogue authentique et personnalisé, pas un questionnaire g�
    - Pose régulièrement des questions qui invitent à la nuance : "Qu'est-ce qui pourrait freiner...", "Quel serait le risque si...", "Qu'est-ce que vous pourriez perdre en..."
    - Ne valide pas systématiquement les choix du bénéficiaire : aide-le à les questionner`;
 
-  return `${baseInstruction}\n\n${getCoachingStyleInstruction(style)}`;
+  return `${baseInstruction}\n\n${getCoachingStyleInstruction(style)}\n\n${langInstruction}`;
 };
 
 /**
@@ -77,6 +107,24 @@ const getPhaseTransitionGuidance = (
   answersCount: number, 
   userName: string
 ): string => {
+  const lang = getCurrentLanguage();
+  
+  if (lang === 'tr') {
+    if (phaseKey === 'phase1' && answersCount >= 8) {
+      return `
+🔄 2. AŞAMAYA GEÇİŞ YAKLAŞIYOR
+${userName}'ın kariyer geçmişini keşfettin. Yetkinlik analizine geçişi hazırla.
+Sonraki soru, belirlenen yetkinliklere köprü kurmalı.`;
+    }
+    if (phaseKey === 'phase2' && answersCount >= 15) {
+      return `
+🔄 3. AŞAMAYA GEÇİŞ YAKLAŞIYOR
+Yetkinlikleri iyi analiz ettin. Mesleki projeye geçişi hazırla.
+Sonraki soru, projeksiyon ve isteklere yönlendirmeli.`;
+    }
+    return '';
+  }
+  
   if (phaseKey === 'phase1' && answersCount >= 8) {
     return `
 🔄 TRANSITION VERS PHASE 2 IMMINENTE
@@ -112,6 +160,8 @@ export const generateQuestion = async (
   } = {}
 ): Promise<Question> => {
   const systemInstruction = getSystemInstruction(coachingStyle);
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
   
   // Construire le contexte de conversation
   let conversationContext = buildConversationContext(
@@ -126,6 +176,14 @@ export const generateQuestion = async (
   // Instructions spéciales
   const specialInstruction = buildSpecialInstruction(options, userName);
 
+  const langReminder = lang === 'tr'
+    ? `HATIRLATMA: Soru ${userName} için kişiselleştirilmiş, TÜRKÇE olmalı ve gerçek bir ilgi çekici diyalog oluşturmalıdır.
+"description" alanı, önceki yanıtı değerlendiren bir geçiş veya giriş cümlesi içerebilir.`
+    : `RAPPEL: La question doit être en FRANÇAIS, personnalisée pour ${userName}, et créer un vrai dialogue engageant.
+Le champ "description" peut contenir une phrase d'accroche ou de transition qui valorise la réponse précédente.`;
+
+  const generateInstr = lang === 'tr' ? 'Soruyu JSON formatında oluştur.' : 'Génère la question au format JSON.';
+
   const prompt = `${conversationContext}
 
 ${specialInstruction}
@@ -134,10 +192,11 @@ TÂCHE: ${taskDescription}
 
 ${getPhaseTransitionGuidance(phaseKey, previousAnswers.length, userName)}
 
-RAPPEL: La question doit être en FRANÇAIS, personnalisée pour ${userName}, et créer un vrai dialogue engageant.
-Le champ "description" peut contenir une phrase d'accroche ou de transition qui valorise la réponse précédente.
+${langReminder}
 
-Génère la question au format JSON.`;
+${generateInstr}
+
+${langInstruction}`;
 
   const config: Record<string, unknown> = { 
     systemInstruction,
@@ -192,12 +251,83 @@ function buildConversationContext(
     return buildFirstQuestionContext(userName, userProfile);
   }
 
+  const lang = getCurrentLanguage();
   const lastAnswer = previousAnswers[previousAnswers.length - 1];
   const keyElements = extractKeyElements(lastAnswer.value);
   
   const sentences = lastAnswer.value.split(/[.!?]+/).filter(s => s.trim().length > 20);
   const significantPhrases = sentences.slice(0, 2);
   
+  if (lang === 'tr') {
+    const profileContext = userProfile ? `
+💼 ADAY PROFİLİ (CV'den):
+- Mevcut rol: ${userProfile.currentRole}
+- Temel yetkinlikler: ${userProfile.keySkills.join(', ')}
+- Deneyimler: ${userProfile.pastExperiences.join(', ')}
+
+Bu bilgileri sorularını kişiselleştirmek için kullan.` : '';
+
+    return `
+=== DİKKAT: KİŞİSELLEŞTİRME ZORUNLU ===${profileContext}
+
+İşte ${userName}'ın az önce paylaştığı. Buna MUTLAKA değinmelisin:
+
+"""
+${lastAnswer.value}
+"""
+
+🎯 KULLANILACAK ANAHTAR UNSURLAR:
+${keyElements.length > 0 ? keyElements.map(e => `- ${e}`).join('\n') : '- Kişisel bir açı bulmak için içeriği analiz et'}
+
+${significantPhrases.length > 0 ? `💬 ALINACAK ÖNEMLİ İFADELER:
+${significantPhrases.map(p => `"${p.trim()}"`).join('\n')}` : ''}
+
+${previousAnswers.length > 1 ? `📝 ZATEN SORULAN SORULAR (TEKRARLAMA):
+${previousAnswers.slice(-10, -1).map((a, i) => `${i + 1}. "${a.questionTitle || a.questionId}"`).join('\n')}` : ''}
+
+🚨 TEKRAR UYARISI 🚨
+Zaten sorulan soru sayısı: ${previousAnswers.length}
+Öncekilerden TAMAMEN FARKLI bir soru sormalısın.
+
+=== KESİN TALİMAT ===
+Sorun MUTLAKA:
+✅ ${userName}'ın az önce söylediğine AÇIK bir referansla başlamalı
+✅ Yanıtından belirli bir unsuru alıntılamalı veya başka sözcüklerle ifade etmeli
+✅ GERÇEKTEN dinlediğini ve anladığını göstermeli
+✅ Belirli bir yönü derinleştirmeli, genelleştirmemeli
+
+❌ KESİNLİKLE YASAK:
+- "Bana ... hakkında anlatın" (çok genel)
+- Onay soruları ("Doğru anlıyorsam...", "Bu doğru mu...")
+- Önceki yanıtı okumadan sorulabilecek herhangi bir soru
+
+${previousAnswers.length >= 8 ? `=== ÖNYARGI KARŞITI BLOK (R3) ===
+🚩 Zaten ${previousAnswers.length} soru sordun. Sınama soruları ekleme zamanı:
+- "Yön değiştirirseniz kaybedebileceğiniz ne olabilir?"
+- "Bu yolu izlerseniz en zor senaryo ne olurdu?"
+- "Mevcut pozisyonunuzda özleyeceğiniz yönler var mı?"
+- "Hangi somut fedakarlıkları yapmaya hazırsınız?"
+Bu tür eleştirel sorgulamayı bir sonraki soruna doğal olarak entegre et.
+===========================` : ''}
+
+${previousAnswers.length >= 12 ? `=== ÇOKLU YÖNTEM KEŞFİ (R2) ===
+📍 ${previousAnswers.length} sorudan sonra ALTERNATİFLERİ keşfetmeye başlamalısın:
+- ${userName} için en az 2-4 farklı mesleki yol belirle
+- Tek bir yöne takılma: çeşitli senaryolar keşfet
+- Her yol için belirle: aktarılabilir yetkinlikler, kapatılacak boşluklar, piyasa gerçekliği
+===========================` : ''}
+
+${previousAnswers.length >= 18 ? `=== PİYASA GERÇEKLİĞİ (R4) ===
+📊 ${userName}'ın isteklerini piyasa gerçekliğiyle yüzleştirmeye başla:
+- Profili ve istekleriyle bağlantılı somut hedef pozisyonlar öner
+- Bu pozisyonlar için aranan temel yetkinlikleri belirt
+- Olağan ücret seviyelerini ve gelişim perspektiflerini belirt
+- ÖNEMLİ: Bu bilgilerin tahmin olduğunu ve kendi araştırmalarıyla doğrulaması gerektiğini belirt
+===========================` : ''}
+===================================`;
+  }
+
+  // Français (défaut)
   const profileContext = userProfile ? `
 💼 PROFIL DU CANDIDAT (issu du CV):
 - Rôle actuel: ${userProfile.currentRole}
@@ -273,6 +403,39 @@ ${previousAnswers.length >= 18 ? `=== RÉALITÉ MARCHÉ (R4) ===
  * Construit le contexte pour la première question
  */
 function buildFirstQuestionContext(userName: string, userProfile: UserProfile | null): string {
+  const lang = getCurrentLanguage();
+  
+  if (lang === 'tr') {
+    if (userProfile) {
+      return `
+=== DEĞERLENDİRMENİN İLK SORUSU ===
+
+${userName} ile değerlendirmeye başlıyorsun.
+Profil: ${userProfile.currentRole}
+Belirlenen yetkinlikler: ${userProfile.keySkills.join(', ')}
+
+KİŞİSELLEŞTİRİLMİŞ bir açılış sorusu oluştur:
+1. "${userName}" adını doğal olarak kullan
+2. ${userProfile.currentRole} rolüne atıfta bulun
+3. Kariyerini ilgi çekici bir şekilde paylaşmaya davet et
+4. Hemen bir güven ortamı oluştur
+===================================`;
+    }
+    return `
+=== DEĞERLENDİRMENİN İLK SORUSU ===
+
+${userName} ile değerlendirmeye başlıyorsun.
+Önceden profil yok - tanışma fırsatı!
+
+SICAK bir açılış sorusu oluştur:
+1. "${userName}" adını doğal olarak kullan
+2. Kendini özgürce tanıtmaya davet et
+3. Hemen rahat hissettir
+4. Paylaşma isteği uyandır
+===================================`;
+  }
+
+  // Français (défaut)
   if (userProfile) {
     return `
 === PREMIÈRE QUESTION DU BILAN ===
@@ -311,9 +474,13 @@ function buildTaskDescription(
   categoryIndex: number, 
   options: Record<string, unknown>
 ): string {
+  const lang = getCurrentLanguage();
+  
   if (options.isModuleQuestion) {
     const moduleInfo = options.isModuleQuestion as { moduleId: string; questionNum: number };
-    return `Module optionnel: ${moduleInfo.moduleId} (question ${moduleInfo.questionNum}/3). Pose une question ciblée sur ce thème.`;
+    return lang === 'tr'
+      ? `İsteğe bağlı modül: ${moduleInfo.moduleId} (soru ${moduleInfo.questionNum}/3). Bu konu hakkında hedefli bir soru sor.`
+      : `Module optionnel: ${moduleInfo.moduleId} (question ${moduleInfo.questionNum}/3). Pose une question ciblée sur ce thème.`;
   }
 
   const phaseInfo = QUESTION_CATEGORIES[phaseKey as keyof typeof QUESTION_CATEGORIES];
@@ -322,16 +489,32 @@ function buildTaskDescription(
   let complexityGuidance = "";
   const targetComplexity = options.targetComplexity as string | undefined;
   if (targetComplexity) {
-    const complexityMap: Record<string, string> = {
-      'simple': "Question SIMPLE (1-2 min): factuelle, directe, facile à répondre.",
-      'moyenne': "Question MOYENNE (3-5 min): invite à la réflexion, demande des exemples.",
-      'complexe': "Question COMPLEXE (5-10 min): analyse approfondie, mise en perspective.",
-      'reflexion': "Question de RÉFLEXION PROFONDE (10-15 min): introspection, projection, vision."
+    const complexityMap: Record<string, Record<string, string>> = {
+      'simple': {
+        fr: "Question SIMPLE (1-2 min): factuelle, directe, facile à répondre.",
+        tr: "BASİT soru (1-2 dk): olgusal, doğrudan, yanıtlaması kolay."
+      },
+      'moyenne': {
+        fr: "Question MOYENNE (3-5 min): invite à la réflexion, demande des exemples.",
+        tr: "ORTA soru (3-5 dk): düşünmeye davet eder, örnekler ister."
+      },
+      'complexe': {
+        fr: "Question COMPLEXE (5-10 min): analyse approfondie, mise en perspective.",
+        tr: "KARMAŞIK soru (5-10 dk): derinlemesine analiz, perspektife koyma."
+      },
+      'reflexion': {
+        fr: "Question de RÉFLEXION PROFONDE (10-15 min): introspection, projection, vision.",
+        tr: "DERİN DÜŞÜNCE sorusu (10-15 dk): içe bakış, projeksiyon, vizyon."
+      }
     };
-    complexityGuidance = complexityMap[targetComplexity] || "";
+    complexityGuidance = complexityMap[targetComplexity]?.[lang] || "";
   }
   
-  return `Phase: ${phaseInfo.name} | Catégorie: ${category.name}
+  return lang === 'tr'
+    ? `Aşama: ${phaseInfo.name} | Kategori: ${category.name}
+${complexityGuidance}
+Önceki yanıtlara değinerek bu kategoriyi keşfeden bir soru oluştur.`
+    : `Phase: ${phaseInfo.name} | Catégorie: ${category.name}
 ${complexityGuidance}
 Génère une question qui explore cette catégorie tout en rebondissant sur les réponses précédentes.`;
 }
@@ -340,8 +523,19 @@ Génère une question qui explore cette catégorie tout en rebondissant sur les 
  * Construit les instructions spéciales
  */
 function buildSpecialInstruction(options: Record<string, unknown>, userName: string): string {
+  const lang = getCurrentLanguage();
+  
   if (options.useJoker) {
-    return `
+    return lang === 'tr'
+      ? `
+=== JOKER MODU AKTİF ===
+${userName}'ın yanıtlamak için yardıma ihtiyacı var. Önceki soruyu şu şekilde yeniden formüle et:
+- Daha basit ve erişilebilir
+- Farklı bir açıdan
+- Yönlendirmek için somut bir örnekle
+"Sorun değil, bunu başka bir şekilde keşfedelim..." gibi rahatlatıcı bir cümleyle başla
+===========================`
+      : `
 === MODE JOKER ACTIVÉ ===
 ${userName} a besoin d'aide pour répondre. Reformule la question précédente de manière:
 - Plus simple et accessible
@@ -352,7 +546,13 @@ Commence par une phrase rassurante comme "Pas de souci, explorons cela autrement
   }
   
   if (options.useGoogleSearch && options.searchTopic) {
-    return `
+    return lang === 'tr'
+      ? `
+=== BAĞLAMSAL ZENGİNLEŞTİRME ===
+${userName} "${options.searchTopic}" konusuna ilgi gösterdi.
+Zenginleştirilmiş bir soru sormak için arama sonuçlarını kullan.
+===========================`
+      : `
 === ENRICHISSEMENT CONTEXTUEL ===
 ${userName} a mentionné un intérêt pour "${options.searchTopic}".
 Utilise les résultats de recherche pour poser une question enrichie.
@@ -393,7 +593,10 @@ function handleFallback(
     return fallbackQuestion;
   }
   
-  throw new Error('Impossible de générer la question après 2 tentatives. Veuillez réessayer.');
+  const lang = getCurrentLanguage();
+  throw new Error(lang === 'tr' 
+    ? '2 denemeden sonra soru oluşturulamadı. Lütfen tekrar deneyin.'
+    : 'Impossible de générer la question après 2 tentatives. Veuillez réessayer.');
 }
 
 /**
@@ -405,74 +608,23 @@ function processQuestionResponse(
   userName: string,
   coachingStyle: CoachingStyle
 ): Question {
-  const type = (questionData.type as string)?.toUpperCase() === 'MULTIPLE_CHOICE' 
-    ? QuestionType.MULTIPLE_CHOICE 
-    : QuestionType.PARAGRAPH;
-  
-  const uniqueId = `q_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
-  // Validation: rejeter les questions de validation
-  const questionTitle = ((questionData.title as string) || '').toLowerCase();
-  const forbiddenPatterns = [
-    'est-ce que cette synthèse', 'si je résume', 'si je comprends bien',
-    'ai-je bien saisi', 'cette analyse vous semble', 'vous reconnaissez-vous dans',
-    'ce portrait correspond', 'diriez-vous que', 'est-ce exact', 'confirmer'
-  ];
-  
-  const isValidationQuestion = forbiddenPatterns.some(pattern => questionTitle.includes(pattern));
-  
-  if (isValidationQuestion && previousAnswers.length > 0) {
-    console.warn('[generateQuestion] Question de validation détectée et rejetée');
-    const smartQuestion = generateSmartQuestion(previousAnswers, userName, coachingStyle);
-    if (smartQuestion) {
-      return smartQuestion;
-    }
-  }
-  
-  // Nettoyer les phrases techniques
-  const technicalPhrases = [
-    /question générée en fonction de[^.]*\.?/gi,
-    /cette question fait suite à[^.]*\.?/gi,
-    /générée? automatiquement[^.]*\.?/gi
-  ];
-  
-  let cleanDescription = (questionData.description as string) || '';
-  let cleanTitle = (questionData.title as string) || '';
-  
-  for (const pattern of technicalPhrases) {
-    cleanDescription = cleanDescription.replace(pattern, '').trim();
-    cleanTitle = cleanTitle.replace(pattern, '').trim();
-  }
-  
-  return { 
-    ...questionData, 
-    id: uniqueId,
-    title: cleanTitle.replace(/\s{2,}/g, ' ').trim(),
-    description: cleanDescription.replace(/\s{2,}/g, ' ').trim() || undefined,
-    type, 
-    choices: type === QuestionType.MULTIPLE_CHOICE ? (questionData.choices as string[]) : undefined 
-  } as Question;
-}
+  const question: Question = {
+    id: (questionData.id as string) || `q-${Date.now()}`,
+    title: (questionData.title as string) || '',
+    description: (questionData.description as string) || '',
+    type: ((questionData.type as string) || 'open') as QuestionType,
+    options: (questionData.options as string[]) || undefined,
+    category: (questionData.category as string) || 'general',
+    phase: (questionData.phase as string) || 'phase1',
+    isRequired: true,
+    order: previousAnswers.length + 1,
+  };
 
-/**
- * Suggère un module optionnel basé sur les réponses
- */
-export const suggestOptionalModule = async (
-  answers: Answer[]
-): Promise<{ isNeeded: boolean; moduleId?: string; reason?: string }> => {
-  const history = answers.map(a => `Q: ${a.questionId}\nA: ${a.value}`).join('\n\n');
-  
-  const prompt = `Analyze the user's answers. Determine if they exhibit a strong need for a specific, short optional module on one of these topics: 'transition-management' (fear of change, uncertainty), 'self-confidence' (self-doubt, impostor syndrome), or 'work-life-balance' (stress, burnout, desire for better balance). Only set isNeeded to true if the signal is clear and strong. The response must be a valid JSON object. Answers: --- ${history} ---`;
-  
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: { responseMimeType: "application/json", responseSchema: optionalModuleSchema },
-    });
-    return parseJsonResponse(response.text ?? '', 'suggestOptionalModule');
-  } catch (error) {
-    console.error('[suggestOptionalModule] Error:', error);
-    return { isNeeded: false };
+  // Vérification de qualité
+  if (!question.title || question.title.length < 10) {
+    console.warn('[processQuestionResponse] Question trop courte, fallback');
+    return handleFallback(previousAnswers, userName, coachingStyle, {});
   }
-};
+
+  return question;
+}

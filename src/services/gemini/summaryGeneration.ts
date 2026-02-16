@@ -5,7 +5,7 @@
 
 import { Answer, Summary, UserProfile, DashboardData, Package } from '../../types';
 import { geminiProxy } from '../geminiServiceProxy';
-import { parseJsonResponse, getCoachingStyleInstruction } from './utils';
+import { parseJsonResponse, getCoachingStyleInstruction, getCurrentLanguage, getLangInstruction, getDocLangInstruction } from './utils';
 import { summarySchema, dashboardDataSchema, userProfileSchema, Type } from './schemas';
 
 const ai = geminiProxy;
@@ -164,9 +164,23 @@ export const generateIntermediateSummary = async (
   answers: Answer[],
   userName: string
 ): Promise<{ themes: string[]; insights: string[]; progress: number }> => {
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
   const history = answers.map(a => `Q: ${a.questionTitle}\nR: ${a.value}`).join('\n\n');
   
-  const prompt = `Analyse les réponses suivantes d'un bilan de compétences en cours pour ${userName}.
+  const prompt = lang === 'tr'
+    ? `${userName} için devam eden yetkinlik değerlendirmesinin aşağıdaki yanıtlarını analiz et.
+
+${history}
+
+Oluştur:
+1. themes: Ortaya çıkan 3-5 ana tema
+2. insights: Profil hakkında 2-3 temel gözlem
+3. progress: Değerlendirmenin tamamlanma yüzdesi tahmini (0-100)
+
+JSON olarak yanıtla.
+${langInstruction}`
+    : `Analyse les réponses suivantes d'un bilan de compétences en cours pour ${userName}.
 
 ${history}
 
@@ -175,7 +189,8 @@ Génère:
 2. insights: 2-3 observations clés sur le profil
 3. progress: estimation du pourcentage de complétion du bilan (0-100)
 
-Réponds en JSON. Langue: Français.`;
+Réponds en JSON.
+${langInstruction}`;
 
   const schema = {
     type: Type.OBJECT,

@@ -5,7 +5,7 @@
 
 import { Answer } from '../../types';
 import { geminiProxy } from '../geminiServiceProxy';
-import { parseJsonResponse } from './utils';
+import { parseJsonResponse, getCurrentLanguage, getLangInstruction } from './utils';
 import { Type } from './schemas';
 
 const ai = geminiProxy;
@@ -60,7 +60,7 @@ const explorationNeedSchema = {
     },
     reason: { 
       type: Type.STRING, 
-      description: "Explication en français de pourquoi l'exploration est ou n'est pas nécessaire" 
+      description: "Explication de pourquoi l'exploration est ou n'est pas nécessaire" 
     },
     suggestedApproach: { 
       type: Type.STRING, 
@@ -120,9 +120,32 @@ const careerExplorationSchema = {
  * Détecte si le bénéficiaire a besoin d'explorer des pistes métiers
  */
 export const detectCareerExplorationNeed = async (answers: Answer[]): Promise<ExplorationNeedResult> => {
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
   const history = answers.map(a => `Q: ${a.questionTitle || a.questionId}\nR: ${a.value}`).join('\n\n');
   
-  const prompt = `Tu es un expert en orientation professionnelle. Analyse les réponses suivantes d'un bénéficiaire en bilan de compétences.
+  const prompt = lang === 'tr'
+    ? `Sen bir mesleki yönlendirme uzmanısın. Yetkinlik değerlendirmesindeki bir yararlanıcının aşağıdaki yanıtlarını analiz et.
+
+YARARLANICININ YANITLARI:
+${history}
+
+GÖREV:
+Bu yararlanıcının mesleki yol keşfine ihtiyacı olup olmadığını belirle:
+1. Net ve tanımlanmış bir mesleki projesi var mı?
+2. Geleceği hakkında tereddüt veya belirsizlik ifade ediyor mu?
+3. Nereye gideceğini bilmeden yön değiştirmek istediğinden bahsediyor mu?
+4. Yeni olasılıklar keşfetmeye ihtiyacı var gibi görünüyor mu?
+
+YAKLAŞIM TÜRLERİ:
+- "full_exploration": Net bir fikir yok, yollar keşfetmesi gerekiyor
+- "validation": Bir fikri var ama doğrulamak/onaylamak istiyor
+- "refinement": Birkaç seçenek arasında kararsız, netleştirmesi gerekiyor
+- "none": Net ve tanımlanmış proje, keşfe gerek yok
+
+JSON olarak yanıtla.
+${langInstruction}`
+    : `Tu es un expert en orientation professionnelle. Analyse les réponses suivantes d'un bénéficiaire en bilan de compétences.
 
 RÉPONSES DU BÉNÉFICIAIRE:
 ${history}
@@ -140,7 +163,8 @@ TYPES D'APPROCHE:
 - "refinement": Hésite entre plusieurs options, besoin d'affiner
 - "none": Projet clair et défini, pas besoin d'exploration
 
-Réponds en JSON. Langue: Français.`;
+Réponds en JSON.
+${langInstruction}`;
 
   try {
     const response = await ai.models.generateContent({
@@ -154,7 +178,7 @@ Réponds en JSON. Langue: Français.`;
     return {
       needsExploration: false,
       confidence: 0,
-      reason: "Erreur lors de l'analyse",
+      reason: lang === 'tr' ? "Analiz sırasında hata oluştu" : "Erreur lors de l'analyse",
       suggestedApproach: 'none'
     };
   }
@@ -168,9 +192,37 @@ export const exploreCareerPaths = async (
   userName: string,
   additionalContext?: string
 ): Promise<CareerExplorationResult> => {
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
   const history = answers.map(a => `Q: ${a.questionTitle || a.questionId}\nR: ${a.value}`).join('\n\n');
   
-  const prompt = `Tu es un expert en orientation professionnelle et en marché du travail français.
+  const prompt = lang === 'tr'
+    ? `Sen mesleki yönlendirme ve Fransız iş piyasası uzmanısın.
+
+YARARLANICININ PROFİLİ (${userName}):
+${history}
+
+${additionalContext ? `EK BAĞLAM:\n${additionalContext}\n` : ''}
+
+GÖREV:
+Bu yararlanıcı için 3 ila 5 kişiselleştirilmiş ve gerçekçi mesleki yol öner.
+
+ÖNEMLİ KRİTERLER:
+1. Meslekler ifade edilen yetkinliklere ve isteklere uygun olmalı
+2. Hızlı erişilebilir meslekler ve eğitim gerektiren mesleklerin bir karışımını dahil et
+3. Fransa'daki mevcut iş piyasası eğilimlerini dikkate al (2024-2025)
+4. Maaşlar ve perspektifler konusunda gerçekçi ol
+5. Profille tutarlı ancak çeşitli meslekler öner
+
+HER MESLEK İÇİN:
+- Profile neden uygun olduğunu açıkça açıkla
+- Geliştirilecek yetkinlikleri belirle
+- Piyasa hakkında somut bilgiler ver
+- Bu yolu keşfetmek için somut eylemler öner
+
+JSON olarak yanıtla.
+${langInstruction}`
+    : `Tu es un expert en orientation professionnelle et en marché du travail français.
 
 PROFIL DU BÉNÉFICIAIRE (${userName}):
 ${history}
@@ -193,7 +245,8 @@ POUR CHAQUE MÉTIER:
 - Donne des informations concrètes sur le marché
 - Propose des actions concrètes pour explorer cette piste
 
-Réponds en JSON. Langue: Français.`;
+Réponds en JSON.
+${langInstruction}`;
 
   try {
     const response = await ai.models.generateContent({
@@ -206,7 +259,7 @@ Réponds en JSON. Langue: Français.`;
     console.error('[exploreCareerPaths] Error:', error);
     return {
       careerPaths: [],
-      profileSummary: "Erreur lors de l'analyse du profil",
+      profileSummary: lang === 'tr' ? "Profil analizi sırasında hata oluştu" : "Erreur lors de l'analyse du profil",
       keyStrengths: [],
       explorationQuestions: []
     };
@@ -221,20 +274,51 @@ export const generateCareerFollowUpQuestion = async (
   userReaction: 'interested' | 'not_interested' | 'need_more_info',
   previousAnswers: Answer[]
 ): Promise<string> => {
-  const reactionContext = {
-    'interested': "Le bénéficiaire est intéressé par cette piste",
-    'not_interested': "Le bénéficiaire n'est pas intéressé par cette piste",
-    'need_more_info': "Le bénéficiaire souhaite plus d'informations"
+  const lang = getCurrentLanguage();
+  const langInstruction = getLangInstruction();
+  
+  const reactionContext: Record<string, Record<string, string>> = {
+    'interested': {
+      fr: "Le bénéficiaire est intéressé par cette piste",
+      tr: "Yararlanıcı bu yolla ilgileniyor"
+    },
+    'not_interested': {
+      fr: "Le bénéficiaire n'est pas intéressé par cette piste",
+      tr: "Yararlanıcı bu yolla ilgilenmiyor"
+    },
+    'need_more_info': {
+      fr: "Le bénéficiaire souhaite plus d'informations",
+      tr: "Yararlanıcı daha fazla bilgi istiyor"
+    }
   };
 
-  const prompt = `Tu es un conseiller en orientation professionnelle.
+  const prompt = lang === 'tr'
+    ? `Sen bir mesleki yönlendirme danışmanısın.
+
+SUNULAN MESLEKİ YOL:
+- Başlık: ${careerPath.title}
+- Açıklama: ${careerPath.description}
+- Uyum puanı: ${careerPath.matchScore}%
+
+YARARLANICININ TEPKİSİ: ${reactionContext[userReaction]?.tr}
+
+GÖREV:
+Şunlar için uygun ve yardımsever BİR takip sorusu oluştur:
+${userReaction === 'interested' ? '- İlgisini derinleştir ve somut sonraki adımları belirle' : ''}
+${userReaction === 'not_interested' ? '- Neyin uygun olmadığını anla ve önerileri iyileştir' : ''}
+${userReaction === 'need_more_info' ? '- Hangi ek bilgilerin faydalı olacağını belirle' : ''}
+
+Soru açık uçlu ve cesaretlendirici olmalı.
+Sadece soruyla yanıtla, JSON formatı olmadan.
+${langInstruction}`
+    : `Tu es un conseiller en orientation professionnelle.
 
 PISTE MÉTIER PRÉSENTÉE:
 - Titre: ${careerPath.title}
 - Description: ${careerPath.description}
 - Score de correspondance: ${careerPath.matchScore}%
 
-RÉACTION DU BÉNÉFICIAIRE: ${reactionContext[userReaction]}
+RÉACTION DU BÉNÉFICIAIRE: ${reactionContext[userReaction]?.fr}
 
 TÂCHE:
 Génère UNE question de suivi pertinente et bienveillante pour:
@@ -242,17 +326,22 @@ ${userReaction === 'interested' ? '- Approfondir son intérêt et identifier les
 ${userReaction === 'not_interested' ? '- Comprendre ce qui ne lui convient pas pour affiner les suggestions' : ''}
 ${userReaction === 'need_more_info' ? '- Identifier quelles informations supplémentaires seraient utiles' : ''}
 
-La question doit être ouverte, encourageante et en français.
-Réponds uniquement avec la question, sans formatage JSON.`;
+La question doit être ouverte et encourageante.
+Réponds uniquement avec la question, sans formatage JSON.
+${langInstruction}`;
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
     });
-    return response.text?.trim() ?? "Qu'est-ce qui vous attire ou vous freine dans cette piste ?";
+    return response.text?.trim() ?? (lang === 'tr' 
+      ? "Bu yolda sizi çeken veya durduran ne?"
+      : "Qu'est-ce qui vous attire ou vous freine dans cette piste ?");
   } catch (error) {
     console.error('[generateCareerFollowUpQuestion] Error:', error);
-    return "Qu'est-ce qui vous attire ou vous freine dans cette piste ?";
+    return lang === 'tr'
+      ? "Bu yolda sizi çeken veya durduran ne?"
+      : "Qu'est-ce qui vous attire ou vous freine dans cette piste ?";
   }
 };
