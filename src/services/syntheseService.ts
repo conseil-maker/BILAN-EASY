@@ -4,8 +4,16 @@ import { organizationConfig, getFullAddress } from '../config/organization';
 import { CareerPath } from './geminiService';
 import i18n from '../i18n';
 
-const tSyn = (fr: string, tr: string): string => (i18n.language || 'fr') === 'tr' ? tr : fr;
-const dateFmt = (): string => (i18n.language || 'fr') === 'tr' ? 'tr-TR' : 'fr-FR';
+// Langue par défaut basée sur i18n, mais peut être forcée via le paramètre forceLang
+let _forceLang: string | null = null;
+const tSyn = (fr: string, tr: string): string => {
+  const lang = _forceLang || i18n.language || 'fr';
+  return lang === 'tr' ? tr : fr;
+};
+const dateFmt = (): string => {
+  const lang = _forceLang || i18n.language || 'fr';
+  return lang === 'tr' ? 'tr-TR' : 'fr-FR';
+};
 
 export interface SyntheseData {
   userName: string;
@@ -66,7 +74,8 @@ export const syntheseService = {
   /**
    * Génère le document de synthèse complet conforme Qualiopi
    */
-  generateSynthese(data: SyntheseData): Blob {
+  generateSynthese(data: SyntheseData, forceLang?: string): Blob {
+    _forceLang = forceLang || null;
     const doc = new jsPDF();
     let y = 20;
     const margin = 20;
@@ -588,7 +597,8 @@ export const syntheseService = {
   /**
    * Génère le plan d'action séparé
    */
-  generatePlanAction(data: SyntheseData): Blob {
+  generatePlanAction(data: SyntheseData, forceLang?: string): Blob {
+    _forceLang = forceLang || null;
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();

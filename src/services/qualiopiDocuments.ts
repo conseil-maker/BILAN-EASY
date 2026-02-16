@@ -2,8 +2,16 @@ import jsPDF from 'jspdf';
 import { organizationConfig, getFullAddress } from '../config/organization';
 import i18n from '../i18n';
 
-const tDoc = (fr: string, tr: string): string => (i18n.language || 'fr') === 'tr' ? tr : fr;
-const dateFmt = (): string => (i18n.language || 'fr') === 'tr' ? 'tr-TR' : 'fr-FR';
+// Langue par défaut basée sur i18n, mais peut être forcée via le paramètre forceLang
+let _forceLang: string | null = null;
+const tDoc = (fr: string, tr: string): string => {
+  const lang = _forceLang || i18n.language || 'fr';
+  return lang === 'tr' ? tr : fr;
+};
+const dateFmt = (): string => {
+  const lang = _forceLang || i18n.language || 'fr';
+  return lang === 'tr' ? 'tr-TR' : 'fr-FR';
+};
 
 export interface ConventionData {
   clientName: string;
@@ -34,7 +42,8 @@ export const qualiopiDocuments = {
   /**
    * Génère la convention de prestation conforme Qualiopi
    */
-  generateConvention(data: ConventionData): Blob {
+  generateConvention(data: ConventionData, forceLang?: string): Blob {
+    _forceLang = forceLang || null;
     const doc = new jsPDF();
     let y = 20;
     const margin = 20;
@@ -184,7 +193,8 @@ addSection(tDoc('ARTICLE 5 : LIVRABLES', 'MADDE 5: TESLİMATLAR'));
   /**
    * Génère l'attestation de présence conforme Qualiopi
    */
-  generateAttestation(data: AttestationData): Blob {
+  generateAttestation(data: AttestationData, forceLang?: string): Blob {
+    _forceLang = forceLang || null;
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -292,7 +302,8 @@ addSection(tDoc('ARTICLE 5 : LIVRABLES', 'MADDE 5: TESLİMATLAR'));
   /**
    * Génère le livret d'accueil
    */
-  generateLivretAccueil(): Blob {
+  generateLivretAccueil(forceLang?: string): Blob {
+    _forceLang = forceLang || null;
     const doc = new jsPDF();
     let y = 20;
     const margin = 20;

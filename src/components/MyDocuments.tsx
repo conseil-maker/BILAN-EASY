@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { qualiopiDocuments, ConventionData, AttestationData } from '../services/qualiopiDocuments';
@@ -149,6 +150,104 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
     } catch (err) {
       console.error('Erreur export Excel:', err);
       showError(t('excel.errorMessage'));
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const isUserTurkish = i18n.language === 'tr';
+
+  const downloadDocumentInLang = async (doc: DocumentItem, lang: 'fr' | 'tr') => {
+    try {
+      setLoading(`${doc.id}-${lang}`);
+      setError(null);
+      setSuccess(null);
+
+      const userName = profile?.full_name || user.email?.split('@')[0] || 'Utilisateur';
+      const userEmail = profile?.email || user.email || '';
+      const userAddress = profile?.address || '';
+      const currentEndDate = endDate || new Date().toLocaleDateString('fr-FR');
+
+      let blob: Blob;
+      let filename: string;
+      const langSuffix = lang === 'tr' ? '-TR' : '';
+
+      switch (doc.type) {
+        case 'convention':
+          blob = qualiopiDocuments.generateConvention({
+            clientName: userName, clientEmail: userEmail, clientAddress: userAddress,
+            packageName, packageDuration, packagePrice, startDate,
+            consultantName: organizationConfig.defaultConsultant.name,
+            consultantEmail: organizationConfig.defaultConsultant.email,
+            organizationName: organizationConfig.name,
+            organizationAddress: getFullAddress(),
+            organizationSiret: organizationConfig.siret,
+          }, lang);
+          filename = `convention${langSuffix}-${userName.replace(/\s+/g, '-')}-${Date.now()}.pdf`;
+          break;
+        case 'attestation':
+          blob = qualiopiDocuments.generateAttestation({
+            clientName: userName, packageName, packageDuration, startDate,
+            endDate: currentEndDate,
+            consultantName: organizationConfig.defaultConsultant.name,
+            organizationName: organizationConfig.name,
+          }, lang);
+          filename = `attestation${langSuffix}-${userName.replace(/\s+/g, '-')}-${Date.now()}.pdf`;
+          break;
+        case 'livret':
+          blob = qualiopiDocuments.generateLivretAccueil(lang);
+          filename = `livret-accueil${langSuffix}-${Date.now()}.pdf`;
+          break;
+        case 'synthese':
+          blob = syntheseService.generateSynthese({
+            userName, userEmail, packageName, startDate, endDate: currentEndDate,
+            consultantName: organizationConfig.defaultConsultant.name,
+            organizationName: organizationConfig.name,
+            summary: summary || {}, answers: answers || [],
+          }, lang);
+          filename = `synthese${langSuffix}-${userName.replace(/\s+/g, '-')}-${Date.now()}.pdf`;
+          break;
+        case 'plan':
+          const extractedActions: any[] = [];
+          const ap = summary?.actionPlan;
+          if (ap) {
+            if (Array.isArray(ap)) {
+              ap.forEach((item: any, i: number) => {
+                extractedActions.push({ action: item.text || item, echeance: i < 2 ? 'Court terme' : i < 4 ? 'Moyen terme' : 'Long terme', priorite: i < 2 ? 'haute' : i < 4 ? 'moyenne' : 'basse', statut: item.completed ? 'termine' : 'a_faire' });
+              });
+            } else {
+              (ap.shortTerm || []).forEach((item: any) => extractedActions.push({ action: item.text || item, echeance: 'Court terme (0-3 mois)', priorite: 'haute', statut: item.completed ? 'termine' : 'a_faire' }));
+              (ap.mediumTerm || []).forEach((item: any) => extractedActions.push({ action: item.text || item, echeance: 'Moyen terme (3-6 mois)', priorite: 'moyenne', statut: item.completed ? 'termine' : 'a_faire' }));
+              (ap.longTerm || []).forEach((item: any) => extractedActions.push({ action: item.text || item, echeance: 'Long terme (6-12 mois)', priorite: 'basse', statut: item.completed ? 'termine' : 'a_faire' }));
+            }
+          }
+          blob = syntheseService.generatePlanAction({
+            userName, userEmail, packageName, startDate, endDate: currentEndDate,
+            consultantName: organizationConfig.defaultConsultant.name,
+            organizationName: organizationConfig.name,
+            summary: summary || {}, answers: answers || [],
+            projectProfessionnel: summary?.projectProfessionnel || '',
+            planAction: extractedActions,
+          }, lang);
+          filename = `plan-action${langSuffix}-${userName.replace(/\s+/g, '-')}-${Date.now()}.pdf`;
+          break;
+        default:
+          throw new Error('Type de document non reconnu');
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setSuccess(t('messages.downloadSuccess', { name: doc.name + (lang === 'tr' ? ' (Türkçe)' : '') }));
+      await saveDownloadHistory(doc);
+    } catch (err) {
+      console.error('Erreur génération document:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors de la génération du document');
     } finally {
       setLoading(null);
     }
@@ -435,25 +534,46 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
                       </p>
                     )}
                     
-                    <button
-                      onClick={() => downloadDocument(doc)}
-                      disabled={loading === doc.id || !doc.available}
-                      className={`mt-4 px-4 py-2 ${colors.button} text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors text-sm`}
-                    >
-                      {loading === doc.id ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                          {t('buttons.generating')}
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                          {doc.available ? t('buttons.downloadPdf') : t('buttons.notAvailable')}
-                        </>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => downloadDocument(doc)}
+                        disabled={loading === doc.id || !doc.available}
+                        className={`px-4 py-2 ${colors.button} text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors text-sm`}
+                      >
+                        {loading === doc.id ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                            {t('buttons.generating')}
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            {doc.available ? t('buttons.downloadPdf') : t('buttons.notAvailable')}
+                          </>
+                        )}
+                      </button>
+                      {isUserTurkish && doc.available && (
+                        <button
+                          onClick={() => downloadDocumentInLang(doc, 'tr')}
+                          disabled={loading === `${doc.id}-tr`}
+                          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors text-sm"
+                        >
+                          {loading === `${doc.id}-tr` ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                              {t('buttons.generating')}
+                            </>
+                          ) : (
+                            <>
+                              <span className="mr-1">🇹🇷</span>
+                              {t('buttons.downloadTurkish')}
+                            </>
+                          )}
+                        </button>
                       )}
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -547,25 +667,46 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
                       </p>
                     )}
                     
-                    <button
-                      onClick={() => downloadDocument(doc)}
-                      disabled={loading === doc.id || !doc.available}
-                      className={`mt-4 px-4 py-2 ${colors.button} text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors text-sm`}
-                    >
-                      {loading === doc.id ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                          {t('buttons.generating')}
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                          {doc.available ? t('buttons.downloadPdf') : t('buttons.notAvailable')}
-                        </>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => downloadDocument(doc)}
+                        disabled={loading === doc.id || !doc.available}
+                        className={`px-4 py-2 ${colors.button} text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors text-sm`}
+                      >
+                        {loading === doc.id ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                            {t('buttons.generating')}
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            {doc.available ? t('buttons.downloadPdf') : t('buttons.notAvailable')}
+                          </>
+                        )}
+                      </button>
+                      {isUserTurkish && doc.available && (
+                        <button
+                          onClick={() => downloadDocumentInLang(doc, 'tr')}
+                          disabled={loading === `${doc.id}-tr`}
+                          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors text-sm"
+                        >
+                          {loading === `${doc.id}-tr` ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                              {t('buttons.generating')}
+                            </>
+                          ) : (
+                            <>
+                              <span className="mr-1">🇹🇷</span>
+                              {t('buttons.downloadTurkish')}
+                            </>
+                          )}
+                        </button>
                       )}
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>

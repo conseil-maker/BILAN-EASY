@@ -53,6 +53,7 @@
   "buttons": {
     "generating": "Génération...",
     "downloadPdf": "Télécharger PDF",
+    "downloadTurkish": "Version turque",
     "notAvailable": "Non disponible"
   },
   "legal": {
