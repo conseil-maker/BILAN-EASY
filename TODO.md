@@ -1,6 +1,6 @@
 # ✅ Bilan Easy - TODO List & État des Lieux
 
-**Date de dernière mise à jour :** 16 février 2026 (session 2)
+**Date de dernière mise à jour :** 16 février 2026 (session 3)
 
 Ce document sert de feuille de route et de suivi pour le développement de la plateforme Bilan-Easy. Il est destiné à être mis à jour régulièrement pour refléter l'avancement du projet.
 
@@ -19,7 +19,7 @@ L'application est **fonctionnelle** sur son périmètre principal. La base techn
 | Tables Supabase utilisées | 11 (dont `appointment_requests`) |
 | Buckets Supabase Storage | 2 (`cvs`, `pdfs`) |
 | Edge Functions (Supabase) | 2 (Gemini & Email Proxy) |
-| Erreurs TypeScript (critiques) | ~143 (réduites de ~7800) |
+| Erreurs TypeScript (critiques) | ~66 (réduites de ~7800 → ~143 → ~66) |
 
 ---
 
@@ -31,13 +31,15 @@ L'application est **fonctionnelle** sur son périmètre principal. La base techn
 | 👤 Authentification | **Gestion des Rôles** | Inscription, connexion, et 3 rôles fonctionnels (client, consultant, admin). |
 | 🚀 Parcours Client | **Questionnaire Dynamique** | Les 3 phases (Préliminaire, Investigation, Conclusion) sont implémentées avec une logique de questions adaptatives. |
 | 💾 Sauvegarde | **Progression & Historique** | La session du client est sauvegardée dans Supabase (`user_sessions`) et les bilans terminés sont dans l'historique (`assessments`). |
-| 🌍 Internationalisation | **Traduction FR/TR (Complète)** | L'UI est bilingue. Prompts Gemini, pages légales, noms de packages/phases, dashboards — tout est traduit. |
+| 🌍 Internationalisation | **Traduction FR/TR (Complète)** | L'UI est bilingue. Prompts Gemini, pages légales, noms de packages/phases, dashboards, synthèse PDF — tout est traduit. |
 | 📄 Documents | **Génération Qualiopi (Partiel)** | La convention de formation et l'attestation de présence sont générées. |
+| 📄 Documents | **Synthèse PDF Bilingue** | La synthèse PDF (standard et enrichie) est traduite dynamiquement selon la langue via `tSyn()`. |
 | 🔒 Sécurité | **Proxy API** | Les clés API (Gemini, Resend) sont sécurisées côté serveur via des Edge Functions Supabase. |
 | 🧹 Nettoyage | **Code Orphelin Archivé** | 12 composants et 5 services inutilisés ont été déplacés dans `src/_unused` pour clarifier la base de code. |
-| 🐛 TypeScript | **Erreurs TS Corrigées** | De ~7800 erreurs à ~143 (ajout `@types/react`, correction types, `useTranslation` manquants, `tsconfig.json`). |
+| 🐛 TypeScript | **Erreurs TS Corrigées** | De ~7800 erreurs à ~66 (ajout `@types/react`, correction types, `useTranslation` manquants, `tsconfig.json`, gardes null, props optionnelles). |
 | 🌐 Langue | **Flash de Langue Résolu** | La langue préférée est chargée depuis Supabase avant le rendu de l'UI (AuthWrapper). |
 | 📅 Rendez-vous | **Système de Demande RDV** | Formulaire simple côté client → consultant voit et gère les demandes. Table `appointment_requests` avec RLS. |
+| 📧 Notifications | **Email Notification RDV** | Le consultant est notifié par email (via proxy Supabase) quand un client fait une demande de RDV. |
 | 📊 Dashboards | **Admin & Consultant Enrichis** | Données dynamiques Supabase, onglet RDV, statistiques, gestion des utilisateurs et des bilans. |
 
 ---
@@ -59,22 +61,21 @@ L'application est **fonctionnelle** sur son périmètre principal. La base techn
   - **Comment :** Utiliser les sous-composants déjà créés dans `src/components/questionnaire/`.
   - **Fichiers concernés :** `Questionnaire.tsx`, `ClientDashboard.tsx`.
 
-- [ ] **Corriger les ~143 erreurs TypeScript restantes :**
+- [ ] **Corriger les ~66 erreurs TypeScript restantes :**
   - **Objectif :** Rendre le build TypeScript propre.
-  - **Comment :** Principalement des erreurs `possibly undefined` sur des accès d'index de tableau dans les services PDF (`syntheseService.ts`, `syntheseServiceEnriched.ts`).
+  - **Comment :** Principalement des erreurs `possibly undefined` sur des accès d'index de tableau dans les services PDF (`syntheseService.ts`, `syntheseServiceEnriched.ts`, `pdfHelpers.ts`).
   - **Note :** Le build Vite passe sans problème, ces erreurs sont du typage strict.
 
 ### 🟡 Priorité Moyenne : Fonctionnalités Clés
 
 - [ ] **Améliorer la Génération de la Synthèse PDF :**
-  - **Objectif :** Produire un document de synthèse riche et visuel.
-  - **Comment :** Intégrer pleinement `syntheseServiceEnriched` et les graphiques (`SkillsRadar`, etc.) dans la génération du PDF final.
-  - **État actuel :** La génération PDF depuis le `SummaryDashboard` est basique.
+  - **Objectif :** Produire un document de synthèse plus riche visuellement.
+  - **Comment :** Intégrer les graphiques (`SkillsRadar`, etc.) dans la génération du PDF final.
+  - **État actuel :** La génération PDF fonctionne et est bilingue, mais pourrait être plus visuelle.
 
-- [ ] **Notifications Email pour les Demandes de RDV :**
-  - **Objectif :** Notifier le consultant par email quand un client fait une demande de RDV.
-  - **Comment :** Utiliser le proxy email Supabase (Edge Function `send-email`) pour envoyer une notification.
-  - **État actuel :** Les demandes sont enregistrées en base mais pas de notification email.
+- [ ] **Compléter les Documents Qualiopi :**
+  - **Objectif :** Générer tous les documents requis (programme de formation, feuilles d'émargement, etc.).
+  - **Comment :** Enrichir le composant `DocumentsQualiopi` et le service de génération PDF.
 
 ### 🟢 Priorité Basse : Améliorations & Vision à Long Terme
 
@@ -114,3 +115,4 @@ L'application est **fonctionnelle** sur son périmètre principal. La base techn
 |---|---|
 | 16/02/2026 (S1) | Traduction noms packages/phases, audit complet, nettoyage 17 fichiers orphelins, création TODO.md |
 | 16/02/2026 (S2) | Correction ~7500 erreurs TS, flash de langue, traduction prompts Gemini + pages légales, système RDV simplifié, dashboards Admin/Consultant enrichis |
+| 16/02/2026 (S3) | Notification email RDV au consultant, correction 77 erreurs TS supplémentaires (de 143 à 66), types enrichis (Question, Answer, Package, etc.), gardes null, props optionnelles |
