@@ -38,6 +38,30 @@ export interface AttestationData {
   organizationName: string;
 }
 
+export interface ProgrammeData {
+  packageName: string;
+  packageDuration: number;
+  consultantName: string;
+  organizationName: string;
+  startDate: string;
+}
+
+export interface EmargementData {
+  clientName: string;
+  packageName: string;
+  consultantName: string;
+  organizationName: string;
+  sessions: { date: string; duration: string; topic: string }[];
+}
+
+export interface EvaluationData {
+  clientName: string;
+  packageName: string;
+  consultantName: string;
+  organizationName: string;
+  completionDate: string;
+}
+
 export const qualiopiDocuments = {
   /**
    * Génère la convention de prestation conforme Qualiopi
@@ -403,6 +427,403 @@ addSection(tDoc('NOS ENGAGEMENTS QUALITÉ', 'KALİTE TAAHHÜTLERİMİZ'));
     doc.setFontSize(8);
     doc.setTextColor(128, 128, 128);
     doc.text(tDoc('Livret d\'accueil - Bilan de compétences conforme Qualiopi', 'Hoş geldiniz kitapçığı - Qualiopi uyumlu yetkinlik değerlendirmesi'), pageWidth / 2, 285, { align: 'center' });
+
+    return doc.output('blob');
+  },
+
+  /**
+   * Génère le programme de formation détaillé conforme Qualiopi
+   */
+  generateProgramme(data: ProgrammeData, forceLang?: string): Blob {
+    _forceLang = forceLang || null;
+    const doc = new jsPDF();
+    let y = 20;
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const maxWidth = pageWidth - 2 * margin;
+
+    const addText = (text: string, fontSize: number = 11, isBold: boolean = false, align: 'left' | 'center' | 'right' = 'left') => {
+      doc.setFontSize(fontSize);
+      doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach((line: string) => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        if (align === 'center') doc.text(line, pageWidth / 2, y, { align: 'center' });
+        else doc.text(line, margin, y);
+        y += fontSize * 0.5;
+      });
+      y += 3;
+    };
+
+    const addSection = (title: string) => {
+      y += 5;
+      doc.setFillColor(79, 70, 229);
+      doc.rect(margin, y - 5, maxWidth, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(title, margin + 2, y);
+      y += 10;
+      doc.setTextColor(0, 0, 0);
+    };
+
+    // En-tête
+    doc.setFillColor(79, 70, 229);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(tDoc('PROGRAMME DE FORMATION', 'EĞİTİM PROGRAMI'), pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(tDoc('Bilan de Compétences', 'Yetkinlik Değerlendirmesi'), pageWidth / 2, 25, { align: 'center' });
+    y = 45;
+    doc.setTextColor(0, 0, 0);
+
+    // Informations générales
+    addSection(tDoc('INFORMATIONS GÉNÉRALES', 'GENEL BİLGİLER'));
+    addText(tDoc(`Intitulé : Bilan de compétences - ${data.packageName}`, `Başlık: Yetkinlik değerlendirmesi - ${data.packageName}`));
+    addText(tDoc(`Organisme : ${data.organizationName}`, `Kuruluş: ${data.organizationName}`));
+    addText(tDoc(`Consultant référent : ${data.consultantName}`, `Referans danışman: ${data.consultantName}`));
+    addText(tDoc(`Durée totale : ${data.packageDuration} heures`, `Toplam süre: ${data.packageDuration} saat`));
+    addText(tDoc(`Date de début prévue : ${data.startDate}`, `Planlanan başlangıç tarihi: ${data.startDate}`));
+    addText(tDoc('Format : Entretiens individuels + travail personnel sur plateforme numérique', 'Format: Bireysel görüşmeler + dijital platformda kişisel çalışma'));
+
+    // Objectifs
+    addSection(tDoc('OBJECTIFS PÉDAGOGIQUES', 'EĞİTİM HEDEFLERİ'));
+    addText(tDoc('À l\'issue du bilan, le bénéficiaire sera en mesure de :', 'Değerlendirme sonunda yararlanıcı şunları yapabilecektir:'));
+    addText(tDoc('• Identifier et valoriser ses compétences professionnelles et personnelles', '• Mesleki ve kişisel yetkinliklerini belirlemek ve değerlendirmek'));
+    addText(tDoc('• Analyser ses aptitudes, motivations et valeurs professionnelles', '• Yeteneklerini, motivasyonlarını ve mesleki değerlerini analiz etmek'));
+    addText(tDoc('• Définir un projet professionnel réaliste et réalisable', '• Gerçekçi ve uygulanabilir bir mesleki proje tanımlamak'));
+    addText(tDoc('• Élaborer un plan d\'action concret pour la mise en œuvre du projet', '• Projenin uygulanması için somut bir eylem planı oluşturmak'));
+
+    // Public cible
+    addSection(tDoc('PUBLIC CIBLE ET PRÉREQUIS', 'HEDEF KİTLE VE ÖN KOŞULLAR'));
+    addText(tDoc('Public : Tout actif souhaitant faire le point sur sa carrière (salarié, demandeur d\'emploi, indépendant).', 'Hedef kitle: Kariyerini değerlendirmek isteyen tüm çalışanlar (maaşlı, iş arayanlar, serbest çalışanlar).'));
+    addText(tDoc('Prérequis : Aucun prérequis spécifique. Accès à un ordinateur avec connexion internet.', 'Ön koşullar: Özel bir ön koşul yoktur. İnternet bağlantılı bilgisayara erişim gereklidir.'));
+
+    // Phase 1
+    addSection(tDoc('PHASE 1 : PHASE PRÉLIMINAIRE', 'AŞAMA 1: ÖN AŞAMA'));
+    const phase1Hours = Math.round(data.packageDuration * 0.17);
+    addText(tDoc(`Durée estimée : ${phase1Hours} heures (17% du temps total)`, `Tahmini süre: ${phase1Hours} saat (toplam sürenin %17'si)`));
+    addText(tDoc('Objectifs :', 'Hedefler:'), 11, true);
+    addText(tDoc('• Analyser la demande et le besoin du bénéficiaire', '• Yararlanıcının talebini ve ihtiyacını analiz etmek'));
+    addText(tDoc('• Déterminer le format le plus adapté à la situation', '• Duruma en uygun formatı belirlemek'));
+    addText(tDoc('• Définir conjointement les modalités de déroulement', '• Birlikte sürecin yürütme koşullarını belirlemek'));
+    addText(tDoc('Contenu :', 'İçerik:'), 11, true);
+    addText(tDoc('• Entretien d\'accueil et recueil des attentes', '• Karşılama görüşmesi ve beklentilerin toplanması'));
+    addText(tDoc('• Présentation de la méthodologie et des outils', '• Metodoloji ve araçların sunulması'));
+    addText(tDoc('• Signature de la convention et du consentement', '• Sözleşme ve onay imzalanması'));
+    addText(tDoc('• Questionnaire d\'exploration du parcours professionnel', '• Mesleki geçmiş keşif anketi'));
+
+    // Phase 2
+    addSection(tDoc('PHASE 2 : PHASE D\'INVESTIGATION', 'AŞAMA 2: ARAŞTIRMA AŞAMASI'));
+    const phase2Hours = Math.round(data.packageDuration * 0.50);
+    addText(tDoc(`Durée estimée : ${phase2Hours} heures (50% du temps total)`, `Tahmini süre: ${phase2Hours} saat (toplam sürenin %50'si)`));
+    addText(tDoc('Objectifs :', 'Hedefler:'), 11, true);
+    addText(tDoc('• Explorer les compétences, aptitudes et motivations', '• Yetkinlikleri, yetenekleri ve motivasyonları keşfetmek'));
+    addText(tDoc('• Identifier les valeurs professionnelles et personnelles', '• Mesleki ve kişisel değerleri belirlemek'));
+    addText(tDoc('• Construire le projet professionnel', '• Mesleki projeyi oluşturmak'));
+    addText(tDoc('Contenu :', 'İçerik:'), 11, true);
+    addText(tDoc('• Analyse approfondie du parcours professionnel et des expériences', '• Mesleki geçmiş ve deneyimlerin derinlemesine analizi'));
+    addText(tDoc('• Tests et questionnaires d\'évaluation (RIASEC, compétences, valeurs)', '• Değerlendirme testleri ve anketleri (RIASEC, yetkinlikler, değerler)'));
+    addText(tDoc('• Exploration des pistes professionnelles avec l\'IA', '• Yapay zeka ile mesleki yolların keşfi'));
+    addText(tDoc('• Recherche documentaire et exploration du marché', '• Belge araştırması ve piyasa keşfi'));
+    addText(tDoc('• Entretiens de suivi avec le consultant', '• Danışmanla takip görüşmeleri'));
+
+    // Phase 3
+    addSection(tDoc('PHASE 3 : PHASE DE CONCLUSION', 'AŞAMA 3: SONUÇ AŞAMASI'));
+    const phase3Hours = Math.round(data.packageDuration * 0.17);
+    addText(tDoc(`Durée estimée : ${phase3Hours} heures (17% du temps total)`, `Tahmini süre: ${phase3Hours} saat (toplam sürenin %17'si)`));
+    addText(tDoc('Objectifs :', 'Hedefler:'), 11, true);
+    addText(tDoc('• Synthétiser les résultats de l\'investigation', '• Araştırma sonuçlarını sentezlemek'));
+    addText(tDoc('• Valider le projet professionnel', '• Mesleki projeyi doğrulamak'));
+    addText(tDoc('• Élaborer le plan d\'action', '• Eylem planını hazırlamak'));
+    addText(tDoc('Contenu :', 'İçerik:'), 11, true);
+    addText(tDoc('• Restitution des résultats et du profil RIASEC', '• Sonuçların ve RIASEC profilinin sunulması'));
+    addText(tDoc('• Document de synthèse personnalisé', '• Kişiselleştirilmiş özet belgesi'));
+    addText(tDoc('• Plan d\'action détaillé avec échéances', '• Süreli ayrıntılı eylem planı'));
+    addText(tDoc('• Entretien de clôture et évaluation de satisfaction', '• Kapanış görüşmesi ve memnuniyet değerlendirmesi'));
+
+    // Méthodes pédagogiques
+    addSection(tDoc('MÉTHODES ET MOYENS PÉDAGOGIQUES', 'YÖNTEMLER VE EĞİTİM ARAÇLARI'));
+    addText(tDoc('• Entretiens individuels semi-directifs avec un consultant certifié', '• Sertifikalı danışmanla yarı yapılandırılmış bireysel görüşmeler'));
+    addText(tDoc('• Plateforme numérique Bilan-Easy avec intelligence artificielle', '• Yapay zekalı Bilan-Easy dijital platformu'));
+    addText(tDoc('• Tests psychométriques et questionnaires d\'auto-évaluation', '• Psikometrik testler ve öz değerlendirme anketleri'));
+    addText(tDoc('• Exercices de réflexion personnelle guidés', '• Rehberli kişisel düşünce egzersizleri'));
+    addText(tDoc('• Recherche documentaire et exploration du marché de l\'emploi', '• Belge araştırması ve iş piyasası keşfi'));
+
+    // Évaluation
+    addSection(tDoc('MODALITÉS D\'ÉVALUATION', 'DEĞERLENDİRME YÖNTEMLERİ'));
+    addText(tDoc('• Évaluation continue tout au long du parcours', '• Süreç boyunca sürekli değerlendirme'));
+    addText(tDoc('• Questionnaire de satisfaction à chaud en fin de bilan', '• Değerlendirme sonunda anlık memnuniyet anketi'));
+    addText(tDoc('• Suivi à 6 mois post-bilan', '• Değerlendirme sonrası 6 aylık takip'));
+
+    // Pied de page
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text(tDoc('Programme de formation - Bilan de compétences conforme Qualiopi', 'Eğitim programı - Qualiopi uyumlu yetkinlik değerlendirmesi'), pageWidth / 2, 285, { align: 'center' });
+
+    return doc.output('blob');
+  },
+
+  /**
+   * Génère la feuille d'émargement conforme Qualiopi
+   */
+  generateEmargement(data: EmargementData, forceLang?: string): Blob {
+    _forceLang = forceLang || null;
+    const doc = new jsPDF();
+    let y = 20;
+    const margin = 15;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const maxWidth = pageWidth - 2 * margin;
+
+    // En-tête
+    doc.setFillColor(79, 70, 229);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(tDoc('FEUILLE D\'ÉMARGEMENT', 'YOKLAMA FORMU'), pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(tDoc('Bilan de Compétences', 'Yetkinlik Değerlendirmesi'), pageWidth / 2, 25, { align: 'center' });
+    y = 45;
+    doc.setTextColor(0, 0, 0);
+
+    // Informations
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(tDoc('Bénéficiaire :', 'Yararlanıcı:'), margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.clientName, margin + 40, y);
+    y += 7;
+    doc.setFont('helvetica', 'bold');
+    doc.text(tDoc('Parcours :', 'Paket:'), margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.packageName, margin + 40, y);
+    y += 7;
+    doc.setFont('helvetica', 'bold');
+    doc.text(tDoc('Consultant :', 'Danışman:'), margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.consultantName, margin + 40, y);
+    y += 7;
+    doc.setFont('helvetica', 'bold');
+    doc.text(tDoc('Organisme :', 'Kuruluş:'), margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.organizationName, margin + 40, y);
+    y += 12;
+
+    // Tableau d'émargement
+    const colWidths = [35, 25, 55, 35, 35];
+    const headers = [
+      tDoc('Date', 'Tarih'),
+      tDoc('Durée', 'Süre'),
+      tDoc('Contenu / Thème', 'İçerik / Konu'),
+      tDoc('Signature\nbénéficiaire', 'Yararlanıcı\nimzası'),
+      tDoc('Signature\nconsultant', 'Danışman\nimzası')
+    ];
+
+    // Header du tableau
+    doc.setFillColor(79, 70, 229);
+    doc.rect(margin, y, maxWidth, 12, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    let xPos = margin;
+    headers.forEach((header, i) => {
+      doc.text(header, xPos + 2, y + 5);
+      xPos += colWidths[i]!;
+    });
+    y += 12;
+    doc.setTextColor(0, 0, 0);
+
+    // Lignes du tableau (sessions fournies + lignes vides)
+    const allSessions = [...data.sessions];
+    // Ajouter des lignes vides pour atteindre au moins 12 lignes
+    while (allSessions.length < 12) {
+      allSessions.push({ date: '', duration: '', topic: '' });
+    }
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    allSessions.forEach((session, idx) => {
+      if (y > 260) { doc.addPage(); y = 20; }
+      const rowHeight = 15;
+      // Alternance de couleur
+      if (idx % 2 === 0) {
+        doc.setFillColor(245, 245, 255);
+        doc.rect(margin, y, maxWidth, rowHeight, 'F');
+      }
+      // Bordures
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin, y, maxWidth, rowHeight);
+      let x = margin;
+      colWidths.forEach((w) => {
+        doc.line(x, y, x, y + rowHeight);
+        x += w;
+      });
+
+      // Contenu
+      x = margin;
+      doc.text(session.date, x + 2, y + 9);
+      x += colWidths[0]!;
+      doc.text(session.duration, x + 2, y + 9);
+      x += colWidths[1]!;
+      const topicLines = doc.splitTextToSize(session.topic, colWidths[2]! - 4);
+      doc.text(topicLines, x + 2, y + 6);
+
+      y += rowHeight;
+    });
+
+    // Mention légale
+    y += 10;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    const legalText = tDoc(
+      'Je soussigné(e) certifie avoir participé aux séances ci-dessus dans le cadre de mon bilan de compétences.',
+      'Aşağıda imzası bulunan, yetkinlik değerlendirmem kapsamında yukarıdaki oturumlara katıldığımı onaylarım.'
+    );
+    const legalLines = doc.splitTextToSize(legalText, maxWidth);
+    doc.text(legalLines, margin, y);
+
+    // Pied de page
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text(tDoc('Feuille d\'émargement - Bilan de compétences conforme Qualiopi', 'Yoklama formu - Qualiopi uyumlu yetkinlik değerlendirmesi'), pageWidth / 2, 285, { align: 'center' });
+
+    return doc.output('blob');
+  },
+
+  /**
+   * Génère le questionnaire d'évaluation à chaud conforme Qualiopi
+   */
+  generateEvaluation(data: EvaluationData, forceLang?: string): Blob {
+    _forceLang = forceLang || null;
+    const doc = new jsPDF();
+    let y = 20;
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const maxWidth = pageWidth - 2 * margin;
+
+    const addText = (text: string, fontSize: number = 11, isBold: boolean = false) => {
+      doc.setFontSize(fontSize);
+      doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach((line: string) => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.text(line, margin, y);
+        y += fontSize * 0.5;
+      });
+      y += 3;
+    };
+
+    const addSection = (title: string) => {
+      y += 5;
+      doc.setFillColor(79, 70, 229);
+      doc.rect(margin, y - 5, maxWidth, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(title, margin + 2, y);
+      y += 10;
+      doc.setTextColor(0, 0, 0);
+    };
+
+    const addRatingScale = (question: string) => {
+      addText(question);
+      y += 2;
+      const scaleLabels = [
+        tDoc('Pas du tout', 'Hiç'),
+        tDoc('Peu', 'Az'),
+        tDoc('Moyennement', 'Orta'),
+        tDoc('Bien', 'İyi'),
+        tDoc('Très bien', 'Çok iyi')
+      ];
+      const boxSize = 5;
+      const startX = margin + 10;
+      doc.setFontSize(8);
+      scaleLabels.forEach((label, i) => {
+        const x = startX + i * 32;
+        doc.setDrawColor(79, 70, 229);
+        doc.rect(x, y - 3, boxSize, boxSize);
+        doc.setTextColor(80, 80, 80);
+        doc.text(label, x + boxSize + 2, y + 1);
+      });
+      y += 12;
+    };
+
+    const addOpenQuestion = (question: string) => {
+      addText(question);
+      // Zone de réponse
+      doc.setDrawColor(200, 200, 200);
+      doc.rect(margin, y, maxWidth, 20);
+      y += 25;
+    };
+
+    // En-tête
+    doc.setFillColor(79, 70, 229);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(tDoc('ÉVALUATION DE SATISFACTION', 'MEMNUNİYET DEĞERLENDİRMESİ'), pageWidth / 2, 15, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(tDoc('Bilan de Compétences', 'Yetkinlik Değerlendirmesi'), pageWidth / 2, 25, { align: 'center' });
+    y = 45;
+    doc.setTextColor(0, 0, 0);
+
+    // Informations
+    addText(tDoc(`Bénéficiaire : ${data.clientName}`, `Yararlanıcı: ${data.clientName}`));
+    addText(tDoc(`Parcours : ${data.packageName}`, `Paket: ${data.packageName}`));
+    addText(tDoc(`Consultant : ${data.consultantName}`, `Danışman: ${data.consultantName}`));
+    addText(tDoc(`Date de fin : ${data.completionDate}`, `Bitiş tarihi: ${data.completionDate}`));
+
+    // Section 1 : Organisation
+    addSection(tDoc('1. ORGANISATION ET DÉROULEMENT', '1. ORGANİZASYON VE SÜREÇ'));
+    addRatingScale(tDoc('L\'accueil et la prise en charge ont été satisfaisants', 'Karşılama ve ilgilenme tatmin ediciydi'));
+    addRatingScale(tDoc('Le rythme du bilan était adapté à mes besoins', 'Değerlendirme ritmi ihtiyaçlarıma uygundu'));
+    addRatingScale(tDoc('La durée du bilan était suffisante', 'Değerlendirme süresi yeterliydi'));
+    addRatingScale(tDoc('La plateforme numérique était facile à utiliser', 'Dijital platform kullanımı kolaydı'));
+
+    // Section 2 : Contenu
+    addSection(tDoc('2. CONTENU ET MÉTHODES', '2. İÇERİK VE YÖNTEMLER'));
+    addRatingScale(tDoc('Les méthodes utilisées étaient adaptées', 'Kullanılan yöntemler uygundu'));
+    addRatingScale(tDoc('Les outils d\'évaluation étaient pertinents', 'Değerlendirme araçları uygundu'));
+    addRatingScale(tDoc('Le contenu correspondait à mes attentes', 'İçerik beklentilerime uygundu'));
+
+    // Section 3 : Accompagnement
+    addSection(tDoc('3. ACCOMPAGNEMENT DU CONSULTANT', '3. DANIŞMAN EŞLİĞİ'));
+    addRatingScale(tDoc('Le consultant était à l\'écoute et disponible', 'Danışman dinleyici ve ulaşılabilirdi'));
+    addRatingScale(tDoc('Les échanges étaient constructifs et bienveillants', 'Görüşmeler yapıcı ve destekleyiciydi'));
+    addRatingScale(tDoc('Le consultant a su m\'aider à clarifier mon projet', 'Danışman projemi netleştirmeme yardımcı oldu'));
+
+    // Section 4 : Résultats
+    addSection(tDoc('4. RÉSULTATS ET BÉNÉFICES', '4. SONUÇLAR VE KAZANIMLAR'));
+    addRatingScale(tDoc('Le bilan m\'a permis de mieux me connaître', 'Değerlendirme kendimi daha iyi tanımamı sağladı'));
+    addRatingScale(tDoc('J\'ai pu définir un projet professionnel clair', 'Net bir mesleki proje tanımlayabildim'));
+    addRatingScale(tDoc('Le plan d\'action est concret et réalisable', 'Eylem planı somut ve uygulanabilir'));
+    addRatingScale(tDoc('Je recommanderais ce bilan à un proche', 'Bu değerlendirmeyi bir yakınıma tavsiye ederim'));
+
+    // Section 5 : Questions ouvertes
+    addSection(tDoc('5. VOS COMMENTAIRES', '5. YORUMLARINIZ'));
+    addOpenQuestion(tDoc('Qu\'avez-vous le plus apprécié dans ce bilan ?', 'Bu değerlendirmede en çok neyi beğendiniz?'));
+    addOpenQuestion(tDoc('Qu\'est-ce qui pourrait être amélioré ?', 'Nelerin iyileştirilebileceğini düşünüyorsunuz?'));
+    addOpenQuestion(tDoc('Commentaires libres :', 'Serbest yorumlar:'));
+
+    // Note globale
+    y += 5;
+    addText(tDoc('Note globale de satisfaction (sur 10) : _____ / 10', 'Genel memnuniyet notu (10 üzerinden): _____ / 10'), 12, true);
+
+    // Signature
+    y += 10;
+    addText(tDoc(`Fait le ${data.completionDate}`, `Tarih: ${data.completionDate}`));
+    y += 5;
+    doc.text(tDoc('Signature du bénéficiaire :', 'Yararlanıcı imzası:'), margin, y);
+    doc.line(margin + 60, y + 2, margin + 140, y + 2);
+
+    // Pied de page
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text(tDoc('Évaluation de satisfaction - Bilan de compétences conforme Qualiopi', 'Memnuniyet değerlendirmesi - Qualiopi uyumlu yetkinlik değerlendirmesi'), pageWidth / 2, 285, { align: 'center' });
 
     return doc.output('blob');
   }

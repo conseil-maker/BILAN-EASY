@@ -40,6 +40,18 @@
       "name": "Plan d'action",
       "description": "Feuille de route avec objectifs et échéances",
       "availableMessage": "Disponible après la phase de conclusion"
+    },
+    "programme": {
+      "name": "Programme de formation",
+      "description": "Programme détaillé avec objectifs pédagogiques, contenu des 3 phases et méthodes"
+    },
+    "emargement": {
+      "name": "Feuille d'émargement",
+      "description": "Feuille de suivi des présences à compléter à chaque séance"
+    },
+    "evaluation": {
+      "name": "Évaluation de satisfaction",
+      "description": "Questionnaire d'évaluation à chaud à remplir en fin de bilan"
     }
   },
   "excel": {
@@ -100,6 +112,7 @@
     "subtitle": "Téléchargez vos documents officiels conformes Qualiopi",
     "profileNotFound": "Profil utilisateur introuvable",
     "attestationNotReady": "L'attestation ne peut être générée qu'à la fin du bilan",
+    "evaluationNotReady": "L'évaluation est disponible uniquement à la fin du bilan",
     "downloadSuccess": "Document \"{{type}}\" téléchargé avec succès !",
     "generateError": "Erreur lors de la génération du document",
     "importantInfo": "Informations importantes",

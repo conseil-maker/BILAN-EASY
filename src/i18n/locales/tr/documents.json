@@ -40,6 +40,18 @@
       "name": "Eylem planı",
       "description": "Hedefler ve zaman çizelgesi ile yol haritası",
       "availableMessage": "Sonuç aşamasından sonra kullanılabilir"
+    },
+    "programme": {
+      "name": "Eğitim programı",
+      "description": "Pedagojik hedefler, 3 aşamanın içeriği ve yöntemlerle ayrıntılı program"
+    },
+    "emargement": {
+      "name": "İmza çizelgesi",
+      "description": "Her oturumda doldurulacak katılım takip formu"
+    },
+    "evaluation": {
+      "name": "Memnuniyet değerlendirmesi",
+      "description": "Değerlendirme sonunda doldurulacak memnuniyet anketi"
     }
   },
   "excel": {
@@ -100,6 +112,7 @@
     "subtitle": "Resmi belgelerinizi indirin",
     "profileNotFound": "Kullanıcı profili bulunamadı",
     "attestationNotReady": "Katılım belgesi yalnızca değerlendirme sonunda oluşturulabilir",
+    "evaluationNotReady": "Memnuniyet değerlendirmesi yalnızca değerlendirme sonunda kullanılabilir",
     "downloadSuccess": "\"{{type}}\" belgesi başarıyla indirildi!",
     "generateError": "Belge oluşturulurken hata oluştu",
     "importantInfo": "Önemli bilgiler",
