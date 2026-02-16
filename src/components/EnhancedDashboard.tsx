@@ -56,10 +56,10 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({
       );
       
       if (relevantQuotes.length > 0) {
-        setCurrentQuote(relevantQuotes[Math.floor(Math.random() * relevantQuotes.length)]);
+        setCurrentQuote(relevantQuotes[Math.floor(Math.random() * relevantQuotes.length)]!);
       } else {
         // Citation aléatoire si aucune correspondance
-        setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+        setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)]!);
       }
 
       // Trouver un conseil contextuel

@@ -60,7 +60,7 @@ export const CareerExploration: React.FC<CareerExplorationProps> = ({
       setExplorationResult(result);
       // Expand first path by default
       if (result.careerPaths.length > 0) {
-        setExpandedPath(result.careerPaths[0].title);
+        setExpandedPath(result.careerPaths[0]!.title);
       }
     } catch (error) {
       console.error('Error loading career paths:', error);

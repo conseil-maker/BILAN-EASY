@@ -119,7 +119,7 @@ export const generatePDF = async (
           <h3>${theme.name}</h3>
           <p>${theme.description}</p>
           <div>
-            ${theme.keywords.map(keyword => `<span class="badge">${keyword}</span>`).join('')}
+            ${theme.keywords!.map(keyword => `<span class="badge">${keyword}</span>`).join('')}
           </div>
         </div>
       `).join('') 

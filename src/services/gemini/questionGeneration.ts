@@ -591,7 +591,7 @@ function handleFallback(
   );
   
   if (fallbackQuestion) {
-    return fallbackQuestion;
+    return fallbackQuestion as unknown as Question;
   }
   
   const lang = getCurrentLanguage();

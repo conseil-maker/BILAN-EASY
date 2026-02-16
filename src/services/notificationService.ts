@@ -123,7 +123,7 @@ class NotificationService {
     const notifications = this.getLocalNotifications(userId);
     const index = notifications.findIndex(n => n.id === notificationId);
     if (index !== -1) {
-      notifications[index].read = true;
+      notifications[index]!.read = true;
       localStorage.setItem(`notifications_${userId}`, JSON.stringify(notifications));
     }
   }
@@ -206,7 +206,7 @@ class NotificationService {
     const reminders = this.getLocalReminders(userId);
     const index = reminders.findIndex(r => r.id === reminderId);
     if (index !== -1) {
-      reminders[index].completed = true;
+      reminders[index]!.completed = true;
       localStorage.setItem(`reminders_${userId}`, JSON.stringify(reminders));
     }
   }
@@ -254,7 +254,7 @@ class NotificationService {
         subject,
         html: body,
       });
-      return result.success;
+      return (result as any).success;
     } catch (error) {
       console.error('[NotificationService] Erreur envoi email:', error);
       // Fallback: logger l'email (pour le développement)

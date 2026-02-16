@@ -511,7 +511,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
         
         <div className="grid md:grid-cols-2 gap-4">
           {documents.filter(d => d.qualiopi).map((doc) => {
-            const colors = colorClasses[doc.color];
+            const colors = colorClasses[doc.color] || colorClasses['blue']!;
             return (
               <div
                 key={doc.id}
@@ -644,7 +644,7 @@ export const MyDocuments: React.FC<MyDocumentsProps> = ({
         
         <div className="grid md:grid-cols-2 gap-4">
           {documents.filter(d => !d.qualiopi).map((doc) => {
-            const colors = colorClasses[doc.color];
+            const colors = colorClasses[doc.color] || colorClasses['blue']!;
             return (
               <div
                 key={doc.id}

@@ -21,8 +21,8 @@ export const useSpeechSynthesis = () => {
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      setIsSupported(true);
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    setIsSupported(true);
       const synth = window.speechSynthesis;
 
       const updateVoices = () => {
@@ -40,7 +40,7 @@ export const useSpeechSynthesis = () => {
           );
           const anyFrench = availableVoices.find(v => v.lang === 'fr-FR');
           
-          const bestVoice = googleFrench || microsoftFrench || anyFrench || availableVoices[0];
+          const bestVoice = googleFrench || microsoftFrench || anyFrench || availableVoices[0]!;
           setSettings(prev => ({ ...prev, voice: bestVoice }));
         }
       };
@@ -53,7 +53,6 @@ export const useSpeechSynthesis = () => {
         synth.onvoiceschanged = null;
         synth.cancel(); // Clean up any ongoing speech
       };
-    }
   }, [settings.voice]);
 
   const speak = useCallback((text: string) => {

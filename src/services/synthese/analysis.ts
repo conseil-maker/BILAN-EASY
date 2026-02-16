@@ -184,7 +184,7 @@ export function extractDetailedValues(answers: Answer[]): ValueAnalysis[] {
       const lowerValue = answer.value.toLowerCase();
 
       Object.entries(valueKeywords).forEach(([value, keywords]) => {
-        keywords.forEach((keyword) => {
+        keywords.forEach((keyword: string) => {
           if (lowerValue.includes(keyword)) {
             if (!valueCounts[value]) {
               valueCounts[value] = { count: 0, manifestations: [] };
@@ -198,10 +198,10 @@ export function extractDetailedValues(answers: Answer[]): ValueAnalysis[] {
             );
             if (
               relevantSentence &&
-              valueCounts[value].manifestations.length < 1 &&
+              valueCounts[value]!.manifestations.length < 1 &&
               relevantSentence.trim().length > 15
             ) {
-              valueCounts[value].manifestations.push(relevantSentence.trim());
+              valueCounts[value]!.manifestations.push(relevantSentence.trim());
             }
           }
         });
@@ -214,7 +214,7 @@ export function extractDetailedValues(answers: Answer[]): ValueAnalysis[] {
     .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 8); // Garder les 8 valeurs les plus importantes
 
-  const maxCount = sortedValues.length > 0 ? sortedValues[0][1].count : 1;
+  const maxCount = sortedValues.length > 0 ? sortedValues[0]![1].count : 1;
 
   sortedValues.forEach(([value, data]) => {
     let importance: 'haute' | 'moyenne' | 'basse';

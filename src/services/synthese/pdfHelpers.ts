@@ -187,7 +187,7 @@ export function drawRadarChart(
     const labelX = centerX + (radius + 10) * Math.cos(angle);
     const labelY = centerY + (radius + 10) * Math.sin(angle);
     ctx.doc.setFontSize(8);
-    ctx.doc.text(labels[i], labelX, labelY, { align: 'center' });
+    ctx.doc.text(labels[i] || '', labelX, labelY, { align: 'center' });
   }
 
   // Dessiner les cercles concentriques
@@ -204,7 +204,7 @@ export function drawRadarChart(
     // Dessiner le polygone
     for (let i = 0; i < points.length; i++) {
       const next = (i + 1) % points.length;
-      ctx.doc.line(points[i][0], points[i][1], points[next][0], points[next][1]);
+      ctx.doc.line(points[i]![0], points[i]![1], points[next]![0], points[next]![1]);
     }
   }
 
@@ -216,22 +216,22 @@ export function drawRadarChart(
   const valuePoints: [number, number][] = [];
   for (let i = 0; i < numPoints; i++) {
     const angle = i * angleStep - Math.PI / 2;
-    const r = (values[i] / 100) * radius;
+    const r = ((values[i] ?? 0) / 100) * radius;
     valuePoints.push([centerX + r * Math.cos(angle), centerY + r * Math.sin(angle)]);
   }
 
   // Remplir avec transparence (simulée)
-  ctx.doc.setGState(new ctx.doc.GState({ opacity: 0.3 }));
+  ctx.doc.setGState(new (ctx.doc as any).GState({ opacity: 0.3 }));
   ctx.doc.setFillColor(...ctx.style.primaryColor);
   
   // Dessiner le polygone rempli
   const path = valuePoints.map((p, i) => (i === 0 ? `M ${p[0]} ${p[1]}` : `L ${p[0]} ${p[1]}`)).join(' ') + ' Z';
   
   // Dessiner les lignes du polygone
-  ctx.doc.setGState(new ctx.doc.GState({ opacity: 1 }));
+  ctx.doc.setGState(new (ctx.doc as any).GState({ opacity: 1 }));
   for (let i = 0; i < valuePoints.length; i++) {
     const next = (i + 1) % valuePoints.length;
-    ctx.doc.line(valuePoints[i][0], valuePoints[i][1], valuePoints[next][0], valuePoints[next][1]);
+    ctx.doc.line(valuePoints[i]![0], valuePoints[i]![1], valuePoints[next]![0], valuePoints[next]![1]);
   }
 
   // Points sur le polygone

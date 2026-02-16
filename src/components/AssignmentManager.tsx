@@ -47,7 +47,7 @@ export const AssignmentManager: React.FC = () => {
         assignmentService.getAvailableConsultants()
       ]);
       
-      setAssignments(assignmentsData as Assignment[]);
+      setAssignments(assignmentsData as unknown as Assignment[]);
       setUnassignedClients(unassignedData);
       setConsultants(consultantsData);
     } catch (error) {

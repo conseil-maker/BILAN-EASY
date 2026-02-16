@@ -5,7 +5,7 @@ export enum QuestionType {
   MULTIPLE_CHOICE = 'multiple_choice',
 }
 
-export type CoachingStyle = 'collaborative' | 'analytic' | 'creative';
+export type CoachingStyle = 'collaborative' | 'analytic' | 'creative' | 'empathetic' | 'directive' | 'analytical';
 
 export interface Question {
   id: string;

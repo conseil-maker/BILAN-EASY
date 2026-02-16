@@ -96,7 +96,7 @@ export const sendLocalNotification = async (
       tag: options.tag || NOTIFICATION_CONFIG.defaultTag,
       data: options.data,
       requireInteraction: options.requireInteraction || false,
-      actions: options.actions,
+      ...(options.actions ? { actions: options.actions } as any : {}),
     });
 
     console.log('[Push] Notification envoyée:', options.title);

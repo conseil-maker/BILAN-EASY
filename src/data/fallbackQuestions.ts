@@ -11,7 +11,7 @@ import { FALLBACK_TRANSLATIONS_TR } from './fallbackQuestions-tr';
 import { getCurrentLanguage } from '../services/aiTranslationHelper';
 
 // Type interne pour les questions de fallback avec champs additionnels
-interface FallbackQuestion extends Question {
+interface FallbackQuestion extends Omit<Question, 'phase'> {
   category: string;
   phase: number;
   expectedDuration: number;
@@ -766,7 +766,7 @@ export function selectFallbackQuestion(
   categoryId: string,
   phase: number,
   previousQuestionIds: string[]
-): Question | null {
+): FallbackQuestion | null {
   console.log(`[selectFallbackQuestion] Recherche question pour catégorie: ${categoryId}, phase: ${phase}`);
   console.log(`[selectFallbackQuestion] Questions déjà posées: ${previousQuestionIds.length}`);
   

@@ -386,7 +386,7 @@ export const generateQuestion = async (
     let conversationContext = "";
     if (previousAnswers.length > 0) {
         const lastAnswer = previousAnswers[previousAnswers.length - 1];
-        if (!lastAnswer) return '';
+        if (!lastAnswer) return '' as any;
         const keyElements = extractKeyElements(lastAnswer.value);
         
         // Extraire des citations spécifiques de la dernière réponse pour forcer la personnalisation
@@ -644,7 +644,7 @@ ${getAITranslation('prompts.questionGeneration.generateJson')}`;
             
             if (fallbackQuestion) {
                 // console.log('[generateQuestion] Question de fallback sélectionnée:', fallbackQuestion.id);
-                return fallbackQuestion;
+                return fallbackQuestion as unknown as Question;
             }
             
             // Si même le fallback échoue, lever l'erreur

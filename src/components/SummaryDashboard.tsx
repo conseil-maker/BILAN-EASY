@@ -45,7 +45,7 @@ const CoachModal: React.FC<{ onClose: () => void, t: any }> = ({ onClose, t }) =
 );
 
 const ResourceModal: React.FC<{ item: ActionPlanItem, onClose: () => void, t: any }> = ({ item, onClose, t }) => {
-    const [leads, setLeads] = useState<{ searchKeywords: string[], resourceTypes: string[], platformExamples: string[] } | null>(null);
+    const [leads, setLeads] = useState<{ resources: string[], actions: string[] } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -67,9 +67,8 @@ const ResourceModal: React.FC<{ item: ActionPlanItem, onClose: () => void, t: an
                 <p className="text-slate-600 mb-4">{t('resourceModal.intro')}</p>
                 {isLoading ? <p>{t('resourceModal.searching')}</p> : leads ? (
                     <div className="space-y-4">
-                        <div><h4 className="font-semibold text-slate-700">{t('resourceModal.keywords')}</h4><p className="text-slate-600 text-sm">{leads.searchKeywords.join(', ')}</p></div>
-                        <div><h4 className="font-semibold text-slate-700">{t('resourceModal.resourceTypes')}</h4><p className="text-slate-600 text-sm">{leads.resourceTypes.join(', ')}</p></div>
-                        <div><h4 className="font-semibold text-slate-700">{t('resourceModal.platforms')}</h4><p className="text-slate-600 text-sm">{leads.platformExamples.join(', ')}</p></div>
+                        <div><h4 className="font-semibold text-slate-700">{t('resourceModal.keywords')}</h4><p className="text-slate-600 text-sm">{leads.resources.join(', ')}</p></div>
+                        <div><h4 className="font-semibold text-slate-700">{t('resourceModal.resourceTypes')}</h4><p className="text-slate-600 text-sm">{leads.actions.join(', ')}</p></div>
                     </div>
                 ) : <p>{t('resourceModal.noResults')}</p>}
                 <button onClick={onClose} className="mt-6 w-full bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700">{t('resourceModal.close')}</button>
@@ -238,7 +237,7 @@ const SummaryDashboard: React.FC<SummaryDashboardProps> = ({ summary, answers, u
             const pdfBlob = pdfService.generateAssessmentPDF(pdfData);
 
             // Récupérer l'assessment actuel pour obtenir son ID
-            const assessments = await assessmentService.getUserAssessments();
+            const assessments = await assessmentService.getClientAssessments();
             if (assessments && assessments.length > 0) {
                 const currentAssessment = assessments[0]; // Le plus récent
                 

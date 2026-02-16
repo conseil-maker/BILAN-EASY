@@ -276,7 +276,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ pkg, userName, userProfil
                 // console.log('[fetchNextQuestion] Complexity:', complexity, 'for category:', selectedCategory.id);
                 
                 let genOptions: any = { useJoker: options.useJoker, targetComplexity: complexity, categoryId: selectedCategory?.id || '' };
-                if (info.phase === 2 && answersToUse.length > 0 && answersToUse[answersToUse.length - 1]?.value?.length > 3) {
+                if (info.phase === 2 && answersToUse.length > 0 && ((answersToUse[answersToUse.length - 1]?.value?.length) ?? 0) > 3) {
                     genOptions.useGoogleSearch = true; genOptions.searchTopic = answersToUse[answersToUse.length - 1]?.value || '';
                 }
                 // console.log('[fetchNextQuestion] Calling generateQuestion with:', { phaseKey, categoryIndex, answersCount: answersToUse.length, userName, coachingStyle, hasProfile: !!userProfile, genOptions });

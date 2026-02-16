@@ -69,7 +69,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
       // Poser la première question après un délai
       setTimeout(() => {
         if (data.interactiveQuestions.length > 0) {
-          addProfessionalMessage(data.interactiveQuestions[0].question);
+          addProfessionalMessage(data.interactiveQuestions[0]!.question);
         }
       }, 2000);
       
@@ -120,7 +120,7 @@ export const JobInterview: React.FC<JobInterviewProps> = ({
         if (currentQuestionIndex < interviewData.interactiveQuestions.length - 1) {
           setCurrentQuestionIndex(prev => prev + 1);
           setTimeout(() => {
-            addProfessionalMessage(interviewData.interactiveQuestions[currentQuestionIndex + 1].question);
+            addProfessionalMessage(interviewData.interactiveQuestions[currentQuestionIndex + 1]!.question);
           }, 3000);
         } else if (currentQuestionIndex === interviewData.interactiveQuestions.length - 1) {
           // Fin de l'entretien

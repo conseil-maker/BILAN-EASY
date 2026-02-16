@@ -221,7 +221,7 @@ export const syntheseServiceEnriched = {
     const maxWidth = pageWidth - 2 * margin;
 
     // Helpers
-    const addText = (text: string, fontSize: number = 11, isBold: boolean = false, color: number[] = [0, 0, 0]) => {
+    const addText = (text: string, fontSize: number = 11, isBold: boolean = false, color: [number, number, number] = [0, 0, 0]) => {
       doc.setFontSize(fontSize);
       doc.setFont('helvetica', isBold ? 'bold' : 'normal');
       doc.setTextColor(color[0], color[1], color[2]);
@@ -516,7 +516,7 @@ export const syntheseServiceEnriched = {
         doc.addPage();
         y = 20;
       }
-      drawProgressBar(margin, y, 100, value, riasecLabels[key as keyof typeof riasecLabels]);
+      drawProgressBar(margin, y, 100, value, riasecLabels[key as keyof typeof riasecLabels] || key);
       y += 18;
     });
     
@@ -527,8 +527,8 @@ export const syntheseServiceEnriched = {
     
     addSubSection(tE('Interprétation', 'Yorumlama'));
     addText(tE(
-      `Les types dominants identifiés sont : ${topTypes.map(t => riasecLabels[t as keyof typeof riasecLabels].split(' ')[0]).join(', ')}.`,
-      `Belirlenen baskın tipler: ${topTypes.map(t => riasecLabels[t as keyof typeof riasecLabels].split(' ')[0]).join(', ')}.`
+      `Les types dominants identifiés sont : ${topTypes.map(t => (riasecLabels[t as keyof typeof riasecLabels] || t).split(' ')[0]).join(', ')}.`,
+      `Belirlenen baskın tipler: ${topTypes.map(t => (riasecLabels[t as keyof typeof riasecLabels] || t).split(' ')[0]).join(', ')}.`
     ));
     addText(tE(
       'Cette combinaison suggère une affinité pour les métiers et environnements de travail correspondant à ces caractéristiques.',
@@ -559,7 +559,7 @@ export const syntheseServiceEnriched = {
           y = 20;
         }
         
-        const importanceColor = val.importance === 'haute' ? [34, 197, 94] : 
+        const importanceColor: [number, number, number] = val.importance === 'haute' ? [34, 197, 94] : 
                                val.importance === 'moyenne' ? [234, 179, 8] : [156, 163, 175];
         
         doc.setFillColor(importanceColor[0], importanceColor[1], importanceColor[2]);
@@ -803,7 +803,7 @@ export const syntheseServiceEnriched = {
         addSubSection(tE('Score de faisabilité global', 'Genel fizibilite puanı'));
         
         const score = fa.overallScore;
-        const scoreColor = score >= 8 ? [34, 197, 94] : score >= 6 ? [234, 179, 8] : score >= 4 ? [249, 115, 22] : [239, 68, 68];
+        const scoreColor: [number, number, number] = score >= 8 ? [34, 197, 94] : score >= 6 ? [234, 179, 8] : score >= 4 ? [249, 115, 22] : [239, 68, 68];
         
         doc.setFillColor(scoreColor[0], scoreColor[1], scoreColor[2]);
         doc.roundedRect(margin, y, 30, 20, 3, 3, 'F');
@@ -831,7 +831,7 @@ export const syntheseServiceEnriched = {
         
         addSubSection(tE('Analyse du marché de l\'emploi', 'İstihdam piyasası analizi'));
         
-        const demandColor = ma.demandLevel === 'très_forte' || ma.demandLevel === 'forte' ? [34, 197, 94] : 
+        const demandColor: [number, number, number] = ma.demandLevel === 'très_forte' || ma.demandLevel === 'forte' ? [34, 197, 94] : 
                            ma.demandLevel === 'moyenne' ? [234, 179, 8] : [239, 68, 68];
         
         doc.setFillColor(240, 240, 240);
@@ -845,7 +845,7 @@ export const syntheseServiceEnriched = {
         doc.text(tE('Régions', 'Bölgeler'), margin + 130, y + 8);
         
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(demandColor[0], demandColor[1], demandColor[2]);
+        doc.setTextColor(demandColor[0]!, demandColor[1]!, demandColor[2]!);
         doc.text(ma.demandLevel.replace('_', ' '), margin + 5, y + 18);
         doc.setTextColor(0, 0, 0);
         doc.text(ma.demandTrend, margin + 50, y + 18);
@@ -887,10 +887,10 @@ export const syntheseServiceEnriched = {
         const maxItems = Math.max(fa.matchingSkills.length, fa.skillGaps.length);
         for (let i = 0; i < Math.min(maxItems, 5); i++) {
           if (fa.matchingSkills[i]) {
-            doc.text('\u2022 ' + fa.matchingSkills[i].substring(0, 35), margin + 3, y);
+            doc.text('\u2022 ' + fa.matchingSkills[i]!.substring(0, 35), margin + 3, y);
           }
           if (fa.skillGaps[i]) {
-            doc.text('\u2022 ' + fa.skillGaps[i].substring(0, 35), margin + colWidth + 13, y);
+            doc.text('\u2022 ' + fa.skillGaps[i]!.substring(0, 35), margin + colWidth + 13, y);
           }
           y += 5;
         }
@@ -903,7 +903,7 @@ export const syntheseServiceEnriched = {
         addSubSection(tE('Formations recommandées', 'Önerilen eğitimler'));
         
         feasibilityData.marketExploration.trainingRecommendations.slice(0, 4).forEach((training) => {
-          const priorityColor = training.priority === 'essentielle' ? [239, 68, 68] : 
+          const priorityColor: [number, number, number] = training.priority === 'essentielle' ? [239, 68, 68] : 
                                training.priority === 'recommandée' ? [234, 179, 8] : [156, 163, 175];
           
           doc.setFillColor(priorityColor[0], priorityColor[1], priorityColor[2]);
@@ -964,11 +964,11 @@ export const syntheseServiceEnriched = {
         const maxPros = Math.max(ji.honestOpinion.prosOfJob.length, ji.honestOpinion.consOfJob.length);
         for (let i = 0; i < Math.min(maxPros, 4); i++) {
           if (ji.honestOpinion.prosOfJob[i]) {
-            const proText = ji.honestOpinion.prosOfJob[i].substring(0, 35);
+            const proText = ji.honestOpinion.prosOfJob[i]!.substring(0, 35);
             doc.text('\u2022 ' + proText, margin + 3, y);
           }
           if (ji.honestOpinion.consOfJob[i]) {
-            const conText = ji.honestOpinion.consOfJob[i].substring(0, 35);
+            const conText = ji.honestOpinion.consOfJob[i]!.substring(0, 35);
             doc.text('\u2022 ' + conText, margin + colWidth2 + 13, y);
           }
           y += 5;
@@ -986,7 +986,7 @@ export const syntheseServiceEnriched = {
         addSubSection(tE('Pistes alternatives à considérer', 'Değerlendirilecek alternatif yollar'));
         
         feasibilityData.marketExploration.alternativePaths.forEach((alt, i) => {
-          const easeColor = alt.transitionEase === 'facile' ? [34, 197, 94] : 
+          const easeColor: [number, number, number] = alt.transitionEase === 'facile' ? [34, 197, 94] : 
                            alt.transitionEase === 'modérée' ? [234, 179, 8] : [239, 68, 68];
           
           doc.setFontSize(10);
