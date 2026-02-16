@@ -282,18 +282,32 @@ export const syntheseServiceEnriched = {
       doc.text(`${value}%`, x + width + 3, yPos + 5);
     };
 
-    // ========== PAGE DE GARDE ==========
-    doc.setFillColor(79, 70, 229);
-    doc.rect(0, 0, pageWidth, 70, 'F');
+    // ========== PAGE DE GARDE AMÉLIORÉE ==========
+    // Dégradé simulé
+    const gradientSteps = 35;
+    for (let gs = 0; gs < gradientSteps; gs++) {
+      const ratio = gs / gradientSteps;
+      const r = Math.round(79 + (99 - 79) * ratio);
+      const g = Math.round(70 + (102 - 70) * ratio);
+      const b = Math.round(229 + (241 - 229) * ratio);
+      doc.setFillColor(r, g, b);
+      doc.rect(0, (gs * 75) / gradientSteps, pageWidth, 75 / gradientSteps + 1, 'F');
+    }
+    // Ligne d'accent
+    doc.setFillColor(16, 185, 129);
+    doc.rect(0, 75, pageWidth, 3, 'F');
     
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(32);
     doc.setFont('helvetica', 'bold');
-    doc.text(tE('DOCUMENT DE SYNTHÈSE', 'SENTEZ BELGESİ'), pageWidth / 2, 28, { align: 'center' });
+    doc.text(tE('DOCUMENT DE SYNTHESE', 'SENTEZ BELGESI'), pageWidth / 2, 28, { align: 'center' });
     doc.setFontSize(18);
-    doc.text(tE('Bilan de Compétences', 'Yetkinlik Değerlendirmesi'), pageWidth / 2, 45, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.text(tE('Bilan de Competences', 'Yetkinlik Degerlendirmesi'), pageWidth / 2, 45, { align: 'center' });
     doc.setFontSize(12);
-    doc.text(tE('Conforme au référentiel Qualiopi', 'Qualiopi referansına uygun'), pageWidth / 2, 60, { align: 'center' });
+    doc.text(tE('Conforme au referentiel Qualiopi', 'Qualiopi referansina uygun'), pageWidth / 2, 58, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(organizationConfig.name, pageWidth / 2, 70, { align: 'center' });
 
     y = 90;
     doc.setTextColor(0, 0, 0);
@@ -443,19 +457,27 @@ export const syntheseServiceEnriched = {
         y = 20;
       }
       
-      // Nom de la compétence et niveau
-      doc.setFontSize(11);
+      // Nom de la compétence
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
+      doc.setTextColor(31, 41, 55);
       doc.text(comp.category, margin, y);
       
-      // Étoiles de niveau
-      const stars = '★'.repeat(comp.level) + '☆'.repeat(5 - comp.level);
-      doc.setTextColor(79, 70, 229);
-      doc.text(stars, margin + 60, y);
+      // Barre de compétence colorée
+      const barX = margin + 65;
+      const barW = maxWidth - 75;
+      const barH = 6;
+      doc.setFillColor(229, 231, 235);
+      doc.roundedRect(barX, y - 4, barW, barH, 2, 2, 'F');
+      const progressW = (comp.level / 5) * barW;
+      const barColor: [number, number, number] = comp.level >= 4 ? [16, 185, 129] : comp.level >= 3 ? [79, 70, 229] : [245, 158, 11];
+      doc.setFillColor(barColor[0], barColor[1], barColor[2]);
+      doc.roundedRect(barX, y - 4, progressW, barH, 2, 2, 'F');
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(107, 114, 128);
+      doc.text(`${comp.level}/5`, barX + barW + 3, y);
       doc.setTextColor(0, 0, 0);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${comp.level}/5`, margin + 90, y);
       
       y += 8;
       
@@ -511,13 +533,84 @@ export const syntheseServiceEnriched = {
       conventional: tE('Conventionnel (C) - Organisation et méthode', 'Geleneksel (C) - Organizasyon ve yöntem')
     };
     
+    // ===== GRAPHIQUE RADAR RIASEC =====
+    const radarCenterX = pageWidth / 2;
+    const radarCenterY = y + 55;
+    const radarRadius = 40;
+    const riasecKeys = Object.keys(riasec) as (keyof typeof riasec)[];
+    const riasecValues = riasecKeys.map(k => riasec[k]);
+    const radarLabels = riasecKeys.map(k => (riasecLabels[k] || k).split(' ')[0]);
+    const numPoints = riasecKeys.length;
+    const angleStep = (2 * Math.PI) / numPoints;
+
+    // Cercles concentriques de fond
+    for (let r = 0.25; r <= 1; r += 0.25) {
+      doc.setDrawColor(220, 220, 230);
+      doc.setLineWidth(0.3);
+      const pts: [number, number][] = [];
+      for (let i = 0; i < numPoints; i++) {
+        const angle = i * angleStep - Math.PI / 2;
+        pts.push([radarCenterX + radarRadius * r * Math.cos(angle), radarCenterY + radarRadius * r * Math.sin(angle)]);
+      }
+      for (let i = 0; i < pts.length; i++) {
+        const next = (i + 1) % pts.length;
+        doc.line(pts[i]![0], pts[i]![1], pts[next]![0], pts[next]![1]);
+      }
+    }
+
+    // Axes
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const x = radarCenterX + radarRadius * Math.cos(angle);
+      const yy = radarCenterY + radarRadius * Math.sin(angle);
+      doc.setDrawColor(200, 200, 210);
+      doc.line(radarCenterX, radarCenterY, x, yy);
+
+      // Labels
+      const labelX = radarCenterX + (radarRadius + 12) * Math.cos(angle);
+      const labelY = radarCenterY + (radarRadius + 12) * Math.sin(angle);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(79, 70, 229);
+      doc.text(radarLabels[i] || '', labelX, labelY, { align: 'center' });
+      // Pourcentage sous le label
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text(`${riasecValues[i]}%`, labelX, labelY + 5, { align: 'center' });
+    }
+
+    // Polygone des valeurs
+    doc.setDrawColor(79, 70, 229);
+    doc.setLineWidth(1.5);
+    const valuePoints: [number, number][] = [];
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const r = ((riasecValues[i] ?? 0) / 100) * radarRadius;
+      valuePoints.push([radarCenterX + r * Math.cos(angle), radarCenterY + r * Math.sin(angle)]);
+    }
+    for (let i = 0; i < valuePoints.length; i++) {
+      const next = (i + 1) % valuePoints.length;
+      doc.line(valuePoints[i]![0], valuePoints[i]![1], valuePoints[next]![0], valuePoints[next]![1]);
+    }
+    // Points
+    doc.setFillColor(79, 70, 229);
+    valuePoints.forEach((point) => {
+      doc.circle(point[0], point[1], 2, 'F');
+    });
+
+    y = radarCenterY + radarRadius + 25;
+    doc.setTextColor(0, 0, 0);
+
+    // Barres de progression en complément
+    addSubSection(tE('Détail par dimension', 'Boyut detayı'));
     Object.entries(riasec).forEach(([key, value]) => {
       if (y > 260) {
         doc.addPage();
         y = 20;
       }
       drawProgressBar(margin, y, 100, value, riasecLabels[key as keyof typeof riasecLabels] || key);
-      y += 18;
+      y += 16;
     });
     
     y += 10;
@@ -1272,17 +1365,26 @@ export const syntheseServiceEnriched = {
       y += 5;
     });
 
-    // Pied de page sur toutes les pages
+    // Pied de page amélioré sur toutes les pages
     const totalPages = doc.internal.pages.length - 1;
+    const pgHeight = doc.internal.pageSize.getHeight();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
+      // Ligne décorative
+      doc.setFillColor(79, 70, 229);
+      doc.rect(margin, pgHeight - 15, maxWidth, 0.5, 'F');
+      doc.setFontSize(7);
       doc.setTextColor(150, 150, 150);
       doc.text(
-        `${tE('Document de synthèse', 'Sentez belgesi')} - ${data.userName} - ${tE('Page', 'Sayfa')} ${i}/${totalPages}`,
-        pageWidth / 2,
-        290,
-        { align: 'center' }
+        `${organizationConfig.name} | ${tE('Document de synthese', 'Sentez belgesi')} - ${data.userName}`,
+        margin,
+        pgHeight - 8
+      );
+      doc.text(
+        `${tE('Page', 'Sayfa')} ${i}/${totalPages}`,
+        pageWidth - margin,
+        pgHeight - 8,
+        { align: 'right' }
       );
     }
 

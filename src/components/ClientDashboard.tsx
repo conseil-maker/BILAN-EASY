@@ -9,6 +9,7 @@ import { HistoryItem } from '../types-ai-studio';
 import { syntheseService, SyntheseData } from '../services/syntheseService';
 import { organizationConfig } from '../config/organization';
 import { getTranslatedPackageName, translatePackageNameFromFrench } from '../utils/packageTranslations';
+import { PostBilanFollowUp } from './PostBilanFollowUp';
 
 interface ClientDashboardProps {
   user: User;
@@ -71,6 +72,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
   const [changingPassword, setChangingPassword] = useState(false);
   const [showNewBilanModal, setShowNewBilanModal] = useState(false);
+  const [showFollowUp, setShowFollowUp] = useState<HistoryItem | null>(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -734,12 +736,21 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                           </span>
                         )}
                       </div>
-                      <button
-                        onClick={() => onViewHistory(item)}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                      >
-                        {t('actions.viewResults')}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setShowFollowUp(item)}
+                          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm flex items-center gap-1"
+                          title={t('actions.followUp', { defaultValue: 'Suivi post-bilan' })}
+                        >
+                          <span>📅</span> {t('actions.followUp', { defaultValue: 'Suivi' })}
+                        </button>
+                        <button
+                          onClick={() => onViewHistory(item)}
+                          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                        >
+                          {t('actions.viewResults')}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1196,6 +1207,19 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           </div>
         )}
       </div>
+
+      {/* Modal Suivi Post-Bilan */}
+      {showFollowUp && (
+        <PostBilanFollowUp
+          userId={user.id}
+          bilanId={showFollowUp.id}
+          userName={profile?.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : user.email?.split('@')[0] || 'Utilisateur'}
+          userEmail={user.email || ''}
+          projectTitle={showFollowUp.summary?.projectProfessionnel || showFollowUp.summary?.profileType || 'Projet professionnel'}
+          bilanEndDate={new Date(showFollowUp.date)}
+          onClose={() => setShowFollowUp(null)}
+        />
+      )}
     </div>
   );
 };
