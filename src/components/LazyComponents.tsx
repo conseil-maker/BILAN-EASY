@@ -85,7 +85,7 @@ export const LazySatisfactionSurvey = lazy(() =>
 );
 
 export const LazyAppointmentSystem = lazy(() => 
-  import('./AppointmentSystem').then(module => ({ default: module.AppointmentSystem }))
+  import('./AppointmentRequest').then(module => ({ default: module.default }))
 );
 
 // ============================================

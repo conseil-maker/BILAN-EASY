@@ -1,46 +1,60 @@
 {
   "title": "Prendre rendez-vous",
   "subtitle": "Planifiez vos entretiens avec {{consultant}}",
-  "tabs": {
-    "book": "Réserver",
-    "upcoming": "À venir",
-    "history": "Historique"
+  "form": {
+    "title": "Demander un rendez-vous",
+    "description": "Remplissez ce formulaire pour demander un rendez-vous avec votre consultant. Il vous contactera dans les plus brefs délais.",
+    "reason": "Motif du rendez-vous",
+    "select_reason": "Sélectionnez un motif",
+    "preferred_date": "Date souhaitée (optionnel)",
+    "preferred_time": "Créneau préféré (optionnel)",
+    "select_time": "Sélectionnez un créneau",
+    "morning": "Matin (9h-12h)",
+    "afternoon": "Après-midi (14h-17h)",
+    "evening": "Fin de journée (17h-19h)",
+    "message": "Message complémentaire (optionnel)",
+    "message_placeholder": "Précisez votre demande si nécessaire...",
+    "submit": "Envoyer la demande",
+    "submitting": "Envoi en cours...",
+    "success": "Votre demande a été envoyée avec succès ! Le consultant vous contactera prochainement.",
+    "error": "Une erreur est survenue. Veuillez réessayer."
   },
-  "types": {
-    "initial": { "label": "Entretien initial", "description": "Premier rendez-vous de découverte" },
-    "followup": { "label": "Suivi", "description": "Point d'avancement du bilan" },
-    "synthesis": { "label": "Synthèse", "description": "Présentation du document de synthèse" },
-    "phone": { "label": "Appel téléphonique", "description": "Échange rapide par téléphone" }
+  "reasons": {
+    "initial_meeting": "Entretien initial",
+    "progress_review": "Point d'avancement",
+    "career_guidance": "Orientation professionnelle",
+    "document_review": "Revue de documents",
+    "synthesis_discussion": "Discussion de synthèse",
+    "other": "Autre"
   },
-  "calendar": {
-    "months": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
-    "days": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+  "status": {
+    "pending": "En attente",
+    "contacted": "Contacté",
+    "scheduled": "Planifié",
+    "completed": "Terminé",
+    "cancelled": "Annulé"
   },
-  "steps": {
-    "chooseDate": "1. Choisissez une date",
-    "chooseType": "2. Type de rendez-vous",
-    "chooseSlot": "3. Choisissez un créneau"
+  "my_requests": {
+    "title": "Mes demandes de rendez-vous",
+    "empty": "Vous n'avez pas encore fait de demande de rendez-vous.",
+    "preferred": "Créneau souhaité",
+    "consultant_note": "Note du consultant"
   },
-  "noSlots": "Aucun créneau disponible ce jour",
-  "notes": "Notes (optionnel)",
-  "notesPlaceholder": "Précisez l'objet de votre rendez-vous...",
-  "booking": "Réservation en cours...",
-  "confirm": "Confirmer le rendez-vous",
-  "noUpcoming": "Aucun rendez-vous à venir",
-  "bookOne": "Réserver un rendez-vous",
-  "noPast": "Aucun rendez-vous passé",
-  "at": "à",
-  "with": "Avec",
-  "confirmed": "Confirmé",
-  "pending": "En attente",
-  "completed": "Terminé",
-  "confirmModal": {
-    "title": "Rendez-vous réservé !",
-    "message": "Votre demande de rendez-vous a été envoyée. Vous recevrez une confirmation par email.",
-    "date": "Date :",
-    "time": "Heure :",
-    "type": "Type :",
-    "consultant": "Consultant :",
-    "close": "Fermer"
+  "consultant": {
+    "tab_title": "Demandes de RDV",
+    "pending_requests": "Demandes RDV",
+    "pending_alert": "Demandes de RDV en attente",
+    "all_requests": "Toutes les demandes de rendez-vous",
+    "no_requests": "Aucune demande de rendez-vous pour le moment.",
+    "view_details": "Voir →",
+    "reason": "Motif",
+    "preferred_slot": "Créneau souhaité",
+    "your_notes": "Vos notes",
+    "received": "Reçue le",
+    "at": "à",
+    "mark_contacted": "Contacté",
+    "mark_scheduled": "Planifié",
+    "mark_completed": "Terminé",
+    "cancel": "Annuler"
   }
 }

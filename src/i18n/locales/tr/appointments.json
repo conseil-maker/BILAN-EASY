@@ -42,5 +42,61 @@
     "type": "Tür:",
     "consultant": "Danışman:",
     "close": "Kapat"
+  },
+  "form": {
+    "title": "Randevu Talebi",
+    "description": "Danışmanınızla randevu talep etmek için bu formu doldurun. En kısa sürede sizinle iletişime geçecektir.",
+    "reason": "Randevu nedeni",
+    "select_reason": "Bir neden seçin",
+    "preferred_date": "Tercih edilen tarih (isteğe bağlı)",
+    "preferred_time": "Tercih edilen zaman dilimi (isteğe bağlı)",
+    "select_time": "Bir zaman dilimi seçin",
+    "morning": "Sabah (9:00-12:00)",
+    "afternoon": "Öğleden sonra (14:00-17:00)",
+    "evening": "Akşam (17:00-19:00)",
+    "message": "Ek mesaj (isteğe bağlı)",
+    "message_placeholder": "Gerekirse talebinizi detaylandırın...",
+    "submit": "Talebi Gönder",
+    "submitting": "Gönderiliyor...",
+    "success": "Talebiniz başarıyla gönderildi! Danışmanınız en kısa sürede sizinle iletişime geçecektir.",
+    "error": "Bir hata oluştu. Lütfen tekrar deneyin."
+  },
+  "reasons": {
+    "initial_meeting": "İlk Görüşme",
+    "progress_review": "İlerleme Değerlendirmesi",
+    "career_guidance": "Kariyer Yönlendirmesi",
+    "document_review": "Belge İncelemesi",
+    "synthesis_discussion": "Sentez Görüşmesi",
+    "other": "Diğer"
+  },
+  "status": {
+    "pending": "Beklemede",
+    "contacted": "İletişime Geçildi",
+    "scheduled": "Planlandı",
+    "completed": "Tamamlandı",
+    "cancelled": "İptal Edildi"
+  },
+  "my_requests": {
+    "title": "Randevu Taleplerim",
+    "empty": "Henüz randevu talebinde bulunmadınız.",
+    "preferred": "Tercih edilen zaman",
+    "consultant_note": "Danışman notu"
+  },
+  "consultant": {
+    "tab_title": "Randevu Talepleri",
+    "pending_requests": "Randevu Talepleri",
+    "pending_alert": "Bekleyen Randevu Talepleri",
+    "all_requests": "Tüm randevu talepleri",
+    "no_requests": "Şu anda randevu talebi bulunmamaktadır.",
+    "view_details": "Görüntüle →",
+    "reason": "Neden",
+    "preferred_slot": "Tercih edilen zaman",
+    "your_notes": "Notlarınız",
+    "received": "Alınma tarihi",
+    "at": "saat",
+    "mark_contacted": "İletişime Geçildi",
+    "mark_scheduled": "Planlandı",
+    "mark_completed": "Tamamlandı",
+    "cancel": "İptal Et"
   }
 }

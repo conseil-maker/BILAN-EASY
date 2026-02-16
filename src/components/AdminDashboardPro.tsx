@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { supabase } from '../lib/supabaseClient';
 import { organizationConfig } from '../config/organization';
 
@@ -21,6 +22,19 @@ interface Assessment {
   package_name?: string;
 }
 
+interface AppointmentRequest {
+  id: string;
+  client_id: string;
+  reason: string;
+  preferred_date?: string;
+  preferred_time?: string;
+  message?: string;
+  status: string;
+  created_at: string;
+  client_name?: string;
+  client_email?: string;
+}
+
 interface Stats {
   totalUsers: number;
   totalClients: number;
@@ -32,6 +46,7 @@ interface Stats {
   revenue: number;
   satisfactionAvg: number;
   monthlyGrowth: number;
+  pendingAppointments: number;
 }
 
 interface AdminDashboardProProps {
@@ -40,9 +55,11 @@ interface AdminDashboardProProps {
 
 export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) => {
   const { t } = useTranslation('admin');
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'assessments' | 'reports' | 'settings'>('overview');
+  const { t: tAppt } = useTranslation('appointments');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'assessments' | 'appointments' | 'reports' | 'settings'>('overview');
   const [users, setUsers] = useState<User[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
@@ -54,10 +71,13 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
     inProgressAssessments: 0,
     revenue: 0,
     satisfactionAvg: 4.5,
-    monthlyGrowth: 12
+    monthlyGrowth: 12,
+    pendingAppointments: 0
   });
   const [userFilter, setUserFilter] = useState<'all' | 'client' | 'consultant' | 'admin'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const currentLocale = i18n.language === 'tr' ? 'tr-TR' : 'fr-FR';
 
   useEffect(() => {
     loadData();
@@ -82,8 +102,28 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (assessmentsError) throw assessmentsError;
-      setAssessments(assessmentsData || []);
+      if (!assessmentsError) {
+        setAssessments(assessmentsData || []);
+      }
+
+      // Charger les demandes de RDV
+      const { data: appointmentsData, error: appointmentsError } = await supabase
+        .from('appointment_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!appointmentsError && appointmentsData) {
+        // Enrichir avec les noms des clients
+        const enriched = appointmentsData.map(appt => {
+          const client = usersData?.find(u => u.id === appt.client_id);
+          return {
+            ...appt,
+            client_name: client?.full_name || t('users.unknown'),
+            client_email: client?.email || ''
+          };
+        });
+        setAppointments(enriched);
+      }
 
       // Calculer les statistiques
       const clients = usersData?.filter(u => u.role === 'client') || [];
@@ -91,8 +131,8 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
       const admins = usersData?.filter(u => u.role === 'admin') || [];
       const completed = assessmentsData?.filter(a => a.status === 'completed') || [];
       const inProgress = assessmentsData?.filter(a => a.status === 'in_progress') || [];
+      const pendingAppts = appointmentsData?.filter(a => a.status === 'pending') || [];
 
-      // Calculer le revenu estimé
       const revenue = completed.reduce((acc, a) => {
         const price = organizationConfig.pricing[a.package_name?.toLowerCase() as keyof typeof organizationConfig.pricing] || 0;
         return acc + price;
@@ -108,10 +148,11 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
         inProgressAssessments: inProgress.length,
         revenue,
         satisfactionAvg: 4.5,
-        monthlyGrowth: 12
+        monthlyGrowth: 12,
+        pendingAppointments: pendingAppts.length
       });
     } catch (error) {
-      console.error('Erreur lors du chargement des données:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -127,7 +168,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
       if (error) throw error;
       await loadData();
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du rôle:', error);
+      console.error('Error updating role:', error);
     }
   };
 
@@ -138,16 +179,6 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
       (user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesFilter && matchesSearch;
   });
-
-  // Données pour les graphiques (simulées)
-  const monthlyData = [
-    { month: 'Jan', bilans: 5, revenue: 6000 },
-    { month: 'Fév', bilans: 8, revenue: 9600 },
-    { month: 'Mar', bilans: 12, revenue: 14400 },
-    { month: 'Avr', bilans: 10, revenue: 12000 },
-    { month: 'Mai', bilans: 15, revenue: 18000 },
-    { month: 'Juin', bilans: 18, revenue: 21600 }
-  ];
 
   const getRoleBadge = (role: string) => {
     const roles: Record<string, { label: string; color: string }> = {
@@ -163,10 +194,26 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
     const statuses: Record<string, { label: string; color: string }> = {
       completed: { label: t('stats.completedBilans'), color: 'bg-green-100 text-green-800' },
       in_progress: { label: t('stats.inProgressBilans'), color: 'bg-orange-100 text-orange-800' },
-      draft: { label: t('back'), color: 'bg-slate-100 text-slate-800' }
+      draft: { label: t('stats.draft', 'Brouillon'), color: 'bg-slate-100 text-slate-800' }
     };
     const s = statuses[status] || { label: status, color: 'bg-slate-100 text-slate-800' };
     return <span className={`px-2 py-1 text-xs font-semibold rounded-full ${s.color}`}>{s.label}</span>;
+  };
+
+  const getApptStatusBadge = (status: string) => {
+    const statuses: Record<string, { color: string }> = {
+      pending: { color: 'bg-yellow-100 text-yellow-800' },
+      contacted: { color: 'bg-blue-100 text-blue-800' },
+      scheduled: { color: 'bg-indigo-100 text-indigo-800' },
+      completed: { color: 'bg-green-100 text-green-800' },
+      cancelled: { color: 'bg-red-100 text-red-800' }
+    };
+    const s = statuses[status] || { color: 'bg-slate-100 text-slate-800' };
+    return (
+      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${s.color}`}>
+        {tAppt(`status.${status}`, status)}
+      </span>
+    );
   };
 
   if (loading) {
@@ -174,7 +221,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Chargement du dashboard...</p>
+          <p className="text-slate-400">{t('loading', 'Chargement...')}</p>
         </div>
       </div>
     );
@@ -199,6 +246,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
             { id: 'overview', label: t('tabs.overview'), icon: '📊' },
             { id: 'users', label: t('tabs.users'), icon: '👥' },
             { id: 'assessments', label: t('tabs.bilans'), icon: '📋' },
+            { id: 'appointments', label: tAppt('consultant.tab_title'), icon: '📅', badge: stats.pendingAppointments },
             { id: 'reports', label: t('tabs.reports'), icon: '📈' },
             { id: 'settings', label: t('tabs.settings'), icon: '⚙️' }
           ].map(item => (
@@ -212,7 +260,12 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
               }`}
             >
               <span>{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="flex-1 text-left">{item.label}</span>
+              {item.badge ? (
+                <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {item.badge}
+                </span>
+              ) : null}
             </button>
           ))}
         </nav>
@@ -236,14 +289,15 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
         <header className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-bold text-white">
-              {activeTab === 'overview' && 'Vue d\'ensemble'}
-              {activeTab === 'users' && 'Gestion des utilisateurs'}
-              {activeTab === 'assessments' && 'Gestion des bilans'}
-              {activeTab === 'reports' && 'Rapports et statistiques'}
-              {activeTab === 'settings' && 'Paramètres'}
+              {activeTab === 'overview' && t('tabs.overview')}
+              {activeTab === 'users' && t('tabs.users')}
+              {activeTab === 'assessments' && t('tabs.bilans')}
+              {activeTab === 'appointments' && tAppt('consultant.tab_title')}
+              {activeTab === 'reports' && t('tabs.reports')}
+              {activeTab === 'settings' && t('tabs.settings')}
             </h1>
             <p className="text-slate-400 text-sm">
-              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              {new Date().toLocaleDateString(currentLocale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -251,6 +305,11 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
+              {stats.pendingAppointments > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {stats.pendingAppointments}
+                </span>
+              )}
             </button>
             <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
               A
@@ -261,7 +320,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* Stats cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -300,33 +359,27 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
 
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                 <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">📅</span>
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-white">{stats.pendingAppointments}</p>
+                <p className="text-slate-400 text-sm">{tAppt('consultant.pending_requests')}</p>
+              </div>
+
+              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
                     <span className="text-2xl">💰</span>
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-white">{stats.revenue.toLocaleString('fr-FR')} €</p>
+                <p className="text-3xl font-bold text-white">{stats.revenue.toLocaleString(currentLocale)} €</p>
                 <p className="text-slate-400 text-sm">{t('stats.revenue')}</p>
               </div>
             </div>
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Bar chart - Bilans par mois */}
-              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <h3 className="text-lg font-semibold text-white mb-6">{t('charts.bilansByMonth')}</h3>
-                <div className="flex items-end justify-between h-48 gap-4">
-                  {monthlyData.map((data, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                      <div 
-                        className="w-full bg-indigo-600 rounded-t-lg transition-all hover:bg-indigo-500"
-                        style={{ height: `${(data.bilans / 20) * 100}%` }}
-                      />
-                      <span className="text-xs text-slate-400">{data.month}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Pie chart - Répartition des utilisateurs */}
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                 <h3 className="text-lg font-semibold text-white mb-6">{t('charts.userDistribution')}</h3>
@@ -334,23 +387,27 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   <div className="relative w-40 h-40">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r="40" fill="none" stroke="#334155" strokeWidth="20" />
-                      <circle 
-                        cx="50" cy="50" r="40" fill="none" 
-                        stroke="#3b82f6" strokeWidth="20"
-                        strokeDasharray={`${(stats.totalClients / stats.totalUsers) * 251.2} 251.2`}
-                      />
-                      <circle 
-                        cx="50" cy="50" r="40" fill="none" 
-                        stroke="#22c55e" strokeWidth="20"
-                        strokeDasharray={`${(stats.totalConsultants / stats.totalUsers) * 251.2} 251.2`}
-                        strokeDashoffset={`-${(stats.totalClients / stats.totalUsers) * 251.2}`}
-                      />
-                      <circle 
-                        cx="50" cy="50" r="40" fill="none" 
-                        stroke="#ef4444" strokeWidth="20"
-                        strokeDasharray={`${(stats.totalAdmins / stats.totalUsers) * 251.2} 251.2`}
-                        strokeDashoffset={`-${((stats.totalClients + stats.totalConsultants) / stats.totalUsers) * 251.2}`}
-                      />
+                      {stats.totalUsers > 0 && (
+                        <>
+                          <circle 
+                            cx="50" cy="50" r="40" fill="none" 
+                            stroke="#3b82f6" strokeWidth="20"
+                            strokeDasharray={`${(stats.totalClients / stats.totalUsers) * 251.2} 251.2`}
+                          />
+                          <circle 
+                            cx="50" cy="50" r="40" fill="none" 
+                            stroke="#22c55e" strokeWidth="20"
+                            strokeDasharray={`${(stats.totalConsultants / stats.totalUsers) * 251.2} 251.2`}
+                            strokeDashoffset={`-${(stats.totalClients / stats.totalUsers) * 251.2}`}
+                          />
+                          <circle 
+                            cx="50" cy="50" r="40" fill="none" 
+                            stroke="#ef4444" strokeWidth="20"
+                            strokeDasharray={`${(stats.totalAdmins / stats.totalUsers) * 251.2} 251.2`}
+                            strokeDashoffset={`-${((stats.totalClients + stats.totalConsultants) / stats.totalUsers) * 251.2}`}
+                          />
+                        </>
+                      )}
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-2xl font-bold text-white">{stats.totalUsers}</span>
@@ -359,18 +416,48 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <span className="text-slate-400">Clients ({stats.totalClients})</span>
+                      <span className="text-slate-400">{t('users.roles.client')} ({stats.totalClients})</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="text-slate-400">Consultants ({stats.totalConsultants})</span>
+                      <span className="text-slate-400">{t('users.roles.consultant')} ({stats.totalConsultants})</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <span className="text-slate-400">Admins ({stats.totalAdmins})</span>
+                      <span className="text-slate-400">{t('users.roles.admin')} ({stats.totalAdmins})</span>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Pending appointments */}
+              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <h3 className="text-lg font-semibold text-white mb-6">{tAppt('consultant.pending_alert')}</h3>
+                {appointments.filter(a => a.status === 'pending').length === 0 ? (
+                  <p className="text-slate-400 text-center py-8">{tAppt('consultant.no_requests')}</p>
+                ) : (
+                  <div className="space-y-3">
+                    {appointments.filter(a => a.status === 'pending').slice(0, 5).map(appt => (
+                      <div key={appt.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">{appt.client_name}</p>
+                          <p className="text-sm text-slate-400">{tAppt(`reasons.${appt.reason}`, appt.reason)}</p>
+                        </div>
+                        <span className="text-xs text-slate-400">
+                          {new Date(appt.created_at).toLocaleDateString(currentLocale)}
+                        </span>
+                      </div>
+                    ))}
+                    {appointments.filter(a => a.status === 'pending').length > 5 && (
+                      <button 
+                        onClick={() => setActiveTab('appointments')}
+                        className="w-full text-center text-indigo-400 hover:text-indigo-300 text-sm py-2"
+                      >
+                        {tAppt('consultant.view_details')}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -389,13 +476,16 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                       <div>
                         <p className="text-white font-medium">{assessment.title}</p>
                         <p className="text-sm text-slate-400">
-                          {new Date(assessment.created_at).toLocaleDateString('fr-FR')}
+                          {new Date(assessment.created_at).toLocaleDateString(currentLocale)}
                         </p>
                       </div>
                     </div>
                     {getStatusBadge(assessment.status)}
                   </div>
                 ))}
+                {assessments.length === 0 && (
+                  <p className="p-6 text-slate-400 text-center">{t('activity.empty', 'Aucune activité récente')}</p>
+                )}
               </div>
             </div>
           </div>
@@ -407,10 +497,10 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
             <div className="flex flex-wrap gap-4 items-center justify-between">
               <div className="flex gap-2">
                 {[
-                  { id: 'all', label: 'Tous' },
-                  { id: 'client', label: 'Clients' },
-                  { id: 'consultant', label: 'Consultants' },
-                  { id: 'admin', label: 'Admins' }
+                  { id: 'all', label: t('users.filters.all', 'Tous') },
+                  { id: 'client', label: t('users.roles.client') },
+                  { id: 'consultant', label: t('users.roles.consultant') },
+                  { id: 'admin', label: t('users.roles.admin') }
                 ].map(filter => (
                   <button
                     key={filter.id}
@@ -427,7 +517,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
               </div>
               <input
                 type="text"
-                placeholder="Rechercher un utilisateur..."
+                placeholder={t('users.search', 'Rechercher un utilisateur...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -441,7 +531,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.user')}</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.role')}</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.registration')}</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.date')}</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase">{t('users.table.actions')}</th>
                   </tr>
                 </thead>
@@ -454,14 +544,14 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                             {(user.full_name || user.email).charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-white font-medium">{user.full_name || 'Non renseigné'}</p>
+                            <p className="text-white font-medium">{user.full_name || t('users.unknown', 'Non renseigné')}</p>
                             <p className="text-sm text-slate-400">{user.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
                       <td className="px-6 py-4 text-slate-400">
-                        {new Date(user.created_at).toLocaleDateString('fr-FR')}
+                        {new Date(user.created_at).toLocaleDateString(currentLocale)}
                       </td>
                       <td className="px-6 py-4">
                         <select
@@ -485,9 +575,9 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
         {activeTab === 'assessments' && (
           <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
             <div className="p-6 border-b border-slate-700 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white">Tous les bilans ({assessments.length})</h3>
+              <h3 className="text-lg font-semibold text-white">{t('tabs.bilans')} ({assessments.length})</h3>
               <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                Exporter CSV
+                {t('reports.exportCSV', 'Exporter CSV')}
               </button>
             </div>
             <table className="w-full">
@@ -507,7 +597,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                     <td className="px-6 py-4 text-slate-400">{assessment.package_name || '-'}</td>
                     <td className="px-6 py-4">{getStatusBadge(assessment.status)}</td>
                     <td className="px-6 py-4 text-slate-400">
-                      {new Date(assessment.created_at).toLocaleDateString('fr-FR')}
+                      {new Date(assessment.created_at).toLocaleDateString(currentLocale)}
                     </td>
                     <td className="px-6 py-4">
                       <button className="text-indigo-400 hover:text-indigo-300">{t('bilans.view')}</button>
@@ -519,28 +609,102 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
           </div>
         )}
 
+        {activeTab === 'appointments' && (
+          <div className="space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {['pending', 'contacted', 'scheduled', 'completed'].map(status => {
+                const count = appointments.filter(a => a.status === status).length;
+                const colors: Record<string, string> = {
+                  pending: 'bg-yellow-500/20 text-yellow-400',
+                  contacted: 'bg-blue-500/20 text-blue-400',
+                  scheduled: 'bg-indigo-500/20 text-indigo-400',
+                  completed: 'bg-green-500/20 text-green-400'
+                };
+                return (
+                  <div key={status} className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                    <p className={`text-2xl font-bold ${colors[status]?.split(' ')[1] || 'text-white'}`}>{count}</p>
+                    <p className="text-slate-400 text-sm">{tAppt(`status.${status}`)}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Appointments list */}
+            <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+              <div className="p-6 border-b border-slate-700">
+                <h3 className="text-lg font-semibold text-white">{tAppt('consultant.all_requests')}</h3>
+              </div>
+              {appointments.length === 0 ? (
+                <p className="p-6 text-slate-400 text-center">{tAppt('consultant.no_requests')}</p>
+              ) : (
+                <div className="divide-y divide-slate-700">
+                  {appointments.map(appt => (
+                    <div key={appt.id} className="p-4 hover:bg-slate-700/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-indigo-500/20 rounded-full flex items-center justify-center text-indigo-400 font-semibold">
+                            {(appt.client_name || '?').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{appt.client_name}</p>
+                            <p className="text-sm text-slate-400">{appt.client_email}</p>
+                          </div>
+                        </div>
+                        {getApptStatusBadge(appt.status)}
+                      </div>
+                      <div className="ml-13 pl-13 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm mt-2">
+                        <div>
+                          <span className="text-slate-500">{tAppt('consultant.reason')}:</span>{' '}
+                          <span className="text-slate-300">{tAppt(`reasons.${appt.reason}`, appt.reason)}</span>
+                        </div>
+                        {appt.preferred_date && (
+                          <div>
+                            <span className="text-slate-500">{tAppt('consultant.preferred_slot')}:</span>{' '}
+                            <span className="text-slate-300">
+                              {new Date(appt.preferred_date).toLocaleDateString(currentLocale)}
+                              {appt.preferred_time && ` - ${tAppt(`form.${appt.preferred_time}`, appt.preferred_time)}`}
+                            </span>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-slate-500">{tAppt('consultant.received')}:</span>{' '}
+                          <span className="text-slate-300">{new Date(appt.created_at).toLocaleDateString(currentLocale)}</span>
+                        </div>
+                      </div>
+                      {appt.message && (
+                        <p className="text-slate-400 text-sm mt-2 italic ml-13">"{appt.message}"</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'reports' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                 <h3 className="text-lg font-semibold text-white mb-4">{t('reports.monthlyReport')}</h3>
-                <p className="text-slate-400 text-sm mb-4">Générez un rapport détaillé de l'activité du mois.</p>
+                <p className="text-slate-400 text-sm mb-4">{t('reports.monthlyReportDesc', 'Générez un rapport détaillé de l\'activité du mois.')}</p>
                 <button className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                  Générer PDF
+                  {t('reports.generatePDF', 'Générer PDF')}
                 </button>
               </div>
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                 <h3 className="text-lg font-semibold text-white mb-4">{t('reports.userExport')}</h3>
-                <p className="text-slate-400 text-sm mb-4">Exportez la liste complète des utilisateurs.</p>
+                <p className="text-slate-400 text-sm mb-4">{t('reports.userExportDesc', 'Exportez la liste complète des utilisateurs.')}</p>
                 <button className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                  Exporter CSV
+                  {t('reports.exportCSV', 'Exporter CSV')}
                 </button>
               </div>
               <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                 <h3 className="text-lg font-semibold text-white mb-4">{t('reports.qualiopiStats')}</h3>
-                <p className="text-slate-400 text-sm mb-4">Indicateurs pour le renouvellement Qualiopi.</p>
+                <p className="text-slate-400 text-sm mb-4">{t('reports.qualiopiStatsDesc', 'Indicateurs pour le renouvellement Qualiopi.')}</p>
                 <button className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                  Voir les indicateurs
+                  {t('reports.viewIndicators', 'Voir les indicateurs')}
                 </button>
               </div>
             </div>
@@ -609,7 +773,7 @@ export const AdminDashboardPro: React.FC<AdminDashboardProProps> = ({ onBack }) 
                 </div>
               </div>
               <button className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                Enregistrer les modifications
+                {t('settings.save', 'Enregistrer les modifications')}
               </button>
             </div>
 

@@ -59,8 +59,8 @@ const DocumentsWithPackage = lazy(() =>
 const ClientDashboard = lazy(() => 
   import('./components/ClientDashboard').then(m => ({ default: m.ClientDashboard }))
 );
-const AppointmentSystem = lazy(() => 
-  import('./components/AppointmentSystem').then(m => ({ default: m.AppointmentSystem }))
+const AppointmentRequest = lazy(() => 
+  import('./components/AppointmentRequest').then(m => ({ default: m.default }))
 );
 const AboutPage = lazy(() => 
   import('./components/AboutPage').then(m => ({ default: m.AboutPage }))
@@ -333,12 +333,7 @@ const App: React.FC = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <GlobalNavbar user={user} userRole={userRole} showBackButton={true} title={t('userMenu.appointments', 'Mes Rendez-vous')} />
           <Suspense fallback={<LoadingSpinner message={t('loadingAppointments')} />}>
-            <AppointmentSystem
-              userId={user.id}
-              userName={user.email?.split('@')[0] || t('userMenu.user', 'Utilisateur')}
-              userEmail={user.email || ''}
-              mode="client"
-            />
+            <AppointmentRequest userId={user.id} />
           </Suspense>
         </div>
       );
